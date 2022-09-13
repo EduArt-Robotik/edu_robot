@@ -1,17 +1,18 @@
 #pragma once
 
-#include "eduart_robot/visibility_control.h"
+#include "edu_robot/msg/mode.hpp"
+
 #include <geometry_msgs/msg/detail/twist__struct.hpp>
-#include <memory>
 #include <nav_msgs/msg/detail/odometry__struct.hpp>
 #include <rclcpp/node.hpp>
 #include <geometry_msgs/msg/twist.hpp>
 #include <nav_msgs/msg/odometry.hpp>
-#include <eduart_robot/msg/mode.hpp>
 #include <rclcpp/publisher.hpp>
 
-namespace eduart_robot
-{
+#include <memory>
+
+namespace eduart {
+namespace robot {
 
 class Robot : public rclcpp::Node
 {
@@ -28,4 +29,5 @@ private:
   std::shared_ptr<rclcpp::Publisher<nav_msgs::msg::Odometry>> _pub_odometry;
 };
 
-}  // namespace eduart_robot
+} // end namespace robot
+} // end namespace eduart

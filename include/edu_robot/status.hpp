@@ -1,6 +1,7 @@
 #pragma once
 
-namespace eduart_robot {
+namespace eduart {
+namespace robot {
 
 enum class Status {
   OK,
@@ -10,4 +11,5 @@ enum class Status {
   EMERGENCY_STOP,
 };
 
-} // end namespace eduart_robot
+} // end namespace robot
+} // end namespace eduart

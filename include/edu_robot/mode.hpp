@@ -1,6 +1,7 @@
 #pragma once
 
-namespace eduart_robot {
+namespace eduart {
+namespace robot {
 
 enum class Mode {
   INACTIVE,
@@ -9,4 +10,5 @@ enum class Mode {
   FLEET_SLAVE,
 };
 
-} // end namespace eduart_robot
+} // end namespace robot
+} // end namespace eduart
