@@ -1,0 +1,5 @@
+# request
+edu_robot/Mode mode
+---
+# response
+edu_robot/RobotStatus status # TODO: maybe this is not the best response type

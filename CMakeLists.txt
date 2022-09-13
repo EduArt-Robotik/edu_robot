@@ -15,17 +15,22 @@ find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 
+## Build Defined ROS Messages
 rosidl_generate_interfaces(${PROJECT_NAME}
+# Messages
   "msg/Mode.msg"
   "msg/Status.msg"
   "msg/RobotStatus.msg"
+# Services
+  "srv/SetMode.srv"
 )
 rosidl_get_typesupport_target(CPP_TYPESUPPORT_TARGET "${PROJECT_NAME}" "rosidl_typesupport_cpp")
+
+## Build Library needed for ROS Nodes
 add_library(eduart-robot src/robot.cpp)
 target_link_libraries(eduart-robot
   ${CPP_TYPESUPPORT_TARGET}
 )
-
 target_compile_features(eduart-robot PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 target_include_directories(eduart-robot PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -40,10 +45,9 @@ ament_target_dependencies(
   "nav_msgs"
 )
 
-# Causes the visibility macros to use dllexport rather than dllimport,
-# which is appropriate when building the dll but not consuming it.
-target_compile_definitions(eduart-robot PRIVATE "EDUART_ROBOT_BUILDING_LIBRARY")
+## Build Nodes
 
+## Installing of Content
 install(
   DIRECTORY include/
   DESTINATION include

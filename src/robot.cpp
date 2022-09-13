@@ -11,6 +11,7 @@ Robot::Robot(const std::string& robot_name)
 
 Robot::~Robot()
 {
+  
 }
 
 } // end namespace robot
