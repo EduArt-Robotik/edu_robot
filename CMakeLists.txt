@@ -19,17 +19,18 @@ find_package(nav_msgs REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
 # Messages
   "msg/Mode.msg"
-  "msg/Status.msg"
-  "msg/RobotStatus.msg"
+  "msg/State.msg"
+  "msg/RobotState.msg"
 # Services
   "srv/SetMode.srv"
 )
-rosidl_get_typesupport_target(CPP_TYPESUPPORT_TARGET "${PROJECT_NAME}" "rosidl_typesupport_cpp")
+## Line below needed for ROS distro humble and newer. TODO: handle this somehow!
+# rosidl_get_typesupport_target(CPP_TYPESUPPORT_TARGET "${PROJECT_NAME}" "rosidl_typesupport_cpp")
 
 ## Build Library needed for ROS Nodes
 add_library(eduart-robot src/robot.cpp)
 target_link_libraries(eduart-robot
-  ${CPP_TYPESUPPORT_TARGET}
+  # ${CPP_TYPESUPPORT_TARGET} needed for ROS distro humble and newer. TODO: handle this somehow!
 )
 target_compile_features(eduart-robot PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 target_include_directories(eduart-robot PUBLIC
@@ -44,6 +45,8 @@ ament_target_dependencies(
   "tf2_geometry_msgs"
   "nav_msgs"
 )
+rosidl_target_interfaces(eduart-robot ${PROJECT_NAME} "rosidl_typesupport_cpp")
+
 
 ## Build Nodes
 

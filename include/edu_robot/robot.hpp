@@ -25,7 +25,7 @@ namespace robot {
 
 /**
  * \brief Defines and implements basic functionality of robot in Eduart universe. Each robot inherits from this
-          class has to implement a hardware driver that is used for hardware abstraction.
+ *        class has to implement a hardware driver that is used for hardware abstraction.
  */
 class Robot : public rclcpp::Node
 {

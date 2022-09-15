@@ -1,15 +1,15 @@
 #pragma once
 
 #include "edu_robot/mode.hpp"
-#include "edu_robot/status.hpp"
+#include "edu_robot/state.hpp"
 
 #include <string>
 
 namespace eduart {
 namespace robot {
 
-struct RobotStatus {
-  Status status;
+struct RobotState {
+  State state;
   Mode mode;
   std::string info_message;
 };
