@@ -28,7 +28,10 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 # rosidl_get_typesupport_target(CPP_TYPESUPPORT_TARGET "${PROJECT_NAME}" "rosidl_typesupport_cpp")
 
 ## Build Library needed for ROS Nodes
-add_library(eduart-robot src/robot.cpp)
+add_library(eduart-robot
+  src/robot.cpp
+  src/iot_shield/iot_shield.cpp  
+)
 target_link_libraries(eduart-robot
   # ${CPP_TYPESUPPORT_TARGET} needed for ROS distro humble and newer. TODO: handle this somehow!
 )

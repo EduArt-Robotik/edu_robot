@@ -6,6 +6,8 @@
 #pragma once
 
 #include "edu_robot/rotation_per_minute.hpp"
+#include "edu_robot/lighting.hpp"
+#include "edu_robot/robot_status_report.hpp"
 
 #include <vector>
 
@@ -19,8 +21,7 @@ public:
 
   virtual bool enable();
   virtual bool disable();
-  virtual bool setRpm(const std::vector<Rpm>& rpm);
-  virtual const std::vector<Rpm>& getRpm() const;
+  virtual RobotStatusReport getStatusReport();
 };
 
 } // end namespace eduart
