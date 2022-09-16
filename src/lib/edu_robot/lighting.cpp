@@ -6,8 +6,7 @@ namespace robot {
 Lighting::Lighting(const std::string& name, const Color default_color, const float default_brightness)
   : _name(name)
 {
-  setColor(default_color);
-  setBrightness(default_brightness);
+
 }
 
 void Lighting::setColor(const Color color)

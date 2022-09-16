@@ -10,6 +10,11 @@
 #include "edu_robot/robot_hardware_interface.hpp"
 #include "edu_robot/robot_status_report.hpp"
 
+#if _WITH_MRAA
+#include <mraa/common.hpp>
+#include <mraa/uart.hpp>
+#endif
+
 #include <memory>
 #include <array>
 

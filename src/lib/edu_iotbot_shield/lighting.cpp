@@ -12,12 +12,13 @@ Lighting::Lighting(const std::string& name, const std::uint8_t id, std::shared_p
   : eduart::robot::Lighting(name, default_color, default_brightness)
   , IotShieldDevice(name, id, communicator) 
 {
-
+  setColor(default_color);
+  setBrightness(default_brightness);
 }
 
 Lighting::~Lighting()
 {
-  
+
 }
 
 bool Lighting::processSetColor(const Color color)
