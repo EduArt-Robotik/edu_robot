@@ -1,5 +1,6 @@
 #include "edu_robot/robot.hpp"
 #include "edu_robot/hardware_error.hpp"
+#include "edu_robot/msg_conversion.hpp"
 
 #include "edu_robot/msg/detail/robot_status_report__struct.hpp"
 #include "edu_robot/msg/detail/set_lighting_color__struct.hpp"
@@ -94,7 +95,15 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
 
 void Robot::registerLighting(std::shared_ptr<Lighting> lighting)
 {
+  const auto search = _lightings.find(lighting->name());
 
+  if (search != _lightings.end()) {
+    RCLCPP_ERROR_STREAM(get_logger(), "Lighting \"" << lighting->name() << "\" already contained in lighting register."
+                                      << " Can't add it twice.");
+    return;                                      
+  }
+
+  _lightings[lighting->name()] = lighting;
 }
 
 void Robot::handleStatusReport()
@@ -105,10 +114,7 @@ void Robot::handleStatusReport()
 
   auto report = _hardware_interface->getStatusReport();
 
-  // \todo convert report message
-
-  edu_robot::msg::RobotStatusReport report_msg;
-  _pub_status_report->publish(report_msg);
+  _pub_status_report->publish(toRos(report));
 }
 
 } // end namespace robot

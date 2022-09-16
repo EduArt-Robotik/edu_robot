@@ -10,11 +10,6 @@
 #include "edu_robot/robot_hardware_interface.hpp"
 #include "edu_robot/robot_status_report.hpp"
 
-#if _WITH_MRAA
-#include <mraa/common.hpp>
-#include <mraa/uart.hpp>
-#endif
-
 #include <memory>
 #include <array>
 
@@ -40,10 +35,6 @@ private:
 
   std::shared_ptr<IotShieldCommunicator> _communicator;
   std::array<std::uint8_t, UART::BUFFER::TX_SIZE> _tx_buffer;
-
-#if _WITH_MRAA
-   std::unique_ptr<mraa::Uart> _uart;
-#endif
 };
 
 } // end namespace iotbot

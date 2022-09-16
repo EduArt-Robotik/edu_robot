@@ -5,39 +5,17 @@
 
 #include <memory>
 #include <functional>
-#include <iostream>
 
 namespace eduart {
 namespace robot {
 namespace iotbot {
 
 IotShield::IotShield(char const* const device_name)
-  : _communicator(std::make_shared<IotShieldCommunicator>())
+  : _communicator(std::make_shared<IotShieldCommunicator>(device_name))
 {
   _communicator->registerProcessReceivedBytes(
     std::bind(&IotShield::processStatusReport, this, std::placeholders::_1)
   );
-
-  // \todo check for better logging instance.
-#if _WITH_MRAA
-   _uart = std::make_unique<mraa::Uart>(device_name);
-
-   if (_uart->setBaudRate(115200) != mraa::SUCCESS) {
-      std::cerr << "Error setting parity on UART" << std::endl;
-   }
-
-   if (_uart->setMode(8, mraa::UART_PARITY_NONE, 1) != mraa::SUCCESS) {
-      std::cerr << "Error setting parity on UART" << std::endl;
-   }
-
-   if (_uart->setFlowcontrol(false, false) != mraa::SUCCESS) {
-      std::cerr << "Error setting flow control UART" << std::endl;
-   }
-   
-   _uart->flush();
-#else
-   std::cerr << "UART interface not available. MRAA is missing!" << std::endl;
-#endif
 }
 
 IotShield::~IotShield()
@@ -55,7 +33,7 @@ void IotShield::enable()
   _tx_buffer[1]  = UART::COMMAND::ENABLE;
   _tx_buffer[10] = UART::BUFFER::END_BYTE;
 
-  _communicator->sendBytes(_tx_buffer); 
+  _communicator->sendBytes(_tx_buffer);
 }
 
 void IotShield::disable()
@@ -81,6 +59,7 @@ void IotShield::processStatusReport(const std::array<std::uint8_t, UART::BUFFER:
   _report.temperature = rxBufferToTemperature(buffer);
   _report.voltage.mcu = rxBufferToVoltage(buffer);
   _report.current.mcu = rxBufferToCurrent(buffer);
+  _status_report_ready = true;
 }
 
 } // end namespace iotbot

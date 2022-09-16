@@ -7,6 +7,11 @@
 
 #include "edu_robot/iot_shield/uart_message_conversion.hpp"
 
+#if _WITH_MRAA
+#include <mraa/common.hpp>
+#include <mraa/uart.hpp>
+#endif
+
 #include <functional>
 #include <memory>
 #include <array>
@@ -22,17 +27,20 @@ class IotShieldDevice;
 class IotShieldCommunicator
 {
 public:
-  IotShieldCommunicator();
+  IotShieldCommunicator(char const* const device_name);
 
   void registerDevice(std::shared_ptr<IotShieldDevice> device);
   void registerProcessReceivedBytes(std::function<void(const std::array<std::uint8_t, UART::BUFFER::RX_SIZE>&)> callback);
   void sendBytes(const std::array<std::uint8_t, UART::BUFFER::TX_SIZE>& bytes);
 
 private:
-  void receiveBytes(std::vector<std::uint8_t>& bytes);
+  void receiveBytes();
 
-  std::array<std::uint8_t, UART::BUFFER::RX_SIZE> _rx_buffer; 
   std::function<void(const std::array<std::uint8_t, UART::BUFFER::RX_SIZE>&)> _process_received_bytes;
+
+#if _WITH_MRAA
+  std::unique_ptr<mraa::Uart> _uart;
+#endif
 };
 
 } // end namespace iotbot
