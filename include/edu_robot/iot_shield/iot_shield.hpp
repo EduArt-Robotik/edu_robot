@@ -35,7 +35,6 @@ private:
 
   std::shared_ptr<IotShieldCommunicator> _communicator;
   std::array<std::uint8_t, UART::BUFFER::TX_SIZE> _tx_buffer;
-  RobotStatusReport _report;
 
 #if _WITH_MRAA
    std::unique_ptr<mraa::Uart> _uart;

@@ -1,6 +1,7 @@
 #include "edu_robot/iot_shield/lighting.hpp"
 #include "edu_robot/iot_shield/iot_shield_device.hpp"
 #include "edu_robot/iot_shield/iot_shield_communicator.hpp"
+#include "edu_robot/lighting.hpp"
 
 namespace eduart {
 namespace robot {
@@ -14,7 +15,12 @@ Lighting::Lighting(const std::string& name, const std::uint8_t id, std::shared_p
 
 }
 
-void Lighting::setColor(const Color color)
+Lighting::~Lighting()
+{
+  
+}
+
+bool Lighting::processSetColor(const Color color)
 {
   // clear buffer
   _tx_buffer = { 0 };
@@ -28,11 +34,14 @@ void Lighting::setColor(const Color color)
   _tx_buffer[10] = UART::BUFFER::END_BYTE;
 
   _communicator->sendBytes(_tx_buffer);
+
+  return true;
 }
 
-void Lighting::setBrightness(const float brightness)
+bool Lighting::processSetBrightness(const float brightness)
 {
   // \todo no idea how to set the brightness at the moment
+  return true;
 }
 
 } // end namespace iotbot

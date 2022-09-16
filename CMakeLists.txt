@@ -14,6 +14,8 @@ find_package(rclcpp REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 
 # MRAA library
@@ -33,8 +35,12 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Mode.msg"
   "msg/State.msg"
   "msg/RobotState.msg"
+  "msg/SetLightingColor.msg"
+  "msg/RobotStatusReport.msg"
 # Services
   "srv/SetMode.srv"
+  DEPENDENCIES
+  std_msgs
 )
 ## Line below needed for ROS distro humble and newer. TODO: handle this somehow!
 # rosidl_get_typesupport_target(CPP_TYPESUPPORT_TARGET "${PROJECT_NAME}" "rosidl_typesupport_cpp")
@@ -44,6 +50,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 # Library Eduart Robot
 add_library(eduart-robot
   src/lib/edu_robot/robot.cpp
+  src/lib/edu_robot/lighting.cpp
 )
 target_link_libraries(eduart-robot
   # ${CPP_TYPESUPPORT_TARGET} needed for ROS distro humble and newer. TODO: handle this somehow!
@@ -60,6 +67,8 @@ ament_target_dependencies(
   "tf2_ros"
   "tf2_geometry_msgs"
   "nav_msgs"
+  "std_msgs"
+  "geometry_msgs"
 )
 rosidl_target_interfaces(eduart-robot ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
@@ -68,19 +77,31 @@ add_library(eduart-iotbot-shield
   src/lib/edu_iotbot_shield/iot_shield.cpp
   src/lib/edu_iotbot_shield/iot_shield_communicator.cpp
   src/lib/edu_iotbot_shield/lighting.cpp
+  src/lib/edu_iotbot_shield/iotbot.cpp
 )
 target_link_libraries(eduart-iotbot-shield
   # ${CPP_TYPESUPPORT_TARGET} needed for ROS distro humble and newer. TODO: handle this somehow!
-  PUBLIC eduart-robot
+  eduart-robot
 )
 target_compile_features(eduart-iotbot-shield PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 target_include_directories(eduart-iotbot-shield PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
-
+# rosidl_target_interfaces(eduart-iotbot-shield ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
 ## Build Nodes
+add_executable(iotbot-shield
+  src/node/iotbot_shield_node.cpp
+)
+target_link_libraries(iotbot-shield
+  eduart-iotbot-shield
+  eduart-robot
+)
+ament_target_dependencies(iotbot-shield
+  "rclcpp"
+)
+# rosidl_target_interfaces(iotbot-shield ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
 ## Installing of Content
 install(
@@ -88,11 +109,10 @@ install(
   DESTINATION include
 )
 install(
-  TARGETS eduart-robot eduart-iotbot-shield
+  TARGETS iotbot-shield eduart-iotbot-shield eduart-robot
   EXPORT export_${PROJECT_NAME}
-  ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
 if(BUILD_TESTING)
@@ -106,15 +126,5 @@ if(BUILD_TESTING)
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
-
-ament_export_include_directories(
-  include
-)
-ament_export_libraries(
-  eduart-robot
-)
-ament_export_targets(
-  export_${PROJECT_NAME}
-)
 
 ament_package()

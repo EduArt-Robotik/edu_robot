@@ -19,13 +19,8 @@ namespace robot {
 class Lighting
 {
 protected:
-  Lighting(const std::string& name, const Color default_color, const float default_brightness)
-    : _name(name)
-  {
-    setColor(default_color);
-    setBrightness(default_brightness);
-  }
-
+  Lighting(const std::string& name, const Color default_color, const float default_brightness);
+  
 public:
   virtual ~Lighting() = default;
 
@@ -36,7 +31,7 @@ public:
    * \throw HardwareError
    * \return true if the brightness was set successfully.
    */
-  void virtual setColor(const Color color);
+  void setColor(const Color color);
   /**
    * \brief Sets the brightness of this lighting.
    *
@@ -44,11 +39,14 @@ public:
    * \throw HardwareError
    * \return true if the brightness was set successfully.
    */
-  void virtual setBrightness(const float brightness);
+  void setBrightness(const float brightness);
 
   const std::string& name() const { return _name; }
 
 protected:
+  virtual bool processSetColor(const Color color) = 0;
+  virtual bool processSetBrightness(const float brightness) = 0;
+
   Color _color;
   float _brightness;
 

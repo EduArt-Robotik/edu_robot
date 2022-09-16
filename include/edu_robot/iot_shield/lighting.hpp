@@ -20,8 +20,8 @@ public:
            const Color default_color, const float default_brightness);
   ~Lighting() override;
 
-  void setColor(const Color color) override;
-  void setBrightness(const float brightness) override;
+  bool processSetColor(const Color color) override;
+  bool processSetBrightness(const float brightness) override;
 
 private:
   // \todo do some iot hardware things here...
