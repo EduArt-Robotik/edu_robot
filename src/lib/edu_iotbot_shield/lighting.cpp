@@ -1,6 +1,7 @@
 #include "edu_robot/iot_shield/lighting.hpp"
 #include "edu_robot/iot_shield/iot_shield_device.hpp"
 #include "edu_robot/iot_shield/iot_shield_communicator.hpp"
+#include "edu_robot/iot_shield/uart_message_conversion.hpp"
 #include "edu_robot/lighting.hpp"
 
 namespace eduart {
@@ -28,7 +29,7 @@ bool Lighting::processSetColor(const Color color)
 
   // prepare message and send it
   _tx_buffer[ 0] = UART::BUFFER::START_BYTE;
-  _tx_buffer[ 1] = id();
+  _tx_buffer[ 1] = UART::COMMAND::FLASH_LEFT;
   _tx_buffer[ 2] = color.r;
   _tx_buffer[ 3] = color.g;
   _tx_buffer[ 4] = color.b;

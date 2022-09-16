@@ -24,6 +24,8 @@ struct UART {
   struct COMMAND {
     static constexpr std::uint8_t ENABLE  = 0x01;
     static constexpr std::uint8_t DISABLE = 0x02;
+    static constexpr std::uint8_t DIM_HEADLIGHT = 0x43;
+    static constexpr std::uint8_t FLASH_LEFT = 0x46;
   };
 };
 
