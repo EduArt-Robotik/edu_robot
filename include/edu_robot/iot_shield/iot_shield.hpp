@@ -15,7 +15,7 @@
 
 namespace eduart {
 namespace robot {
-namespace iot_bot {
+namespace iotbot {
 
 class IotShieldCommunicator;
 
@@ -42,6 +42,6 @@ private:
 #endif
 };
 
-} // end namespace iot_bot
+} // end namespace iotbot
 } // end namespace eduart
 } // end namespace robot

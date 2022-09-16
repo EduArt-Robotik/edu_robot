@@ -13,7 +13,7 @@
 
 namespace eduart {
 namespace robot {
-namespace iot_bot {
+namespace iotbot {
 
 class IotShieldCommunicator;
 
@@ -39,6 +39,6 @@ protected:
   std::array<std::uint8_t, UART::BUFFER::TX_SIZE> _tx_buffer;
 };
 
-} // end namespace iot_bot
+} // end namespace iotbot
 } // end namespace eduart
 } // end namespace robot

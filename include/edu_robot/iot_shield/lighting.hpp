@@ -10,10 +10,10 @@
 
 namespace eduart {
 namespace robot {
-namespace iot_bot {
+namespace iotbot {
 
 class Lighting : public eduart::robot::Lighting
-               , public eduart::robot::iot_bot::IotShieldDevice
+               , public eduart::robot::iotbot::IotShieldDevice
 {
 public:
   Lighting(const std::string& name, const std::uint8_t id, std::shared_ptr<IotShieldCommunicator> communicator,
@@ -27,6 +27,6 @@ private:
   // \todo do some iot hardware things here...
 };
 
-} // end namespace iot_bot
+} // end namespace iotbot
 } // end namespace eduart
 } // end namespace robot

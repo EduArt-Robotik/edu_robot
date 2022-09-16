@@ -3,7 +3,7 @@
 
 namespace eduart {
 namespace robot {
-namespace iot_bot {
+namespace iotbot {
 
 IotShieldCommunicator::IotShieldCommunicator()
 {
@@ -31,6 +31,6 @@ void IotShieldCommunicator::receiveBytes(std::vector<std::uint8_t>& bytes)
 
 }
 
-} // end namespace iot_bot
+} // end namespace iotbot
 } // end namespace eduart
 } // end namespace robot

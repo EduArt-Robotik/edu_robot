@@ -4,7 +4,7 @@
 
 namespace eduart {
 namespace robot {
-namespace iot_bot {
+namespace iotbot {
 
 Lighting::Lighting(const std::string& name, const std::uint8_t id, std::shared_ptr<IotShieldCommunicator> communicator,
                    const Color default_color, const float default_brightness)
@@ -35,6 +35,6 @@ void Lighting::setBrightness(const float brightness)
   // \todo no idea how to set the brightness at the moment
 }
 
-} // end namespace iot_bot
+} // end namespace iotbot
 } // end namespace eduart
 } // end namespace robot

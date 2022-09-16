@@ -9,7 +9,7 @@
 
 namespace eduart {
 namespace robot {
-namespace iot_bot {
+namespace iotbot {
 
 IotShield::IotShield(char const* const device_name)
   : _communicator(std::make_shared<IotShieldCommunicator>())
@@ -83,6 +83,6 @@ void IotShield::processStatusReport(const std::array<std::uint8_t, UART::BUFFER:
   _report.current.mcu = rxBufferToCurrent(buffer);
 }
 
-} // end namespace iot_bot
+} // end namespace iotbot
 } // end namespace eduart
 } // end namespace robot

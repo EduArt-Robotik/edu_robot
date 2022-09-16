@@ -11,7 +11,7 @@
 
 namespace eduart {
 namespace robot {
-namespace iot_bot {
+namespace iotbot {
 
 struct UART {
   struct BUFFER {
@@ -54,6 +54,6 @@ inline float rxBufferToCurrent(const std::array<std::uint8_t, UART::BUFFER::RX_S
   return static_cast<float>(buffer[idx]) / 20.0f;
 }
 
-} // end namespace iot_bot
+} // end namespace iotbot
 } // end namespace eduart
 } // end namespace robot
