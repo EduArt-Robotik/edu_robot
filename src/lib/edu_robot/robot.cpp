@@ -1,5 +1,6 @@
 #include "edu_robot/robot.hpp"
 #include "edu_robot/hardware_error.hpp"
+#include "edu_robot/lighting.hpp"
 #include "edu_robot/msg_conversion.hpp"
 
 #include "edu_robot/msg/detail/robot_status_report__struct.hpp"
@@ -49,7 +50,7 @@ Robot::~Robot()
 {
   // Switch off all lights and set color white.
   for (auto& lighting : _lightings) {
-    lighting.second->setColor({0xff, 0xff, 0xff});
+    lighting.second->setColor({0xff, 0xff, 0xff}, Lighting::Mode::OFF);
     lighting.second->setBrightness(0.0f);
   }
 }
@@ -71,7 +72,7 @@ void Robot::callbackSetLightingColor(std::shared_ptr<const edu_robot::msg::SetLi
 
   // try to set new values
   try {
-    search->second->setColor({ msg->r, msg->g, msg->b });
+    search->second->setColor({ msg->r, msg->g, msg->b }, fromRos(*msg));
     search->second->setBrightness(msg->brightness.data);
   }
   catch (HardwareError& ex) {

@@ -9,9 +9,9 @@ Lighting::Lighting(const std::string& name, const Color default_color, const flo
 
 }
 
-void Lighting::setColor(const Color color)
+void Lighting::setColor(const Color color, const Mode mode)
 {
-  processSetColor(color);
+  processSetColor(color, mode);
   _color = color;
 }
 

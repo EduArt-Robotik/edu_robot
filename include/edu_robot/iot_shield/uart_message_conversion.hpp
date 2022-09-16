@@ -24,8 +24,20 @@ struct UART {
   struct COMMAND {
     static constexpr std::uint8_t ENABLE  = 0x01;
     static constexpr std::uint8_t DISABLE = 0x02;
-    static constexpr std::uint8_t DIM_HEADLIGHT = 0x43;
-    static constexpr std::uint8_t FLASH_LEFT = 0x46;
+
+    struct LIGHTING {
+      static constexpr std::uint8_t OFF = 0x42;
+      static constexpr std::uint8_t DIM = 0x43;
+      static constexpr std::uint8_t HIGH_BEAM = 0x44;
+      struct FLASH {
+        static constexpr std::uint8_t ALL = 0x45;
+        static constexpr std::uint8_t LEFT = 0x46;
+        static constexpr std::uint8_t RIGHT = 0x47;
+      };
+      static constexpr std::uint8_t PULSATION = 0x48;
+      static constexpr std::uint8_t ROTATION = 0x49;
+      static constexpr std::uint8_t RUNNING = 0x4A;
+    };
   };
 };
 

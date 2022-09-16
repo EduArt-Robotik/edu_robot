@@ -20,7 +20,7 @@ public:
            const Color default_color, const float default_brightness);
   ~Lighting() override;
 
-  bool processSetColor(const Color color) override;
+  bool processSetColor(const Color color, const Mode mode) override;
   bool processSetBrightness(const float brightness) override;
 
 private:

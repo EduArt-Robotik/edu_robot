@@ -22,16 +22,27 @@ protected:
   Lighting(const std::string& name, const Color default_color, const float default_brightness);
   
 public:
+  // \todo mode do not really fit to a single lighting.
+  enum class Mode {
+    OFF,
+    DIM,
+    FLASH,
+    PULSATION,
+    ROTATION,
+    RUNNING,
+  };
+
   virtual ~Lighting() = default;
 
   /**
    * \brief Sets the color of this lighting.
    *
-   * \param color The new color.
+   * \param color The new color of the lighting.
+   * \param mode The new mode of the lighting.
    * \throw HardwareError
    * \return true if the brightness was set successfully.
    */
-  void setColor(const Color color);
+  void setColor(const Color color, const Mode mode);
   /**
    * \brief Sets the brightness of this lighting.
    *
@@ -44,7 +55,7 @@ public:
   const std::string& name() const { return _name; }
 
 protected:
-  virtual bool processSetColor(const Color color) = 0;
+  virtual bool processSetColor(const Color color, const Mode mode) = 0;
   virtual bool processSetBrightness(const float brightness) = 0;
 
   Color _color;

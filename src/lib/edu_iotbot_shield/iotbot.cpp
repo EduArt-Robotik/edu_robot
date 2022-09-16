@@ -21,33 +21,44 @@ IotBot::IotBot()
   auto iot_shield = std::dynamic_pointer_cast<IotShield>(_hardware_interface);
 
   registerLighting(std::make_shared<iotbot::Lighting>(
-    "head_left",
+    "head",
     0u,
     iot_shield->getCommunicator(),
     COLOR::DEFAULT::HEAD,
     1.0f)
   );
   registerLighting(std::make_shared<iotbot::Lighting>(
-    "head_right",
+    "right_side",
     1u,
     iot_shield->getCommunicator(),
     COLOR::DEFAULT::HEAD,
     1.0f)
   );
   registerLighting(std::make_shared<iotbot::Lighting>(
-    "back_left",
+    "left_side",
     2u,
     iot_shield->getCommunicator(),
     COLOR::DEFAULT::BACK,
     1.0f)
   );
   registerLighting(std::make_shared<iotbot::Lighting>(
-    "back_right",
+    "back",
     3u,
     iot_shield->getCommunicator(),
     COLOR::DEFAULT::BACK,
     1.0f)
   );
+
+  // Use all representation to set a initial light.
+  auto lighting_all = std::make_shared<iotbot::Lighting>(
+    "all",
+    4u,
+    iot_shield->getCommunicator(),
+    COLOR::DEFAULT::HEAD,
+    1.0f
+  );
+  lighting_all->setColor(COLOR::DEFAULT::BACK, Lighting::Mode::RUNNING);
+  registerLighting(lighting_all);
 }
 
 IotBot::~IotBot()
