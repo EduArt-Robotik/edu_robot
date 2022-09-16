@@ -43,7 +43,9 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 ## Build Library needed for ROS Nodes
 add_library(eduart-robot
   src/robot.cpp
-  src/iot_shield/iot_shield.cpp  
+  src/iot_shield/iot_shield.cpp
+  src/iot_shield/iot_shield_communicator.cpp
+  src/iot_shield/lighting.cpp
 )
 target_link_libraries(eduart-robot
   # ${CPP_TYPESUPPORT_TARGET} needed for ROS distro humble and newer. TODO: handle this somehow!

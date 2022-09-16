@@ -5,10 +5,10 @@
  */
 #pragma once
 
+#include "edu_robot/iot_shield/uart_message_conversion.hpp"
+#include "edu_robot/iot_shield/iot_shield_communicator.hpp"
 #include "edu_robot/robot_hardware_interface.hpp"
 #include "edu_robot/robot_status_report.hpp"
-
-#include "edu_robot/iot_shield/iot_shield_communicator.hpp"
 
 #include <memory>
 #include <array>
@@ -16,6 +16,8 @@
 namespace eduart {
 namespace robot {
 namespace iot_bot {
+
+class IotShieldCommunicator;
 
 class IotShield : public RobotHardwareInterface
 {

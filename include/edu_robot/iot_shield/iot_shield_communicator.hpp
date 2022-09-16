@@ -5,6 +5,8 @@
  */
 #pragma once
 
+#include "edu_robot/iot_shield/uart_message_conversion.hpp"
+
 #include <functional>
 #include <memory>
 #include <array>
@@ -15,19 +17,7 @@ namespace iot_bot {
 
 class IotShieldDevice;
 
-struct UART {
-  struct BUFFER {
-    static constexpr std::size_t TX_SIZE = 11;
-    static constexpr std::size_t RX_SIZE = 32;
-  
-    static constexpr std::uint8_t START_BYTE = 0xff;
-    static constexpr std::uint8_t END_BYTE   = 0xee;
-  };
-  struct COMMAND {
-    static constexpr std::uint8_t ENABLE  = 0x01;
-    static constexpr std::uint8_t DISABLE = 0x02;
-  };
-};
+
 
 class IotShieldCommunicator
 {

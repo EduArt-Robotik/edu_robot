@@ -1,5 +1,6 @@
 #include "edu_robot/iot_shield/iot_shield.hpp"
 #include "edu_robot/iot_shield/iot_shield_communicator.hpp"
+#include "edu_robot/iot_shield/uart_message_conversion.hpp"
 #include "edu_robot/robot_status_report.hpp"
 
 #include <memory>
@@ -13,7 +14,9 @@ namespace iot_bot {
 IotShield::IotShield(char const* const device_name)
   : _communicator(std::make_shared<IotShieldCommunicator>())
 {
-  _communicator->registerProcessReceivedBytes(std::bind(&IotShield::processStatusReport, this, std::placeholders::_1));
+  _communicator->registerProcessReceivedBytes(
+    std::bind(&IotShield::processStatusReport, this, std::placeholders::_1)
+  );
 
   // \todo check for better logging instance.
 #if _WITH_MRAA
@@ -75,7 +78,9 @@ RobotStatusReport IotShield::getStatusReport()
 
 void IotShield::processStatusReport(const std::array<std::uint8_t, UART::BUFFER::RX_SIZE>& buffer)
 {
-
+  _report.temperature = rxBufferToTemperature(buffer);
+  _report.voltage.mcu = rxBufferToVoltage(buffer);
+  _report.current.mcu = rxBufferToCurrent(buffer);
 }
 
 } // end namespace iot_bot

@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "edu_robot/iot_shield/iot_shield_communicator.hpp"
+#include "edu_robot/iot_shield/uart_message_conversion.hpp"
 
 #include <memory>
 #include <string>
