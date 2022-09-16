@@ -1,13 +1,19 @@
 #include "edu_robot/iot_shield/iot_shield_communicator.hpp"
 #include "edu_robot/iot_shield/iot_shield_device.hpp"
 
+#include <chrono>
 #include <iostream>
+#include <thread>
 
 namespace eduart {
 namespace robot {
 namespace iotbot {
 
+using namespace std::chrono_literals;
+
 IotShieldCommunicator::IotShieldCommunicator(char const* const device_name)
+  : _wait_time_after_sending(80ms)
+  , _last_sending(std::chrono::system_clock::now())
 {
   // \todo check for better logging instance.
 #if _WITH_MRAA
@@ -45,8 +51,22 @@ void IotShieldCommunicator::registerDevice(std::shared_ptr<IotShieldDevice> devi
 
 void IotShieldCommunicator::sendBytes(const std::array<std::uint8_t, UART::BUFFER::TX_SIZE>& bytes)
 {
+  // Wait a minimum time until next message can be sent.
+  // \todo Try to find a non blocking/sleeping solution.
+  auto now = std::chrono::system_clock::now();
+
+  while (std::chrono::duration_cast<std::chrono::milliseconds>(now - _last_sending) < _wait_time_after_sending) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(10ms));
+    now = std::chrono::system_clock::now();
+  }
+
 #if _WITH_MRAA
   _uart->write((char*)bytes.data(), bytes.size());
+  std::cout << "send data: ";
+  for (const auto& byte : bytes) {
+    std::cout << std::hex << static_cast<unsigned int>(byte) << " ";
+  }
+  std::cout << std::endl;
 #endif
 
   receiveBytes();
@@ -59,6 +79,11 @@ void IotShieldCommunicator::receiveBytes()
 #if _WITH_MRAA
    _uart->read((char*)bytes.data(), bytes.size());
 #endif
+  std::cout << "received data: ";
+  for (const auto& byte : bytes) {
+    std::cout << std::hex << static_cast<unsigned int>(byte) << " ";
+  }
+  std::cout << std::endl;
   _process_received_bytes(bytes);
 }
 

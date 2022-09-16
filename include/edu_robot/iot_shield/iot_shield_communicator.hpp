@@ -15,6 +15,7 @@
 #include <functional>
 #include <memory>
 #include <array>
+#include <chrono>
 
 namespace eduart {
 namespace robot {
@@ -41,6 +42,8 @@ private:
 #if _WITH_MRAA
   std::unique_ptr<mraa::Uart> _uart;
 #endif
+  std::chrono::milliseconds _wait_time_after_sending;
+  std::chrono::time_point<std::chrono::system_clock> _last_sending;
 };
 
 } // end namespace iotbot
