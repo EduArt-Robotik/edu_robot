@@ -5,6 +5,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
+## Dependencies
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_ros REQUIRED)
@@ -14,6 +15,17 @@ find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
+
+# MRAA library
+if(EXISTS "/usr/include/mraa/common.hpp")
+  message(STATUS "Found mraa installed at ${MRAA_INCLUDE_DIR}.")
+  add_compile_definitions(_WITH_MRAA)
+  set(HAVE_MRAA "TRUE")
+else()
+  message(STATUS "Couldn't find mraa, are you compiling on a IOT 2050 device? IotBot's components will to be compiled.")
+  set(HAVE_MRAA "FALSE")
+endif()
+
 
 ## Build Defined ROS Messages
 rosidl_generate_interfaces(${PROJECT_NAME}
@@ -26,6 +38,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 )
 ## Line below needed for ROS distro humble and newer. TODO: handle this somehow!
 # rosidl_get_typesupport_target(CPP_TYPESUPPORT_TARGET "${PROJECT_NAME}" "rosidl_typesupport_cpp")
+
 
 ## Build Library needed for ROS Nodes
 add_library(eduart-robot

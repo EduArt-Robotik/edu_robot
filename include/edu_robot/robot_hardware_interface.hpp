@@ -19,8 +19,8 @@ class RobotHardwareInterface
 public:
   virtual ~RobotHardwareInterface() = default;
 
-  virtual bool enable();
-  virtual bool disable();
+  virtual void enable();
+  virtual void disable();
   virtual RobotStatusReport getStatusReport();
 };
 

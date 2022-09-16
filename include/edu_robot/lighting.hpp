@@ -36,7 +36,7 @@ public:
    * \throw HardwareError
    * \return true if the brightness was set successfully.
    */
-  bool virtual setColor(const Color color);
+  void virtual setColor(const Color color);
   /**
    * \brief Sets the brightness of this lighting.
    *
@@ -44,7 +44,7 @@ public:
    * \throw HardwareError
    * \return true if the brightness was set successfully.
    */
-  bool virtual setBrightness(const float brightness);
+  void virtual setBrightness(const float brightness);
 
   const std::string& name() const { return _name; }
 
