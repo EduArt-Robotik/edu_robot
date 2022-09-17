@@ -13,7 +13,7 @@ class Rpm
 public:
   static constexpr Rpm fromRps(const float value) { return Rpm(value * 60.0f); }
 
-  constexpr Rpm(const float rpm) : _value(rpm) { }
+  constexpr Rpm(const float rpm = 0.0f) : _value(rpm) { }
 
   inline constexpr float rps() const { return _value / 60.0f; }
  

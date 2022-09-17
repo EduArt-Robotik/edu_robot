@@ -12,7 +12,7 @@ namespace iotbot {
 using namespace std::chrono_literals;
 
 IotShieldCommunicator::IotShieldCommunicator(char const* const device_name)
-  : _wait_time_after_sending(80ms)
+  : _wait_time_after_sending(8ms)
   , _last_sending(std::chrono::system_clock::now())
 {
   // \todo check for better logging instance.
@@ -56,7 +56,7 @@ void IotShieldCommunicator::sendBytes(const std::array<std::uint8_t, UART::BUFFE
   auto now = std::chrono::system_clock::now();
 
   while (std::chrono::duration_cast<std::chrono::milliseconds>(now - _last_sending) < _wait_time_after_sending) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(10ms));
+    std::this_thread::sleep_for(std::chrono::milliseconds(1ms));
     now = std::chrono::system_clock::now();
   }
 

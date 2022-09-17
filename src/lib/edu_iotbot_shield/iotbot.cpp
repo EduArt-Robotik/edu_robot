@@ -2,6 +2,9 @@
 #include "edu_robot/color.hpp"
 #include "edu_robot/iot_shield/iot_shield.hpp"
 #include "edu_robot/iot_shield/lighting.hpp"
+#include "edu_robot/iot_shield/motor_controller.hpp"
+#include "edu_robot/motor_controller.hpp"
+#include "edu_robot/robot.hpp"
 
 #include <memory>
 
@@ -59,6 +62,21 @@ IotBot::IotBot()
   );
   lighting_all->setColor(COLOR::DEFAULT::BACK, Lighting::Mode::RUNNING);
   registerLighting(lighting_all);
+
+
+  // Motor controllers.
+  robot::MotorController::Parameter parameter;
+  auto compound_motor_controller = std::make_shared<iotbot::CompoundMotorController>(
+    "motor_d",
+    3u,
+    iot_shield->getCommunicator(),
+    parameter
+  );
+
+  registerMotorController(compound_motor_controller->dummyMotorController()[0]);
+  registerMotorController(compound_motor_controller->dummyMotorController()[1]);
+  registerMotorController(compound_motor_controller->dummyMotorController()[2]);
+  registerMotorController(compound_motor_controller);
 }
 
 IotBot::~IotBot()

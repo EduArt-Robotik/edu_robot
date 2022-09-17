@@ -51,6 +51,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 add_library(eduart-robot
   src/lib/edu_robot/robot.cpp
   src/lib/edu_robot/lighting.cpp
+  src/lib/edu_robot/motor_controller.cpp
 )
 target_link_libraries(eduart-robot
   # ${CPP_TYPESUPPORT_TARGET} needed for ROS distro humble and newer. TODO: handle this somehow!
@@ -78,6 +79,7 @@ add_library(eduart-iotbot-shield
   src/lib/edu_iotbot_shield/iot_shield_communicator.cpp
   src/lib/edu_iotbot_shield/lighting.cpp
   src/lib/edu_iotbot_shield/iotbot.cpp
+  src/lib/edu_iotbot_shield/motor_controller.cpp
 )
 if(HAVE_MRAA) ## TODO: use string for dependencies, so onyl one target_link_libraries is there!
   message("MRAA library found")

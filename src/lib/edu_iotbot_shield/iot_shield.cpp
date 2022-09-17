@@ -16,6 +16,16 @@ IotShield::IotShield(char const* const device_name)
   _communicator->registerProcessReceivedBytes(
     std::bind(&IotShield::processStatusReport, this, std::placeholders::_1)
   );
+
+  // set UART timeout
+  _tx_buffer = { 0 };
+
+  _tx_buffer[0] = UART::BUFFER::START_BYTE;
+  _tx_buffer[1] = UART::COMMAND::SET::UART_TIMEOUT;
+  floatToTxBuffer<2, 5>(1.0f, _tx_buffer);
+  _tx_buffer[10] = UART::BUFFER::END_BYTE;
+
+  _communicator->sendBytes(_tx_buffer);
 }
 
 IotShield::~IotShield()
@@ -34,6 +44,17 @@ void IotShield::enable()
   _tx_buffer[10] = UART::BUFFER::END_BYTE;
 
   _communicator->sendBytes(_tx_buffer);
+
+  // HACK BEGIN
+  _tx_buffer = { 0 };
+
+  _tx_buffer[0] = UART::BUFFER::START_BYTE;
+  _tx_buffer[1] = UART::COMMAND::SET::IMU_RAW_DATA;
+  _tx_buffer[2] = 0x00;
+  _tx_buffer[10] = UART::BUFFER::END_BYTE;
+
+  _communicator->sendBytes(_tx_buffer);
+  // HACK END
 }
 
 void IotShield::disable()

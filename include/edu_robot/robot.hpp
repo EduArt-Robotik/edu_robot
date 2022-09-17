@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "edu_robot/msg/detail/set_lighting_color__struct.hpp"
+#include "edu_robot/motor_controller.hpp"
 #include "edu_robot/msg/mode.hpp"
 #include "edu_robot/msg/set_lighting_color.hpp"
 #include "edu_robot/msg/robot_status_report.hpp"
@@ -18,6 +18,7 @@
 #include <rclcpp/publisher.hpp>
 #include <rclcpp/service.hpp>
 #include <rclcpp/subscription.hpp>
+
 #include <geometry_msgs/msg/detail/twist__struct.hpp>
 #include <geometry_msgs/msg/twist.hpp>
 #include <nav_msgs/msg/detail/odometry__struct.hpp>
@@ -68,6 +69,7 @@ public:
 
 protected:
   void registerLighting(std::shared_ptr<Lighting> lighting);
+  void registerMotorController(std::shared_ptr<MotorController> motor_controller);
 
   std::shared_ptr<RobotHardwareInterface> _hardware_interface;
 
@@ -83,6 +85,7 @@ private:
 
   // Mounted components that are controlled by the hardware interface.
   std::map<std::string, std::shared_ptr<Lighting>> _lightings;
+  std::map<std::uint8_t, std::shared_ptr<MotorController>> _motor_controllers;
 };
 
 } // end namespace robot
