@@ -39,7 +39,7 @@ IotShieldCommunicator::IotShieldCommunicator(char const* const device_name)
 }
 
 void IotShieldCommunicator::registerProcessReceivedBytes(
-  std::function<void(const std::array<std::uint8_t, UART::BUFFER::RX_SIZE>&)> callback)
+  std::function<void(const std::array<std::uint8_t, uart::message::UART::BUFFER::RX_SIZE>&)> callback)
 {
   _process_received_bytes = callback;
 }
@@ -49,7 +49,7 @@ void IotShieldCommunicator::registerDevice(std::shared_ptr<IotShieldDevice> devi
 
 }
 
-void IotShieldCommunicator::sendBytes(const std::array<std::uint8_t, UART::BUFFER::TX_SIZE>& bytes)
+void IotShieldCommunicator::sendBytes(const std::array<std::uint8_t, uart::message::UART::BUFFER::TX_SIZE>& bytes)
 {
   // Wait a minimum time until next message can be sent.
   // \todo Try to find a non blocking/sleeping solution.
@@ -74,7 +74,7 @@ void IotShieldCommunicator::sendBytes(const std::array<std::uint8_t, UART::BUFFE
 
 void IotShieldCommunicator::receiveBytes()
 {
-  std::array<std::uint8_t, UART::BUFFER::RX_SIZE> bytes;
+  std::array<std::uint8_t, uart::message::UART::BUFFER::RX_SIZE> bytes;
 
 #if _WITH_MRAA
    _uart->read((char*)bytes.data(), bytes.size());

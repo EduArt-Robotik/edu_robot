@@ -1,5 +1,5 @@
 #include "edu_robot/iot_shield/motor_controller.hpp"
-#include "edu_robot/iot_shield/uart_message_conversion.hpp"
+#include "edu_robot/iot_shield/uart/uart_message.hpp"
 #include "edu_robot/motor_controller.hpp"
 
 #include <memory>
@@ -57,38 +57,46 @@ void CompoundMotorController::initialize(const eduart::robot::MotorController::P
   }
 
   // set control frequency
-  {
-    _tx_buffer = { 0 };
-    _tx_buffer[0] = UART::BUFFER::START_BYTE;
-    _tx_buffer[1] = UART::COMMAND::SET::CONTROL_FREQUENCY;
-    uint32ToTxBuffer<2, 5>(parameter.control_frequency, _tx_buffer);
-    _tx_buffer[10] = UART::BUFFER::END_BYTE;
+  // {
+  //   _tx_buffer = { 0 };
+  //   _tx_buffer[0] = UART::BUFFER::START_BYTE;
+  //   _tx_buffer[1] = UART::COMMAND::SET::CONTROL_FREQUENCY;
+  //   uint32ToTxBuffer<2, 5>(parameter.control_frequency, _tx_buffer);
+  //   _tx_buffer[10] = UART::BUFFER::END_BYTE;
 
-    _communicator->sendBytes(_tx_buffer);
-  }
+  //   _communicator->sendBytes(_tx_buffer);
+  // }
 
-  setValue<UART::COMMAND::SET::KP>(parameter.kp);
-  setValue<UART::COMMAND::SET::KI>(parameter.ki);
-  setValue<UART::COMMAND::SET::KD>(parameter.kd);
-  setValue<UART::COMMAND::SET::SET_POINT_LOW_PASS>(parameter.weight_low_pass_set_point);
-  setValue<UART::COMMAND::SET::ENCODER_LOW_PASS>(parameter.weight_low_pass_encoder);
-  setValue<UART::COMMAND::SET::GEAR_RATIO>(parameter.gear_ratio);
-  setValue<UART::COMMAND::SET::TICKS_PER_REV>(parameter.encoder_ratio);
+  // setValue<UART::COMMAND::SET::KP>(parameter.kp);
+  // setValue<UART::COMMAND::SET::KI>(parameter.ki);
+  // setValue<UART::COMMAND::SET::KD>(parameter.kd);
+  // setValue<UART::COMMAND::SET::SET_POINT_LOW_PASS>(parameter.weight_low_pass_set_point);
+  // setValue<UART::COMMAND::SET::ENCODER_LOW_PASS>(parameter.weight_low_pass_encoder);
+  // setValue<UART::COMMAND::SET::GEAR_RATIO>(parameter.gear_ratio);
+  // setValue<UART::COMMAND::SET::TICKS_PER_REV>(parameter.encoder_ratio);
 }
 
 void CompoundMotorController::processSetRpm(const Rpm rpm)
 {
-  _tx_buffer[0] = UART::BUFFER::START_BYTE;
-  _tx_buffer[1] = UART::COMMAND::SET::RPM;
+  const uart::message::SetRpm uart_message(
+    static_cast<std::int16_t>(_dummy_motor_controllers[0]->_set_rpm * 100.f + 0.5f),
+    static_cast<std::int16_t>(_dummy_motor_controllers[1]->_set_rpm * 100.f + 0.5f),
+    static_cast<std::int16_t>(_dummy_motor_controllers[2]->_set_rpm * 100.f + 0.5f),
+    static_cast<std::int16_t>(rpm * 100.f + 0.5f)
+  );
 
-  int16ToTxBuffer<2, 3>(static_cast<std::int16_t>(_dummy_motor_controllers[0]->_set_rpm * 100.f + 0.5f), _tx_buffer);
-  int16ToTxBuffer<4, 5>(static_cast<std::int16_t>(_dummy_motor_controllers[1]->_set_rpm * 100.f + 0.5f), _tx_buffer);
-  int16ToTxBuffer<6, 7>(static_cast<std::int16_t>(_dummy_motor_controllers[2]->_set_rpm * 100.f + 0.5f), _tx_buffer);
-  int16ToTxBuffer<8, 9>(static_cast<std::int16_t>(rpm * 100.f + 0.5f), _tx_buffer);
+  _communicator->sendBytes(uart_message.data());
+  // _tx_buffer[0] = UART::BUFFER::START_BYTE;
+  // _tx_buffer[1] = UART::COMMAND::SET::RPM;
 
-  _tx_buffer[10] = UART::BUFFER::END_BYTE;
+  // int16ToTxBuffer<2, 3>(static_cast<std::int16_t>(_dummy_motor_controllers[0]->_set_rpm * 100.f + 0.5f), _tx_buffer);
+  // int16ToTxBuffer<4, 5>(static_cast<std::int16_t>(_dummy_motor_controllers[1]->_set_rpm * 100.f + 0.5f), _tx_buffer);
+  // int16ToTxBuffer<6, 7>(static_cast<std::int16_t>(_dummy_motor_controllers[2]->_set_rpm * 100.f + 0.5f), _tx_buffer);
+  // int16ToTxBuffer<8, 9>(static_cast<std::int16_t>(rpm * 100.f + 0.5f), _tx_buffer);
 
-  _communicator->sendBytes(_tx_buffer);
+  // _tx_buffer[10] = UART::BUFFER::END_BYTE;
+
+  // _communicator->sendBytes(_tx_buffer);
 }
 
 } // end namespace iotbot

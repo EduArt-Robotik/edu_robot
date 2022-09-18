@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "edu_robot/iot_shield/uart_message_conversion.hpp"
+#include "edu_robot/iot_shield/uart/uart_message_conversion.hpp"
 #include "edu_robot/iot_shield/iot_shield_communicator.hpp"
 #include "edu_robot/robot_hardware_interface.hpp"
 #include "edu_robot/robot_status_report.hpp"
@@ -31,10 +31,10 @@ public:
   std::shared_ptr<IotShieldCommunicator> getCommunicator() { return _communicator; }
 
 private:
-  void processStatusReport(const std::array<std::uint8_t, UART::BUFFER::RX_SIZE>& buffer);
+  void processStatusReport(const std::array<std::uint8_t, uart::message::UART::BUFFER::RX_SIZE>& buffer);
 
   std::shared_ptr<IotShieldCommunicator> _communicator;
-  std::array<std::uint8_t, UART::BUFFER::TX_SIZE> _tx_buffer;
+  std::array<std::uint8_t, uart::message::UART::BUFFER::TX_SIZE> _tx_buffer;
 };
 
 } // end namespace iotbot

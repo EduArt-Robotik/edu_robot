@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "edu_robot/iot_shield/uart_message_conversion.hpp"
+#include "edu_robot/iot_shield/uart/uart_message_conversion.hpp"
 
 #if _WITH_MRAA
 #include <mraa/common.hpp>
@@ -31,13 +31,13 @@ public:
   IotShieldCommunicator(char const* const device_name);
 
   void registerDevice(std::shared_ptr<IotShieldDevice> device);
-  void registerProcessReceivedBytes(std::function<void(const std::array<std::uint8_t, UART::BUFFER::RX_SIZE>&)> callback);
-  void sendBytes(const std::array<std::uint8_t, UART::BUFFER::TX_SIZE>& bytes);
+  void registerProcessReceivedBytes(std::function<void(const std::array<std::uint8_t, uart::message::UART::BUFFER::RX_SIZE>&)> callback);
+  void sendBytes(const std::array<std::uint8_t, uart::message::UART::BUFFER::TX_SIZE>& bytes);
 
 private:
   void receiveBytes();
 
-  std::function<void(const std::array<std::uint8_t, UART::BUFFER::RX_SIZE>&)> _process_received_bytes;
+  std::function<void(const std::array<std::uint8_t, uart::message::UART::BUFFER::RX_SIZE>&)> _process_received_bytes;
 
 #if _WITH_MRAA
   std::unique_ptr<mraa::Uart> _uart;

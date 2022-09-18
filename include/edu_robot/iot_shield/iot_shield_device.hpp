@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "edu_robot/iot_shield/uart_message_conversion.hpp"
+#include "edu_robot/iot_shield/uart/uart_message_conversion.hpp"
 
 #include <memory>
 #include <string>
@@ -36,7 +36,7 @@ private:
 
 protected:
   std::shared_ptr<IotShieldCommunicator> _communicator;
-  std::array<std::uint8_t, UART::BUFFER::TX_SIZE> _tx_buffer;
+  std::array<std::uint8_t, uart::message::UART::BUFFER::TX_SIZE> _tx_buffer;
 };
 
 } // end namespace iotbot

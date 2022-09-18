@@ -1,7 +1,7 @@
 #include "edu_robot/iot_shield/lighting.hpp"
 #include "edu_robot/iot_shield/iot_shield_device.hpp"
 #include "edu_robot/iot_shield/iot_shield_communicator.hpp"
-#include "edu_robot/iot_shield/uart_message_conversion.hpp"
+#include "edu_robot/iot_shield/uart/uart_message_conversion.hpp"
 #include "edu_robot/lighting.hpp"
 #include <stdexcept>
 #include <string>
@@ -34,35 +34,35 @@ bool Lighting::processSetColor(const Color color, const Mode mode)
   switch (mode) {
   case Mode::FLASH:
     if (robot::Lighting::name().find("left") != std::string::npos) {
-      command = UART::COMMAND::LIGHTING::FLASH::LEFT;
+      command = uart::message::UART::COMMAND::LIGHTING::FLASH::LEFT;
     }
     else if (robot::Lighting::name().find("right") != std::string::npos) {
-      command = UART::COMMAND::LIGHTING::FLASH::RIGHT;
+      command = uart::message::UART::COMMAND::LIGHTING::FLASH::RIGHT;
     }
     else if (robot::Lighting::name().find("all") != std::string::npos) {
-      command = UART::COMMAND::LIGHTING::FLASH::ALL;
+      command = uart::message::UART::COMMAND::LIGHTING::FLASH::ALL;
     }
     break;
 
     // all lightings are addressed
   case Mode::DIM:
-    command = UART::COMMAND::LIGHTING::DIM;
+    command = uart::message::UART::COMMAND::LIGHTING::DIM;
     break;
 
   case Mode::OFF:
-    command = UART::COMMAND::LIGHTING::OFF;
+    command = uart::message::UART::COMMAND::LIGHTING::OFF;
     break;
 
   case Mode::PULSATION:
-    command = UART::COMMAND::LIGHTING::PULSATION;
+    command = uart::message::UART::COMMAND::LIGHTING::PULSATION;
     break;
 
   case Mode::ROTATION:
-    command = UART::COMMAND::LIGHTING::ROTATION;
+    command = uart::message::UART::COMMAND::LIGHTING::ROTATION;
     break;
 
   case Mode::RUNNING:
-    command = UART::COMMAND::LIGHTING::RUNNING;
+    command = uart::message::UART::COMMAND::LIGHTING::RUNNING;
     break;
 
   default:
@@ -71,14 +71,14 @@ bool Lighting::processSetColor(const Color color, const Mode mode)
 
 
   // prepare message and send it
-  _tx_buffer[ 0] = UART::BUFFER::START_BYTE;
-  _tx_buffer[ 1] = command;
-  _tx_buffer[ 2] = color.r;
-  _tx_buffer[ 3] = color.g;
-  _tx_buffer[ 4] = color.b;
-  _tx_buffer[10] = UART::BUFFER::END_BYTE;
+  // _tx_buffer[ 0] = UART::BUFFER::START_BYTE;
+  // _tx_buffer[ 1] = command;
+  // _tx_buffer[ 2] = color.r;
+  // _tx_buffer[ 3] = color.g;
+  // _tx_buffer[ 4] = color.b;
+  // _tx_buffer[10] = UART::BUFFER::END_BYTE;
 
-  _communicator->sendBytes(_tx_buffer);
+  // _communicator->sendBytes(_tx_buffer);
 
   return true;
 }

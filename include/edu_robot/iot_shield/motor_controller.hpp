@@ -9,7 +9,7 @@
 
 #include "edu_robot/iot_shield/iot_shield_communicator.hpp"
 #include "edu_robot/iot_shield/iot_shield_device.hpp"
-#include "edu_robot/iot_shield/uart_message_conversion.hpp"
+#include "edu_robot/iot_shield/uart/uart_message_conversion.hpp"
 
 #include <memory>
 #include <string>
@@ -52,19 +52,19 @@ private:
   template<std::uint8_t Command>
   void setValue(const float value)
   {
-    // clear buffer
-    _tx_buffer = { 0 };
+    // // clear buffer
+    // _tx_buffer = { 0 };
 
-    // construct message
-    _tx_buffer[0] = UART::BUFFER::START_BYTE;
-    _tx_buffer[1] = Command;
+    // // construct message
+    // _tx_buffer[0] = UART::BUFFER::START_BYTE;
+    // _tx_buffer[1] = Command;
 
-    floatToTxBuffer<2, 5>(value, _tx_buffer);
+    // floatToTxBuffer<2, 5>(value, _tx_buffer);
   
-    _tx_buffer[10] = UART::BUFFER::END_BYTE;
+    // _tx_buffer[10] = UART::BUFFER::END_BYTE;
 
-    // send message
-    _communicator->sendBytes(_tx_buffer);    
+    // // send message
+    // _communicator->sendBytes(_tx_buffer);    
   }
 
   std::array<std::shared_ptr<iotbot::DummyMotorController>, 3u> _dummy_motor_controllers;
