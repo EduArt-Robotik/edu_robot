@@ -68,7 +68,6 @@ IotBot::IotBot()
   robot::MotorController::Parameter parameter;
   auto compound_motor_controller = std::make_shared<iotbot::CompoundMotorController>(
     "motor_d",
-    3u,
     iot_shield->getCommunicator(),
     parameter
   );

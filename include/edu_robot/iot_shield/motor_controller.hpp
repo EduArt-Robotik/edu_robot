@@ -37,7 +37,7 @@ class CompoundMotorController : public eduart::robot::MotorController
                               , public eduart::robot::iotbot::IotShieldDevice
 {
 public:
-  CompoundMotorController(const std::string& name, const std::uint8_t id, std::shared_ptr<IotShieldCommunicator> communicator,
+  CompoundMotorController(const std::string& name, std::shared_ptr<IotShieldCommunicator> communicator,
                           const eduart::robot::MotorController::Parameter& parameter);
   ~CompoundMotorController() override;
 

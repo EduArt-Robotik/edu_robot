@@ -1,6 +1,7 @@
 #include "edu_robot/iot_shield/lighting.hpp"
 #include "edu_robot/iot_shield/iot_shield_device.hpp"
 #include "edu_robot/iot_shield/iot_shield_communicator.hpp"
+#include "edu_robot/iot_shield/uart/uart_message.hpp"
 #include "edu_robot/iot_shield/uart/uart_message_conversion.hpp"
 #include "edu_robot/lighting.hpp"
 #include <stdexcept>
@@ -9,6 +10,8 @@
 namespace eduart {
 namespace robot {
 namespace iotbot {
+
+using uart::message::UART;
 
 Lighting::Lighting(const std::string& name, const std::uint8_t id, std::shared_ptr<IotShieldCommunicator> communicator,
                    const Color default_color, const float default_brightness)
@@ -29,56 +32,43 @@ bool Lighting::processSetColor(const Color color, const Mode mode)
   _tx_buffer = { 0 };
 
   // HACK! At the moment each light can't controlled separately.
-  std::uint8_t command = 0x00;
-
   switch (mode) {
   case Mode::FLASH:
     if (robot::Lighting::name().find("left") != std::string::npos) {
-      command = uart::message::UART::COMMAND::LIGHTING::FLASH::LEFT;
+      _communicator->sendBytes(uart::message::SetLighting<UART::COMMAND::LIGHTING::FLASH::LEFT>(color).data()); 
     }
     else if (robot::Lighting::name().find("right") != std::string::npos) {
-      command = uart::message::UART::COMMAND::LIGHTING::FLASH::RIGHT;
+      _communicator->sendBytes(uart::message::SetLighting<UART::COMMAND::LIGHTING::FLASH::RIGHT>(color).data());
     }
     else if (robot::Lighting::name().find("all") != std::string::npos) {
-      command = uart::message::UART::COMMAND::LIGHTING::FLASH::ALL;
+      _communicator->sendBytes(uart::message::SetLighting<UART::COMMAND::LIGHTING::FLASH::ALL>(color).data());
     }
     break;
 
     // all lightings are addressed
   case Mode::DIM:
-    command = uart::message::UART::COMMAND::LIGHTING::DIM;
+    _communicator->sendBytes(uart::message::SetLighting<UART::COMMAND::LIGHTING::DIM>(color).data());
     break;
 
   case Mode::OFF:
-    command = uart::message::UART::COMMAND::LIGHTING::OFF;
+    _communicator->sendBytes(uart::message::SetLighting<UART::COMMAND::LIGHTING::OFF>(color).data());
     break;
 
   case Mode::PULSATION:
-    command = uart::message::UART::COMMAND::LIGHTING::PULSATION;
+    _communicator->sendBytes(uart::message::SetLighting<UART::COMMAND::LIGHTING::PULSATION>(color).data());
     break;
 
   case Mode::ROTATION:
-    command = uart::message::UART::COMMAND::LIGHTING::ROTATION;
+    _communicator->sendBytes(uart::message::SetLighting<UART::COMMAND::LIGHTING::ROTATION>(color).data());
     break;
 
   case Mode::RUNNING:
-    command = uart::message::UART::COMMAND::LIGHTING::RUNNING;
+    _communicator->sendBytes(uart::message::SetLighting<UART::COMMAND::LIGHTING::RUNNING>(color).data());
     break;
 
   default:
     throw std::invalid_argument("given mode is not handled");
   }
-
-
-  // prepare message and send it
-  // _tx_buffer[ 0] = UART::BUFFER::START_BYTE;
-  // _tx_buffer[ 1] = command;
-  // _tx_buffer[ 2] = color.r;
-  // _tx_buffer[ 3] = color.g;
-  // _tx_buffer[ 4] = color.b;
-  // _tx_buffer[10] = UART::BUFFER::END_BYTE;
-
-  // _communicator->sendBytes(_tx_buffer);
 
   return true;
 }

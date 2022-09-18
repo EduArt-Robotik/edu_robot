@@ -1,5 +1,6 @@
 #include "edu_robot/iot_shield/iot_shield.hpp"
 #include "edu_robot/iot_shield/iot_shield_communicator.hpp"
+#include "edu_robot/iot_shield/uart/uart_message.hpp"
 #include "edu_robot/iot_shield/uart/uart_message_conversion.hpp"
 #include "edu_robot/robot_status_report.hpp"
 
@@ -10,6 +11,8 @@ namespace eduart {
 namespace robot {
 namespace iotbot {
 
+using uart::message::UART;
+
 IotShield::IotShield(char const* const device_name)
   : _communicator(std::make_shared<IotShieldCommunicator>(device_name))
 {
@@ -18,14 +21,9 @@ IotShield::IotShield(char const* const device_name)
   );
 
   // set UART timeout
-  // _tx_buffer = { 0 };
-
-  // _tx_buffer[0] = UART::BUFFER::START_BYTE;
-  // _tx_buffer[1] = UART::COMMAND::SET::UART_TIMEOUT;
-  // floatToTxBuffer<2, 5>(1.0f, _tx_buffer);
-  // _tx_buffer[10] = UART::BUFFER::END_BYTE;
-
-  // _communicator->sendBytes(_tx_buffer);
+  _communicator->sendBytes(uart::message::SetValueF<UART::COMMAND::SET::UART_TIMEOUT>(1.0f).data());
+  // and IMU data mode to raw
+  _communicator->sendBytes(uart::message::SetImuRawDataMode(false).data());
 }
 
 IotShield::~IotShield()
@@ -35,39 +33,12 @@ IotShield::~IotShield()
 
 void IotShield::enable()
 {
-  // // clear buffer
-  // _tx_buffer = { 0 };
-
-  // // prepare message and send it
-  // _tx_buffer[0]  = UART::BUFFER::START_BYTE;
-  // _tx_buffer[1]  = UART::COMMAND::ENABLE;
-  // _tx_buffer[10] = UART::BUFFER::END_BYTE;
-
-  // _communicator->sendBytes(_tx_buffer);
-
-  // // HACK BEGIN
-  // _tx_buffer = { 0 };
-
-  // _tx_buffer[0] = UART::BUFFER::START_BYTE;
-  // _tx_buffer[1] = UART::COMMAND::SET::IMU_RAW_DATA;
-  // _tx_buffer[2] = 0x00;
-  // _tx_buffer[10] = UART::BUFFER::END_BYTE;
-
-  // _communicator->sendBytes(_tx_buffer);
-  // // HACK END
+  _communicator->sendBytes(uart::message::Enable().data());
 }
 
 void IotShield::disable()
 {
-  // // clear buffer
-  // _tx_buffer = { 0 };
-
-  // // prepare message and send it
-  // _tx_buffer[0]  = UART::BUFFER::START_BYTE;
-  // _tx_buffer[1]  = UART::COMMAND::DISABLE;
-  // _tx_buffer[10] = UART::BUFFER::END_BYTE;
-
-  // _communicator->sendBytes(_tx_buffer);
+  _communicator->sendBytes(uart::message::Disable().data());
 }
 
 RobotStatusReport IotShield::getStatusReport()
@@ -77,9 +48,9 @@ RobotStatusReport IotShield::getStatusReport()
 
 void IotShield::processStatusReport(const std::array<std::uint8_t, uart::message::UART::BUFFER::RX_SIZE>& buffer)
 {
-  // _report.temperature = rxBufferToTemperature(buffer);
-  // _report.voltage.mcu = rxBufferToVoltage(buffer);
-  // _report.current.mcu = rxBufferToCurrent(buffer);
+  _report.temperature = uart::message::rxBufferToTemperature(buffer);
+  _report.voltage.mcu = uart::message::rxBufferToVoltage(buffer);
+  _report.current.mcu = uart::message::rxBufferToCurrent(buffer);
   _status_report_ready = true;
 }
 

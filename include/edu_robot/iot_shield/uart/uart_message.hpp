@@ -5,6 +5,8 @@
  */
 #pragma once
 
+#include <edu_robot/rotation_per_minute.hpp>
+#include <edu_robot/color.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -97,8 +99,9 @@ using StopByte = impl::ConstByte<UART::BUFFER::END_BYTE>;
 template <Byte UartCommand>
 struct Command : public impl::ConstByte<UartCommand> { };
 
-struct Float : public impl::Element<float> { };
-struct Int16 : public impl::Element<std::int16_t> { };
+struct Float  : public impl::Element<float> { };
+struct Int16  : public impl::Element<std::int16_t> { };
+struct Uint8  : public impl::Element<std::uint8_t> { };
 struct Uint32 : public impl::Element<std::uint32_t> { };
 
 } // end namespace element
@@ -110,6 +113,7 @@ struct Message {
   static constexpr std::size_t SIZE = (Elements::SIZE + ...);
 
   const std::array<Byte, SIZE>& data() const { return _buffer; }
+  static constexpr std::size_t size() { return SIZE; } 
 
 protected:
   std::array<Byte, SIZE> _buffer;
@@ -120,11 +124,11 @@ struct TxMessageFrame : public Message<element::StartByte, CommandByte, Elements
 {
 private:
   using Message<element::StartByte, CommandByte, Elements..., element::StopByte>::_buffer;
-
-public:
   using Message<element::StartByte, CommandByte, Elements..., element::StopByte>::SIZE;
 
-  TxMessageFrame(const typename Elements::DataType... args) {
+public:
+  TxMessageFrame(const typename Elements::DataType... args)
+  {
     std::size_t current_index = 0u;
 
     _buffer[current_index] = element::StartByte::serialize()[0];
@@ -132,10 +136,10 @@ public:
     _buffer[current_index] = CommandByte::serialize()[0];
     current_index += CommandByte::SIZE;
 
-    ([&]{
+    ([&](){
       const auto message_bytes = Elements::serialize(args);
       std::memcpy(
-        &Message<element::StartByte, CommandByte, Elements..., element::StopByte>::_buffer[current_index],
+        &_buffer[current_index],
         message_bytes.data(),
         Elements::SIZE
       );
@@ -149,8 +153,60 @@ public:
 
 } // end namespace impl
 
-using SetRpm = impl::TxMessageFrame<element::Command<UART::COMMAND::SET::RPM>,
-                                    element::Int16, element::Int16, element::Int16, element::Int16>;
+struct SetRpm : public impl::TxMessageFrame<element::Command<UART::COMMAND::SET::RPM>,
+                                            element::Int16, element::Int16, element::Int16, element::Int16>
+{
+  SetRpm(const Rpm rpm_0, const Rpm rpm_1, const Rpm rpm_2, const Rpm rpm_3)
+    : impl::TxMessageFrame<element::Command<UART::COMMAND::SET::RPM>, element::Int16, element::Int16, element::Int16, element::Int16>(
+        static_cast<element::Int16::DataType>(rpm_0 * 100.f + 0.5f),
+        static_cast<element::Int16::DataType>(rpm_1 * 100.f + 0.5f),
+        static_cast<element::Int16::DataType>(rpm_2 * 100.f + 0.5f),
+        static_cast<element::Int16::DataType>(rpm_3 * 100.f + 0.5f)
+      )
+  { }
+};
+
+template <Byte UartCommand>
+struct SetLighting : public impl::TxMessageFrame<element::Command<UartCommand>, element::Uint8, element::Uint8,
+                                                 element::Uint8, /* spacer */ element::Uint8 , element::Uint32>
+{
+  SetLighting(const Color& color)
+    : impl::TxMessageFrame<element::Command<UartCommand>, element::Uint8, element::Uint8,
+                           element::Uint8, /* spacer */ element::Uint8 , element::Uint32>(
+        color.r, color.g, color.b, 0u, 0u
+      )
+  { }
+};
+
+template <Byte UartCommand>
+struct SetValueF : public impl::TxMessageFrame<element::Command<UartCommand>, element::Float, /* spacer */ element::Uint32> {
+  SetValueF(const element::Float::DataType value)
+    : impl::TxMessageFrame<element::Command<UartCommand>, element::Float, element::Uint32>(value, 0u) { }    
+};
+
+template <Byte UartCommand>
+struct SetValueU : public impl::TxMessageFrame<element::Command<UartCommand>, element::Uint32, /* spacer */ element::Uint32> {
+  SetValueU(const element::Uint32::DataType value)
+    : impl::TxMessageFrame<element::Command<UartCommand>, element::Uint32, element::Uint32>(value, 0u) { }
+};
+
+struct SetImuRawDataMode 
+  : public impl::TxMessageFrame<element::Command<UART::COMMAND::SET::IMU_RAW_DATA>, element::Uint8, 
+                                /* spacer */ element::Uint8, element::Int16, element::Uint32> {
+  SetImuRawDataMode(const bool enable)
+    : impl::TxMessageFrame<element::Command<UART::COMMAND::SET::IMU_RAW_DATA>, element::Uint8, element::Uint8,
+                           element::Int16, element::Uint32>(enable ? 0xff : 0x00, 0u, 0u, 0u) { }
+};
+
+struct Enable : public impl::TxMessageFrame<element::Command<UART::COMMAND::ENABLE>, /* spacer */ element::Uint32, element::Uint32> {
+  Enable() : impl::TxMessageFrame<element::Command<UART::COMMAND::ENABLE>,
+                                  element::Uint32, element::Uint32>(0u, 0u) { }
+};
+
+struct Disable : public impl::TxMessageFrame<element::Command<UART::COMMAND::DISABLE>, /* spacer */ element::Uint32, element::Uint32> {
+  Disable() : impl::TxMessageFrame<element::Command<UART::COMMAND::DISABLE>,
+                                   element::Uint32, element::Uint32>(0u, 0u) { }
+};
 
 } // end namespace message
 } // end namespace uart
