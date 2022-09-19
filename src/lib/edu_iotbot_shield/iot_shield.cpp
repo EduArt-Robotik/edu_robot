@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <functional>
+#include <iostream>
 
 namespace eduart {
 namespace robot {
@@ -49,9 +50,11 @@ RobotStatusReport IotShield::getStatusReport()
 
 void IotShield::processStatusReport(const std::array<std::uint8_t, uart::message::UART::BUFFER::RX_SIZE>& buffer)
 {
-  _report.temperature = uart::message::rxBufferToTemperature(buffer);
-  _report.voltage.mcu = uart::message::rxBufferToVoltage(buffer);
-  _report.current.mcu = uart::message::rxBufferToCurrent(buffer);
+  uart::message::ShieldResponse<UART::COMMAND::SET::RPM>msg(buffer);
+  std::cout << "message valid = " << msg.isMessageCandidateValid() << std::endl;
+  _report.temperature = static_cast<float>(msg.getElementValue<6>()) / 100.0f;// uart::message::rxBufferToTemperature(buffer);
+  _report.voltage.mcu = static_cast<float>(msg.getElementValue<9>()) / 100.0f;// std::size_t Index>()  uart::message::rxBufferToVoltage(buffer);
+  _report.current.mcu = static_cast<float>(msg.getElementValue<10>()) / 20.0f;// uart::message::rxBufferToCurrent(buffer);
   _status_report_ready = true;
 }
 

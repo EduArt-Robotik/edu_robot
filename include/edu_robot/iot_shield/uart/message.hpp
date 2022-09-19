@@ -74,11 +74,11 @@ struct Element {
   static constexpr std::array<Byte, SIZE> serialize(const DataType value)
   {
     union {
-      const DataType input;
-      const Byte bytes[SIZE];
-    } const serializer{ value };
+      const Byte* bytes;
+      const DataType* input;
+    } const serializer{ reinterpret_cast<const Byte*>(&value) };
 
-    std::array<Byte, SIZE> serialized_bytes = { 0 };
+    std::array<Byte, SIZE> serialized_bytes{ 0 };
     std::memcpy(serialized_bytes.data(), serializer.bytes, serialized_bytes.size());
 
     return serialized_bytes;
@@ -86,28 +86,38 @@ struct Element {
   static constexpr DataType deserialize(const Byte data[SIZE])
   {
     union {
-      DataType data;
+      DataType value;
       Byte bytes[SIZE];
-    } serializer;
+    } serializer{ };
     std::memcpy(serializer.bytes, data, SIZE);
 
-    return serializer.data;
+    return serializer.value;
+  }
+  inline static constexpr bool isElementValid(const Byte[SIZE]) { return true; }
+};
+
+template <typename ElementDataType, ElementDataType Value>
+struct ConstElement : public Element<ElementDataType> {
+  static constexpr ElementDataType VALUE = Value;
+  static constexpr std::size_t SIZE = sizeof(ElementDataType);
+  static constexpr std::array<Byte, SIZE> serialize(const ElementDataType) { return {{ VALUE }}; }
+  static constexpr bool isElementValid(const Byte data[SIZE]) {
+    return VALUE == Element<ElementDataType>::deserialize(data);
   }
 };
 
-template <Byte Value>
-struct ConstByte : public Element<Byte> {
-  static constexpr Byte VALUE = Value;
-  static constexpr std::array<Byte, SIZE> serialize(const Byte) { return {{ VALUE }}; }
-};
-
-
+/**
+ * \brief This class constructs a UART message based on the given message elements. Methods
+ *        to (de-)serialize and to check received message candidate are provided.
+ */
 template <std::size_t Index, std::size_t ByteIndex, class... Elements>
 struct Message;
 
 template <std::size_t Index, std::size_t ByteIndex>
 struct Message<Index, ByteIndex>{
 protected:
+  inline constexpr bool isElementValid() const { return true; }
+
   std::array<Byte, ByteIndex> _buffer;
 };
 
@@ -119,19 +129,26 @@ protected:
   static constexpr std::size_t BYTE_INDEX = ByteIndex;
   using Message<Index + 1, ByteIndex + HeadElement::SIZE, TailElements...>::_buffer;
 
+  Message() = default;
+
   template <class HeadArgument, class... TailArguments>
-  Message(const HeadArgument head_arg, const TailArguments... tail_args)
+  constexpr Message(const HeadArgument head_arg, const TailArguments... tail_args)
     : Message<Index + 1, ByteIndex + HeadElement::SIZE, TailElements...>(tail_args...)
   {
     const auto serialized_bytes = serialize(head_arg);
     std::memcpy(&_buffer[BYTE_INDEX], serialized_bytes.data(), serialized_bytes.size());
   }
+  inline constexpr bool isElementValid() const {
+    return HeadElement::isElementValid(&_buffer[BYTE_INDEX])
+           &&
+           Message<Index + 1, ByteIndex + HeadElement::SIZE, TailElements...>::isElementValid();
+  }
 
 public:
-  constexpr typename HeadElement::DataType get() const {
+  inline constexpr typename HeadElement::DataType get() const {
     return HeadElement::deserialize(&_buffer[ByteIndex]);
   }
-  constexpr std::array<Byte, HeadElement::SIZE> serialize(const typename HeadElement::DataType value) {
+  inline static constexpr std::array<Byte, HeadElement::SIZE> serialize(const typename HeadElement::DataType value) {
     return HeadElement::serialize(value);
   }
 };
@@ -143,11 +160,11 @@ typename HeadElement::DataType get(const Message<Index, ByteIndex, HeadElement, 
 
 } // end namespace impl
 
-using StartByte = impl::ConstByte<UART::BUFFER::START_BYTE>;
-using StopByte = impl::ConstByte<UART::BUFFER::END_BYTE>;
+using StartByte = impl::ConstElement<Byte, UART::BUFFER::START_BYTE>;
+using StopByte  = impl::ConstElement<Byte, UART::BUFFER::END_BYTE>;
 
 template <Byte UartCommand>
-struct Command : public impl::ConstByte<UartCommand> { };
+struct Command : public impl::ConstElement<Byte, UartCommand> { };
 
 struct Float  : public impl::Element<float> { };
 struct Int16  : public impl::Element<std::int16_t> { };
@@ -164,9 +181,10 @@ protected:
   using element::impl::Message<0u, 0u, Elements...>::_buffer;
 
 public:
-  Message(const std::array<Byte, SIZE>& buffer)
+  Message(const std::array<Byte, SIZE>& message_candidate)
+    : element::impl::Message<0u, 0u, Elements...>()
   {
-    _buffer = buffer;  
+    _buffer = message_candidate;
   }
 
   template <typename... Arguments>
@@ -175,7 +193,9 @@ public:
 
   inline static constexpr std::size_t size() { return SIZE; }
   inline constexpr const std::array<Byte, SIZE>& data() const { return _buffer; }
-
+  inline constexpr bool isMessageCandidateValid() const {
+    return element::impl::Message<0u, 0u, Elements...>::isElementValid();
+  }
   template <std::size_t Index>
   inline constexpr auto getElementValue() const { return element::impl::get<Index>(*this); }
 };

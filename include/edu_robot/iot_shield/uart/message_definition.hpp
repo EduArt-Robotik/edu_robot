@@ -7,6 +7,7 @@
 
 #include "edu_robot/iot_shield/uart/message.hpp"
 
+#include <array>
 #include <edu_robot/rotation_per_minute.hpp>
 #include <edu_robot/color.hpp>
 
@@ -65,9 +66,10 @@ struct Disable : public MessageFrame<element::Command<UART::COMMAND::DISABLE>, /
   Disable() : MessageFrame<element::Command<UART::COMMAND::DISABLE>, element::Uint32, element::Uint32>(0u, 0u) { }
 };
 
-// element::Uint8,  element::Int16,  element::Int16, element::Int16,  element::Int16,
-//                                        element::Uint32, element::Uint32, element::Int16, element::Uint32, element::Uint32,
-//                                        element::Int16,  element::Int16,  element::Uint8
+template <Byte CommandByte>
+using ShieldResponse = uart::message::Message<element::Command<CommandByte>, element::Uint8,  element::Int16,  element::Int16, element::Int16,  element::Int16,
+                               element::Uint32, element::Uint32, element::Int16, element::Uint32, element::Uint32,
+                               element::Int16,  element::Int16>;
 
 } // end namespace message
 } // end namespace uart
