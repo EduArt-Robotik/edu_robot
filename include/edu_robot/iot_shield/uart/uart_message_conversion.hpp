@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "edu_robot/iot_shield/uart/uart_message.hpp"
+#include "edu_robot/iot_shield/uart/message.hpp"
 
 #include <cstddef>
 #include <cstdint>

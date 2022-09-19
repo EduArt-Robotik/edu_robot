@@ -23,7 +23,7 @@ public:
   struct Parameter
   {
     float gear_ratio = 70.0f;
-    float encoder_ratio = 64.0f;
+    float encoder_ratio = 2048.0f;
     float max_rpm = 140.0f;
     std::uint32_t control_frequency = 16000;
 

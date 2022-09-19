@@ -1,5 +1,5 @@
 #include "edu_robot/iot_shield/motor_controller.hpp"
-#include "edu_robot/iot_shield/uart/uart_message.hpp"
+#include "edu_robot/iot_shield/uart/message_definition.hpp"
 #include "edu_robot/motor_controller.hpp"
 
 #include <memory>
