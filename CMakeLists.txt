@@ -18,6 +18,7 @@ find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(Eigen3 REQUIRED NO_MODULE)
 
 # MRAA library
 if(EXISTS "/usr/include/mraa/common.hpp")
@@ -55,9 +56,11 @@ add_library(eduart-robot
   src/lib/edu_robot/motor_controller.cpp
   src/lib/edu_robot/sensor.cpp
   src/lib/edu_robot/range_sensor.cpp
+  src/lib/edu_robot/imu_sensor.cpp
 )
 target_link_libraries(eduart-robot
   # ${CPP_TYPESUPPORT_TARGET} needed for ROS distro humble and newer. TODO: handle this somehow!
+  Eigen3::Eigen
 )
 target_compile_features(eduart-robot PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 target_include_directories(eduart-robot PUBLIC

@@ -2,7 +2,6 @@
 #include "edu_robot/iot_shield/iot_shield_communicator.hpp"
 #include "edu_robot/iot_shield/uart/message.hpp"
 #include "edu_robot/iot_shield/uart/message_definition.hpp"
-#include "edu_robot/iot_shield/uart/uart_message_conversion.hpp"
 #include "edu_robot/robot_status_report.hpp"
 
 #include <algorithm>
@@ -26,8 +25,6 @@ IotShield::IotShield(char const* const device_name)
 
   // set UART timeout
   _communicator->sendBytes(uart::message::SetValueF<UART::COMMAND::SET::UART_TIMEOUT>(1.0f).data());
-  // and IMU data mode to raw
-  _communicator->sendBytes(uart::message::SetImuRawDataMode(false).data());
 }
 
 IotShield::~IotShield()
@@ -59,7 +56,7 @@ void IotShield::registerIotShieldRxDevice(std::shared_ptr<IotShieldRxDevice> dev
   _rx_devices.push_back(device);
 }
 
-void IotShield::processStatusReport(const std::array<std::uint8_t, uart::message::UART::BUFFER::RX_SIZE>& buffer)
+void IotShield::processStatusReport(const uart::message::RxMessageDataBuffer& buffer)
 {
   uart::message::ShieldResponse msg(buffer);
 

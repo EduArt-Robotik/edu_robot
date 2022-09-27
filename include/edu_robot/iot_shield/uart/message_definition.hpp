@@ -7,6 +7,7 @@
 
 #include "edu_robot/iot_shield/uart/message.hpp"
 
+#include <Eigen/Dense>
 #include <array>
 #include <edu_robot/rotation_per_minute.hpp>
 #include <edu_robot/color.hpp>
@@ -64,11 +65,11 @@ struct Disable : public MessageFrame<element::Command<UART::COMMAND::DISABLE>, /
   Disable() : MessageFrame<element::Command<UART::COMMAND::DISABLE>, element::Uint32, element::Uint32>(0u, 0u) { }
 };
 
-struct ShieldResponse : public uart::message::Message<element::Uint8, element::Int16,  element::Int16, element::Int16,  element::Int16, element::Uint32, element::Uint32, element::Int16,
+struct ShieldResponse : public uart::message::Message<element::Uint8, element::Int16,  element::Int16, element::Int16,  element::Int16, element::Int16, element::Int16, element::Int16, element::Int16, element::Int16,
                                                       element::Int16, element::Int16, element::Int16, element::Int16, element::Int16,  element::Int16, element::Uint8>
 {
   ShieldResponse(const std::array<Byte, SIZE>& message_candidate)
-    : uart::message::Message<element::Uint8, element::Int16,  element::Int16, element::Int16,  element::Int16, element::Uint32, element::Uint32, element::Int16, 
+    : uart::message::Message<element::Uint8, element::Int16,  element::Int16, element::Int16,  element::Int16, element::Int16, element::Int16, element::Int16, element::Int16, element::Int16, 
                              element::Int16, element::Int16, element::Int16, element::Int16, element::Int16,  element::Int16, element::Uint8>(message_candidate) { }
 
   inline constexpr std::uint8_t command() const { return getElementValue<0>(); }
@@ -76,13 +77,21 @@ struct ShieldResponse : public uart::message::Message<element::Uint8, element::I
   inline constexpr Rpm rpm1() const { return static_cast<float>(getElementValue<2>()) / 100.0f; }
   inline constexpr Rpm rpm2() const { return static_cast<float>(getElementValue<3>()) / 100.0f; }
   inline constexpr Rpm rpm3() const { return static_cast<float>(getElementValue<4>()) / 100.0f; }
-  inline constexpr float temperature() const { return static_cast<float>(getElementValue<7>()) / 100.0f; }
-  inline constexpr float range0() const { return static_cast<float>(getElementValue<9>()) / 1000.0f; }
-  inline constexpr float range1() const { return static_cast<float>(getElementValue<10>()) / 1000.0f; }
-  inline constexpr float range2() const { return static_cast<float>(getElementValue<11>()) / 1000.0f; }
-  inline constexpr float range3() const { return static_cast<float>(getElementValue<12>()) / 1000.0f; }
-  inline constexpr float voltage() const { return static_cast<float>(getElementValue<13>()) / 100.0f; }
-  inline constexpr float current() const { return static_cast<float>(getElementValue<14>()) / 20.0f; }
+  inline Eigen::Quaterniond imuOrientation() const {
+    return Eigen::Quaterniond(
+      static_cast<double>(getElementValue<5>()) / 1000.0,
+      static_cast<double>(getElementValue<6>()) / 1000.0,
+      static_cast<double>(getElementValue<7>()) / 1000.0,
+      static_cast<double>(getElementValue<8>()) / 1000.0
+    );
+  }
+  inline constexpr float temperature() const { return static_cast<float>(getElementValue<9>()) / 100.0f; }
+  inline constexpr float range0() const { return static_cast<float>(getElementValue<11>()) / 1000.0f; }
+  inline constexpr float range1() const { return static_cast<float>(getElementValue<12>()) / 1000.0f; }
+  inline constexpr float range2() const { return static_cast<float>(getElementValue<13>()) / 1000.0f; }
+  inline constexpr float range3() const { return static_cast<float>(getElementValue<14>()) / 1000.0f; }
+  inline constexpr float voltage() const { return static_cast<float>(getElementValue<15>()) / 100.0f; }
+  inline constexpr float current() const { return static_cast<float>(getElementValue<16>()) / 20.0f; }
 };                                                     
 
 } // end namespace message
