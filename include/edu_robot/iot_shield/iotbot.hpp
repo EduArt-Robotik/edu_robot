@@ -16,6 +16,8 @@ class IotBot : public eduart::robot::Robot
 public:
   IotBot();
   ~IotBot() override;
+
+  void initialize();
 };
 
 } // end namespace iotbot

@@ -26,6 +26,11 @@ struct COLOR {
 IotBot::IotBot()
   : eduart::robot::Robot("IotBot", std::make_unique<IotShield>("/dev/ttyS1"))
 {
+
+}
+
+void IotBot::initialize()
+{
   auto iot_shield = std::dynamic_pointer_cast<IotShield>(_hardware_interface);
 
   // Lightings
