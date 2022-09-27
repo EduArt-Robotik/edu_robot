@@ -4,6 +4,7 @@
 #include "edu_robot/iot_shield/uart/message_definition.hpp"
 #include "edu_robot/iot_shield/uart/uart_message_conversion.hpp"
 #include "edu_robot/lighting.hpp"
+
 #include <stdexcept>
 #include <string>
 
@@ -15,8 +16,9 @@ using uart::message::UART;
 
 Lighting::Lighting(const std::string& name, const std::uint8_t id, std::shared_ptr<IotShieldCommunicator> communicator,
                    const Color default_color, const float default_brightness)
-  : eduart::robot::Lighting(name, default_color, default_brightness)
-  , IotShieldDevice(name, id, communicator) 
+  : IotShieldDevice(name, id)
+  , eduart::robot::Lighting(name, default_color, default_brightness)
+  , IotShieldTxDevice(name, id, communicator) 
 {
 
 }

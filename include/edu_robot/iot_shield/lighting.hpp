@@ -13,7 +13,7 @@ namespace robot {
 namespace iotbot {
 
 class Lighting : public eduart::robot::Lighting
-               , public eduart::robot::iotbot::IotShieldDevice
+               , public eduart::robot::iotbot::IotShieldTxDevice
 {
 public:
   Lighting(const std::string& name, const std::uint8_t id, std::shared_ptr<IotShieldCommunicator> communicator,

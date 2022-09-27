@@ -62,6 +62,8 @@ void IotShield::processStatusReport(const std::array<std::uint8_t, uart::message
   _report.rpm[3] = msg.rpm3();
   
   _status_report_ready = true;
+
+  // \todo do sensor data processing here
 }
 
 } // end namespace iotbot

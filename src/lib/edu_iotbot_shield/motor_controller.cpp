@@ -1,4 +1,6 @@
 #include "edu_robot/iot_shield/motor_controller.hpp"
+#include "edu_robot/iot_shield/iot_shield_communicator.hpp"
+#include "edu_robot/iot_shield/iot_shield_device.hpp"
 #include "edu_robot/iot_shield/uart/message_definition.hpp"
 #include "edu_robot/motor_controller.hpp"
 
@@ -35,8 +37,9 @@ void DummyMotorController::processSetRpm(const Rpm /* rpm */)
 CompoundMotorController::CompoundMotorController(const std::string& name,
                                                  std::shared_ptr<IotShieldCommunicator> communicator,
                                                  const eduart::robot::MotorController::Parameter& parameter)
-  : eduart::robot::MotorController(name + "_d", 3u, parameter)
-  , IotShieldDevice(name + "_d", 3u, communicator)
+  : IotShieldDevice(name, 3u)
+  , eduart::robot::MotorController(name + "_d", 3u, parameter)
+  , IotShieldTxDevice(name + "_d", 3u, communicator)
 {
   _dummy_motor_controllers[0] = std::make_shared<DummyMotorController>(name + "_a", 0u, parameter);
   _dummy_motor_controllers[1] = std::make_shared<DummyMotorController>(name + "_b", 1u, parameter);
@@ -62,15 +65,20 @@ void CompoundMotorController::initialize(const eduart::robot::MotorController::P
   _communicator->sendBytes(uart::message::SetValueF<UART::COMMAND::SET::KI>(parameter.ki).data());
   _communicator->sendBytes(uart::message::SetValueF<UART::COMMAND::SET::KD>(parameter.kd).data());
   _communicator->sendBytes(uart::message::SetValueF<UART::COMMAND::SET::SET_POINT_LOW_PASS>(
-    parameter.weight_low_pass_set_point).data());
+    parameter.weight_low_pass_set_point).data()
+  );
   _communicator->sendBytes(uart::message::SetValueF<UART::COMMAND::SET::ENCODER_LOW_PASS>(
-    parameter.weight_low_pass_encoder).data());
+    parameter.weight_low_pass_encoder).data()
+  );
   _communicator->sendBytes(uart::message::SetValueF<UART::COMMAND::SET::GEAR_RATIO>(
-    parameter.gear_ratio).data());
+    parameter.gear_ratio).data()
+  );
   _communicator->sendBytes(uart::message::SetValueF<UART::COMMAND::SET::TICKS_PER_REV>(
-    parameter.encoder_ratio).data());
+    parameter.encoder_ratio).data()
+  );
   _communicator->sendBytes(uart::message::SetValueU<UART::COMMAND::SET::CONTROL_FREQUENCY>(
-    parameter.control_frequency).data());
+    parameter.control_frequency).data()
+  );
 }
 
 void CompoundMotorController::processSetRpm(const Rpm rpm)

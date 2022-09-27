@@ -34,7 +34,7 @@ private:
 };
 
 class CompoundMotorController : public eduart::robot::MotorController
-                              , public eduart::robot::iotbot::IotShieldDevice
+                              , public eduart::robot::iotbot::IotShieldTxDevice
 {
 public:
   CompoundMotorController(const std::string& name, std::shared_ptr<IotShieldCommunicator> communicator,

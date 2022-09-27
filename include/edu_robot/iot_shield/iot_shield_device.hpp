@@ -5,6 +5,8 @@
  */
 #pragma once
 
+#include "edu_robot/iot_shield/iot_shield_communicator.hpp"
+#include "edu_robot/iot_shield/uart/message.hpp"
 #include "edu_robot/iot_shield/uart/uart_message_conversion.hpp"
 
 #include <memory>
@@ -19,12 +21,13 @@ class IotShieldCommunicator;
 
 class IotShieldDevice
 {
-public:
-  IotShieldDevice(const std::string& name, const std::uint8_t id, std::shared_ptr<IotShieldCommunicator> communicator)
+protected:
+  IotShieldDevice(const std::string& name, const std::uint8_t id)
     : _name(name)
     , _id(id)
-    , _communicator(communicator)
   { }
+
+public:
   virtual ~IotShieldDevice() = default;
 
   const std::string& name() const { return _name; }
@@ -32,11 +35,42 @@ public:
 
 private:
   std::string _name;
-  std::uint8_t _id;
+  std::uint8_t _id; // \todo id has actually no meaning, maybe remove it
+};
+
+class IotShieldTxDevice : public virtual IotShieldDevice
+{
+public:
+  IotShieldTxDevice(const std::string& name, const std::uint8_t id, std::shared_ptr<IotShieldCommunicator> communicator)
+    : IotShieldDevice(name, id)
+    , _communicator(communicator)
+  { }
+  ~IotShieldTxDevice() override = default;
 
 protected:
   std::shared_ptr<IotShieldCommunicator> _communicator;
-  std::array<std::uint8_t, uart::message::UART::BUFFER::TX_SIZE> _tx_buffer;
+  uart::message::TxMessageDataBuffer _tx_buffer;
+};
+
+class IotShieldRxDevice : public virtual IotShieldDevice
+{
+public:
+  IotShieldRxDevice(const std::string& name, const std::uint8_t id)
+    : IotShieldDevice(name, id)
+  { }
+  ~IotShieldRxDevice() override = default;
+
+  virtual void processRxData(const uart::message::RxMessageDataBuffer& data) = 0;
+};
+
+class IotShieldTxRxDevice : public IotShieldTxDevice, public IotShieldRxDevice
+{
+public:
+  IotShieldTxRxDevice(const std::string& name, const std::uint8_t id, std::shared_ptr<IotShieldCommunicator> communicator)
+    : IotShieldTxDevice(name, id, communicator)
+    , IotShieldRxDevice(name, id)
+  { }
+  ~IotShieldTxRxDevice() override = default;
 };
 
 } // end namespace iotbot

@@ -62,6 +62,9 @@ struct UART {
   };
 };
 
+using TxMessageDataBuffer = std::array<std::uint8_t, UART::BUFFER::TX_SIZE>;
+using RxMessageDataBuffer = std::array<std::uint8_t, uart::message::UART::BUFFER::RX_SIZE>;
+
 namespace element {
 namespace impl {
 
