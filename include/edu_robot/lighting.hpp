@@ -15,6 +15,8 @@ namespace robot {
 /**
  * \brief Represents a RGB lighting without any hardware relation, providing lighting functionality.
  *        This class needs to be realized by a specific hardware layer.
+ *
+ * \todo below is only a draft, a first try --> please review concept after first release
  */
 class Lighting
 {

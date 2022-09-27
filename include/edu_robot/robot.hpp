@@ -6,22 +6,22 @@
 #pragma once
 
 #include "edu_robot/motor_controller.hpp"
+#include "edu_robot/robot_hardware_interface.hpp"
+#include "edu_robot/sensor.hpp"
+
 #include "edu_robot/msg/mode.hpp"
 #include "edu_robot/msg/set_lighting_color.hpp"
 #include "edu_robot/msg/robot_status_report.hpp"
-#include "edu_robot/srv/detail/set_mode__struct.hpp"
 #include "edu_robot/srv/set_mode.hpp"
-
-#include "edu_robot/robot_hardware_interface.hpp"
 
 #include <rclcpp/node.hpp>
 #include <rclcpp/publisher.hpp>
 #include <rclcpp/service.hpp>
 #include <rclcpp/subscription.hpp>
+#include <rclcpp/timer.hpp>
+#include <tf2_ros/transform_broadcaster.h>
 
-#include <geometry_msgs/msg/detail/twist__struct.hpp>
 #include <geometry_msgs/msg/twist.hpp>
-#include <nav_msgs/msg/detail/odometry__struct.hpp>
 #include <nav_msgs/msg/odometry.hpp>
 
 #include <memory>
@@ -70,22 +70,33 @@ public:
 protected:
   void registerLighting(std::shared_ptr<Lighting> lighting);
   void registerMotorController(std::shared_ptr<MotorController> motor_controller);
+  void registerSensor(std::shared_ptr<Sensor> sensor);
 
   std::shared_ptr<RobotHardwareInterface> _hardware_interface;
 
 private:
-  void handleStatusReport();
+  void processStatusReport();
+  void processTfPublishing();
 
   // ROS related members
   std::shared_ptr<rclcpp::Publisher<nav_msgs::msg::Odometry>> _pub_odometry;
   std::shared_ptr<rclcpp::Publisher<edu_robot::msg::RobotStatusReport>> _pub_status_report;
+
   std::shared_ptr<rclcpp::Service<edu_robot::srv::SetMode>> _srv_set_mode;
+
   std::shared_ptr<rclcpp::Subscription<geometry_msgs::msg::Twist>> _sub_twist;
   std::shared_ptr<rclcpp::Subscription<edu_robot::msg::SetLightingColor>> _sub_set_lighting_color;
+
+  std::shared_ptr<tf2_ros::TransformBroadcaster> _tf_broadcaster;
+
+  // Timer used for synchronous processing
+  std::shared_ptr<rclcpp::TimerBase> _timer_status_report; 
+  std::shared_ptr<rclcpp::TimerBase> _timer_tf_publishing;
 
   // Mounted components that are controlled by the hardware interface.
   std::map<std::string, std::shared_ptr<Lighting>> _lightings;
   std::map<std::uint8_t, std::shared_ptr<MotorController>> _motor_controllers;
+  std::map<std::string, std::shared_ptr<Sensor>> _sensors;
 };
 
 } // end namespace robot

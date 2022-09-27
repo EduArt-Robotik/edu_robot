@@ -60,6 +60,7 @@ void IotShield::processStatusReport(const std::array<std::uint8_t, uart::message
   _report.rpm[1] = msg.rpm1();
   _report.rpm[2] = msg.rpm2();
   _report.rpm[3] = msg.rpm3();
+  
   _status_report_ready = true;
 }
 

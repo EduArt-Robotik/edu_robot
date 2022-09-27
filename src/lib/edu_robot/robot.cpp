@@ -7,6 +7,7 @@
 #include "edu_robot/msg/detail/robot_status_report__struct.hpp"
 #include "edu_robot/msg/detail/set_lighting_color__struct.hpp"
 #include "edu_robot/srv/detail/set_mode__struct.hpp"
+#include <cstdio>
 #include <exception>
 #include <functional>
 #include <geometry_msgs/msg/detail/twist__struct.hpp>
@@ -17,9 +18,12 @@
 namespace eduart {
 namespace robot {
 
+using namespace std::chrono_literals;
+
 Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface)
   : rclcpp::Node(robot_name)
   , _hardware_interface(std::move(hardware_interface))
+  , _tf_broadcaster(std::make_unique<tf2_ros::TransformBroadcaster>(*this))
 {
   _pub_odometry = create_publisher<nav_msgs::msg::Odometry>(
     "odometry",
@@ -45,6 +49,9 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterfa
     rclcpp::QoS(2).best_effort(),
     std::bind(&Robot::callbackSetLightingColor, this, std::placeholders::_1)
   );
+
+  _timer_status_report = create_wall_timer(100ms, std::bind(&Robot::processStatusReport, this));
+  _timer_tf_publishing = create_wall_timer(100ms, std::bind(&Robot::processTfPublishing, this));
 }
 
 Robot::~Robot()
@@ -75,8 +82,6 @@ void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> tw
   _motor_controllers[2u]->setRpm(Rpm( rpmFwd + rpmLeft - rpmOmega));
   _motor_controllers[3u]->setRpm(Rpm(-rpmFwd + rpmLeft - rpmOmega));
   // END HACK
-
-  handleStatusReport();
 }
 
 void Robot::callbackSetLightingColor(std::shared_ptr<const edu_robot::msg::SetLightingColor> msg)
@@ -102,9 +107,6 @@ void Robot::callbackSetLightingColor(std::shared_ptr<const edu_robot::msg::SetLi
     RCLCPP_ERROR_STREAM(get_logger(), "Error occurred while trying to set new values for lighting \""
                                       << msg->lighting_name << "\". what() = " << ex.what());     
   }
-
-  // check if status report is ready to send
-  handleStatusReport();
 }
 
 void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode::Request> request,
@@ -162,7 +164,20 @@ void Robot::registerMotorController(std::shared_ptr<MotorController> motor_contr
   _motor_controllers[motor_controller->id()] = motor_controller;
 }
 
-void Robot::handleStatusReport()
+void Robot::registerSensor(std::shared_ptr<Sensor> sensor)
+{
+  const auto search = _sensors.find(sensor->name());
+
+  if (search != _sensors.end()) {
+    RCLCPP_ERROR_STREAM(get_logger(), "Sensor \"" << sensor->name() << "\" already contained"
+                                      << " in sensor register. Can't add it twice.");
+    return;                                      
+  }
+
+  _sensors[sensor->name()] = sensor;
+}
+
+void Robot::processStatusReport()
 {
   if (false == _hardware_interface->isStatusReportReady()) {
     return;
@@ -172,6 +187,16 @@ void Robot::handleStatusReport()
 
   _pub_status_report->publish(toRos(report));
 }
+
+void Robot::processTfPublishing()
+{
+  const auto stamp = get_clock()->now();
+
+  for (const auto& sensor : _sensors) {
+    _tf_broadcaster->sendTransform(sensor.second->getTransformMsg(stamp));
+  }
+}
+
 
 } // end namespace robot
 } // end namespace eduart
