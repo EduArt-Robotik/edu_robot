@@ -23,6 +23,7 @@ protected:
   Sensor(const std::string& name, const std::string& frame_id, const tf2::Transform sensor_transform);
 
 public:
+  Sensor(const Sensor&) = delete;
   virtual ~Sensor() = default;
 
   inline const std::string& name() const { return _name; }

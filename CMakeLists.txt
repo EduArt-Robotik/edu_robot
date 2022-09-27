@@ -17,6 +17,7 @@ find_package(tf2_geometry_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 
 # MRAA library
 if(EXISTS "/usr/include/mraa/common.hpp")
@@ -53,6 +54,7 @@ add_library(eduart-robot
   src/lib/edu_robot/lighting.cpp
   src/lib/edu_robot/motor_controller.cpp
   src/lib/edu_robot/sensor.cpp
+  src/lib/edu_robot/range_sensor.cpp
 )
 target_link_libraries(eduart-robot
   # ${CPP_TYPESUPPORT_TARGET} needed for ROS distro humble and newer. TODO: handle this somehow!
@@ -71,6 +73,7 @@ ament_target_dependencies(
   "nav_msgs"
   "std_msgs"
   "geometry_msgs"
+  "sensor_msgs"
 )
 rosidl_target_interfaces(eduart-robot ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
