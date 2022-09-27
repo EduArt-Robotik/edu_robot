@@ -17,9 +17,7 @@ namespace iotbot {
 namespace uart {
 namespace message {
 
-struct SetRpm : public MessageFrame<element::Command<UART::COMMAND::SET::RPM>,
-                                    element::Int16, element::Int16, element::Int16, element::Int16>
-{
+struct SetRpm : public MessageFrame<element::Command<UART::COMMAND::SET::RPM>, element::Int16, element::Int16, element::Int16, element::Int16> {
   SetRpm(const Rpm rpm_0, const Rpm rpm_1, const Rpm rpm_2, const Rpm rpm_3)
     : MessageFrame<element::Command<UART::COMMAND::SET::RPM>, element::Int16, element::Int16, element::Int16, element::Int16>(
         static_cast<element::Int16::DataType>(rpm_0 * 100.f + 0.5f),
@@ -66,10 +64,22 @@ struct Disable : public MessageFrame<element::Command<UART::COMMAND::DISABLE>, /
   Disable() : MessageFrame<element::Command<UART::COMMAND::DISABLE>, element::Uint32, element::Uint32>(0u, 0u) { }
 };
 
-template <Byte CommandByte>
-using ShieldResponse = uart::message::Message<element::Command<CommandByte>, element::Uint8,  element::Int16,  element::Int16, element::Int16,  element::Int16,
-                               element::Uint32, element::Uint32, element::Int16, element::Uint32, element::Uint32,
-                               element::Int16,  element::Int16>;
+struct ShieldResponse : public uart::message::Message<element::Uint8, element::Int16,  element::Int16, element::Int16,  element::Int16, element::Uint32, element::Uint32, element::Int16,
+                                                      element::Uint32, element::Uint32, element::Int16,  element::Int16, element::Uint8>
+{
+  ShieldResponse(const std::array<Byte, SIZE>& message_candidate)
+    : uart::message::Message<element::Uint8, element::Int16,  element::Int16, element::Int16,  element::Int16, element::Uint32, element::Uint32, element::Int16, 
+                             element::Uint32, element::Uint32, element::Int16,  element::Int16, element::Uint8>(message_candidate) { }
+
+  inline constexpr std::uint8_t command() const { return getElementValue<0>(); }
+  inline constexpr Rpm rpm0() const { return static_cast<float>(getElementValue<1>()) / 100.0f; }
+  inline constexpr Rpm rpm1() const { return static_cast<float>(getElementValue<2>()) / 100.0f; }
+  inline constexpr Rpm rpm2() const { return static_cast<float>(getElementValue<3>()) / 100.0f; }
+  inline constexpr Rpm rpm3() const { return static_cast<float>(getElementValue<4>()) / 100.0f; }
+  inline constexpr float temperature() const { return static_cast<float>(getElementValue<7>()) / 100.0f; }
+  inline constexpr float voltage() const { return static_cast<float>(getElementValue<11>()) / 100.0f; }
+  inline constexpr float current() const { return static_cast<float>(getElementValue<12>()) / 20.0f; }
+};                                                     
 
 } // end namespace message
 } // end namespace uart

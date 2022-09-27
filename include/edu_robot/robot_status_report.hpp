@@ -5,7 +5,10 @@
  */
 #pragma once
 
+#include "edu_robot/rotation_per_minute.hpp"
+
 #include <limits>
+#include <vector>
 
 namespace eduart {
 namespace robot {
@@ -23,6 +26,8 @@ struct RobotStatusReport
     float mcu   = std::numeric_limits<float>::quiet_NaN();
     float drive = std::numeric_limits<float>::quiet_NaN();
   } current;
+
+  std::vector<Rpm> rpm;
 };
 
 } // end namespace eduart

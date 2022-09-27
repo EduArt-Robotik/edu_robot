@@ -109,6 +109,8 @@ struct ConstElement : public Element<ElementDataType> {
 /**
  * \brief This class constructs a UART message based on the given message elements. Methods
  *        to (de-)serialize and to check received message candidate are provided.
+ *
+ * \todo make a static version for received message checking --> no instantiation necessary.
  */
 template <std::size_t Index, std::size_t ByteIndex, class... Elements>
 struct Message;

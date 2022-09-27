@@ -26,6 +26,11 @@ inline edu_robot::msg::RobotStatusReport toRos(const RobotStatusReport& report)
   msg.mcu_current   = report.current.mcu;
   msg.drive_voltage = report.current.drive;
 
+  msg.rpm.reserve(report.rpm.size());
+  for (const auto& rpm : report.rpm) {
+    msg.rpm.push_back(rpm);
+  }
+
   return msg;
 }
 

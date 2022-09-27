@@ -50,11 +50,16 @@ RobotStatusReport IotShield::getStatusReport()
 
 void IotShield::processStatusReport(const std::array<std::uint8_t, uart::message::UART::BUFFER::RX_SIZE>& buffer)
 {
-  uart::message::ShieldResponse<UART::COMMAND::SET::RPM>msg(buffer);
-  std::cout << "message valid = " << msg.isMessageCandidateValid() << std::endl;
-  _report.temperature = static_cast<float>(msg.getElementValue<6>()) / 100.0f;// uart::message::rxBufferToTemperature(buffer);
-  _report.voltage.mcu = static_cast<float>(msg.getElementValue<9>()) / 100.0f;// std::size_t Index>()  uart::message::rxBufferToVoltage(buffer);
-  _report.current.mcu = static_cast<float>(msg.getElementValue<10>()) / 20.0f;// uart::message::rxBufferToCurrent(buffer);
+  uart::message::ShieldResponse msg(buffer);
+
+  _report.temperature = msg.temperature();
+  _report.voltage.mcu = msg.voltage();
+  _report.current.mcu = msg.current();
+  _report.rpm.resize(4u);
+  _report.rpm[0] = msg.rpm0();
+  _report.rpm[1] = msg.rpm1();
+  _report.rpm[2] = msg.rpm2();
+  _report.rpm[3] = msg.rpm3();
   _status_report_ready = true;
 }
 
