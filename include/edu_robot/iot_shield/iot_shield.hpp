@@ -5,19 +5,24 @@
  */
 #pragma once
 
+#include "edu_robot/iot_shield/iot_shield_device.hpp"
+#include "edu_robot/iot_shield/uart/message.hpp"
 #include "edu_robot/iot_shield/uart/uart_message_conversion.hpp"
 #include "edu_robot/iot_shield/iot_shield_communicator.hpp"
+
 #include "edu_robot/robot_hardware_interface.hpp"
 #include "edu_robot/robot_status_report.hpp"
 
 #include <memory>
 #include <array>
+#include <vector>
 
 namespace eduart {
 namespace robot {
 namespace iotbot {
 
 class IotShieldCommunicator;
+class IotShieldRxDevice;
 
 class IotShield : public RobotHardwareInterface
 {
@@ -29,12 +34,14 @@ public:
   RobotStatusReport getStatusReport() override;
 
   std::shared_ptr<IotShieldCommunicator> getCommunicator() { return _communicator; }
+  void registerIotShieldRxDevice(std::shared_ptr<IotShieldRxDevice> device);
 
 private:
-  void processStatusReport(const std::array<std::uint8_t, uart::message::UART::BUFFER::RX_SIZE>& buffer);
+  void processStatusReport(const uart::message::RxMessageDataBuffer& buffer);
 
   std::shared_ptr<IotShieldCommunicator> _communicator;
-  std::array<std::uint8_t, uart::message::UART::BUFFER::TX_SIZE> _tx_buffer;
+  uart::message::TxMessageDataBuffer _tx_buffer;
+  std::vector<std::shared_ptr<IotShieldRxDevice>> _rx_devices;
 };
 
 } // end namespace iotbot

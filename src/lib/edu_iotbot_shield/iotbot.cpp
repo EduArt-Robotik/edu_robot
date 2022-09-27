@@ -3,10 +3,15 @@
 #include "edu_robot/iot_shield/iot_shield.hpp"
 #include "edu_robot/iot_shield/lighting.hpp"
 #include "edu_robot/iot_shield/motor_controller.hpp"
+#include "edu_robot/iot_shield/range_sensor.hpp"
 #include "edu_robot/motor_controller.hpp"
+#include "edu_robot/range_sensor.hpp"
 #include "edu_robot/robot.hpp"
 
 #include <memory>
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2/LinearMath/Transform.h>
+#include <tf2/LinearMath/Vector3.h>
 
 namespace eduart {
 namespace robot {
@@ -23,6 +28,7 @@ IotBot::IotBot()
 {
   auto iot_shield = std::dynamic_pointer_cast<IotShield>(_hardware_interface);
 
+  // Lightings
   registerLighting(std::make_shared<iotbot::Lighting>(
     "head",
     0u,
@@ -64,7 +70,7 @@ IotBot::IotBot()
   registerLighting(lighting_all);
 
 
-  // Motor controllers.
+  // Motor Controllers
   robot::MotorController::Parameter parameter;
   auto compound_motor_controller = std::make_shared<iotbot::CompoundMotorController>(
     "motor_d",
@@ -76,6 +82,53 @@ IotBot::IotBot()
   registerMotorController(compound_motor_controller->dummyMotorController()[1]);
   registerMotorController(compound_motor_controller->dummyMotorController()[2]);
   registerMotorController(compound_motor_controller);
+
+  // Range Sensors
+  constexpr eduart::robot::RangeSensor::Parameter range_sensor_parameter{ 10.0 * M_PI / 180.0, 0.01, 5.0 };
+
+  auto range_sensor = std::make_shared<iotbot::RangeSensor>(
+    "front_left",
+    "range/front/left",
+    tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.17, 0.07, 0.1)),
+    0u,
+    range_sensor_parameter,
+    shared_from_this()
+  );
+  registerSensor(range_sensor);
+  iot_shield->registerIotShieldRxDevice(range_sensor);
+
+  range_sensor = std::make_shared<iotbot::RangeSensor>(
+    "front_right",
+    "range/front/right",
+    tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.17, -0.07, 0.1)),
+    1u,
+    range_sensor_parameter,
+    shared_from_this()
+  );
+  registerSensor(range_sensor);
+  iot_shield->registerIotShieldRxDevice(range_sensor);
+
+  range_sensor = std::make_shared<iotbot::RangeSensor>(
+    "rear_left",
+    "range/rear/left",
+    tf2::Transform(tf2::Quaternion(0.0, 0.0, 1.0, 0.0), tf2::Vector3(-0.17, 0.07, 0.1)),
+    2u,
+    range_sensor_parameter,
+    shared_from_this()
+  );
+  registerSensor(range_sensor);
+  iot_shield->registerIotShieldRxDevice(range_sensor);
+
+  range_sensor = std::make_shared<iotbot::RangeSensor>(
+    "rear_right",
+    "range/rear/right",
+    tf2::Transform(tf2::Quaternion(0.0, 0.0, 1.0, 0.0), tf2::Vector3(-0.17, -0.07, 0.1)),
+    3u,
+    range_sensor_parameter,
+    shared_from_this()
+  );
+  registerSensor(range_sensor);
+  iot_shield->registerIotShieldRxDevice(range_sensor);
 }
 
 IotBot::~IotBot()

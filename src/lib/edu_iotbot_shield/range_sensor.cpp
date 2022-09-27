@@ -1,10 +1,21 @@
 #include "edu_robot/iot_shield/range_sensor.hpp"
+#include "edu_robot/iot_shield/iot_shield_device.hpp"
 #include "edu_robot/iot_shield/uart/message_definition.hpp"
+#include "edu_robot/range_sensor.hpp"
 #include <stdexcept>
 
 namespace eduart {
 namespace robot {
 namespace iotbot {
+
+RangeSensor::RangeSensor(const std::string& name, const std::string& frame_id, const tf2::Transform sensor_transform,
+                         const std::uint8_t id, const Parameter parameter, std::shared_ptr<rclcpp::Node> ros_node)
+  : IotShieldDevice(name, id)
+  , eduart::robot::RangeSensor(name, frame_id, sensor_transform, parameter, ros_node)
+  , IotShieldRxDevice(name, id)
+{
+
+}
 
 void RangeSensor::processRxData(const uart::message::RxMessageDataBuffer& data)
 {

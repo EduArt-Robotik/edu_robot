@@ -5,9 +5,11 @@
 #include "edu_robot/iot_shield/uart/uart_message_conversion.hpp"
 #include "edu_robot/robot_status_report.hpp"
 
+#include <algorithm>
 #include <memory>
 #include <functional>
 #include <iostream>
+#include <stdexcept>
 
 namespace eduart {
 namespace robot {
@@ -48,6 +50,15 @@ RobotStatusReport IotShield::getStatusReport()
   return _report;
 }
 
+void IotShield::registerIotShieldRxDevice(std::shared_ptr<IotShieldRxDevice> device)
+{
+  if (std::find(_rx_devices.begin(), _rx_devices.end(), device) != _rx_devices.end()) {
+    throw std::invalid_argument("Given IotShieldRxDevice is already contained in rx device container.");
+  }
+
+  _rx_devices.push_back(device);
+}
+
 void IotShield::processStatusReport(const std::array<std::uint8_t, uart::message::UART::BUFFER::RX_SIZE>& buffer)
 {
   uart::message::ShieldResponse msg(buffer);
@@ -63,7 +74,9 @@ void IotShield::processStatusReport(const std::array<std::uint8_t, uart::message
   
   _status_report_ready = true;
 
-  // \todo do sensor data processing here
+  for (auto& device : _rx_devices) {
+    device->processRxData(buffer);
+  }
 }
 
 } // end namespace iotbot
