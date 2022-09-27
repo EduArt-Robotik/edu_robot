@@ -28,7 +28,7 @@ public:
 
   inline const std::string& name() const { return _name; }
   inline const std::string& frameId() const { return _frame_id; }
-  geometry_msgs::msg::TransformStamped getTransformMsg(const rclcpp::Time stamp) const;
+  geometry_msgs::msg::TransformStamped getTransformMsg(const rclcpp::Time stamp, const std::string& base_frame) const;
 
 private:
   std::string _name;

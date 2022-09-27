@@ -88,6 +88,7 @@ private:
   std::shared_ptr<rclcpp::Subscription<edu_robot::msg::SetLightingColor>> _sub_set_lighting_color;
 
   std::shared_ptr<tf2_ros::TransformBroadcaster> _tf_broadcaster;
+  std::string _tf_base_frame = "base_link";
 
   // Timer used for synchronous processing
   std::shared_ptr<rclcpp::TimerBase> _timer_status_report; 

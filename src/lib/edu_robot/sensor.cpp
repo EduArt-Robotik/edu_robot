@@ -12,11 +12,12 @@ Sensor::Sensor(const std::string& name, const std::string& frame_id, const tf2::
 
 }
 
-geometry_msgs::msg::TransformStamped Sensor::getTransformMsg(const rclcpp::Time stamp) const
+geometry_msgs::msg::TransformStamped Sensor::getTransformMsg(const rclcpp::Time stamp, const std::string& base_frame) const
 {
   geometry_msgs::msg::TransformStamped message;
   
-  message.header.frame_id = _frame_id;
+  message.child_frame_id  = _frame_id;
+  message.header.frame_id = base_frame;
   message.header.stamp    = stamp;
   message.transform       = tf2::toMsg(_sensor_transform);
 

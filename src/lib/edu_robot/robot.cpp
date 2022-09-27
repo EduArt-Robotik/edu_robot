@@ -1,18 +1,18 @@
 #include "edu_robot/robot.hpp"
 #include "edu_robot/hardware_error.hpp"
 #include "edu_robot/lighting.hpp"
+
 #include "edu_robot/msg/detail/mode__struct.hpp"
 #include "edu_robot/msg_conversion.hpp"
-
 #include "edu_robot/msg/detail/robot_status_report__struct.hpp"
-#include "edu_robot/msg/detail/set_lighting_color__struct.hpp"
-#include "edu_robot/srv/detail/set_mode__struct.hpp"
-#include <cstdio>
-#include <exception>
-#include <functional>
+
 #include <geometry_msgs/msg/detail/twist__struct.hpp>
 #include <nav_msgs/msg/detail/odometry__struct.hpp>
 #include <rclcpp/logging.hpp>
+
+#include <cstdio>
+#include <exception>
+#include <functional>
 #include <stdexcept>
 
 namespace eduart {
@@ -193,10 +193,9 @@ void Robot::processTfPublishing()
   const auto stamp = get_clock()->now();
 
   for (const auto& sensor : _sensors) {
-    _tf_broadcaster->sendTransform(sensor.second->getTransformMsg(stamp));
+    _tf_broadcaster->sendTransform(sensor.second->getTransformMsg(stamp, _tf_base_frame));
   }
 }
-
 
 } // end namespace robot
 } // end namespace eduart

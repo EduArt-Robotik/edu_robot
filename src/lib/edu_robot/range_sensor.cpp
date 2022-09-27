@@ -24,11 +24,12 @@ void RangeSensor::processMeasurementData(const float measurement)
   sensor_msgs::msg::Range msg;
 
   msg.header.frame_id = frameId();
-  msg.header.stamp = _clock->now();
-  msg.field_of_view = _parameter.field_of_view;
-  msg.max_range = _parameter.range_max;
-  msg.min_range = _parameter.range_min;
-  msg.range = measurement;
+  msg.header.stamp    = _clock->now();
+  msg.field_of_view   = _parameter.field_of_view;
+  msg.max_range       = _parameter.range_max;
+  msg.min_range       = _parameter.range_min;
+  msg.radiation_type  = msg.INFRARED;
+  msg.range           = measurement;
 
   _publisher->publish(msg);
 }
