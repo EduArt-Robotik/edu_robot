@@ -25,9 +25,9 @@ public:
     std::string base_frame;
   };
 
-  ImuSensor(const std::string& name, const std::string& frame_id, const tf2::Transform sensor_transform,
-            const Parameter parameter, std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster,
-            std::shared_ptr<rclcpp::Node> ros_node);
+  ImuSensor(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
+            const tf2::Transform sensor_transform, const Parameter parameter,
+            std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster, std::shared_ptr<rclcpp::Node> ros_node);
   ~ImuSensor() override = default;
 
 protected:

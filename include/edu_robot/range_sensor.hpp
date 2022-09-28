@@ -39,8 +39,8 @@ public:
     float range_max;
   };
 
-  RangeSensor(const std::string& name, const std::string& frame_id, const tf2::Transform sensor_transform,
-              const Parameter parameter, std::shared_ptr<rclcpp::Node> ros_node);
+  RangeSensor(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
+              const tf2::Transform sensor_transform, const Parameter parameter, std::shared_ptr<rclcpp::Node> ros_node);
 
   ~RangeSensor() override = default;
 

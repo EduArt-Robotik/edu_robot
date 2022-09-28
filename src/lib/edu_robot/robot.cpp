@@ -193,7 +193,7 @@ void Robot::processTfPublishing()
   const auto stamp = get_clock()->now();
 
   for (const auto& sensor : _sensors) {
-    _tf_broadcaster->sendTransform(sensor.second->getTransformMsg(stamp, _tf_base_frame));
+    _tf_broadcaster->sendTransform(sensor.second->getTransformMsg(stamp));
   }
 }
 
