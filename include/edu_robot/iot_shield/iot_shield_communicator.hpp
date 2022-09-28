@@ -30,7 +30,6 @@ class IotShieldCommunicator
 public:
   IotShieldCommunicator(char const* const device_name);
 
-  void registerDevice(std::shared_ptr<IotShieldDevice> device);
   void registerProcessReceivedBytes(std::function<void(const uart::message::RxMessageDataBuffer&)> callback);
   void sendBytes(const uart::message::TxMessageDataBuffer& bytes);
 

@@ -72,6 +72,8 @@ protected:
   void registerMotorController(std::shared_ptr<MotorController> motor_controller);
   void registerSensor(std::shared_ptr<Sensor> sensor);
 
+  inline std::shared_ptr<tf2_ros::TransformBroadcaster> getTfBroadcaster() { return _tf_broadcaster; }
+
   std::shared_ptr<RobotHardwareInterface> _hardware_interface;
 
 private:

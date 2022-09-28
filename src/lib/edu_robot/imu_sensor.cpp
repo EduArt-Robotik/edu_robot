@@ -19,9 +19,9 @@ void ImuSensor::processMeasurementData(const Eigen::Quaterniond& measurement)
 {
   geometry_msgs::msg::TransformStamped msg;
 
-  msg.header.frame_id = _parameter.base_frame;
+  msg.header.frame_id = frameId();
   msg.header.stamp    = _clock->now();
-  msg.child_frame_id  = frameId();
+  msg.child_frame_id  = _parameter.rotated_frame;
   
   msg.transform.translation.x = 0.0;
   msg.transform.translation.y = 0.0;

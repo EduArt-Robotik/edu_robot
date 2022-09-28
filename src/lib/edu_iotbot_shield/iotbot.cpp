@@ -1,5 +1,6 @@
 #include "edu_robot/iot_shield/iotbot.hpp"
 #include "edu_robot/color.hpp"
+#include "edu_robot/iot_shield/imu_sensor.hpp"
 #include "edu_robot/iot_shield/iot_shield.hpp"
 #include "edu_robot/iot_shield/lighting.hpp"
 #include "edu_robot/iot_shield/motor_controller.hpp"
@@ -138,6 +139,21 @@ void IotBot::initialize()
   );
   registerSensor(range_sensor);
   iot_shield->registerIotShieldRxDevice(range_sensor);
+
+  // IMU Sensor
+  auto imu_sensor = std::make_shared<iotbot::ImuSensor>(
+    "imu",
+    "imu/base",
+    "base_footprint",
+    tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.0, 0.0, 0.1)),
+    0u,
+    ImuSensor::Parameter{ false, "base_link" },
+    iot_shield->getCommunicator(),
+    getTfBroadcaster(),
+    shared_from_this()
+  );
+  registerSensor(imu_sensor);
+  iot_shield->registerIotShieldRxDevice(imu_sensor);
 }
 
 IotBot::~IotBot()

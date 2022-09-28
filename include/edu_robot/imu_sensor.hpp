@@ -22,7 +22,7 @@ class ImuSensor : public Sensor
 public:
   struct Parameter {
     bool raw_mode;
-    std::string base_frame;
+    std::string rotated_frame;
   };
 
   ImuSensor(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,

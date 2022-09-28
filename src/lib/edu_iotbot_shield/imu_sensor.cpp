@@ -7,16 +7,17 @@ namespace eduart {
 namespace robot {
 namespace iotbot {
 
-ImuSensor::ImuSensor(const std::string& name, const std::string& frame_id, const tf2::Transform sensor_transform,
-                     const std::uint8_t id, const Parameter parameter, std::shared_ptr<IotShieldCommunicator> communicator,
+ImuSensor::ImuSensor(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id, 
+                     const tf2::Transform sensor_transform, const std::uint8_t id, const Parameter parameter,
+                     std::shared_ptr<IotShieldCommunicator> communicator, 
                      std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster, std::shared_ptr<rclcpp::Node> ros_node)
   : IotShieldDevice(name, id)
-  , eduart::robot::ImuSensor(name, frame_id, sensor_transform, parameter, tf_broadcaster, ros_node)
+  , eduart::robot::ImuSensor(name, frame_id, reference_frame_id, sensor_transform, parameter, tf_broadcaster, ros_node)
   , IotShieldTxRxDevice(name, id, communicator)
 {
-  // and IMU data mode to raw
+  // set IMU data mode
   _communicator->sendBytes(uart::message::SetImuRawDataMode(parameter.raw_mode).data());
-};
+}
 
 void ImuSensor::processRxData(const uart::message::RxMessageDataBuffer& data)
 {
