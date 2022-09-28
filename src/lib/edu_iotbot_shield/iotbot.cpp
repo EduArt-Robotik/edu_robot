@@ -24,6 +24,7 @@ struct COLOR {
     static constexpr Color BACK = { 0xff, 0x00, 0x00 };
   };
 };
+
 IotBot::IotBot()
   : eduart::robot::Robot("IotBot", std::make_unique<IotShield>("/dev/ttyS1"))
 {
@@ -96,7 +97,7 @@ void IotBot::initialize()
     "range/front/left",
     "range/front/left",
     "base_link",
-    tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.17, 0.07, 0.1)),
+    tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.17, 0.063, 0.045)),
     0u,
     range_sensor_parameter,
     shared_from_this()
@@ -108,7 +109,7 @@ void IotBot::initialize()
     "range/front/right",
     "range/front/right",
     "base_link",
-    tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.17, -0.07, 0.1)),
+    tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.17, -0.063, 0.045)),
     1u,
     range_sensor_parameter,
     shared_from_this()
@@ -120,7 +121,7 @@ void IotBot::initialize()
     "range/rear/left",
     "range/rear/left",
     "base_link",
-    tf2::Transform(tf2::Quaternion(0.0, 0.0, 1.0, 0.0), tf2::Vector3(-0.17, 0.07, 0.1)),
+    tf2::Transform(tf2::Quaternion(0.0, 0.0, 1.0, 0.0), tf2::Vector3(-0.17, 0.063, 0.05)),
     2u,
     range_sensor_parameter,
     shared_from_this()
@@ -132,7 +133,7 @@ void IotBot::initialize()
     "range/rear/right",
     "range/rear/right",
     "base_link",
-    tf2::Transform(tf2::Quaternion(0.0, 0.0, 1.0, 0.0), tf2::Vector3(-0.17, -0.07, 0.1)),
+    tf2::Transform(tf2::Quaternion(0.0, 0.0, 1.0, 0.0), tf2::Vector3(-0.17, -0.063, 0.05)),
     3u,
     range_sensor_parameter,
     shared_from_this()
