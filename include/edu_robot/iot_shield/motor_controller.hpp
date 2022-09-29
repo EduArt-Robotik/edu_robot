@@ -23,7 +23,8 @@ class DummyMotorController : public eduart::robot::MotorController
 public:
   friend class CompoundMotorController;
 
-  DummyMotorController(const std::string& name, const std::uint8_t id, const eduart::robot::MotorController::Parameter& parameter);
+  DummyMotorController(const std::string& name, const std::uint8_t id, const eduart::robot::MotorController::Parameter& parameter,
+                       const std::string& urdf_joint_name, rclcpp::Node& ros_node);
   ~DummyMotorController() override;
 
   void initialize(const eduart::robot::MotorController::Parameter& parameter) override;
@@ -37,7 +38,7 @@ class CompoundMotorController : public eduart::robot::MotorController
 {
 public:
   CompoundMotorController(const std::string& name, std::shared_ptr<IotShieldCommunicator> communicator,
-                          const eduart::robot::MotorController::Parameter& parameter);
+                          const eduart::robot::MotorController::Parameter& parameter, rclcpp::Node& ros_node);
   ~CompoundMotorController() override;
 
   void initialize(const eduart::robot::MotorController::Parameter& parameter) override;

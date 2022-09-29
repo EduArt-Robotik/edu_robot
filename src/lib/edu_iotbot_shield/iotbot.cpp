@@ -28,11 +28,6 @@ struct COLOR {
 IotBot::IotBot()
   : eduart::robot::Robot("IotBot", std::make_unique<IotShield>("/dev/ttyS1"))
 {
-
-}
-
-void IotBot::initialize()
-{
   auto iot_shield = std::dynamic_pointer_cast<IotShield>(_hardware_interface);
 
   // Lightings
@@ -82,7 +77,8 @@ void IotBot::initialize()
   auto compound_motor_controller = std::make_shared<iotbot::CompoundMotorController>(
     "motor_d",
     iot_shield->getCommunicator(),
-    parameter
+    parameter,
+    *this
   );
 
   registerMotorController(compound_motor_controller->dummyMotorController()[0]);
@@ -100,7 +96,7 @@ void IotBot::initialize()
     tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.17, 0.063, 0.045)),
     0u,
     range_sensor_parameter,
-    shared_from_this()
+    *this
   );
   registerSensor(range_sensor);
   iot_shield->registerIotShieldRxDevice(range_sensor);
@@ -112,7 +108,7 @@ void IotBot::initialize()
     tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.17, -0.063, 0.045)),
     1u,
     range_sensor_parameter,
-    shared_from_this()
+    *this
   );
   registerSensor(range_sensor);
   iot_shield->registerIotShieldRxDevice(range_sensor);
@@ -124,7 +120,7 @@ void IotBot::initialize()
     tf2::Transform(tf2::Quaternion(0.0, 0.0, 1.0, 0.0), tf2::Vector3(-0.17, 0.063, 0.05)),
     2u,
     range_sensor_parameter,
-    shared_from_this()
+    *this
   );
   registerSensor(range_sensor);
   iot_shield->registerIotShieldRxDevice(range_sensor);
@@ -136,7 +132,7 @@ void IotBot::initialize()
     tf2::Transform(tf2::Quaternion(0.0, 0.0, 1.0, 0.0), tf2::Vector3(-0.17, -0.063, 0.05)),
     3u,
     range_sensor_parameter,
-    shared_from_this()
+    *this
   );
   registerSensor(range_sensor);
   iot_shield->registerIotShieldRxDevice(range_sensor);
@@ -151,7 +147,7 @@ void IotBot::initialize()
     ImuSensor::Parameter{ false, "base_link" },
     iot_shield->getCommunicator(),
     getTfBroadcaster(),
-    shared_from_this()
+    *this
   );
   registerSensor(imu_sensor);
   iot_shield->registerIotShieldRxDevice(imu_sensor);

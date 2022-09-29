@@ -11,8 +11,9 @@ namespace eduart {
 namespace robot {
 namespace iotbot {
 
-DummyMotorController::DummyMotorController(const std::string& name, const std::uint8_t id, const eduart::robot::MotorController::Parameter& parameter)
-  : eduart::robot::MotorController(name, id, parameter)
+DummyMotorController::DummyMotorController(const std::string& name, const std::uint8_t id, const eduart::robot::MotorController::Parameter& parameter,
+                                           const std::string& urdf_joint_name, rclcpp::Node& ros_node)
+  : eduart::robot::MotorController(name, id, parameter, urdf_joint_name, ros_node)
 {
 
 }
@@ -34,16 +35,34 @@ void DummyMotorController::processSetRpm(const Rpm /* rpm */)
 
 
 
-CompoundMotorController::CompoundMotorController(const std::string& name,
-                                                 std::shared_ptr<IotShieldCommunicator> communicator,
-                                                 const eduart::robot::MotorController::Parameter& parameter)
+CompoundMotorController::CompoundMotorController(const std::string& name, std::shared_ptr<IotShieldCommunicator> communicator,
+                                                 const eduart::robot::MotorController::Parameter& parameter,
+                                                 rclcpp::Node& ros_node)
   : IotShieldDevice(name, 3u)
-  , eduart::robot::MotorController(name + "_d", 3u, parameter)
+  , eduart::robot::MotorController(name + "_d", 3u, parameter, "base_to_wheel_rear_right", ros_node)
   , IotShieldTxDevice(name + "_d", 3u, communicator)
 {
-  _dummy_motor_controllers[0] = std::make_shared<DummyMotorController>(name + "_a", 0u, parameter);
-  _dummy_motor_controllers[1] = std::make_shared<DummyMotorController>(name + "_b", 1u, parameter);
-  _dummy_motor_controllers[2] = std::make_shared<DummyMotorController>(name + "_c", 2u, parameter);
+  _dummy_motor_controllers[0] = std::make_shared<DummyMotorController>(
+    name + "_a",
+    0u,
+    parameter,
+    "base_to_wheel_front_left",
+    ros_node
+  );
+  _dummy_motor_controllers[1] = std::make_shared<DummyMotorController>(
+    name + "_b",
+    1u,
+    parameter,
+    "base_to_wheel_front_right",
+    ros_node
+  );
+  _dummy_motor_controllers[2] = std::make_shared<DummyMotorController>(
+    name + "_c",
+    2u,
+    parameter,
+    "base_to_wheel_rear_left",
+    ros_node
+  );
 
   initialize(parameter);
 }            

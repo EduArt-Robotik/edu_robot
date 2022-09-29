@@ -19,7 +19,7 @@ class RangeSensor : public eduart::robot::RangeSensor
 public:
   RangeSensor(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id, 
               const tf2::Transform sensor_transform, const std::uint8_t id, const Parameter parameter,
-              std::shared_ptr<rclcpp::Node> ros_node);
+              rclcpp::Node& ros_node);
   ~RangeSensor() override = default;
 
   void processRxData(const uart::message::RxMessageDataBuffer& data) override;

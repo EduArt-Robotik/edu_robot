@@ -6,9 +6,17 @@
 #pragma once
 
 #include "edu_robot/rotation_per_minute.hpp"
+#include "edu_robot/angle.hpp"
+
+#include <rclcpp/node.hpp>
+#include <rclcpp/clock.hpp>
+#include <rclcpp/publisher.hpp>
+
+#include <sensor_msgs/msg/joint_state.hpp>
 
 #include <cstdint>
 #include <string>
+#include <memory>
 
 namespace eduart {
 namespace robot {
@@ -38,7 +46,8 @@ public:
   };
 
 protected:
-  MotorController(const std::string& name, const std::uint8_t id, const Parameter& parameter);
+  MotorController(const std::string& name, const std::uint8_t id, const Parameter& parameter,
+                  const std::string& urdf_joint_name, rclcpp::Node& ros_node);
 
 public:
   virtual ~MotorController();
@@ -51,14 +60,20 @@ public:
 
 protected:
   virtual void processSetRpm(const Rpm rpm) = 0;
+  void processMeasurementData(const Rpm measurement);
 
   Parameter _parameter;
   Rpm _set_rpm;
-  Rpm _measured_rpm;
 
 private:
+  Rpm _measured_rpm;
   std::string _name;
   std::uint8_t _id;
+  std::string _urdf_joint_name;
+  std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::JointState>> _pub_joint_state;
+  std::shared_ptr<rclcpp::Clock> _clock;
+  rclcpp::Time _stamp_last_measurement;
+  Angle0To2Pi _current_wheel_position = 0.0;
 };
 
 } // end namespace robot

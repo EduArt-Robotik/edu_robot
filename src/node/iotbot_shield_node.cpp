@@ -13,10 +13,7 @@
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
-
-  auto iotbot = std::make_shared<eduart::robot::iotbot::IotBot>();
-  iotbot->initialize();
-  rclcpp::spin(iotbot);
+  rclcpp::spin(std::make_shared<eduart::robot::iotbot::IotBot>());
   rclcpp::shutdown();
 
   return 0;

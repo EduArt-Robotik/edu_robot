@@ -5,6 +5,8 @@
  */
 #pragma once
 
+#include <cmath>
+
 namespace eduart {
 namespace robot {
 
@@ -16,6 +18,7 @@ public:
   constexpr Rpm(const float rpm = 0.0f) : _value(rpm) { }
 
   inline constexpr float rps() const { return _value / 60.0f; }
+  inline constexpr float radps() const { return rps() * 2.0f * M_PI; }
  
   inline constexpr operator float() const { return _value; }
   constexpr Rpm& operator=(const float rhs)
