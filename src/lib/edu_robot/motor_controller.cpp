@@ -17,7 +17,7 @@ MotorController::MotorController(const std::string& name, const std::uint8_t id,
 {
   _pub_joint_state = ros_node.create_publisher<sensor_msgs::msg::JointState>(
     "joint_states",
-    rclcpp::QoS(2).best_effort().transient_local()
+    rclcpp::QoS(2).reliable().durability_volatile()
   );
 }
 
@@ -39,7 +39,7 @@ void MotorController::processMeasurementData(const Rpm rpm)
   const auto stamp = _clock->now();
   const auto delta_t = stamp - _stamp_last_measurement;
 
-  _current_wheel_position += delta_t.seconds() * rpm.rps();
+  _current_wheel_position += delta_t.seconds() * rpm.radps();
   _measured_rpm = rpm;
   _stamp_last_measurement = stamp;
 
@@ -49,10 +49,11 @@ void MotorController::processMeasurementData(const Rpm rpm)
   // publish wheel speed using joint state message
   sensor_msgs::msg::JointState joint_state_msg;
 
-  joint_state_msg.header.frame_id = name(); // motor controller has no frame id --> using its name...
+  joint_state_msg.header.frame_id = "";
   joint_state_msg.header.stamp = stamp;
   joint_state_msg.name.push_back(_urdf_joint_name);
   joint_state_msg.velocity.push_back(rpm.radps());
+  joint_state_msg.position.push_back(_current_wheel_position);
 
   _pub_joint_state->publish(joint_state_msg);
 }

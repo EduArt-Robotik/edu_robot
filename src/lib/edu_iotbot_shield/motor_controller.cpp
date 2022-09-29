@@ -11,7 +11,8 @@ namespace eduart {
 namespace robot {
 namespace iotbot {
 
-DummyMotorController::DummyMotorController(const std::string& name, const std::uint8_t id, const eduart::robot::MotorController::Parameter& parameter,
+DummyMotorController::DummyMotorController(const std::string& name, const std::uint8_t id,
+                                           const eduart::robot::MotorController::Parameter& parameter,
                                            const std::string& urdf_joint_name, rclcpp::Node& ros_node)
   : eduart::robot::MotorController(name, id, parameter, urdf_joint_name, ros_node)
 {
@@ -40,7 +41,7 @@ CompoundMotorController::CompoundMotorController(const std::string& name, std::s
                                                  rclcpp::Node& ros_node)
   : IotShieldDevice(name, 3u)
   , eduart::robot::MotorController(name + "_d", 3u, parameter, "base_to_wheel_rear_right", ros_node)
-  , IotShieldTxDevice(name + "_d", 3u, communicator)
+  , IotShieldTxRxDevice(name + "_d", 3u, communicator)
 {
   _dummy_motor_controllers[0] = std::make_shared<DummyMotorController>(
     name + "_a",
@@ -98,6 +99,16 @@ void CompoundMotorController::initialize(const eduart::robot::MotorController::P
   _communicator->sendBytes(uart::message::SetValueU<UART::COMMAND::SET::CONTROL_FREQUENCY>(
     parameter.control_frequency).data()
   );
+}
+
+void CompoundMotorController::processRxData(const uart::message::RxMessageDataBuffer &data)
+{
+  const uart::message::ShieldResponse msg(data);
+
+  _dummy_motor_controllers[0]->processMeasurementData(msg.rpm0());
+  _dummy_motor_controllers[1]->processMeasurementData(msg.rpm1());
+  _dummy_motor_controllers[2]->processMeasurementData(msg.rpm2());
+  processMeasurementData(msg.rpm3());
 }
 
 void CompoundMotorController::processSetRpm(const Rpm rpm)

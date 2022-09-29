@@ -34,7 +34,7 @@ private:
 };
 
 class CompoundMotorController : public eduart::robot::MotorController
-                              , public eduart::robot::iotbot::IotShieldTxDevice
+                              , public eduart::robot::iotbot::IotShieldTxRxDevice
 {
 public:
   CompoundMotorController(const std::string& name, std::shared_ptr<IotShieldCommunicator> communicator,
@@ -42,30 +42,14 @@ public:
   ~CompoundMotorController() override;
 
   void initialize(const eduart::robot::MotorController::Parameter& parameter) override;
-  const std::array<std::shared_ptr<iotbot::DummyMotorController>, 3u>& dummyMotorController() const {
+  void processRxData(const uart::message::RxMessageDataBuffer& data) override;
+
+  inline const std::array<std::shared_ptr<iotbot::DummyMotorController>, 3u>& dummyMotorController() const {
     return _dummy_motor_controllers;
   }
 
 private:
   void processSetRpm(const Rpm rpm) override;
-
-  template<std::uint8_t Command>
-  void setValue(const float value)
-  {
-    // // clear buffer
-    // _tx_buffer = { 0 };
-
-    // // construct message
-    // _tx_buffer[0] = UART::BUFFER::START_BYTE;
-    // _tx_buffer[1] = Command;
-
-    // floatToTxBuffer<2, 5>(value, _tx_buffer);
-  
-    // _tx_buffer[10] = UART::BUFFER::END_BYTE;
-
-    // // send message
-    // _communicator->sendBytes(_tx_buffer);    
-  }
 
   std::array<std::shared_ptr<iotbot::DummyMotorController>, 3u> _dummy_motor_controllers;
 };

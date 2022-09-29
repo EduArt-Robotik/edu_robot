@@ -85,6 +85,7 @@ IotBot::IotBot()
   registerMotorController(compound_motor_controller->dummyMotorController()[1]);
   registerMotorController(compound_motor_controller->dummyMotorController()[2]);
   registerMotorController(compound_motor_controller);
+  iot_shield->registerIotShieldRxDevice(compound_motor_controller);
 
   // Range Sensors
   constexpr eduart::robot::RangeSensor::Parameter range_sensor_parameter{ 10.0 * M_PI / 180.0, 0.01, 5.0 };
