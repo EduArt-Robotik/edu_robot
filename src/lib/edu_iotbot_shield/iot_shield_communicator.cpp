@@ -19,23 +19,24 @@ IotShieldCommunicator::IotShieldCommunicator(char const* const device_name)
   // \todo check for better logging instance.
 #if _WITH_MRAA
   std::cout << "open uart device \"" << device_name << "\"" << std::endl;
-   _uart = std::make_unique<mraa::Uart>(device_name);
+  _uart = std::make_unique<mraa::Uart>(device_name);
 
-   if (_uart->setBaudRate(115200) != mraa::SUCCESS) {
-      std::cerr << "Error setting parity on UART" << std::endl;
-   }
+  if (_uart->setBaudRate(115200) != mraa::SUCCESS) {
+     std::cerr << "Error setting parity on UART" << std::endl;
+  }
 
-   if (_uart->setMode(8, mraa::UART_PARITY_NONE, 1) != mraa::SUCCESS) {
-      std::cerr << "Error setting parity on UART" << std::endl;
-   }
+  if (_uart->setMode(8, mraa::UART_PARITY_NONE, 1) != mraa::SUCCESS) {
+     std::cerr << "Error setting parity on UART" << std::endl;
+  }
 
-   if (_uart->setFlowcontrol(false, false) != mraa::SUCCESS) {
-      std::cerr << "Error setting flow control UART" << std::endl;
-   }
+  if (_uart->setFlowcontrol(false, false) != mraa::SUCCESS) {
+     std::cerr << "Error setting flow control UART" << std::endl;
+  }
    
-   _uart->flush();
+  _uart->flush();
 #else
-   std::cerr << "UART interface not available. MRAA is missing!" << std::endl;
+  (void)device_name;
+  std::cerr << "UART interface not available. MRAA is missing!" << std::endl;
 #endif
 }
 
@@ -63,6 +64,8 @@ void IotShieldCommunicator::sendBytes(const uart::message::TxMessageDataBuffer& 
     std::cout << std::hex << static_cast<unsigned int>(byte) << " ";
   }
   std::cout << std::endl;
+#else
+  (void)bytes;
 #endif
 
   receiveBytes();

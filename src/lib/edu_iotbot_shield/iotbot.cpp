@@ -163,10 +163,10 @@ IotBot::IotBot()
   constexpr float wheel_diameter = 0.17f;
 
   _kinematic_matrix.resize(4, 3);
-  _kinematic_matrix <<  1.0f, 0.0f, l_squared / (2.0f * l_y),
-                       -1.0f, 0.0f, l_squared / (2.0f * l_y),
-                        1.0f, 0.0f, l_squared / (2.0f * l_y),
-                       -1.0f, 0.0f, l_squared / (2.0f * l_y);
+  _kinematic_matrix << -1.0f, 0.0f, -l_squared / (2.0f * l_y),
+                        1.0f, 0.0f, -l_squared / (2.0f * l_y),
+                       -1.0f, 0.0f, -l_squared / (2.0f * l_y),
+                        1.0f, 0.0f, -l_squared / (2.0f * l_y);
   _kinematic_matrix *= 1.0f / wheel_diameter;                       
 }
 
