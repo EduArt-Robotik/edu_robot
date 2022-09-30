@@ -66,23 +66,13 @@ Robot::~Robot()
 
 void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> twist_msg)
 {
-  // BEGIN HACK
-  constexpr float wheel_diameter = 0.17f;
-  constexpr float wheel_base = 0.3f;
-  constexpr float track = 0.3;
+  // \todo maybe a size check would be great!
+  Eigen::Vector3f velocity_cmd(twist_msg->linear.x, twist_msg->linear.y, twist_msg->angular.z);
+  Eigen::VectorXf rps = _kinematic_matrix * velocity_cmd / (2.0f * M_PI);
 
-  constexpr float ms2rpm = 60.0f / (wheel_diameter * M_PI);
-  constexpr float rad2rpm = (wheel_base + track) / wheel_diameter;
-
-  const float rpmFwd   = twist_msg->linear.x  * ms2rpm;
-  const float rpmLeft  = twist_msg->linear.y  * ms2rpm;
-  const float rpmOmega = twist_msg->angular.z * rad2rpm;
-
-  _motor_controllers[0u]->setRpm(Rpm( rpmFwd - rpmLeft - rpmOmega));
-  _motor_controllers[1u]->setRpm(Rpm(-rpmFwd - rpmLeft - rpmOmega));
-  _motor_controllers[2u]->setRpm(Rpm( rpmFwd + rpmLeft - rpmOmega));
-  _motor_controllers[3u]->setRpm(Rpm(-rpmFwd + rpmLeft - rpmOmega));
-  // END HACK
+  for (Eigen::Index i = 0; i < rps.size(); ++i) {
+    _motor_controllers[i]->setRpm(Rpm::fromRps(rps(i)));
+  }
 }
 
 void Robot::callbackSetLightingColor(std::shared_ptr<const edu_robot::msg::SetLightingColor> msg)

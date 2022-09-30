@@ -14,6 +14,8 @@
 #include "edu_robot/msg/robot_status_report.hpp"
 #include "edu_robot/srv/set_mode.hpp"
 
+#include <Eigen/Core>
+
 #include <rclcpp/node.hpp>
 #include <rclcpp/publisher.hpp>
 #include <rclcpp/service.hpp>
@@ -68,13 +70,18 @@ public:
                               std::shared_ptr<edu_robot::srv::SetMode::Response> response);
 
 protected:
+  // Configuration Methods
   void registerLighting(std::shared_ptr<Lighting> lighting);
   void registerMotorController(std::shared_ptr<MotorController> motor_controller);
   void registerSensor(std::shared_ptr<Sensor> sensor);
 
   inline std::shared_ptr<tf2_ros::TransformBroadcaster> getTfBroadcaster() { return _tf_broadcaster; }
 
+  // Hardware Interface
   std::shared_ptr<RobotHardwareInterface> _hardware_interface;
+
+  // Drive Kinematic
+  Eigen::MatrixXf _kinematic_matrix;
 
 private:
   void processStatusReport();

@@ -10,6 +10,7 @@
 #include "edu_robot/robot.hpp"
 
 #include <memory>
+
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Transform.h>
 #include <tf2/LinearMath/Vector3.h>
@@ -152,6 +153,21 @@ IotBot::IotBot()
   );
   registerSensor(imu_sensor);
   iot_shield->registerIotShieldRxDevice(imu_sensor);
+
+  // Set Up Drive Kinematic
+  // \todo make it configurable
+  // \todo handle Mecanum kinematic, too
+  constexpr float l_y = 0.32f;
+  constexpr float l_x = 0.25f;
+  constexpr float l_squared = l_x * l_x + l_y * l_y;
+  constexpr float wheel_diameter = 0.17f;
+
+  _kinematic_matrix.resize(4, 3);
+  _kinematic_matrix <<  1.0f, 0.0f, l_squared / (2.0f * l_y),
+                       -1.0f, 0.0f, l_squared / (2.0f * l_y),
+                        1.0f, 0.0f, l_squared / (2.0f * l_y),
+                       -1.0f, 0.0f, l_squared / (2.0f * l_y);
+  _kinematic_matrix *= 1.0f / wheel_diameter;                       
 }
 
 IotBot::~IotBot()
