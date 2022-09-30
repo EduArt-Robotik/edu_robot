@@ -53,7 +53,8 @@ void IotShieldCommunicator::sendBytes(const uart::message::TxMessageDataBuffer& 
   auto now = std::chrono::system_clock::now();
 
   while (std::chrono::duration_cast<std::chrono::milliseconds>(now - _last_sending) < _wait_time_after_sending) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(1ms));
+    const auto diff = _wait_time_after_sending - std::chrono::duration_cast<std::chrono::milliseconds>(now - _last_sending);
+    std::this_thread::sleep_for(diff);
     now = std::chrono::system_clock::now();
   }
 
@@ -68,6 +69,7 @@ void IotShieldCommunicator::sendBytes(const uart::message::TxMessageDataBuffer& 
   (void)bytes;
 #endif
 
+  _last_sending = now;
   receiveBytes();
 }
 
