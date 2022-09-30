@@ -40,14 +40,14 @@ CompoundMotorController::CompoundMotorController(const std::string& name, std::s
                                                  const eduart::robot::MotorController::Parameter& parameter,
                                                  rclcpp::Node& ros_node)
   : IotShieldDevice(name, 3u)
-  , eduart::robot::MotorController(name + "_d", 3u, parameter, "base_to_wheel_rear_right", ros_node)
+  , eduart::robot::MotorController(name + "_d", 3u, parameter, "base_to_wheel_front_left", ros_node)
   , IotShieldTxRxDevice(name + "_d", 3u, communicator)
 {
   _dummy_motor_controllers[0] = std::make_shared<DummyMotorController>(
     name + "_a",
     0u,
     parameter,
-    "base_to_wheel_front_left",
+    "base_to_wheel_rear_right",
     ros_node
   );
   _dummy_motor_controllers[1] = std::make_shared<DummyMotorController>(
