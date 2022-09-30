@@ -13,6 +13,7 @@
 #include <cstdio>
 #include <exception>
 #include <functional>
+#include <rclcpp/qos.hpp>
 #include <stdexcept>
 
 namespace eduart {
@@ -27,11 +28,11 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterfa
 {
   _pub_odometry = create_publisher<nav_msgs::msg::Odometry>(
     "odometry",
-    rclcpp::QoS(2).reliable()
+    rclcpp::QoS(2).reliable().durability_volatile()
   );
   _pub_status_report = create_publisher<edu_robot::msg::RobotStatusReport>(
     "status_report",
-    rclcpp::QoS(2).best_effort()
+    rclcpp::QoS(2).best_effort().durability_volatile()
   );
 
   _srv_set_mode = create_service<edu_robot::srv::SetMode>(
@@ -41,7 +42,7 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterfa
 
   _sub_twist = create_subscription<geometry_msgs::msg::Twist>(
     "cmd_vel",
-    rclcpp::QoS(2),
+    rclcpp::QoS(2).best_effort().durability_volatile(),
     std::bind(&Robot::callbackVelocity, this, std::placeholders::_1)
   );
   _sub_set_lighting_color = create_subscription<edu_robot::msg::SetLightingColor>(
