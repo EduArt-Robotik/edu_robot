@@ -8,6 +8,7 @@
 #include "edu_robot/motor_controller.hpp"
 #include "edu_robot/robot_hardware_interface.hpp"
 #include "edu_robot/sensor.hpp"
+#include "edu_robot/processing_component/collison_avoidance.hpp"
 
 #include "edu_robot/msg/mode.hpp"
 #include "edu_robot/msg/set_lighting_color.hpp"
@@ -82,6 +83,9 @@ protected:
 
   // Drive Kinematic
   Eigen::MatrixXf _kinematic_matrix;
+
+  // Processing Components
+  std::shared_ptr<processing::CollisionAvoidance> _collision_avoidance_component;
 
 private:
   void processStatusReport();

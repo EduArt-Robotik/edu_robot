@@ -6,15 +6,15 @@
 #pragma once
 
 #include "edu_robot/sensor.hpp"
+#include "edu_robot/processing_component/processing_component.hpp"
 
-#include <functional>
 #include <rclcpp/clock.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/publisher.hpp>
 #include <tf2/LinearMath/Transform.h>
-
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/buffer.h>
+
 #include <sensor_msgs/msg/range.hpp>
 
 #include <memory>
@@ -31,6 +31,7 @@ namespace robot {
  * \todo below is only a draft, a first try --> please review concept after first release
  */
 class RangeSensor : public Sensor
+                  , public processing::ProcessingComponentOutput<float>
 {
 public:
   struct Parameter {

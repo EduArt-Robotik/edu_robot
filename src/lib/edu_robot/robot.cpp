@@ -5,8 +5,10 @@
 #include "edu_robot/msg/detail/mode__struct.hpp"
 #include "edu_robot/msg_conversion.hpp"
 #include "edu_robot/msg/detail/robot_status_report__struct.hpp"
+#include "edu_robot/processing_component/collison_avoidance.hpp"
 
 #include <geometry_msgs/msg/detail/twist__struct.hpp>
+#include <memory>
 #include <nav_msgs/msg/detail/odometry__struct.hpp>
 #include <rclcpp/logging.hpp>
 
@@ -53,6 +55,12 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterfa
 
   _timer_status_report = create_wall_timer(100ms, std::bind(&Robot::processStatusReport, this));
   _timer_tf_publishing = create_wall_timer(100ms, std::bind(&Robot::processTfPublishing, this));
+
+  // Initialize Processing Components
+  _collision_avoidance_component = std::make_shared<processing::CollisionAvoidance>(
+    processing::CollisionAvoidance::Parameter{ 0.3f, 0.05f },
+    *this
+  );
 }
 
 Robot::~Robot()
@@ -68,6 +76,7 @@ void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> tw
 {
   // \todo maybe a size check would be great!
   Eigen::Vector3f velocity_cmd(twist_msg->linear.x, twist_msg->linear.y, twist_msg->angular.z);
+  velocity_cmd *= _collision_avoidance_component->getVelocityReduceFactor();
   Eigen::VectorXf rps = _kinematic_matrix * velocity_cmd / (2.0f * M_PI);
 
   for (Eigen::Index i = 0; i < rps.size(); ++i) {

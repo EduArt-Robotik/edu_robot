@@ -102,6 +102,7 @@ IotBot::IotBot()
   );
   registerSensor(range_sensor);
   iot_shield->registerIotShieldRxDevice(range_sensor);
+  range_sensor->registerComponentInput(_collision_avoidance_component);
 
   range_sensor = std::make_shared<iotbot::RangeSensor>(
     "range/front/right",
@@ -114,6 +115,7 @@ IotBot::IotBot()
   );
   registerSensor(range_sensor);
   iot_shield->registerIotShieldRxDevice(range_sensor);
+  range_sensor->registerComponentInput(_collision_avoidance_component);
 
   range_sensor = std::make_shared<iotbot::RangeSensor>(
     "range/rear/left",
@@ -126,6 +128,7 @@ IotBot::IotBot()
   );
   registerSensor(range_sensor);
   iot_shield->registerIotShieldRxDevice(range_sensor);
+  range_sensor->registerComponentInput(_collision_avoidance_component);
 
   range_sensor = std::make_shared<iotbot::RangeSensor>(
     "range/rear/right",
@@ -138,6 +141,7 @@ IotBot::IotBot()
   );
   registerSensor(range_sensor);
   iot_shield->registerIotShieldRxDevice(range_sensor);
+  range_sensor->registerComponentInput(_collision_avoidance_component);
 
   // IMU Sensor
   auto imu_sensor = std::make_shared<iotbot::ImuSensor>(
@@ -163,11 +167,14 @@ IotBot::IotBot()
   constexpr float wheel_diameter = 0.17f;
 
   _kinematic_matrix.resize(4, 3);
-  _kinematic_matrix <<  1.0f, 0.0f, -l_squared / (2.0f * l_y),
-                        1.0f, 0.0f, -l_squared / (2.0f * l_y),
+  _kinematic_matrix << -1.0f, 0.0f, -l_squared / (2.0f * l_y),
                        -1.0f, 0.0f, -l_squared / (2.0f * l_y),
-                       -1.0f, 0.0f, -l_squared / (2.0f * l_y);
-  _kinematic_matrix *= 1.0f / wheel_diameter;                       
+                        1.0f, 0.0f, -l_squared / (2.0f * l_y),
+                        1.0f, 0.0f, -l_squared / (2.0f * l_y);
+  _kinematic_matrix *= 1.0f / wheel_diameter;
+
+  // Configure Processing Components
+  
 }
 
 IotBot::~IotBot()

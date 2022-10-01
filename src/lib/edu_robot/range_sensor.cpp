@@ -32,6 +32,7 @@ void RangeSensor::processMeasurementData(const float measurement)
   msg.range           = measurement;
 
   _publisher->publish(msg);
+  sendInputValue(measurement);
 }
 
 } // end namespace eduart
