@@ -6,7 +6,9 @@
 #pragma once
 
 #include "edu_robot/color.hpp"
+#include "edu_robot/hardware_component_interface.hpp"
 
+#include <memory>
 #include <string>
 
 namespace eduart {
@@ -20,9 +22,6 @@ namespace robot {
  */
 class Lighting
 {
-protected:
-  Lighting(const std::string& name, const Color default_color, const float default_brightness);
-  
 public:
   // \todo mode do not really fit to a single lighting.
   enum class Mode {
@@ -34,6 +33,8 @@ public:
     RUNNING,
   };
 
+  Lighting(const std::string& name, const Color default_color, const float default_brightness,
+           std::unique_ptr<HardwareComponentInterface<Color, Mode>> hardware_interface);
   virtual ~Lighting() = default;
 
   /**
@@ -54,17 +55,13 @@ public:
    */
   void setBrightness(const float brightness);
 
-  const std::string& name() const { return _name; }
-
-protected:
-  virtual bool processSetColor(const Color color, const Mode mode) = 0;
-  virtual bool processSetBrightness(const float brightness) = 0;
-
-  Color _color;
-  float _brightness;
+  inline const std::string& name() const { return _name; }
 
 private:
+  Color _color;
+  float _brightness;
   std::string _name;
+  std::unique_ptr<HardwareComponentInterface<Color, Mode>> _hardware_interface;
 };
 
 } // end namespace eduart

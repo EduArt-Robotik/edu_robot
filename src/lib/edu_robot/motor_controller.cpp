@@ -1,12 +1,15 @@
 #include "edu_robot/motor_controller.hpp"
 #include "edu_robot/rotation_per_minute.hpp"
+#include <functional>
 #include <sensor_msgs/msg/detail/joint_state__struct.hpp>
 
 namespace eduart {
 namespace robot {
 
 MotorController::MotorController(const std::string& name, const std::uint8_t id, const Parameter& parameter,
-                                 const std::string& urdf_joint_name, rclcpp::Node& ros_node)
+                                 const std::string& urdf_joint_name, rclcpp::Node& ros_node,
+                                 std::shared_ptr<HardwareComponentInterface<Rpm>> hardware_component_interface,
+                                 std::shared_ptr<HardwareSensorInterface<Rpm>> hardware_sensor_interface)
   : _parameter(parameter)
   , _name(name)
   , _id(id)
@@ -14,7 +17,12 @@ MotorController::MotorController(const std::string& name, const std::uint8_t id,
   , _clock(ros_node.get_clock())
   , _stamp_last_measurement(_clock->now())
   , _current_wheel_position(0.0)
+  , _hardware_component_interface(hardware_component_interface)
+  , _hardware_sensor_interface(hardware_sensor_interface)
 {
+  _hardware_sensor_interface->registerCallbackProcessMeasurementData(
+    std::bind(&MotorController::processMeasurementData, this, std::placeholders::_1)
+  );
   _pub_joint_state = ros_node.create_publisher<sensor_msgs::msg::JointState>(
     "joint_states",
     rclcpp::QoS(2).reliable().durability_volatile()
@@ -28,7 +36,7 @@ MotorController::~MotorController()
 
 void MotorController::setRpm(const Rpm rpm)
 {
-  processSetRpm(rpm);
+  _hardware_component_interface->processSetValue(rpm);
   _set_rpm = rpm;
 }
 

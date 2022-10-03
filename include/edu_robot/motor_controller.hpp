@@ -5,6 +5,7 @@
  */
 #pragma once
 
+#include "edu_robot/hardware_component_interface.hpp"
 #include "edu_robot/rotation_per_minute.hpp"
 #include "edu_robot/angle.hpp"
 
@@ -45,27 +46,22 @@ public:
     bool isValid() const { return true; } // \todo implement properly
   };
 
-protected:
   MotorController(const std::string& name, const std::uint8_t id, const Parameter& parameter,
-                  const std::string& urdf_joint_name, rclcpp::Node& ros_node);
-
-public:
+                  const std::string& urdf_joint_name, rclcpp::Node& ros_node,
+                  std::shared_ptr<HardwareComponentInterface<Rpm>> hardware_component_interface,
+                  std::shared_ptr<HardwareSensorInterface<Rpm>> hardware_sensor_interface);
   virtual ~MotorController();
 
   inline const std::string& name() const { return _name; }
   inline std::uint8_t id() const { return _id; }
-  virtual void initialize(const Parameter& parameter) = 0;
   void setRpm(const Rpm rpm);
   inline Rpm getMeasuredRpm() const { return _measured_rpm; }
 
-protected:
-  virtual void processSetRpm(const Rpm rpm) = 0;
+private:
   void processMeasurementData(const Rpm measurement);
 
   Parameter _parameter;
   Rpm _set_rpm;
-
-private:
   Rpm _measured_rpm;
   std::string _name;
   std::uint8_t _id;
@@ -74,6 +70,9 @@ private:
   std::shared_ptr<rclcpp::Clock> _clock;
   rclcpp::Time _stamp_last_measurement;
   Angle0To2Pi _current_wheel_position = 0.0;
+
+  std::shared_ptr<HardwareComponentInterface<Rpm>> _hardware_component_interface;
+  std::shared_ptr<HardwareSensorInterface<Rpm>> _hardware_sensor_interface;
 };
 
 } // end namespace robot

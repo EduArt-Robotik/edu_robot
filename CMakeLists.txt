@@ -80,28 +80,40 @@ ament_target_dependencies(
 )
 rosidl_target_interfaces(eduart-robot ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
+# Library Robot Eduard
+add_library(eduart-robot-eduard
+  src/lib/eduard/eduard.cpp
+)
+target_include_directories(eduart-robot-eduard PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(eduart-robot-eduard
+  eduart-robot
+)
+
 # Library Eduart IotBot Shield
 add_library(eduart-iotbot-shield
-  src/lib/edu_iotbot_shield/iot_shield.cpp
-  src/lib/edu_iotbot_shield/iot_shield_communicator.cpp
-  src/lib/edu_iotbot_shield/lighting.cpp
-  src/lib/edu_iotbot_shield/iotbot.cpp
-  src/lib/edu_iotbot_shield/motor_controller.cpp
-  src/lib/edu_iotbot_shield/range_sensor.cpp
-  src/lib/edu_iotbot_shield/imu_sensor.cpp
+  src/lib/iotbot_shield/iot_shield.cpp
+  src/lib/iotbot_shield/iot_shield_communicator.cpp
+  src/lib/iotbot_shield/lighting_hardware.cpp
+  src/lib/iotbot_shield/iotbot.cpp
+  src/lib/iotbot_shield/motor_controller_hardware.cpp
+  src/lib/iotbot_shield/range_sensor_hardware.cpp
+  src/lib/iotbot_shield/imu_sensor_hardware.cpp
 )
 if(HAVE_MRAA) ## TODO: use string for dependencies, so onyl one target_link_libraries is there!
   message("MRAA library found")
   target_link_libraries(eduart-iotbot-shield
     # ${CPP_TYPESUPPORT_TARGET} needed for ROS distro humble and newer. TODO: handle this somehow!
-    eduart-robot
+    eduart-robot-eduard
     mraa
   )
 else()
   message("MRAA library not found")
   target_link_libraries(eduart-iotbot-shield
     # ${CPP_TYPESUPPORT_TARGET} needed for ROS distro humble and newer. TODO: handle this somehow!
-    eduart-robot
+    eduart-robot-eduard
   )
 endif()
 target_compile_features(eduart-iotbot-shield PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
@@ -117,7 +129,6 @@ add_executable(iotbot-shield
 )
 target_link_libraries(iotbot-shield
   eduart-iotbot-shield
-  eduart-robot
 )
 ament_target_dependencies(iotbot-shield
   "rclcpp"

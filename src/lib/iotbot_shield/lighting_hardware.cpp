@@ -1,4 +1,4 @@
-#include "edu_robot/iot_shield/lighting.hpp"
+#include "edu_robot/iot_shield/lighting_hardware.hpp"
 #include "edu_robot/iot_shield/iot_shield_device.hpp"
 #include "edu_robot/iot_shield/iot_shield_communicator.hpp"
 #include "edu_robot/iot_shield/uart/message_definition.hpp"
@@ -13,38 +13,36 @@ namespace iotbot {
 
 using uart::message::UART;
 
-Lighting::Lighting(const std::string& name, const std::uint8_t id, std::shared_ptr<IotShieldCommunicator> communicator,
-                   const Color default_color, const float default_brightness)
-  : IotShieldDevice(name, id)
-  , eduart::robot::Lighting(name, default_color, default_brightness)
-  , IotShieldTxDevice(name, id, communicator) 
+LightingHardware::LightingHardware(const std::string& hardware_name,
+                                   std::shared_ptr<IotShieldCommunicator> communicator)
+  : IotShieldDevice(hardware_name)
+  , IotShieldTxDevice(hardware_name, communicator) 
 {
 
 }
 
-Lighting::~Lighting()
+LightingHardware::~LightingHardware()
 {
 
 }
 
-bool Lighting::processSetColor(const Color color, const Mode mode)
+void LightingHardware::processSetValue(const Color& color, const robot::Lighting::Mode& mode)
 {
-  // clear buffer
-  _tx_buffer = { 0 };
+  using Mode = robot::Lighting::Mode;
 
   // HACK! At the moment each light can't controlled separately.
   switch (mode) {
-  case Mode::FLASH:
-    if (robot::Lighting::name().find("left") != std::string::npos) {
-      _communicator->sendBytes(uart::message::SetLighting<UART::COMMAND::LIGHTING::FLASH::LEFT>(color).data()); 
-    }
-    else if (robot::Lighting::name().find("right") != std::string::npos) {
-      _communicator->sendBytes(uart::message::SetLighting<UART::COMMAND::LIGHTING::FLASH::RIGHT>(color).data());
-    }
-    else if (robot::Lighting::name().find("all") != std::string::npos) {
-      _communicator->sendBytes(uart::message::SetLighting<UART::COMMAND::LIGHTING::FLASH::ALL>(color).data());
-    }
-    break;
+  // case Mode::FLASH:
+  //   if (robot::Lighting::name().find("left") != std::string::npos) {
+  //     _communicator->sendBytes(uart::message::SetLighting<UART::COMMAND::LIGHTING::FLASH::LEFT>(color).data()); 
+  //   }
+  //   else if (robot::Lighting::name().find("right") != std::string::npos) {
+  //     _communicator->sendBytes(uart::message::SetLighting<UART::COMMAND::LIGHTING::FLASH::RIGHT>(color).data());
+  //   }
+  //   else if (robot::Lighting::name().find("all") != std::string::npos) {
+  //     _communicator->sendBytes(uart::message::SetLighting<UART::COMMAND::LIGHTING::FLASH::ALL>(color).data());
+  //   }
+  //   break;
 
     // all lightings are addressed
   case Mode::DIM:
@@ -70,14 +68,6 @@ bool Lighting::processSetColor(const Color color, const Mode mode)
   default:
     throw std::invalid_argument("given mode is not handled");
   }
-
-  return true;
-}
-
-bool Lighting::processSetBrightness(const float brightness)
-{
-  // \todo no idea how to set the brightness at the moment
-  return true;
 }
 
 } // end namespace iotbot

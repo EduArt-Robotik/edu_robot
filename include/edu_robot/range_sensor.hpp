@@ -5,6 +5,7 @@
  */
 #pragma once
 
+#include "edu_robot/hardware_component_interface.hpp"
 #include "edu_robot/sensor.hpp"
 #include "edu_robot/processing_component/processing_component.hpp"
 
@@ -41,8 +42,8 @@ public:
   };
 
   RangeSensor(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
-              const tf2::Transform sensor_transform, const Parameter parameter, rclcpp::Node& ros_node);
-
+              const tf2::Transform sensor_transform, const Parameter parameter, rclcpp::Node& ros_node,
+              std::unique_ptr<HardwareSensorInterface<float>> hardware_interface);
   ~RangeSensor() override = default;
 
 protected:
@@ -52,6 +53,7 @@ private:
   const Parameter _parameter;
   std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::Range>> _publisher;
   std::shared_ptr<rclcpp::Clock> _clock;
+  std::unique_ptr<HardwareSensorInterface<float>> _hardware_interface;
 };
 
 } // end namespace eduart

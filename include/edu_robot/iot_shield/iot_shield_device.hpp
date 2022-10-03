@@ -21,27 +21,24 @@ class IotShieldCommunicator;
 class IotShieldDevice
 {
 protected:
-  IotShieldDevice(const std::string& name, const std::uint8_t id)
+  IotShieldDevice(const std::string& name)
     : _name(name)
-    , _id(id)
   { }
 
 public:
   virtual ~IotShieldDevice() = default;
 
   const std::string& name() const { return _name; }
-  std::uint8_t id() const { return _id; }
 
 private:
   std::string _name;
-  std::uint8_t _id; // \todo id has actually no meaning, maybe remove it
 };
 
 class IotShieldTxDevice : public virtual IotShieldDevice
 {
 public:
-  IotShieldTxDevice(const std::string& name, const std::uint8_t id, std::shared_ptr<IotShieldCommunicator> communicator)
-    : IotShieldDevice(name, id)
+  IotShieldTxDevice(const std::string& name, std::shared_ptr<IotShieldCommunicator> communicator)
+    : IotShieldDevice(name)
     , _communicator(communicator)
   { }
   ~IotShieldTxDevice() override = default;
@@ -54,8 +51,8 @@ protected:
 class IotShieldRxDevice : public virtual IotShieldDevice
 {
 public:
-  IotShieldRxDevice(const std::string& name, const std::uint8_t id)
-    : IotShieldDevice(name, id)
+  IotShieldRxDevice(const std::string& name)
+    : IotShieldDevice(name)
   { }
   ~IotShieldRxDevice() override = default;
 
@@ -65,9 +62,9 @@ public:
 class IotShieldTxRxDevice : public IotShieldTxDevice, public IotShieldRxDevice
 {
 public:
-  IotShieldTxRxDevice(const std::string& name, const std::uint8_t id, std::shared_ptr<IotShieldCommunicator> communicator)
-    : IotShieldTxDevice(name, id, communicator)
-    , IotShieldRxDevice(name, id)
+  IotShieldTxRxDevice(const std::string& name, std::shared_ptr<IotShieldCommunicator> communicator)
+    : IotShieldTxDevice(name, communicator)
+    , IotShieldRxDevice(name)
   { }
   ~IotShieldTxRxDevice() override = default;
 };

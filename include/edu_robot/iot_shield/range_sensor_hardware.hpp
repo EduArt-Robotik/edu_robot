@@ -5,7 +5,9 @@
  */
 #pragma once
 
+
 #include <edu_robot/range_sensor.hpp>
+#include <edu_robot/hardware_component_interface.hpp>
 
 #include "edu_robot/iot_shield/iot_shield_device.hpp"
 
@@ -13,16 +15,17 @@ namespace eduart {
 namespace robot {
 namespace iotbot {
 
-class RangeSensor : public eduart::robot::RangeSensor
-                  , public IotShieldRxDevice
+class RangeSensorHardware : public HardwareSensorInterface<float>
+                          , public IotShieldRxDevice
 {
 public:
-  RangeSensor(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id, 
-              const tf2::Transform sensor_transform, const std::uint8_t id, const Parameter parameter,
-              rclcpp::Node& ros_node);
-  ~RangeSensor() override = default;
+  RangeSensorHardware(const std::string& hardware_name, const std::uint8_t id, const RangeSensor::Parameter& parameter);
+  ~RangeSensorHardware() override = default;
 
   void processRxData(const uart::message::RxMessageDataBuffer& data) override;
+
+private:
+  std::uint8_t _id;
 };               
 
 } // end namespace iotbot

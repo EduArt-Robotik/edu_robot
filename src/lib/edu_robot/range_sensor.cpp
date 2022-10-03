@@ -10,13 +10,17 @@ namespace eduart {
 namespace robot {
 
 RangeSensor::RangeSensor(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
-                         const tf2::Transform sensor_transform, const Parameter parameter, rclcpp::Node& ros_node)
+                         const tf2::Transform sensor_transform, const Parameter parameter, rclcpp::Node& ros_node,
+                         std::unique_ptr<HardwareSensorInterface<float>> hardware_interface)
   : Sensor(name, frame_id, reference_frame_id, sensor_transform)
   , _parameter(parameter)
   , _publisher(ros_node.create_publisher<sensor_msgs::msg::Range>(name + "/range", rclcpp::SensorDataQoS()))
   , _clock(ros_node.get_clock())
+  , _hardware_interface(std::move(hardware_interface))
 {
-
+  _hardware_interface->registerCallbackProcessMeasurementData(
+    std::bind(&RangeSensor::processMeasurementData, this, std::placeholders::_1)
+  );
 }                         
 
 void RangeSensor::processMeasurementData(const float measurement)

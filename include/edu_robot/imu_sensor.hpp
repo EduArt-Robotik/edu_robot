@@ -5,6 +5,7 @@
  */
 #pragma once
 
+#include "edu_robot/hardware_component_interface.hpp"
 #include "edu_robot/sensor.hpp"
 
 #include <Eigen/Dense>
@@ -27,7 +28,8 @@ public:
 
   ImuSensor(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
             const tf2::Transform sensor_transform, const Parameter parameter,
-            std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster, rclcpp::Node& ros_node);
+            std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster, rclcpp::Node& ros_node,
+            std::unique_ptr<HardwareSensorInterface<Eigen::Quaterniond>> hardware_interface);
   ~ImuSensor() override = default;
 
 protected:
@@ -37,6 +39,7 @@ private:
   const Parameter _parameter;
   std::shared_ptr<tf2_ros::TransformBroadcaster> _tf_broadcaster;
   std::shared_ptr<rclcpp::Clock> _clock;
+  std::unique_ptr<HardwareSensorInterface<Eigen::Quaterniond>> _hardware_interface;
 };
 
 } // end namespace eduart

@@ -5,13 +5,13 @@
  */
 #pragma once
 
-#include "edu_robot/robot.hpp"
+#include <edu_robot/eduard/eduard.hpp>
 
 namespace eduart {
 namespace robot {
 namespace iotbot {
 
-class IotBot : public eduart::robot::Robot
+class IotBot : public eduart::robot::eduard::Eduard
 {
 public:
   IotBot();

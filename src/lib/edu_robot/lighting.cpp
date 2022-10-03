@@ -3,8 +3,10 @@
 namespace eduart {
 namespace robot {
 
-Lighting::Lighting(const std::string& name, const Color default_color, const float default_brightness)
+Lighting::Lighting(const std::string& name, const Color default_color, const float default_brightness,
+                   std::unique_ptr<HardwareComponentInterface<Color, Mode>> hardware_interface)
   : _name(name)
+  , _hardware_interface(std::move(hardware_interface))
 {
   (void)default_color;
   (void)default_brightness;
@@ -12,13 +14,14 @@ Lighting::Lighting(const std::string& name, const Color default_color, const flo
 
 void Lighting::setColor(const Color color, const Mode mode)
 {
-  processSetColor(color, mode);
+  _hardware_interface->processSetValue(color, mode);
   _color = color;
 }
 
 void Lighting::setBrightness(const float brightness)
 {
-  processSetBrightness(brightness);
+  // processSetBrightness(brightness);
+  // \todo implement method!
   _brightness = brightness;
 }
 
