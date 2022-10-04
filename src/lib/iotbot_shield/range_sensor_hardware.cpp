@@ -20,6 +20,10 @@ RangeSensorHardware::RangeSensorHardware(const std::string& hardware_name, const
 
 void RangeSensorHardware::processRxData(const uart::message::RxMessageDataBuffer& data)
 {
+  if (_callback_process_measurement == nullptr) {
+    return;
+  }
+
   uart::message::ShieldResponse msg(data);
 
   switch (_id) {

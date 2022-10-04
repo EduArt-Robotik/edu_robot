@@ -73,6 +73,10 @@ CompoundMotorControllerHardware::~CompoundMotorControllerHardware()
 
 void CompoundMotorControllerHardware::processRxData(const uart::message::RxMessageDataBuffer &data)
 {
+  if (_callback_process_measurement == nullptr) {
+    return;
+  }
+  
   const uart::message::ShieldResponse msg(data);
 
   _dummy_motor_controllers[0]->_callback_process_measurement(msg.rpm0());

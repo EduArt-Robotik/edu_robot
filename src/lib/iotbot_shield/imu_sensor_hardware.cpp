@@ -18,6 +18,10 @@ ImuSensorHardware::ImuSensorHardware(const std::string& hardware_name, const Imu
  
 void ImuSensorHardware::processRxData(const uart::message::RxMessageDataBuffer& data)
 {
+  if (_callback_process_measurement == nullptr) {
+    return;
+  }
+  
   uart::message::ShieldResponse msg(data);
 
   _callback_process_measurement(msg.imuOrientation());
