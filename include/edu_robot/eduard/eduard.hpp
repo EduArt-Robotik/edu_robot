@@ -31,11 +31,11 @@ public:
   ~Eduard() override;
 
 protected:
-  void initialize(std::map<std::string, std::unique_ptr<HardwareComponentInterface<Color, Lighting::Mode>>> lightings_hardware,
+  void initialize(std::map<std::string, std::shared_ptr<HardwareComponentInterface<Color, Lighting::Mode>>> lightings_hardware,
                   std::map<std::string, std::shared_ptr<HardwareComponentInterface<Rpm>>> motor_controller_hardware,
                   std::map<std::string, std::shared_ptr<HardwareSensorInterface<Rpm>>> motor_sensor_hardware,
-                  std::map<std::string, std::unique_ptr<HardwareSensorInterface<float>>> range_sensor_hardware,
-                  std::map<std::string, std::unique_ptr<HardwareSensorInterface<Eigen::Quaterniond>>> imu_sensor_hardware);
+                  std::map<std::string, std::shared_ptr<HardwareSensorInterface<float>>> range_sensor_hardware,
+                  std::map<std::string, std::shared_ptr<HardwareSensorInterface<Eigen::Quaterniond>>> imu_sensor_hardware);
 };
 
 } // end namespace eduard

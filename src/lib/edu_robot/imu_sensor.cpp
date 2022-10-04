@@ -1,6 +1,7 @@
 #include "edu_robot/imu_sensor.hpp"
 #include "edu_robot/sensor.hpp"
 #include <functional>
+#include <memory>
 
 namespace eduart {
 namespace robot {
@@ -8,7 +9,7 @@ namespace robot {
 ImuSensor::ImuSensor(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
                      const tf2::Transform sensor_transform, const Parameter parameter,
                      std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster, rclcpp::Node& ros_node,
-                     std::unique_ptr<HardwareSensorInterface<Eigen::Quaterniond>> hardware_interface)
+                     std::shared_ptr<HardwareSensorInterface<Eigen::Quaterniond>> hardware_interface)
   : Sensor(name, frame_id, reference_frame_id, sensor_transform)
   , _parameter(parameter)
   , _tf_broadcaster(tf_broadcaster)

@@ -11,7 +11,7 @@ namespace robot {
 
 RangeSensor::RangeSensor(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
                          const tf2::Transform sensor_transform, const Parameter parameter, rclcpp::Node& ros_node,
-                         std::unique_ptr<HardwareSensorInterface<float>> hardware_interface)
+                         std::shared_ptr<HardwareSensorInterface<float>> hardware_interface)
   : Sensor(name, frame_id, reference_frame_id, sensor_transform)
   , _parameter(parameter)
   , _publisher(ros_node.create_publisher<sensor_msgs::msg::Range>(name + "/range", rclcpp::SensorDataQoS()))

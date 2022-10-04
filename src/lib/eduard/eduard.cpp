@@ -15,36 +15,36 @@ Eduard::Eduard(const std::string& robot_name, std::unique_ptr<RobotHardwareInter
   : robot::Robot(robot_name, std::move(hardware_interface))
 { }
 
-void Eduard::initialize(std::map<std::string, std::unique_ptr<HardwareComponentInterface<Color, Lighting::Mode>>> lightings_hardware,
+void Eduard::initialize(std::map<std::string, std::shared_ptr<HardwareComponentInterface<Color, Lighting::Mode>>> lightings_hardware,
                         std::map<std::string, std::shared_ptr<HardwareComponentInterface<Rpm>>> motor_controller_hardware,
                         std::map<std::string, std::shared_ptr<HardwareSensorInterface<Rpm>>> motor_sensor_hardware,
-                        std::map<std::string, std::unique_ptr<HardwareSensorInterface<float>>> range_sensor_hardware,
-                        std::map<std::string, std::unique_ptr<HardwareSensorInterface<Eigen::Quaterniond>>> imu_sensor_hardware)
+                        std::map<std::string, std::shared_ptr<HardwareSensorInterface<float>>> range_sensor_hardware,
+                        std::map<std::string, std::shared_ptr<HardwareSensorInterface<Eigen::Quaterniond>>> imu_sensor_hardware)
 {
   // Lightings
   registerLighting(std::make_shared<robot::Lighting>(
     "head",
     COLOR::DEFAULT::HEAD,
     1.0f,
-    std::move(lightings_hardware.at("head"))
+    lightings_hardware.at("head")
   ));
   registerLighting(std::make_shared<robot::Lighting>(
     "right_side",
     COLOR::DEFAULT::HEAD,
     1.0f,
-    std::move(lightings_hardware.at("right_side"))
+    lightings_hardware.at("right_side")
   ));
   registerLighting(std::make_shared<robot::Lighting>(
     "left_side",
     COLOR::DEFAULT::BACK,
     1.0f,
-    std::move(lightings_hardware.at("left_side"))
+    lightings_hardware.at("left_side")
   ));
   registerLighting(std::make_shared<robot::Lighting>(
     "back",
     COLOR::DEFAULT::BACK,
     1.0f,
-    std::move(lightings_hardware.at("back"))
+    lightings_hardware.at("back")
   ));
 
   // Use all representation to set a initial light.
@@ -52,8 +52,8 @@ void Eduard::initialize(std::map<std::string, std::unique_ptr<HardwareComponentI
     "all",
     COLOR::DEFAULT::HEAD,
     1.0f,
-    std::move(lightings_hardware.at("all")
-  ));
+    lightings_hardware.at("all")
+  );
   lighting_all->setColor(COLOR::DEFAULT::BACK, Lighting::Mode::RUNNING);
   registerLighting(lighting_all);
 
@@ -107,7 +107,7 @@ void Eduard::initialize(std::map<std::string, std::unique_ptr<HardwareComponentI
     tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.17, 0.063, 0.045)),
     range_sensor_parameter,
     *this,
-    std::move(range_sensor_hardware.at("range/front/left"))
+    range_sensor_hardware.at("range/front/left")
   );
   registerSensor(range_sensor);
   range_sensor->registerComponentInput(_collision_avoidance_component);
@@ -119,7 +119,7 @@ void Eduard::initialize(std::map<std::string, std::unique_ptr<HardwareComponentI
     tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.17, -0.063, 0.045)),
     range_sensor_parameter,
     *this,
-    std::move(range_sensor_hardware.at("range/front/right"))
+    range_sensor_hardware.at("range/front/right")
   );
   registerSensor(range_sensor);
   range_sensor->registerComponentInput(_collision_avoidance_component);
@@ -131,7 +131,7 @@ void Eduard::initialize(std::map<std::string, std::unique_ptr<HardwareComponentI
     tf2::Transform(tf2::Quaternion(0.0, 0.0, 1.0, 0.0), tf2::Vector3(-0.17, 0.063, 0.05)),
     range_sensor_parameter,
     *this,
-    std::move(range_sensor_hardware.at("range/rear/left"))
+    range_sensor_hardware.at("range/rear/left")
   );
   registerSensor(range_sensor);
   range_sensor->registerComponentInput(_collision_avoidance_component);
@@ -143,7 +143,7 @@ void Eduard::initialize(std::map<std::string, std::unique_ptr<HardwareComponentI
     tf2::Transform(tf2::Quaternion(0.0, 0.0, 1.0, 0.0), tf2::Vector3(-0.17, -0.063, 0.05)),
     range_sensor_parameter,
     *this,
-    std::move(range_sensor_hardware.at("range/rear/right"))
+    range_sensor_hardware.at("range/rear/right")
   );
   registerSensor(range_sensor);
   range_sensor->registerComponentInput(_collision_avoidance_component);
@@ -157,7 +157,7 @@ void Eduard::initialize(std::map<std::string, std::unique_ptr<HardwareComponentI
     ImuSensor::Parameter{ false, "base_link" },
     getTfBroadcaster(),
     *this,
-    std::move(imu_sensor_hardware.at("imu"))
+    imu_sensor_hardware.at("imu")
   );
   registerSensor(imu_sensor);
 

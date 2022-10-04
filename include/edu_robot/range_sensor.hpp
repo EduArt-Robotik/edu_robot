@@ -43,7 +43,7 @@ public:
 
   RangeSensor(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
               const tf2::Transform sensor_transform, const Parameter parameter, rclcpp::Node& ros_node,
-              std::unique_ptr<HardwareSensorInterface<float>> hardware_interface);
+              std::shared_ptr<HardwareSensorInterface<float>> hardware_interface);
   ~RangeSensor() override = default;
 
 protected:
@@ -53,7 +53,7 @@ private:
   const Parameter _parameter;
   std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::Range>> _publisher;
   std::shared_ptr<rclcpp::Clock> _clock;
-  std::unique_ptr<HardwareSensorInterface<float>> _hardware_interface;
+  std::shared_ptr<HardwareSensorInterface<float>> _hardware_interface;
 };
 
 } // end namespace eduart

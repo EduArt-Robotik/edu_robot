@@ -101,6 +101,7 @@ add_library(eduart-iotbot-shield
   src/lib/iotbot_shield/motor_controller_hardware.cpp
   src/lib/iotbot_shield/range_sensor_hardware.cpp
   src/lib/iotbot_shield/imu_sensor_hardware.cpp
+  src/lib/iotbot_shield/iotbot_hardware_component_factory.cpp
 )
 if(HAVE_MRAA) ## TODO: use string for dependencies, so onyl one target_link_libraries is there!
   message("MRAA library found")
@@ -141,7 +142,7 @@ install(
   DESTINATION include
 )
 install(
-  TARGETS iotbot-shield eduart-iotbot-shield eduart-robot
+  TARGETS iotbot-shield eduart-iotbot-shield eduart-robot-eduard eduart-robot
   EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
