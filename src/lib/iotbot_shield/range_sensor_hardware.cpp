@@ -1,7 +1,9 @@
 #include "edu_robot/iot_shield/range_sensor_hardware.hpp"
 #include "edu_robot/iot_shield/iot_shield_device.hpp"
 #include "edu_robot/iot_shield/uart/message_definition.hpp"
+#include "edu_robot/range_sensor.hpp"
 
+#include <rclcpp/node.hpp>
 #include <rclcpp/qos.hpp>
 #include <stdexcept>
 

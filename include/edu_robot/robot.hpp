@@ -46,6 +46,11 @@ protected:
   Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface);
 
 public:
+  struct Parameter {
+    std::string tf_base_frame = "base_link";
+    bool enable_collision_avoidance = false;
+  };
+
   virtual ~Robot();
 
   /**
@@ -78,6 +83,9 @@ protected:
 
   inline std::shared_ptr<tf2_ros::TransformBroadcaster> getTfBroadcaster() { return _tf_broadcaster; }
 
+  // Parameter
+  Parameter _parameter;
+
   // Hardware Interface
   std::shared_ptr<RobotHardwareInterface> _hardware_interface;
 
@@ -101,7 +109,6 @@ private:
   std::shared_ptr<rclcpp::Subscription<edu_robot::msg::SetLightingColor>> _sub_set_lighting_color;
 
   std::shared_ptr<tf2_ros::TransformBroadcaster> _tf_broadcaster;
-  std::string _tf_base_frame = "base_link";
 
   // Timer used for synchronous processing
   std::shared_ptr<rclcpp::TimerBase> _timer_status_report; 

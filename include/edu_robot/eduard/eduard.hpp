@@ -5,10 +5,9 @@
  */
 #pragma once
 
-#include "edu_robot/hardware_component_interface.hpp"
 #include <edu_robot/robot.hpp>
 
-#include <Eigen/Dense>
+#include "edu_robot/eduard/eduard_hardware_component_factory.hpp"
 
 #include <memory>
 #include <string>
@@ -27,15 +26,17 @@ struct COLOR {
 class Eduard : public robot::Robot
 {
 public:
+  struct Parameter {
+    std::string tf_footprint_frame = "base_footprint";
+  };
+
   Eduard(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface);
   ~Eduard() override;
 
 protected:
-  void initialize(std::map<std::string, std::shared_ptr<HardwareComponentInterface<Color, Lighting::Mode>>> lightings_hardware,
-                  std::map<std::string, std::shared_ptr<HardwareComponentInterface<Rpm>>> motor_controller_hardware,
-                  std::map<std::string, std::shared_ptr<HardwareSensorInterface<Rpm>>> motor_sensor_hardware,
-                  std::map<std::string, std::shared_ptr<HardwareSensorInterface<float>>> range_sensor_hardware,
-                  std::map<std::string, std::shared_ptr<HardwareSensorInterface<Eigen::Quaterniond>>> imu_sensor_hardware);
+  void initialize(EduardHardwareComponentFactory& factory);
+
+  Parameter _parameter;
 };
 
 } // end namespace eduard

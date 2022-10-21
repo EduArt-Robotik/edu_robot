@@ -36,9 +36,9 @@ public:
     float max_rpm = 140.0f;
     std::uint32_t control_frequency = 16000;
 
+    float kp = 0.5f;
     float ki = 5.0f;
     float kd = 0.0f;
-    float kp = 0.5f;
 
     float weight_low_pass_set_point = 0.2f;
     float weight_low_pass_encoder   = 0.3f;

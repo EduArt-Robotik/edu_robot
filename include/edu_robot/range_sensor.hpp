@@ -36,9 +36,9 @@ class RangeSensor : public Sensor
 {
 public:
   struct Parameter {
-    float field_of_view;
-    float range_min;
-    float range_max;
+    float field_of_view = 10.0f * M_PI / 180.0f;
+    float range_min = 0.01f;
+    float range_max = 5.0f;
   };
 
   RangeSensor(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,

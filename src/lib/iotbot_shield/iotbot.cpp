@@ -44,13 +44,7 @@ IotBot::IotBot()
          // IMU Sensor
          .addImuSensor("imu", "imu_hardware", robot::ImuSensor::Parameter{ });
 
-  initialize(
-    factory.lightingHardware(),
-    factory.motorControllerHardware(),
-    factory.motorSensorHardware(),
-    factory.rangeSensorHardware(),
-    factory.imuSensorHardware()
-  );
+  initialize(factory);
 }
 
 IotBot::~IotBot()

@@ -1,3 +1,5 @@
+#include "edu_robot/eduard/eduard_hardware_component_factory.hpp"
+#include <cstddef>
 #include <edu_robot/eduard/eduard.hpp>
 #include <edu_robot/hardware_component_interface.hpp>
 #include <edu_robot/motor_controller.hpp>
@@ -6,6 +8,7 @@
 #include <edu_robot/imu_sensor.hpp>
 
 #include <memory>
+#include <tf2/LinearMath/Transform.h>
 
 namespace eduart {
 namespace robot {
@@ -15,36 +18,32 @@ Eduard::Eduard(const std::string& robot_name, std::unique_ptr<RobotHardwareInter
   : robot::Robot(robot_name, std::move(hardware_interface))
 { }
 
-void Eduard::initialize(std::map<std::string, std::shared_ptr<HardwareComponentInterface<Color, Lighting::Mode>>> lightings_hardware,
-                        std::map<std::string, std::shared_ptr<HardwareComponentInterface<Rpm>>> motor_controller_hardware,
-                        std::map<std::string, std::shared_ptr<HardwareSensorInterface<Rpm>>> motor_sensor_hardware,
-                        std::map<std::string, std::shared_ptr<HardwareSensorInterface<float>>> range_sensor_hardware,
-                        std::map<std::string, std::shared_ptr<HardwareSensorInterface<Eigen::Quaterniond>>> imu_sensor_hardware)
+void Eduard::initialize(EduardHardwareComponentFactory& factory)
 {
   // Lightings
   registerLighting(std::make_shared<robot::Lighting>(
     "head",
     COLOR::DEFAULT::HEAD,
     1.0f,
-    lightings_hardware.at("head")
+    factory.lightingHardware().at("head")
   ));
   registerLighting(std::make_shared<robot::Lighting>(
     "right_side",
     COLOR::DEFAULT::HEAD,
     1.0f,
-    lightings_hardware.at("right_side")
+    factory.lightingHardware().at("right_side")
   ));
   registerLighting(std::make_shared<robot::Lighting>(
     "left_side",
     COLOR::DEFAULT::BACK,
     1.0f,
-    lightings_hardware.at("left_side")
+    factory.lightingHardware().at("left_side")
   ));
   registerLighting(std::make_shared<robot::Lighting>(
     "back",
     COLOR::DEFAULT::BACK,
     1.0f,
-    lightings_hardware.at("back")
+    factory.lightingHardware().at("back")
   ));
 
   // Use all representation to set a initial light.
@@ -52,112 +51,67 @@ void Eduard::initialize(std::map<std::string, std::shared_ptr<HardwareComponentI
     "all",
     COLOR::DEFAULT::HEAD,
     1.0f,
-    lightings_hardware.at("all")
+    factory.lightingHardware().at("all")
   );
   lighting_all->setColor(COLOR::DEFAULT::BACK, Lighting::Mode::RUNNING);
   registerLighting(lighting_all);
 
 
   // Motor Controllers
-  registerMotorController(std::make_shared<robot::MotorController>(
-    "motor_a",
-    0u,
-    robot::MotorController::Parameter{ },
-    "base_to_wheel_rear_right",
-    *this,
-    motor_controller_hardware.at("motor_a"),
-    motor_sensor_hardware.at("motor_a")
-  ));
-  registerMotorController(std::make_shared<robot::MotorController>(
-    "motor_b",
-    1u,
-    robot::MotorController::Parameter{ },
-    "base_to_wheel_front_right",
-    *this,
-    motor_controller_hardware.at("motor_b"),
-    motor_sensor_hardware.at("motor_b")
-  ));
-  registerMotorController(std::make_shared<robot::MotorController>(
-    "motor_c",
-    2u,
-    robot::MotorController::Parameter{ },
-    "base_to_wheel_rear_left",
-    *this,
-    motor_controller_hardware.at("motor_c"),
-    motor_sensor_hardware.at("motor_c")
-  ));
-  registerMotorController(std::make_shared<robot::MotorController>(
-    "motor_d",
-    3u,
-    robot::MotorController::Parameter{ },
-    "base_to_wheel_front_left",
-    *this,
-    motor_controller_hardware.at("motor_d"),
-    motor_sensor_hardware.at("motor_d")
-  ));
+  constexpr robot::MotorController::Parameter motor_controller_default_parameter{ };
+  constexpr std::array<const char*, 4> motor_controller_name = {
+    "motor_a", "motor_b", "motor_c", "motor_d" };
+  constexpr std::array<const char*, 4> motor_controller_joint_name = {
+    "base_to_wheel_rear_right", "base_to_wheel_front_right", "base_to_wheel_rear_left", "base_to_wheel_front_left" };
+
+  for (std::size_t i = 0; i < motor_controller_name.size(); ++i) {
+    registerMotorController(std::make_shared<robot::MotorController>(
+      motor_controller_name[i],
+      i,
+      motor_controller_default_parameter,
+      motor_controller_joint_name[i],
+      *this,
+      factory.motorControllerHardware().at(motor_controller_name[i]),
+      factory.motorSensorHardware().at(motor_controller_name[i])
+    ));
+  }
 
 
   // Range Sensors
+  constexpr std::array<const char*, 4> range_sensor_name = {
+    "range/front/left", "range/front/right", "range/rear/left", "range/rear/right" };
+  const std::array<tf2::Transform, 4> range_sensor_pose = {
+    tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3( 0.17,  0.063, 0.045)),
+    tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3( 0.17, -0.063, 0.045)),
+    tf2::Transform(tf2::Quaternion(0.0, 0.0, 1.0, 0.0), tf2::Vector3(-0.17,  0.063, 0.050)),
+    tf2::Transform(tf2::Quaternion(0.0, 0.0, 1.0, 0.0), tf2::Vector3(-0.17, -0.063, 0.050))
+  };
   constexpr eduart::robot::RangeSensor::Parameter range_sensor_parameter{ 10.0 * M_PI / 180.0, 0.01, 5.0 };
 
-  auto range_sensor = std::make_shared<robot::RangeSensor>(
-    "range/front/left",
-    "range/front/left",
-    "base_link",
-    tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.17, 0.063, 0.045)),
-    range_sensor_parameter,
-    *this,
-    range_sensor_hardware.at("range/front/left")
-  );
-  registerSensor(range_sensor);
-  range_sensor->registerComponentInput(_collision_avoidance_component);
-
-  range_sensor = std::make_shared<robot::RangeSensor>(
-    "range/front/right",
-    "range/front/right",
-    "base_link",
-    tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.17, -0.063, 0.045)),
-    range_sensor_parameter,
-    *this,
-    range_sensor_hardware.at("range/front/right")
-  );
-  registerSensor(range_sensor);
-  range_sensor->registerComponentInput(_collision_avoidance_component);
-
-  range_sensor = std::make_shared<robot::RangeSensor>(
-    "range/rear/left",
-    "range/rear/left",
-    "base_link",
-    tf2::Transform(tf2::Quaternion(0.0, 0.0, 1.0, 0.0), tf2::Vector3(-0.17, 0.063, 0.05)),
-    range_sensor_parameter,
-    *this,
-    range_sensor_hardware.at("range/rear/left")
-  );
-  registerSensor(range_sensor);
-  range_sensor->registerComponentInput(_collision_avoidance_component);
-
-  range_sensor = std::make_shared<robot::RangeSensor>(
-    "range/rear/right",
-    "range/rear/right",
-    "base_link",
-    tf2::Transform(tf2::Quaternion(0.0, 0.0, 1.0, 0.0), tf2::Vector3(-0.17, -0.063, 0.05)),
-    range_sensor_parameter,
-    *this,
-    range_sensor_hardware.at("range/rear/right")
-  );
-  registerSensor(range_sensor);
-  range_sensor->registerComponentInput(_collision_avoidance_component);
+  for (std::size_t i = 0; i < range_sensor_name.size(); ++i) {
+    auto range_sensor = std::make_shared<robot::RangeSensor>(
+      range_sensor_name[i],
+      get_effective_namespace() + range_sensor_name[i],
+      Robot::_parameter.tf_base_frame,
+      range_sensor_pose[i],
+      range_sensor_parameter,
+      *this,
+      factory.rangeSensorHardware().at(range_sensor_name[i])
+    );
+    registerSensor(range_sensor);
+    range_sensor->registerComponentInput(_collision_avoidance_component);
+  }
 
   // IMU Sensor
   auto imu_sensor = std::make_shared<robot::ImuSensor>(
     "imu",
-    "imu/base",
-    "base_footprint",
+    get_effective_namespace() + "/imu/base",
+    _parameter.tf_footprint_frame,
     tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.0, 0.0, 0.1)),
-    ImuSensor::Parameter{ false, "base_link" },
+    ImuSensor::Parameter{ false, Robot::_parameter.tf_base_frame },
     getTfBroadcaster(),
     *this,
-    imu_sensor_hardware.at("imu")
+    factory.imuSensorHardware().at("imu")
   );
   registerSensor(imu_sensor);
 
@@ -175,9 +129,6 @@ void Eduard::initialize(std::map<std::string, std::shared_ptr<HardwareComponentI
                         1.0f, 0.0f, -l_squared / (2.0f * l_y),
                         1.0f, 0.0f, -l_squared / (2.0f * l_y);
   _kinematic_matrix *= 1.0f / wheel_diameter;
-
-  // Configure Processing Components
-  
 }
 
 Eduard::~Eduard()

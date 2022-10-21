@@ -15,6 +15,7 @@
 #include <cstdio>
 #include <exception>
 #include <functional>
+#include <rclcpp/node.hpp>
 #include <rclcpp/qos.hpp>
 #include <stdexcept>
 
@@ -23,11 +24,28 @@ namespace robot {
 
 using namespace std::chrono_literals;
 
+static Robot::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
+{
+  Robot::Parameter parameter;
+  
+  // Declare Parameters
+  ros_node.declare_parameter<std::string>("tf_base_frame", parameter.tf_base_frame);
+  ros_node.declare_parameter<bool>("enable_collision_avoidance", parameter.enable_collision_avoidance);
+
+  // Get Parameter Values
+  parameter.tf_base_frame = ros_node.get_parameter("tf_base_frame").as_string();
+  parameter.enable_collision_avoidance = ros_node.get_parameter("enable_collision_avoidance").as_bool();
+
+  return parameter;
+}
+
 Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface)
   : rclcpp::Node(robot_name)
   , _hardware_interface(std::move(hardware_interface))
   , _tf_broadcaster(std::make_unique<tf2_ros::TransformBroadcaster>(*this))
 {
+  _parameter = get_robot_ros_parameter(*this);
+
   _pub_odometry = create_publisher<nav_msgs::msg::Odometry>(
     "odometry",
     rclcpp::QoS(2).reliable().durability_volatile()
