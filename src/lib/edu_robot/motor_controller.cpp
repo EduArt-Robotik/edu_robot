@@ -23,7 +23,7 @@ MotorController::Parameter get_motor_controller_parameter(
   ros_node.declare_parameter<float>(name + "/weight_low_pass_set_point", default_parameter.weight_low_pass_set_point);
   ros_node.declare_parameter<float>(name + "/weight_low_pass_encoder", default_parameter.weight_low_pass_encoder);
 
-  parameter.gear_ratio = ros_node.get_parameter("/gear_ratio").as_double();
+  parameter.gear_ratio = ros_node.get_parameter(name + "/gear_ratio").as_double();
   parameter.encoder_ratio = ros_node.get_parameter(name + "/encoder_ratio").as_double();
   parameter.max_rpm = ros_node.get_parameter(name + "/max_rpm").as_double();
   parameter.control_frequency = ros_node.get_parameter(name + "/control_frequency").as_int();

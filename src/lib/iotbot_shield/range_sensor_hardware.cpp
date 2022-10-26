@@ -12,12 +12,13 @@ namespace robot {
 namespace iotbot {
 
 RangeSensorHardware::RangeSensorHardware(const std::string& hardware_name, const std::uint8_t id, 
-                                         const RangeSensor::Parameter& parameter)
+                                         const Parameter& parameter)
   : IotShieldDevice(hardware_name)
   , IotShieldRxDevice(hardware_name)
+  , _parameter(parameter)
   , _id(id)
 {
-  (void)parameter;
+
 }
 
 void RangeSensorHardware::processRxData(const uart::message::RxMessageDataBuffer& data)

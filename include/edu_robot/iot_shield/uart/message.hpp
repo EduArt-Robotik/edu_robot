@@ -5,13 +5,13 @@
  */
 #pragma once
 
-#include <cstddef>
-#include <cstdint>
-#include <cstring>
+#include <edu_robot/rotation_per_minute.hpp>
+
+#include <algorithm>
 #include <array>
 #include <tuple>
-#include <type_traits>
 #include <utility>
+#include <cstdint>
 
 namespace eduart {
 namespace robot {
@@ -68,156 +68,172 @@ using RxMessageDataBuffer = std::array<std::uint8_t, uart::message::UART::BUFFER
 namespace element {
 namespace impl {
 
-template <typename ElementDataType>
-struct Element {
-  static constexpr std::size_t SIZE = sizeof(ElementDataType);
-  using DataType = ElementDataType;
+// inline constexpr bool is_big_endian() {
+//   constexpr std::uint32_t integer = 0x01020304;
+//   const void* address = static_cast<const void*>(&integer);
+//   const std::uint8_t* bits = static_cast<const std::uint8_t*>(address);
+
+//   return bits[0] == 1;
+// }
+
+template <typename DataType>
+struct DataField {
+  inline static constexpr std::size_t size() { return sizeof(DataType); }
+  using type = DataType;
 
   // It is a default serialization. On demand customization should take place in derived classes.
-  static constexpr std::array<Byte, SIZE> serialize(const DataType value)
+  inline static constexpr std::array<Byte, size()> serialize(const DataType value)
   {
-    union {
-      const Byte* bytes;
-      const DataType* input;
-    } const serializer{ reinterpret_cast<const Byte*>(&value) };
-
-    std::array<Byte, SIZE> serialized_bytes{ 0 };
-    std::memcpy(serialized_bytes.data(), serializer.bytes, serialized_bytes.size());
+    std::array<Byte, size()> serialized_bytes = {0};
+    void* data_address = static_cast<void*>(serialized_bytes.data());
+    *static_cast<DataType*>(data_address) = value;
 
     return serialized_bytes;
   }
-  static constexpr DataType deserialize(const Byte data[SIZE])
+  inline static constexpr DataType deserialize(const Byte data[size()])
   {
-    union {
-      DataType value;
-      Byte bytes[SIZE];
-    } serializer{ };
-    std::memcpy(serializer.bytes, data, SIZE);
-
-    return serializer.value;
+    const void* data_address = static_cast<const void*>(data);
+    return *static_cast<const DataType*>(data_address);
   }
-  inline static constexpr bool isElementValid(const Byte[SIZE]) { return true; }
+  inline static constexpr bool isElementValid(const Byte[size()]) { return true; }
 };
 
-template <typename ElementDataType, ElementDataType Value>
-struct ConstElement : public Element<ElementDataType> {
-  static constexpr ElementDataType VALUE = Value;
-  static constexpr std::size_t SIZE = sizeof(ElementDataType);
-  static constexpr std::array<Byte, SIZE> serialize(const ElementDataType) { return {{ VALUE }}; }
-  static constexpr bool isElementValid(const Byte data[SIZE]) {
-    return VALUE == Element<ElementDataType>::deserialize(data);
+template <typename DataType, DataType Value>
+struct ConstDataField : public DataField<DataType> {
+  using DataField<DataType>::size;
+  using type = typename DataField<DataType>::type;
+
+  inline static constexpr DataType value() { return Value; }
+  inline static constexpr std::array<Byte, size()> serialize(const DataType) {
+    return DataField<DataType>::serialize(Value); }
+  inline static constexpr bool isElementValid(const Byte data[size()]) {
+    return Value == DataField<DataType>::deserialize(data);
   }
+  inline static constexpr std::array<Byte, size()> makeSearchPattern() {
+    return DataField<DataType>::serialize(Value); }
 };
 
-/**
- * \brief This class constructs a UART message based on the given message elements. Methods
- *        to (de-)serialize and to check received message candidate are provided.
- *
- * \todo make a static version for received message checking --> no instantiation necessary.
- */
-template <std::size_t Index, std::size_t ByteIndex, class... Elements>
-struct Message;
+template <std::size_t Index, class Message>
+struct element_byte_index;
 
-template <std::size_t Index, std::size_t ByteIndex>
-struct Message<Index, ByteIndex>{
-protected:
-  inline constexpr bool isElementValid() const { return true; }
-
-  std::array<Byte, ByteIndex> _buffer;
+template <std::size_t Index, class HeadElement, class... TailElements>
+struct element_byte_index<Index, std::tuple<HeadElement, TailElements...>> : element_byte_index<Index - 1, std::tuple<TailElements...>>{
+  constexpr static std::size_t value = HeadElement::size() + element_byte_index<Index - 1, std::tuple<TailElements...>>::value;
 };
 
-template <std::size_t Index, std::size_t ByteIndex, class HeadElement, class... TailElements>
-struct Message<Index, ByteIndex, HeadElement, TailElements...>
-  : public Message<Index + 1, ByteIndex + HeadElement::SIZE, TailElements...>
+template <class HeadElement, class... TailElements>
+struct element_byte_index<0, std::tuple<HeadElement, TailElements...>> { 
+  constexpr static std::size_t value = HeadElement::size();
+};
+// /**
+//  * \brief This class constructs a UART message based on the given message elements. Methods
+//  *        to (de-)serialize and to check received message candidate are provided.
+//  *
+//  * \todo make a static version for received message checking --> no instantiation necessary.
+//  */
+// template <std::size_t Index, std::size_t ByteIndex, class... Elements>
+// struct MessageElement;
+
+// template <std::size_t Index, std::size_t ByteIndex>
+// struct MessageElement<Index, ByteIndex>{ };
+
+// template <std::size_t Index, std::size_t ByteIndex, class HeadElement, class... TailElements>
+// struct MessageElement<Index, ByteIndex, HeadElement, TailElements...>
+//   : public MessageElement<Index + 1, ByteIndex + HeadElement::size(), TailElements...>
+// {
+//   using ElementType = HeadElement;
+// };
+
+// template <std::size_t Index, class MessageType>
+// struct message_element;
+
+// template <std::size_t Index, std::size_t ByteIndex, class HeadElement, class... TailElements>
+// struct message_element<Index, MessageElement<0, 0, HeadElement, TailElements...>> { using type = HeadElement; };
+
+template <class... Elements>
+constexpr TxMessageDataBuffer serialize(Elements&&... element_value, const std::tuple<Elements...>)
 {
-protected:
-  static constexpr std::size_t BYTE_INDEX = ByteIndex;
-  using Message<Index + 1, ByteIndex + HeadElement::SIZE, TailElements...>::_buffer;
+  TxMessageDataBuffer tx_buffer;
+  std::size_t byte_offset = 0;
 
-  Message() = default;
+  ([&]{
+    const auto serialized_bytes = Elements::serialize(std::forward<Elements>(element_value));
+    std::copy(serialized_bytes.begin(), serialized_bytes.end(), tx_buffer.begin() + byte_offset);    
+    byte_offset += serialized_bytes.size();
+  }(), ...);
 
-  template <class HeadArgument, class... TailArguments>
-  constexpr Message(const HeadArgument head_arg, const TailArguments... tail_args)
-    : Message<Index + 1, ByteIndex + HeadElement::SIZE, TailElements...>(tail_args...)
-  {
-    const auto serialized_bytes = serialize(head_arg);
-    std::memcpy(&_buffer[BYTE_INDEX], serialized_bytes.data(), serialized_bytes.size());
-  }
-  inline constexpr bool isElementValid() const {
-    return HeadElement::isElementValid(&_buffer[BYTE_INDEX])
-           &&
-           Message<Index + 1, ByteIndex + HeadElement::SIZE, TailElements...>::isElementValid();
-  }
+  return tx_buffer;
+}
 
-public:
-  inline constexpr typename HeadElement::DataType get() const {
-    return HeadElement::deserialize(&_buffer[ByteIndex]);
-  }
-  inline static constexpr std::array<Byte, HeadElement::SIZE> serialize(const typename HeadElement::DataType value) {
-    return HeadElement::serialize(value);
-  }
-};
+template <std::size_t... Indices, class... Elements>
+inline constexpr auto make_message_search_pattern(const std::tuple<Elements...>)
+{
+  constexpr std::size_t bytes = (std::tuple_element<Indices, std::tuple<Elements...>>::type::size() + ...);
+  std::array<Byte, bytes> search_pattern;
+  auto it_search_pattern = search_pattern.begin();
 
-template <std::size_t Index, std::size_t ByteIndex, class HeadElement, class... TailElements>
-typename HeadElement::DataType get(const Message<Index, ByteIndex, HeadElement, TailElements...>& message) {
-  return message.get();
+  ([&]{
+    const auto element_pattern = std::tuple_element<Indices, std::tuple<Elements...>>::type::makeSearchPattern();
+    std::copy(element_pattern.begin(), element_pattern.end(), it_search_pattern);
+    it_search_pattern += element_pattern.size();
+  }(), ...);
+
+  return search_pattern;
 }
 
 } // end namespace impl
 
-using StartByte = impl::ConstElement<Byte, UART::BUFFER::START_BYTE>;
-using StopByte  = impl::ConstElement<Byte, UART::BUFFER::END_BYTE>;
+using StartByte = impl::ConstDataField<Byte, UART::BUFFER::START_BYTE>;
+using StopByte  = impl::ConstDataField<Byte, UART::BUFFER::END_BYTE>;
 
 template <Byte UartCommand>
-struct Command : public impl::ConstElement<Byte, UartCommand> { };
-
-struct Float  : public impl::Element<float> { };
-struct Int16  : public impl::Element<std::int16_t> { };
-struct Uint8  : public impl::Element<std::uint8_t> { };
-struct Uint32 : public impl::Element<std::uint32_t> { };
+struct Command : public impl::ConstDataField<Byte, UartCommand> { };
+struct Float  : public impl::DataField<float> { };
+struct Int16  : public impl::DataField<std::int16_t> {
+  inline static constexpr std::array<Byte, size()> serialize(const Rpm value) {
+    return impl::DataField<std::int16_t>::serialize(static_cast<std::int16_t>(value * 100.0f + 0.5f));
+  }
+};
+struct Uint8  : public impl::DataField<std::uint8_t> {
+  inline static constexpr std::array<Byte, size()> serialize(const bool value) {
+    return impl::DataField<std::uint8_t>::serialize(static_cast<std::uint8_t>(value));
+  }
+};
+struct Uint32 : public impl::DataField<std::uint32_t> { };
 
 } // end namespace element
 
 template <class... Elements>
-struct Message : public element::impl::Message<0u, 0u, Elements...>
+struct Message : public std::tuple<Elements...>
 {
-protected:
-  static constexpr std::size_t SIZE = (Elements::SIZE + ...);
-  using element::impl::Message<0u, 0u, Elements...>::_buffer;
-
-public:
-  Message(const std::array<Byte, SIZE>& message_candidate)
-    : element::impl::Message<0u, 0u, Elements...>()
-  {
-    _buffer = message_candidate;
-  }
-
-  template <typename... Arguments>
-  Message(const Arguments... args) : element::impl::Message<0u, 0u, Elements...>(args...)
-  { }
-
-  inline static constexpr std::size_t size() { return SIZE; }
-  inline constexpr const std::array<Byte, SIZE>& data() const { return _buffer; }
-  inline constexpr bool isMessageCandidateValid() const {
-    return element::impl::Message<0u, 0u, Elements...>::isElementValid();
+  inline static constexpr std::size_t size() { return (Elements::size() + ...); }
+  static constexpr TxMessageDataBuffer serialize(Elements&&... element_value) {
+    return element::impl::serialize(element_value..., std::tuple<Elements...>{});
   }
   template <std::size_t Index>
-  inline constexpr auto getElementValue() const { return element::impl::get<Index>(*this); }
+  inline constexpr static typename std::tuple_element<Index, std::tuple<Elements...>>::type::type deserialize(
+    const RxMessageDataBuffer& rx_buffer) {
+      return std::tuple_element<Index, std::tuple<Elements...>>::type::deserialize(
+        rx_buffer.data() + element::impl::element_byte_index<Index, std::tuple<Elements...>>::value
+      );
+  }
 };
 
 template <class CommandByte, class ...Elements>
 struct MessageFrame : public Message<element::StartByte, CommandByte, Elements..., element::StopByte>
 {
+private:
+  using MessageType = Message<element::StartByte, CommandByte, Elements..., element::StopByte>;
+
 public:
-  using Message<element::StartByte, CommandByte, Elements..., element::StopByte>::SIZE;
+  using MessageType::size;
 
-  MessageFrame(const typename Elements::DataType... args)
-    : Message<element::StartByte, CommandByte, Elements..., element::StopByte>(0u, 0u, args..., 0u) // 0u are dummy for const values
-  { }
-
-  MessageFrame(const std::array<Byte, SIZE>& buffer)
-    : Message<element::StartByte, CommandByte, Elements..., element::StopByte>(buffer)
-  { }
+  inline constexpr static TxMessageDataBuffer serialize(Elements&&... element_value) {
+    return MessageType::serialize(0, CommandByte::value(), element_value..., 0);
+  }
+  inline constexpr static auto makeSearchPattern() {
+    return element::impl::make_message_search_pattern<1>(MessageType{});
+  }
 };
 
 

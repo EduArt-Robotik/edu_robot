@@ -41,7 +41,7 @@ IotBotHardwareComponentFactory::addMotorController(const std::string& motor_name
 
 IotBotHardwareComponentFactory&
 IotBotHardwareComponentFactory::addRangeSensor(const std::string& sensor_name, const std::string& hardware_name,
-                                               const std::uint8_t id, const robot::RangeSensor::Parameter& parameter)
+                                               const std::uint8_t id, const RangeSensorHardware::Parameter& parameter)
 {
   auto range_sensor_hardware = std::make_shared<RangeSensorHardware>(hardware_name, id, parameter);
   _shield->registerIotShieldRxDevice(range_sensor_hardware);

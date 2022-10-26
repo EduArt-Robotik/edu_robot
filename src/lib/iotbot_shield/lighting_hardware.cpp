@@ -12,6 +12,7 @@ namespace robot {
 namespace iotbot {
 
 using uart::message::UART;
+using namespace std::chrono_literals;
 
 LightingHardware::LightingHardware(const std::string& hardware_name,
                                    std::shared_ptr<IotShieldCommunicator> communicator)
@@ -45,25 +46,50 @@ void LightingHardware::processSetValue(const Color& color, const robot::Lighting
   //   break;
 
     // all lightings are addressed
-  case Mode::DIM:
-    _communicator->sendBytes(uart::message::SetLighting<UART::COMMAND::LIGHTING::DIM>(color).data());
-    break;
+  case Mode::DIM: {
+    auto request = ShieldRequest::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::DIM>>(
+      0, color.r, color.g, color.b);
+    auto response = _communicator->sendRequest(std::move(request));
+    response.wait_for(100ms);
+    response.get();
+  }
+  break;
 
-  case Mode::OFF:
-    _communicator->sendBytes(uart::message::SetLighting<UART::COMMAND::LIGHTING::OFF>(color).data());
-    break;
+  case Mode::OFF: {
+    auto request = ShieldRequest::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::OFF>>(
+      0, color.r, color.g, color.b, 0);
+    auto response = _communicator->sendRequest(std::move(request));
+    response.wait_for(100ms);
+    response.get();    
+  }
+  break;
 
-  case Mode::PULSATION:
-    _communicator->sendBytes(uart::message::SetLighting<UART::COMMAND::LIGHTING::PULSATION>(color).data());
-    break;
+  case Mode::PULSATION: {
+    auto request = ShieldRequest::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::PULSATION>>(
+      0, color.r, color.g, color.b, 0);
+    auto response = _communicator->sendRequest(std::move(request));
+    response.wait_for(100ms);
+    response.get();    
+  }  
+  break;
 
-  case Mode::ROTATION:
-    _communicator->sendBytes(uart::message::SetLighting<UART::COMMAND::LIGHTING::ROTATION>(color).data());
-    break;
+  case Mode::ROTATION: {
+    auto request = ShieldRequest::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::ROTATION>>(
+      0, color.r, color.g, color.b, 0);
+    auto response = _communicator->sendRequest(std::move(request));
+    response.wait_for(100ms);
+    response.get();
+  }
+  break;
 
-  case Mode::RUNNING:
-    _communicator->sendBytes(uart::message::SetLighting<UART::COMMAND::LIGHTING::RUNNING>(color).data());
-    break;
+  case Mode::RUNNING: {
+    auto request = ShieldRequest::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::RUNNING>>(
+      0, color.r, color.g, color.b, 0);
+    auto response = _communicator->sendRequest(std::move(request));
+    response.wait_for(100ms);
+    response.get();    
+  }
+  break;
 
   default:
     throw std::invalid_argument("given mode is not handled");

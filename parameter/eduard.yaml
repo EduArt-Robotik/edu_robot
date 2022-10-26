@@ -1,0 +1,77 @@
+/IotBot:
+  ros__parameters:
+    enable_collision_avoidance: false
+
+    imu:
+      raw_data_mode: false
+      tf_frame_rotated: 'imu/rotated'
+
+    motor_a:
+      control_frequency: 16000
+      encoder_ratio: 2048.0
+      gear_ratio: 70.0
+      max_rpm: 140.0
+      pid/kd: 0.0
+      pid/ki: 5.0
+      pid/kp: 0.5
+      weight_low_pass_encoder: 0.3
+      weight_low_pass_set_point: 0.2
+    
+    motor_b:
+      control_frequency: 16000
+      encoder_ratio: 2048.0
+      gear_ratio: 70.0
+      max_rpm: 140.0
+      pid/kd: 0.0
+      pid/ki: 5.0
+      pid/kp: 0.5
+      weight_low_pass_encoder: 0.3
+      weight_low_pass_set_point: 0.2
+
+    motor_c:
+      control_frequency: 16000
+      encoder_ratio: 2048.0
+      gear_ratio: 70.0
+      max_rpm: 140.0
+      pid/kd: 0.0
+      pid/ki: 5.0
+      pid/kp: 0.5
+      weight_low_pass_encoder: 0.3
+      weight_low_pass_set_point: 0.2
+
+    motor_d:  
+      control_frequency: 16000
+      encoder_ratio: 2048.0
+      gear_ratio: 70.0
+      max_rpm: 140.0
+      pid/kd: 0.0
+      pid/ki: 5.0
+      pid/kp: 0.5
+      weight_low_pass_encoder: 0.3
+      weight_low_pass_set_point: 0.2
+
+    range:
+      front:
+        left:
+          field_of_view: 0.1745329201221466
+          range_max: 5.0
+          range_min: 0.01
+
+        right:
+          field_of_view: 0.174532920122146
+          range_max: 5.
+          range_min: 0.01
+
+      rear:
+        left:
+          field_of_view: 0.1745329201221466
+          range_max: 5.0
+          range_min: 0.01
+
+        right:
+          field_of_view: 0.1745329201221466
+          range_max: 5.0
+          range_min: 0.01
+          
+    tf_base_frame: base_link
+    use_sim_time: false

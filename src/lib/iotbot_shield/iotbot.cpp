@@ -34,13 +34,13 @@ IotBot::IotBot()
          .addMotorController("motor", "motor_hardware", robot::MotorController::Parameter{ })
          // Range Sensor
          .addRangeSensor("range/front/left", "range/front/left/hardware",
-                         0u, robot::RangeSensor::Parameter{ })
+                         0u, RangeSensorHardware::Parameter{ })
          .addRangeSensor("range/front/right", "range/front/right/hardware",
-                         1u, robot::RangeSensor::Parameter{ })
+                         1u, RangeSensorHardware::Parameter{ })
          .addRangeSensor("range/rear/left", "range/rear/left/hardware",
-                         2u, robot::RangeSensor::Parameter{ })
+                         2u, RangeSensorHardware::Parameter{ })
          .addRangeSensor("range/rear/right", "range/rear/right/hardware",
-                         3u, robot::RangeSensor::Parameter{ })
+                         3u, RangeSensorHardware::Parameter{ })
          // IMU Sensor
          .addImuSensor("imu", "imu_hardware", robot::ImuSensor::Parameter{ });
 

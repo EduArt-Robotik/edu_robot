@@ -14,6 +14,8 @@ enum class State {
   MOTOR_ERROR,
   LOW_BATTERY,
   EMERGENCY_STOP,
+  UART_SENDING_FAILED,
+  UART_RECEIVING_FAILED,
 };
 
 } // end namespace robot

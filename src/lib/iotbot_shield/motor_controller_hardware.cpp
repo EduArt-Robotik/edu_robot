@@ -11,6 +11,8 @@ namespace eduart {
 namespace robot {
 namespace iotbot {
 
+using namespace std::chrono_literals;
+
 DummyMotorControllerHardware::DummyMotorControllerHardware(const std::string& hardware_name)
   : _current_set_value(0.0)
 {
@@ -46,24 +48,50 @@ CompoundMotorControllerHardware::CompoundMotorControllerHardware(const std::stri
 
   using uart::message::UART;
 
-  _communicator->sendBytes(uart::message::SetValueF<UART::COMMAND::SET::KP>(parameter.kp).data());
-  _communicator->sendBytes(uart::message::SetValueF<UART::COMMAND::SET::KI>(parameter.ki).data());
-  _communicator->sendBytes(uart::message::SetValueF<UART::COMMAND::SET::KD>(parameter.kd).data());
-  _communicator->sendBytes(uart::message::SetValueF<UART::COMMAND::SET::SET_POINT_LOW_PASS>(
-    parameter.weight_low_pass_set_point).data()
-  );
-  _communicator->sendBytes(uart::message::SetValueF<UART::COMMAND::SET::ENCODER_LOW_PASS>(
-    parameter.weight_low_pass_encoder).data()
-  );
-  _communicator->sendBytes(uart::message::SetValueF<UART::COMMAND::SET::GEAR_RATIO>(
-    parameter.gear_ratio).data()
-  );
-  _communicator->sendBytes(uart::message::SetValueF<UART::COMMAND::SET::TICKS_PER_REV>(
-    parameter.encoder_ratio).data()
-  );
-  _communicator->sendBytes(uart::message::SetValueU<UART::COMMAND::SET::CONTROL_FREQUENCY>(
-    parameter.control_frequency).data()
-  );
+  auto request = ShieldRequest::make_request<uart::message::SetValueF<UART::COMMAND::SET::KP>>(
+    parameter.kp, 0);
+  auto future_response = _communicator->sendRequest(std::move(request));
+  future_response.wait_for(100ms);
+  future_response.get();
+
+  request = ShieldRequest::make_request<uart::message::SetValueF<UART::COMMAND::SET::KI>>(parameter.ki, 0);
+  future_response = _communicator->sendRequest(std::move(request));
+  future_response.wait_for(100ms);
+  future_response.get();
+
+  request = ShieldRequest::make_request<uart::message::SetValueF<UART::COMMAND::SET::KD>>(parameter.kd, 0);
+  future_response = _communicator->sendRequest(std::move(request));
+  future_response.wait_for(100ms);
+  future_response.get();
+
+  request = ShieldRequest::make_request<uart::message::SetValueF<UART::COMMAND::SET::SET_POINT_LOW_PASS>>(
+    parameter.weight_low_pass_set_point, 0);
+  future_response = _communicator->sendRequest(std::move(request));
+  future_response.wait_for(100ms);
+  future_response.get();
+
+  request = ShieldRequest::make_request<uart::message::SetValueF<UART::COMMAND::SET::ENCODER_LOW_PASS>>(
+    parameter.weight_low_pass_encoder, 0);
+  future_response = _communicator->sendRequest(std::move(request));
+  future_response.wait_for(100ms);
+  future_response.get();
+
+  request = ShieldRequest::make_request<uart::message::SetValueF<UART::COMMAND::SET::GEAR_RATIO>>(parameter.gear_ratio, 0);
+  future_response = _communicator->sendRequest(std::move(request));
+  future_response.wait_for(100ms);
+  future_response.get();
+
+  request = ShieldRequest::make_request<uart::message::SetValueF<UART::COMMAND::SET::TICKS_PER_REV>>(
+    parameter.encoder_ratio, 0);
+  future_response = _communicator->sendRequest(std::move(request));
+  future_response.wait_for(100ms);
+  future_response.get();
+
+  request = ShieldRequest::make_request<uart::message::SetValueF<UART::COMMAND::SET::CONTROL_FREQUENCY>>(
+    parameter.control_frequency, 0);
+  future_response = _communicator->sendRequest(std::move(request));
+  future_response.wait_for(100ms);
+  future_response.get();
 }            
 
 CompoundMotorControllerHardware::~CompoundMotorControllerHardware()
@@ -77,24 +105,23 @@ void CompoundMotorControllerHardware::processRxData(const uart::message::RxMessa
     return;
   }
   
-  const uart::message::ShieldResponse msg(data);
-
-  _dummy_motor_controllers[0]->_callback_process_measurement(msg.rpm0());
-  _dummy_motor_controllers[1]->_callback_process_measurement(msg.rpm1());
-  _dummy_motor_controllers[2]->_callback_process_measurement(msg.rpm2());
-  _callback_process_measurement(msg.rpm3());
+  _dummy_motor_controllers[0]->_callback_process_measurement(uart::message::ShieldResponse::rpm0(data));
+  _dummy_motor_controllers[1]->_callback_process_measurement(uart::message::ShieldResponse::rpm1(data));
+  _dummy_motor_controllers[2]->_callback_process_measurement(uart::message::ShieldResponse::rpm2(data));
+  _callback_process_measurement(uart::message::ShieldResponse::rpm3(data));
 }
 
 void CompoundMotorControllerHardware::processSetValue(const Rpm& rpm)
 {
-  const uart::message::SetRpm uart_message(
+  auto request = ShieldRequest::make_request<uart::message::SetRpm>(
     _dummy_motor_controllers[0]->_current_set_value,
     _dummy_motor_controllers[1]->_current_set_value,
     _dummy_motor_controllers[2]->_current_set_value,
     rpm
   );
-
-  _communicator->sendBytes(uart_message.data());
+  auto future_response = _communicator->sendRequest(std::move(request));
+  future_response.wait_for(100ms);
+  future_response.get();
 }
 
 } // end namespace iotbot

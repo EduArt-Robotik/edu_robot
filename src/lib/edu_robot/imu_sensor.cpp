@@ -2,16 +2,31 @@
 #include "edu_robot/sensor.hpp"
 #include <functional>
 #include <memory>
+#include <rclcpp/node.hpp>
 
 namespace eduart {
 namespace robot {
+
+static ImuSensor::Parameter get_imu_sensor_parameter(
+  const std::string sensor_name, const ImuSensor::Parameter& default_parameter, rclcpp::Node& ros_node)
+{
+  ImuSensor::Parameter parameter;
+
+  ros_node.declare_parameter<bool>(sensor_name + "/raw_data_mode", default_parameter.raw_data_mode);
+  ros_node.declare_parameter<std::string>(sensor_name + "/tf_frame_rotated", parameter.rotated_frame);
+
+  parameter.raw_data_mode = ros_node.get_parameter(sensor_name + "/raw_data_mode").as_bool();
+  parameter.rotated_frame = ros_node.get_parameter(sensor_name + "/tf_frame_rotated").as_string();
+
+  return parameter;
+}
 
 ImuSensor::ImuSensor(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
                      const tf2::Transform sensor_transform, const Parameter parameter,
                      std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster, rclcpp::Node& ros_node,
                      std::shared_ptr<HardwareSensorInterface<Eigen::Quaterniond>> hardware_interface)
   : Sensor(name, frame_id, reference_frame_id, sensor_transform)
-  , _parameter(parameter)
+  , _parameter(get_imu_sensor_parameter(name, parameter, ros_node))
   , _tf_broadcaster(tf_broadcaster)
   , _clock(ros_node.get_clock())
   , _hardware_interface(std::move(hardware_interface))

@@ -94,14 +94,14 @@ target_link_libraries(eduart-robot-eduard
 
 # Library Eduart IotBot Shield
 add_library(eduart-iotbot-shield
-  src/lib/iotbot_shield/iot_shield.cpp
+#  src/lib/iotbot_shield/iot_shield.cpp
   src/lib/iotbot_shield/iot_shield_communicator.cpp
   src/lib/iotbot_shield/lighting_hardware.cpp
-  src/lib/iotbot_shield/iotbot.cpp
-  src/lib/iotbot_shield/motor_controller_hardware.cpp
-  src/lib/iotbot_shield/range_sensor_hardware.cpp
-  src/lib/iotbot_shield/imu_sensor_hardware.cpp
-  src/lib/iotbot_shield/iotbot_hardware_component_factory.cpp
+#  src/lib/iotbot_shield/iotbot.cpp
+#  src/lib/iotbot_shield/motor_controller_hardware.cpp
+#  src/lib/iotbot_shield/range_sensor_hardware.cpp
+#  src/lib/iotbot_shield/imu_sensor_hardware.cpp
+#  src/lib/iotbot_shield/iotbot_hardware_component_factory.cpp
 )
 if(HAVE_MRAA) ## TODO: use string for dependencies, so onyl one target_link_libraries is there!
   message("MRAA library found")

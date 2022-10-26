@@ -6,6 +6,7 @@
 #pragma once
 
 #include "edu_robot/iot_shield/iot_shield.hpp"
+#include "edu_robot/iot_shield/range_sensor_hardware.hpp"
 
 #include <edu_robot/eduard/eduard_hardware_component_factory.hpp>
 
@@ -27,7 +28,7 @@ public:
   IotBotHardwareComponentFactory& addMotorController(const std::string& motor_name, const std::string& hardware_name,
                                                      const eduart::robot::MotorController::Parameter& parameter);
   IotBotHardwareComponentFactory& addRangeSensor(const std::string& sensor_name, const std::string& hardware_name,
-                                                 const std::uint8_t id, const robot::RangeSensor::Parameter& parameter);
+                                                 const std::uint8_t id, const RangeSensorHardware::Parameter& parameter);
   IotBotHardwareComponentFactory& addImuSensor(const std::string& sensor_name, const std::string& hardware_name,
                                                const robot::ImuSensor::Parameter parameter);
 

@@ -7,13 +7,18 @@ namespace eduart {
 namespace robot {
 namespace iotbot {
 
+using namespace std::chrono_literals;
+
 ImuSensorHardware::ImuSensorHardware(const std::string& hardware_name, const ImuSensor::Parameter parameter,
                                      std::shared_ptr<IotShieldCommunicator> communicator)
   : IotShieldDevice(hardware_name)
   , IotShieldTxRxDevice(hardware_name, communicator)
 {
   // set IMU data mode
-  _communicator->sendBytes(uart::message::SetImuRawDataMode(parameter.raw_mode).data());
+  auto request = ShieldRequest::make_request<uart::message::SetImuRawDataMode>(parameter.raw_data_mode, 0, 0, 0);
+  auto response = _communicator->sendRequest(std::move(request));
+  response.wait_for(100ms);
+  response.get();
 }
  
 void ImuSensorHardware::processRxData(const uart::message::RxMessageDataBuffer& data)
@@ -22,9 +27,7 @@ void ImuSensorHardware::processRxData(const uart::message::RxMessageDataBuffer& 
     return;
   }
   
-  uart::message::ShieldResponse msg(data);
-
-  _callback_process_measurement(msg.imuOrientation());
+  _callback_process_measurement(uart::message::ShieldResponse::imuOrientation(data));
 }
 
 } // end namespace iotbot
