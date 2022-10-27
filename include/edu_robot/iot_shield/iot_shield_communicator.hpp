@@ -11,6 +11,7 @@
 #include <atomic>
 #include <list>
 #include <mutex>
+#include <utility>
 #include <vector>
 
 #if _WITH_MRAA
@@ -46,17 +47,17 @@ class ShieldRequest
   };
 
 public:
-  template <class Message, class... Elements>
-  inline static ShieldRequest make_request(typename Elements::type&&... element_value) {
-    return ShieldRequest(Message{}, element_value...);
+  template <class Message, class... Arguments>
+  inline static ShieldRequest make_request(Arguments&&... args) {
+    return ShieldRequest(Message{}, std::forward<Arguments>(args)...);
   }
   ShieldRequest(ShieldRequest&&) = default;
 
 private:
-  template <class Message, class... Elements>
-  ShieldRequest(const Message, typename Elements::type&&... element_value) {
-    _request_message = Message::serialize(element_value...);
-    const auto search_pattern = Message::makeSearchPattern();
+  template <class CommandByte, class... Elements>
+  ShieldRequest(const uart::message::MessageFrame<CommandByte, Elements...>, const typename Elements::type&... element_value) {
+    _request_message = uart::message::MessageFrame<CommandByte, Elements...>::serialize(element_value...);
+    const auto search_pattern = uart::message::MessageFrame<CommandByte, Elements...>::makeSearchPattern();
 
     std::copy(search_pattern.begin(), search_pattern.end(), _response_search_pattern.begin());
   }

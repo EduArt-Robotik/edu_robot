@@ -27,23 +27,21 @@ void RangeSensorHardware::processRxData(const uart::message::RxMessageDataBuffer
     return;
   }
 
-  uart::message::ShieldResponse msg(data);
-
   switch (_id) {
   case 0u:
-    _callback_process_measurement(msg.range0());
+    _callback_process_measurement(uart::message::ShieldResponse::range0(data));
     break;
 
   case 1u:
-    _callback_process_measurement(msg.range1());
+    _callback_process_measurement(uart::message::ShieldResponse::range1(data));
     break;
 
   case 2u:
-    _callback_process_measurement(msg.range2());
+    _callback_process_measurement(uart::message::ShieldResponse::range2(data));
     break;
 
   case 3u:
-    _callback_process_measurement(msg.range3());
+    _callback_process_measurement(uart::message::ShieldResponse::range3(data));
     break;
 
   default:

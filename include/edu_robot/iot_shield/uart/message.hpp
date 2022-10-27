@@ -151,13 +151,13 @@ struct element_byte_index<0, std::tuple<HeadElement, TailElements...>> {
 // struct message_element<Index, MessageElement<0, 0, HeadElement, TailElements...>> { using type = HeadElement; };
 
 template <class... Elements>
-constexpr TxMessageDataBuffer serialize(Elements&&... element_value, const std::tuple<Elements...>)
+constexpr TxMessageDataBuffer serialize(const typename Elements::type&... element_value, const std::tuple<Elements...>)
 {
   TxMessageDataBuffer tx_buffer;
   std::size_t byte_offset = 0;
 
   ([&]{
-    const auto serialized_bytes = Elements::serialize(std::forward<Elements>(element_value));
+    const auto serialized_bytes = Elements::serialize(element_value);
     std::copy(serialized_bytes.begin(), serialized_bytes.end(), tx_buffer.begin() + byte_offset);    
     byte_offset += serialized_bytes.size();
   }(), ...);
@@ -207,8 +207,8 @@ template <class... Elements>
 struct Message : public std::tuple<Elements...>
 {
   inline static constexpr std::size_t size() { return (Elements::size() + ...); }
-  static constexpr TxMessageDataBuffer serialize(Elements&&... element_value) {
-    return element::impl::serialize(element_value..., std::tuple<Elements...>{});
+  static constexpr TxMessageDataBuffer serialize(const typename Elements::type&... element_value) {
+    return element::impl::serialize<Elements...>(element_value..., std::tuple<Elements...>{});
   }
   template <std::size_t Index>
   inline constexpr static typename std::tuple_element<Index, std::tuple<Elements...>>::type::type deserialize(
@@ -228,7 +228,7 @@ private:
 public:
   using MessageType::size;
 
-  inline constexpr static TxMessageDataBuffer serialize(Elements&&... element_value) {
+  inline constexpr static TxMessageDataBuffer serialize(const typename Elements::type&... element_value) {
     return MessageType::serialize(0, CommandByte::value(), element_value..., 0);
   }
   inline constexpr static auto makeSearchPattern() {

@@ -48,7 +48,7 @@ void LightingHardware::processSetValue(const Color& color, const robot::Lighting
     // all lightings are addressed
   case Mode::DIM: {
     auto request = ShieldRequest::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::DIM>>(
-      0, color.r, color.g, color.b);
+      color.r, color.g, color.b, 0, 0);
     auto response = _communicator->sendRequest(std::move(request));
     response.wait_for(100ms);
     response.get();
@@ -57,7 +57,7 @@ void LightingHardware::processSetValue(const Color& color, const robot::Lighting
 
   case Mode::OFF: {
     auto request = ShieldRequest::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::OFF>>(
-      0, color.r, color.g, color.b, 0);
+      color.r, color.g, color.b, 0, 0);
     auto response = _communicator->sendRequest(std::move(request));
     response.wait_for(100ms);
     response.get();    
@@ -66,7 +66,7 @@ void LightingHardware::processSetValue(const Color& color, const robot::Lighting
 
   case Mode::PULSATION: {
     auto request = ShieldRequest::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::PULSATION>>(
-      0, color.r, color.g, color.b, 0);
+      color.r, color.g, color.b, 0, 0);
     auto response = _communicator->sendRequest(std::move(request));
     response.wait_for(100ms);
     response.get();    
@@ -75,7 +75,7 @@ void LightingHardware::processSetValue(const Color& color, const robot::Lighting
 
   case Mode::ROTATION: {
     auto request = ShieldRequest::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::ROTATION>>(
-      0, color.r, color.g, color.b, 0);
+      color.r, color.g, color.b, 0, 0);
     auto response = _communicator->sendRequest(std::move(request));
     response.wait_for(100ms);
     response.get();
@@ -84,7 +84,7 @@ void LightingHardware::processSetValue(const Color& color, const robot::Lighting
 
   case Mode::RUNNING: {
     auto request = ShieldRequest::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::RUNNING>>(
-      0, color.r, color.g, color.b, 0);
+      color.r, color.g, color.b, 0, 0);
     auto response = _communicator->sendRequest(std::move(request));
     response.wait_for(100ms);
     response.get();    

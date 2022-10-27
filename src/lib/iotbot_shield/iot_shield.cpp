@@ -15,6 +15,7 @@ namespace robot {
 namespace iotbot {
 
 using uart::message::UART;
+using namespace std::chrono_literals;
 
 IotShield::IotShield(char const* const device_name)
   : _communicator(std::make_shared<IotShieldCommunicator>(device_name))
@@ -24,7 +25,11 @@ IotShield::IotShield(char const* const device_name)
   );
 
   // set UART timeout
-  _communicator->sendBytes(uart::message::SetValueF<UART::COMMAND::SET::UART_TIMEOUT>(1.0f).data());
+  auto request = ShieldRequest::make_request<uart::message::SetValueF<UART::COMMAND::SET::UART_TIMEOUT>>(
+    1.0f, 0);
+  auto future_response = _communicator->sendRequest(std::move(request));
+  future_response.wait_for(100ms);
+  future_response.get();
 }
 
 IotShield::~IotShield()
@@ -34,12 +39,18 @@ IotShield::~IotShield()
 
 void IotShield::enable()
 {
-  _communicator->sendBytes(uart::message::Enable().data());
+  auto request = ShieldRequest::make_request<uart::message::Enable>(0, 0);
+  auto future_response = _communicator->sendRequest(std::move(request));
+  future_response.wait_for(100ms);
+  future_response.get();  
 }
 
 void IotShield::disable()
 {
-  _communicator->sendBytes(uart::message::Disable().data());
+  auto request = ShieldRequest::make_request<uart::message::Disable>(0, 0);
+  auto future_response = _communicator->sendRequest(std::move(request));
+  future_response.wait_for(100ms);
+  future_response.get();    
 }
 
 RobotStatusReport IotShield::getStatusReport()
@@ -58,16 +69,14 @@ void IotShield::registerIotShieldRxDevice(std::shared_ptr<IotShieldRxDevice> dev
 
 void IotShield::processStatusReport(const uart::message::RxMessageDataBuffer& buffer)
 {
-  uart::message::ShieldResponse msg(buffer);
-
-  _report.temperature = msg.temperature();
-  _report.voltage.mcu = msg.voltage();
-  _report.current.mcu = msg.current();
+  _report.temperature = uart::message::ShieldResponse::temperature(buffer);
+  _report.voltage.mcu = uart::message::ShieldResponse::voltage(buffer);
+  _report.current.mcu = uart::message::ShieldResponse::current(buffer);
   _report.rpm.resize(4u);
-  _report.rpm[0] = msg.rpm0();
-  _report.rpm[1] = msg.rpm1();
-  _report.rpm[2] = msg.rpm2();
-  _report.rpm[3] = msg.rpm3();
+  _report.rpm[0] = uart::message::ShieldResponse::rpm0(buffer);
+  _report.rpm[1] = uart::message::ShieldResponse::rpm1(buffer);
+  _report.rpm[2] = uart::message::ShieldResponse::rpm2(buffer);
+  _report.rpm[3] = uart::message::ShieldResponse::rpm3(buffer);
   
   _status_report_ready = true;
 

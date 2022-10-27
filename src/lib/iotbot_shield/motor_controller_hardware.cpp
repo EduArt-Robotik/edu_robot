@@ -54,42 +54,41 @@ CompoundMotorControllerHardware::CompoundMotorControllerHardware(const std::stri
   future_response.wait_for(100ms);
   future_response.get();
 
-  request = ShieldRequest::make_request<uart::message::SetValueF<UART::COMMAND::SET::KI>>(parameter.ki, 0);
-  future_response = _communicator->sendRequest(std::move(request));
+  future_response = _communicator->sendRequest(
+    ShieldRequest::make_request<uart::message::SetValueF<UART::COMMAND::SET::KI>>(parameter.ki, 0));
   future_response.wait_for(100ms);
   future_response.get();
 
-  request = ShieldRequest::make_request<uart::message::SetValueF<UART::COMMAND::SET::KD>>(parameter.kd, 0);
-  future_response = _communicator->sendRequest(std::move(request));
+  future_response = _communicator->sendRequest(
+    ShieldRequest::make_request<uart::message::SetValueF<UART::COMMAND::SET::KD>>(parameter.kd, 0));
   future_response.wait_for(100ms);
   future_response.get();
 
-  request = ShieldRequest::make_request<uart::message::SetValueF<UART::COMMAND::SET::SET_POINT_LOW_PASS>>(
-    parameter.weight_low_pass_set_point, 0);
-  future_response = _communicator->sendRequest(std::move(request));
+  future_response = _communicator->sendRequest(
+    ShieldRequest::make_request<uart::message::SetValueF<UART::COMMAND::SET::SET_POINT_LOW_PASS>>(
+      parameter.weight_low_pass_set_point, 0));
   future_response.wait_for(100ms);
   future_response.get();
 
-  request = ShieldRequest::make_request<uart::message::SetValueF<UART::COMMAND::SET::ENCODER_LOW_PASS>>(
-    parameter.weight_low_pass_encoder, 0);
-  future_response = _communicator->sendRequest(std::move(request));
+  future_response = _communicator->sendRequest(ShieldRequest::make_request<uart::message::SetValueF<UART::COMMAND::SET::ENCODER_LOW_PASS>>(
+    parameter.weight_low_pass_encoder, 0));
   future_response.wait_for(100ms);
   future_response.get();
 
-  request = ShieldRequest::make_request<uart::message::SetValueF<UART::COMMAND::SET::GEAR_RATIO>>(parameter.gear_ratio, 0);
-  future_response = _communicator->sendRequest(std::move(request));
+  future_response = _communicator->sendRequest(
+    ShieldRequest::make_request<uart::message::SetValueF<UART::COMMAND::SET::GEAR_RATIO>>(parameter.gear_ratio, 0));
   future_response.wait_for(100ms);
   future_response.get();
 
-  request = ShieldRequest::make_request<uart::message::SetValueF<UART::COMMAND::SET::TICKS_PER_REV>>(
-    parameter.encoder_ratio, 0);
-  future_response = _communicator->sendRequest(std::move(request));
+  future_response = _communicator->sendRequest(
+    ShieldRequest::make_request<uart::message::SetValueF<UART::COMMAND::SET::TICKS_PER_REV>>(
+      parameter.encoder_ratio, 0));
   future_response.wait_for(100ms);
   future_response.get();
 
-  request = ShieldRequest::make_request<uart::message::SetValueF<UART::COMMAND::SET::CONTROL_FREQUENCY>>(
-    parameter.control_frequency, 0);
-  future_response = _communicator->sendRequest(std::move(request));
+  future_response = _communicator->sendRequest(
+    ShieldRequest::make_request<uart::message::SetValueF<UART::COMMAND::SET::CONTROL_FREQUENCY>>(
+      parameter.control_frequency, 0));
   future_response.wait_for(100ms);
   future_response.get();
 }            
