@@ -156,11 +156,20 @@ void IotShieldCommunicator::processing()
     if (_new_received_data == true) {
       // Reading data thread is waiting.
       try {
-        const auto& rx_buffer = _rx_buffer;
+        uart::message::RxMessageDataBuffer rx_buffer;
+        {
+          std::unique_lock lock(_mutex_receiving_data);
+          rx_buffer = _rx_buffer_queue.front();
+          _rx_buffer_queue.pop();
+
+          if (_rx_buffer_queue.size() == 0) {
+            _new_received_data = false;
+          }
+        }        
         {
           // Make received data available for polling.
           std::lock_guard guard(_mutex_received_data_copy);
-          _rx_buffer_copy = _rx_buffer;
+          _rx_buffer_copy = rx_buffer;
         }
 
         for (auto it =_open_request.begin(); it != _open_request.end();) {
@@ -179,9 +188,6 @@ void IotShieldCommunicator::processing()
           // else
           ++it;
         }
-        // Start reading data thread again.
-        _new_received_data = false;
-        _cv_receiving_data.notify_all();
       }
       catch (std::exception& ex) {
         // \todo this class needs an logger!
@@ -295,18 +301,25 @@ void IotShieldCommunicator::processReceiving()
 #endif
 
     try {
-      _rx_buffer = receivingData();
+      uart::message::RxMessageDataBuffer rx_buffer;
+      rx_buffer = receivingData();
+
+      {
+        std::unique_lock lock(_mutex_receiving_data);
+        _rx_buffer_queue.emplace(rx_buffer);
+        _new_received_data = true;
+      }
     }
     catch (std::exception& ex) {
       std::cout << "error occurred during receiving data: what() = " << ex.what() << std::endl;
       std::cout << "drop message" << std::endl;
       continue;
     }
-    {
-      std::unique_lock lock(_mutex_receiving_data);
-      _new_received_data = true;
-      _cv_receiving_data.wait(lock);
-    }
+    // {
+    //   std::unique_lock lock(_mutex_receiving_data);
+    //   _new_received_data = true;
+    //   _cv_receiving_data.wait(lock);
+    // }
   }
 }
 

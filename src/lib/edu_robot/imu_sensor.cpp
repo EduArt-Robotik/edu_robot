@@ -13,7 +13,7 @@ static ImuSensor::Parameter get_imu_sensor_parameter(
   ImuSensor::Parameter parameter;
 
   ros_node.declare_parameter<bool>(sensor_name + "/raw_data_mode", default_parameter.raw_data_mode);
-  ros_node.declare_parameter<std::string>(sensor_name + "/tf_frame_rotated", parameter.rotated_frame);
+  ros_node.declare_parameter<std::string>(sensor_name + "/tf_frame_rotated", default_parameter.rotated_frame);
 
   parameter.raw_data_mode = ros_node.get_parameter(sensor_name + "/raw_data_mode").as_bool();
   parameter.rotated_frame = ros_node.get_parameter(sensor_name + "/tf_frame_rotated").as_string();

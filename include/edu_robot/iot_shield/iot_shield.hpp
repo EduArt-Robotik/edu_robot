@@ -12,6 +12,8 @@
 #include "edu_robot/robot_hardware_interface.hpp"
 #include "edu_robot/robot_status_report.hpp"
 
+#include <rclcpp/timer.hpp>
+
 #include <memory>
 #include <array>
 #include <vector>

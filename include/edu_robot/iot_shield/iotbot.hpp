@@ -16,6 +16,9 @@ class IotBot : public eduart::robot::eduard::Eduard
 public:
   IotBot();
   ~IotBot() override;
+
+private:
+  std::shared_ptr<rclcpp::TimerBase> _timer_process_status_report;
 };
 
 } // end namespace iotbot

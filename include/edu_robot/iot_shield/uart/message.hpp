@@ -12,6 +12,7 @@
 #include <tuple>
 #include <utility>
 #include <cstdint>
+#include <cstddef>
 
 namespace eduart {
 namespace robot {
@@ -118,12 +119,15 @@ struct element_byte_index;
 
 template <std::size_t Index, class HeadElement, class... TailElements>
 struct element_byte_index<Index, std::tuple<HeadElement, TailElements...>> : element_byte_index<Index - 1, std::tuple<TailElements...>>{
-  constexpr static std::size_t value = HeadElement::size() + element_byte_index<Index - 1, std::tuple<TailElements...>>::value;
+  constexpr static std::size_t value = element_byte_index<Index - 1, std::tuple<TailElements...>>::value
+                                     + element_byte_index<Index - 1, std::tuple<TailElements...>>::size();
 };
 
 template <class HeadElement, class... TailElements>
 struct element_byte_index<0, std::tuple<HeadElement, TailElements...>> { 
-  constexpr static std::size_t value = HeadElement::size();
+  constexpr static std::size_t value = 0;
+protected:
+  constexpr static std::size_t size() { return HeadElement::size(); }
 };
 // /**
 //  * \brief This class constructs a UART message based on the given message elements. Methods

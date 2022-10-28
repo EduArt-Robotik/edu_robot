@@ -91,7 +91,7 @@ void Eduard::initialize(EduardHardwareComponentFactory& factory)
   for (std::size_t i = 0; i < range_sensor_name.size(); ++i) {
     auto range_sensor = std::make_shared<robot::RangeSensor>(
       range_sensor_name[i],
-      get_effective_namespace() + "/" + range_sensor_name[i],
+      /*get_effective_namespace() + "/" + */range_sensor_name[i],
       Robot::_parameter.tf_base_frame,
       range_sensor_pose[i],
       range_sensor_parameter,
@@ -105,8 +105,8 @@ void Eduard::initialize(EduardHardwareComponentFactory& factory)
   // IMU Sensor
   auto imu_sensor = std::make_shared<robot::ImuSensor>(
     "imu",
-    get_effective_namespace() + "/imu/base",
-    get_effective_namespace() + "/" + _parameter.tf_footprint_frame,
+    /*get_effective_namespace() + "/*/"imu/base",
+    /*get_effective_namespace() + "/*/_parameter.tf_footprint_frame,
     tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.0, 0.0, 0.1)),
     ImuSensor::Parameter{ false, Robot::_parameter.tf_base_frame },
     getTfBroadcaster(),

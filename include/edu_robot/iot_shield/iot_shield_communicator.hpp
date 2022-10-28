@@ -116,9 +116,8 @@ private:
   // Reading Thread
   std::mutex _mutex_receiving_data;
   std::mutex _mutex_received_data_copy;
-  std::condition_variable _cv_receiving_data;
   std::thread _uart_receiving_thread;
-  uart::message::RxMessageDataBuffer _rx_buffer;
+  std::queue<uart::message::RxMessageDataBuffer> _rx_buffer_queue;
   uart::message::RxMessageDataBuffer _rx_buffer_copy;
   std::atomic_bool _new_received_data;
 

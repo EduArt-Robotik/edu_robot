@@ -26,7 +26,7 @@ IotBot::IotBot()
 {
   auto iot_shield = std::dynamic_pointer_cast<IotShield>(_hardware_interface);
   auto factory = IotBotHardwareComponentFactory(iot_shield);
-  this->create_wall_timer(100ms, [iot_shield]{ iot_shield->processStatusReport(); });
+  _timer_process_status_report = create_wall_timer(100ms, [iot_shield]{ iot_shield->processStatusReport(); });
 
           // Lightings
   factory.addLighting("head", "head_lighting")
