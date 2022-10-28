@@ -43,6 +43,7 @@ IotShieldCommunicator::IotShieldCommunicator(char const* const device_name)
   }
    
   _uart->flush();
+  while (_uart->dataAvailable(1) == true) { char buffer; _uart->read(&buffer, 1); }
 #else
   (void)device_name;
   std::cerr << "UART interface not available. MRAA is missing!" << std::endl;
@@ -61,6 +62,7 @@ IotShieldCommunicator::IotShieldCommunicator(char const* const device_name)
 
 IotShieldCommunicator::~IotShieldCommunicator()
 {
+  std::cout << "Shuting down shield communicator." << std::endl;
 #if _WITH_MRAA
   _uart->flush();
 #endif
@@ -89,6 +91,13 @@ std::future<ShieldRequest> IotShieldCommunicator::sendRequest(ShieldRequest requ
   return future;
 }
 
+uart::message::RxMessageDataBuffer IotShieldCommunicator::getRxBuffer()
+{
+  // Make received data available for polling.
+  std::lock_guard guard(_mutex_received_data_copy);
+  return _rx_buffer_copy;
+}
+
 template <typename Left, typename Right>
 static bool is_same(const Left& lhs, const Right& rhs) {
   if (lhs.size() > rhs.size()) {
@@ -107,6 +116,8 @@ static bool is_same(const Left& lhs, const Right& rhs) {
 void IotShieldCommunicator::processing()
 {
   while (_is_running) {
+    auto start = std::chrono::system_clock::now();
+
     // Process New Input Requests
     if (_new_incoming_requests) {
       std::scoped_lock lock(_mutex_sending_data, _mutex_data_input);
@@ -146,6 +157,11 @@ void IotShieldCommunicator::processing()
       // Reading data thread is waiting.
       try {
         const auto& rx_buffer = _rx_buffer;
+        {
+          // Make received data available for polling.
+          std::lock_guard guard(_mutex_received_data_copy);
+          _rx_buffer_copy = _rx_buffer;
+        }
 
         for (auto it =_open_request.begin(); it != _open_request.end();) {
           const auto& search_pattern = it->first._response_search_pattern;
@@ -171,6 +187,13 @@ void IotShieldCommunicator::processing()
         // \todo this class needs an logger!
         std::cout << "Error occurred during reading UART interface: what() = " << ex.what() << std::endl;
       }
+    }
+
+    // Make a period of 1ms
+    // \todo fix lines below. Its a bit nasty.
+    if (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start) < 1ms) {
+      const auto diff = 1ms - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start);
+      std::this_thread::sleep_for(diff);      
     }
   }
 }
@@ -236,16 +259,21 @@ void IotShieldCommunicator::processSending(const std::chrono::milliseconds wait_
       now = std::chrono::system_clock::now();
     }       
 
+    bool sending_data_available;
+    {
+      std::lock_guard guard(_mutex_sending_data);
+      sending_data_available = _sending_in_progress.empty() == false;
+    }
+
+    if (sending_data_available == false) {
+      std::this_thread::sleep_for(1ms);
+      continue;      
+    }
+
     // Execute Task if Available
     TaskSendingUart task;
     {
       std::lock_guard guard(_mutex_sending_data);
-
-      if (_sending_in_progress.empty()) {
-        std::this_thread::sleep_for(1ms); // \todo bad idea to keep look during sleep!
-        continue;
-      }
-
       task = std::move(_sending_in_progress.front());
       _sending_in_progress.pop();
     }
@@ -281,8 +309,6 @@ void IotShieldCommunicator::processReceiving()
     }
   }
 }
-
-
 
 } // end namespace iotbot
 } // end namespace eduart

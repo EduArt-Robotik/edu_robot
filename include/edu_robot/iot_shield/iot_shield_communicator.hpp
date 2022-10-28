@@ -82,6 +82,7 @@ public:
 
   void registerProcessReceivedBytes(std::function<void(const uart::message::RxMessageDataBuffer&)> callback);
   std::future<ShieldRequest> sendRequest(ShieldRequest request);
+  uart::message::RxMessageDataBuffer getRxBuffer();
 
 private:
   void processSending(const std::chrono::milliseconds wait_time_after_sending);
@@ -114,9 +115,11 @@ private:
 
   // Reading Thread
   std::mutex _mutex_receiving_data;
+  std::mutex _mutex_received_data_copy;
   std::condition_variable _cv_receiving_data;
   std::thread _uart_receiving_thread;
   uart::message::RxMessageDataBuffer _rx_buffer;
+  uart::message::RxMessageDataBuffer _rx_buffer_copy;
   std::atomic_bool _new_received_data;
 
   std::list<ShieldRequest> _open_response_tasks;

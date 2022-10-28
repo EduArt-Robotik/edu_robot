@@ -34,10 +34,9 @@ public:
 
   std::shared_ptr<IotShieldCommunicator> getCommunicator() { return _communicator; }
   void registerIotShieldRxDevice(std::shared_ptr<IotShieldRxDevice> device);
+  void processStatusReport();
 
 private:
-  void processStatusReport(const uart::message::RxMessageDataBuffer& buffer);
-
   std::shared_ptr<IotShieldCommunicator> _communicator;
   uart::message::TxMessageDataBuffer _tx_buffer;
   std::vector<std::shared_ptr<IotShieldRxDevice>> _rx_devices;

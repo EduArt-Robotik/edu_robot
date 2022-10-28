@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <memory>
 
+#include <rclcpp/create_timer.hpp>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Transform.h>
 #include <tf2/LinearMath/Vector3.h>
@@ -18,11 +19,14 @@ namespace eduart {
 namespace robot {
 namespace iotbot {
 
+using namespace std::chrono_literals;
+
 IotBot::IotBot()
   : eduart::robot::eduard::Eduard("IotBot", std::make_unique<IotShield>("/dev/ttyS1"))
 {
   auto iot_shield = std::dynamic_pointer_cast<IotShield>(_hardware_interface);
   auto factory = IotBotHardwareComponentFactory(iot_shield);
+  this->create_wall_timer(100ms, [iot_shield]{ iot_shield->processStatusReport(); });
 
           // Lightings
   factory.addLighting("head", "head_lighting")

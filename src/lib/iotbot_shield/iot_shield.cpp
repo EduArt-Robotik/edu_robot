@@ -20,10 +20,6 @@ using namespace std::chrono_literals;
 IotShield::IotShield(char const* const device_name)
   : _communicator(std::make_shared<IotShieldCommunicator>(device_name))
 {
-  _communicator->registerProcessReceivedBytes(
-    std::bind(&IotShield::processStatusReport, this, std::placeholders::_1)
-  );
-
   // set UART timeout
   auto request = ShieldRequest::make_request<uart::message::SetValueF<UART::COMMAND::SET::UART_TIMEOUT>>(
     1.0f, 0);
@@ -67,8 +63,9 @@ void IotShield::registerIotShieldRxDevice(std::shared_ptr<IotShieldRxDevice> dev
   _rx_devices.push_back(device);
 }
 
-void IotShield::processStatusReport(const uart::message::RxMessageDataBuffer& buffer)
+void IotShield::processStatusReport()
 {
+  const auto buffer = _communicator->getRxBuffer();
   _report.temperature = uart::message::ShieldResponse::temperature(buffer);
   _report.voltage.mcu = uart::message::ShieldResponse::voltage(buffer);
   _report.current.mcu = uart::message::ShieldResponse::current(buffer);
