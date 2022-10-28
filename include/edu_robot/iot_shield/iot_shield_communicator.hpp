@@ -59,6 +59,7 @@ private:
     _request_message = uart::message::MessageFrame<CommandByte, Elements...>::serialize(element_value...);
     const auto search_pattern = uart::message::MessageFrame<CommandByte, Elements...>::makeSearchPattern();
 
+    _response_search_pattern.resize(search_pattern.size());
     std::copy(search_pattern.begin(), search_pattern.end(), _response_search_pattern.begin());
   }
 
@@ -68,7 +69,6 @@ private:
   std::chrono::time_point<std::chrono::system_clock> _was_sent_at;
   std::chrono::time_point<std::chrono::system_clock> _was_received_at;  
   std::vector<uart::message::Byte> _response_search_pattern;
-  std::promise<ShieldRequest> _response; //> will be set by communicator
 };
 
 class IotShieldCommunicator
@@ -85,7 +85,7 @@ public:
 
 private:
   void processSending(const std::chrono::milliseconds wait_time_after_sending);
-  void processReceiving(TaskReceiving task);
+  void processReceiving();
   void processing();
   void sendingData(const uart::message::TxMessageDataBuffer& tx_buffer);
   uart::message::RxMessageDataBuffer receivingData();
@@ -101,10 +101,9 @@ private:
   std::mutex _mutex_data_input;
   std::atomic_bool _is_running;
   std::atomic_bool _new_incoming_requests;
-  std::queue<ShieldRequest> _incoming_requests;
-  std::queue<std::pair<ShieldRequest, std::future<void>>> _is_being_send;
-  std::list<ShieldRequest> _open_request;
-  std::future<uart::message::RxMessageDataBuffer> _future_received_data;
+  std::queue<std::pair<ShieldRequest, std::promise<ShieldRequest>>> _incoming_requests;
+  std::queue<std::pair<std::pair<ShieldRequest, std::promise<ShieldRequest>>, std::future<void>>> _is_being_send;
+  std::list<std::pair<ShieldRequest, std::promise<ShieldRequest>>> _open_request;
 
   // Sending Thread
   std::chrono::milliseconds _wait_time_after_sending;
@@ -115,7 +114,10 @@ private:
 
   // Reading Thread
   std::mutex _mutex_receiving_data;
+  std::condition_variable _cv_receiving_data;
   std::thread _uart_receiving_thread;
+  uart::message::RxMessageDataBuffer _rx_buffer;
+  std::atomic_bool _new_received_data;
 
   std::list<ShieldRequest> _open_response_tasks;
 };
