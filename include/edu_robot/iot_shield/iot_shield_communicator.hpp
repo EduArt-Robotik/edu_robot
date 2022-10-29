@@ -7,6 +7,10 @@
 
 #include "edu_robot/iot_shield/uart/message.hpp"
 #include "edu_robot/iot_shield/uart/message_definition.hpp"
+
+#include <edu_robot/state.hpp>
+#include <edu_robot/hardware_error.hpp>
+
 #include <algorithm>
 #include <atomic>
 #include <list>
@@ -70,6 +74,13 @@ private:
   std::chrono::time_point<std::chrono::system_clock> _was_received_at;  
   std::vector<uart::message::Byte> _response_search_pattern;
 };
+
+template <typename Duration>
+inline void wait_for_future(std::future<ShieldRequest>& future, const Duration& timeout) {
+  if (future.wait_for(timeout) == std::future_status::timeout) {
+    throw HardwareError(State::SHIELD_REQUEST_TIMEOUT, "UART Request Timeout! Cancel set RPM to motor controller.");
+  }
+}
 
 class IotShieldCommunicator
 {

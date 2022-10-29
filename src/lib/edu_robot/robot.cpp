@@ -92,13 +92,23 @@ Robot::~Robot()
 
 void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> twist_msg)
 {
-  // \todo maybe a size check would be great!
-  Eigen::Vector3f velocity_cmd(twist_msg->linear.x, twist_msg->linear.y, twist_msg->angular.z);
-  velocity_cmd *= _collision_avoidance_component->getVelocityReduceFactor();
-  Eigen::VectorXf rps = _kinematic_matrix * velocity_cmd / (2.0f * M_PI);
+  try {
+    // \todo maybe a size check would be great!
+    Eigen::Vector3f velocity_cmd(twist_msg->linear.x, twist_msg->linear.y, twist_msg->angular.z);
+    velocity_cmd *= _collision_avoidance_component->getVelocityReduceFactor();
+    Eigen::VectorXf rps = _kinematic_matrix * velocity_cmd / (2.0f * M_PI);
 
-  for (Eigen::Index i = 0; i < rps.size(); ++i) {
-    _motor_controllers[i]->setRpm(Rpm::fromRps(rps(i)));
+    for (Eigen::Index i = 0; i < rps.size(); ++i) {
+      _motor_controllers[i]->setRpm(Rpm::fromRps(rps(i)));
+    }
+  }
+  catch (HardwareError& ex) {
+    RCLCPP_ERROR_STREAM(get_logger(), "Hardware error occurred while trying to set new values for motor controller."
+                                      << " what() = " << ex.what());                                      
+  }
+  catch (std::exception& ex) {
+    RCLCPP_ERROR_STREAM(get_logger(), "Error occurred while trying to set new values for motor controller."
+                                      << " what() = " << ex.what());     
   }
 }
 
@@ -202,8 +212,8 @@ void Robot::processStatusReport()
   }
 
   auto report = _hardware_interface->getStatusReport();
-
   _pub_status_report->publish(toRos(report));
+  _hardware_interface->clearStatusReport();
 }
 
 void Robot::processTfPublishing()

@@ -50,7 +50,7 @@ void LightingHardware::processSetValue(const Color& color, const robot::Lighting
     auto request = ShieldRequest::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::DIM>>(
       color.r, color.g, color.b, 0, 0);
     auto response = _communicator->sendRequest(std::move(request));
-    response.wait_for(100ms);
+    wait_for_future(response, 100ms);
     response.get();
   }
   break;
@@ -59,7 +59,7 @@ void LightingHardware::processSetValue(const Color& color, const robot::Lighting
     auto request = ShieldRequest::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::OFF>>(
       color.r, color.g, color.b, 0, 0);
     auto response = _communicator->sendRequest(std::move(request));
-    response.wait_for(100ms);
+    wait_for_future(response, 100ms);
     response.get();    
   }
   break;
@@ -68,7 +68,7 @@ void LightingHardware::processSetValue(const Color& color, const robot::Lighting
     auto request = ShieldRequest::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::PULSATION>>(
       color.r, color.g, color.b, 0, 0);
     auto response = _communicator->sendRequest(std::move(request));
-    response.wait_for(100ms);
+    wait_for_future(response, 100ms);
     response.get();    
   }  
   break;
@@ -77,7 +77,7 @@ void LightingHardware::processSetValue(const Color& color, const robot::Lighting
     auto request = ShieldRequest::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::ROTATION>>(
       color.r, color.g, color.b, 0, 0);
     auto response = _communicator->sendRequest(std::move(request));
-    response.wait_for(100ms);
+    wait_for_future(response, 100ms);
     response.get();
   }
   break;
@@ -86,7 +86,7 @@ void LightingHardware::processSetValue(const Color& color, const robot::Lighting
     auto request = ShieldRequest::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::RUNNING>>(
       color.r, color.g, color.b, 0, 0);
     auto response = _communicator->sendRequest(std::move(request));
-    response.wait_for(100ms);
+    wait_for_future(response, 100ms);
     response.get();    
   }
   break;

@@ -17,7 +17,7 @@ ImuSensorHardware::ImuSensorHardware(const std::string& hardware_name, const Imu
   // set IMU data mode
   auto request = ShieldRequest::make_request<uart::message::SetImuRawDataMode>(parameter.raw_data_mode, 0, 0, 0);
   auto response = _communicator->sendRequest(std::move(request));
-  response.wait_for(100ms);
+  wait_for_future(response, 100ms);
   response.get();
 }
  

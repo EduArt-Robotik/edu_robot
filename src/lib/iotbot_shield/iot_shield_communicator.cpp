@@ -197,8 +197,8 @@ void IotShieldCommunicator::processing()
 
     // Make a period of 1ms
     // \todo fix lines below. Its a bit nasty.
-    if (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start) < 1ms) {
-      const auto diff = 1ms - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start);
+    if (std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - start) < 1ms) {
+      const auto diff = 1ms - std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - start);
       std::this_thread::sleep_for(diff);      
     }
   }

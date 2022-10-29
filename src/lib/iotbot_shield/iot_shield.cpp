@@ -24,7 +24,7 @@ IotShield::IotShield(char const* const device_name)
   auto request = ShieldRequest::make_request<uart::message::SetValueF<UART::COMMAND::SET::UART_TIMEOUT>>(
     1.0f, 0);
   auto future_response = _communicator->sendRequest(std::move(request));
-  future_response.wait_for(100ms);
+  wait_for_future(future_response, 100ms);
   future_response.get();
 }
 
@@ -37,7 +37,7 @@ void IotShield::enable()
 {
   auto request = ShieldRequest::make_request<uart::message::Enable>(0, 0);
   auto future_response = _communicator->sendRequest(std::move(request));
-  future_response.wait_for(100ms);
+  wait_for_future(future_response, 100ms);
   future_response.get();  
 }
 
@@ -45,7 +45,7 @@ void IotShield::disable()
 {
   auto request = ShieldRequest::make_request<uart::message::Disable>(0, 0);
   auto future_response = _communicator->sendRequest(std::move(request));
-  future_response.wait_for(100ms);
+  wait_for_future(future_response, 100ms);
   future_response.get();    
 }
 

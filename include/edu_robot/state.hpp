@@ -16,6 +16,7 @@ enum class State {
   EMERGENCY_STOP,
   UART_SENDING_FAILED,
   UART_RECEIVING_FAILED,
+  SHIELD_REQUEST_TIMEOUT,
 };
 
 } // end namespace robot
