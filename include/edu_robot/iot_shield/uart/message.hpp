@@ -117,17 +117,21 @@ struct ConstDataField : public DataField<DataType> {
 template <std::size_t Index, class Message>
 struct element_byte_index;
 
-template <std::size_t Index, class HeadElement, class... TailElements>
-struct element_byte_index<Index, std::tuple<HeadElement, TailElements...>> : element_byte_index<Index - 1, std::tuple<TailElements...>>{
-  constexpr static std::size_t value = element_byte_index<Index - 1, std::tuple<TailElements...>>::value
-                                     + element_byte_index<Index - 1, std::tuple<TailElements...>>::size();
+template <std::size_t Index, class... Elements>
+struct element_byte_index<Index, std::tuple<Elements...>> : element_byte_index<Index - 1, std::tuple<Elements...>> {
+  constexpr static std::size_t value = element_byte_index<Index - 1, std::tuple<Elements...>>::value
+                                     + element_byte_index<Index - 1, std::tuple<Elements...>>::size();
+protected:
+  inline constexpr static std::size_t size() { 
+    return std::tuple_element<Index, std::tuple<Elements...>>::type::size(); }
 };
 
-template <class HeadElement, class... TailElements>
-struct element_byte_index<0, std::tuple<HeadElement, TailElements...>> { 
+template <class... Elements>
+struct element_byte_index<0, std::tuple<Elements...>> {
   constexpr static std::size_t value = 0;
 protected:
-  constexpr static std::size_t size() { return HeadElement::size(); }
+  inline constexpr static std::size_t size() { 
+    return std::tuple_element<0, std::tuple<Elements...>>::type::size(); }
 };
 // /**
 //  * \brief This class constructs a UART message based on the given message elements. Methods
