@@ -33,17 +33,29 @@ void LightingHardware::processSetValue(const Color& color, const robot::Lighting
 
   // HACK! At the moment each light can't controlled separately.
   switch (mode) {
-  // case Mode::FLASH:
-  //   if (robot::Lighting::name().find("left") != std::string::npos) {
-  //     _communicator->sendBytes(uart::message::SetLighting<UART::COMMAND::LIGHTING::FLASH::LEFT>(color).data()); 
-  //   }
-  //   else if (robot::Lighting::name().find("right") != std::string::npos) {
-  //     _communicator->sendBytes(uart::message::SetLighting<UART::COMMAND::LIGHTING::FLASH::RIGHT>(color).data());
-  //   }
-  //   else if (robot::Lighting::name().find("all") != std::string::npos) {
-  //     _communicator->sendBytes(uart::message::SetLighting<UART::COMMAND::LIGHTING::FLASH::ALL>(color).data());
-  //   }
-  //   break;
+  case Mode::FLASH:
+    if (name().find("left") != std::string::npos) {
+      auto request = ShieldRequest::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::FLASH::LEFT>>(
+      color.r, color.g, color.b, 0, 0);
+      auto response = _communicator->sendRequest(std::move(request));
+      wait_for_future(response, 100ms);
+      response.get();
+    }
+    else if (name().find("right") != std::string::npos) {
+      auto request = ShieldRequest::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::FLASH::RIGHT>>(
+      color.r, color.g, color.b, 0, 0);
+      auto response = _communicator->sendRequest(std::move(request));
+      wait_for_future(response, 100ms);
+      response.get();
+    }
+    else if (name().find("all") != std::string::npos) {
+      auto request = ShieldRequest::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::FLASH::ALL>>(
+      color.r, color.g, color.b, 0, 0);
+      auto response = _communicator->sendRequest(std::move(request));
+      wait_for_future(response, 100ms);
+      response.get();
+    }
+    break;
 
     // all lightings are addressed
   case Mode::DIM: {
