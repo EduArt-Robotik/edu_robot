@@ -6,6 +6,7 @@
 #pragma once
 
 #include "edu_robot/motor_controller.hpp"
+#include "edu_robot/processing_component/processing_detect_charging.hpp"
 #include "edu_robot/robot_hardware_interface.hpp"
 #include "edu_robot/sensor.hpp"
 #include "edu_robot/processing_component/collison_avoidance.hpp"
@@ -94,6 +95,7 @@ protected:
 
   // Processing Components
   std::shared_ptr<processing::CollisionAvoidance> _collision_avoidance_component;
+  std::shared_ptr<processing::DetectCharging> _detect_charging_component;
 
 private:
   void processStatusReport();

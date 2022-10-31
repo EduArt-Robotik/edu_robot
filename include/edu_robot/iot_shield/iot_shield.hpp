@@ -9,8 +9,9 @@
 #include "edu_robot/iot_shield/uart/message.hpp"
 #include "edu_robot/iot_shield/iot_shield_communicator.hpp"
 
-#include "edu_robot/robot_hardware_interface.hpp"
-#include "edu_robot/robot_status_report.hpp"
+#include <edu_robot/robot_hardware_interface.hpp>
+#include <edu_robot/robot_status_report.hpp>
+#include <edu_robot/processing_component/processing_component.hpp>
 
 #include <rclcpp/timer.hpp>
 
@@ -26,6 +27,7 @@ class IotShieldCommunicator;
 class IotShieldRxDevice;
 
 class IotShield : public RobotHardwareInterface
+                , public processing::ProcessingComponentOutput<float>
 {
 public:
   IotShield(char const* const device_name);

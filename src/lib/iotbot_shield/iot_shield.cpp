@@ -76,6 +76,7 @@ void IotShield::processStatusReport()
   _report.rpm[3] = uart::message::ShieldResponse::rpm3(buffer);
   
   _status_report_ready = true;
+  sendInputValue(_report.voltage.mcu);
 
   for (auto& device : _rx_devices) {
     device->processRxData(buffer);
