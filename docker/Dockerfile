@@ -27,7 +27,7 @@ WORKDIR /home/iotbot_ws
 
 # build EduArt packages nodes
 RUN source /opt/ros/$ROS_DISTRO/setup.bash \
-    && MAKEFLAGS="-j1" colcon build edu_robot edu_robot_control --symlink-install --executor sequential
+    && MAKEFLAGS="-j1" colcon build --symlink-install --executor sequential
 
 # write source commands to .bashrc -> no need to source afterwards
 RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc \
