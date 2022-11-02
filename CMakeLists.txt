@@ -142,6 +142,12 @@ install(
   DESTINATION include
 )
 install(
+  DIRECTORY
+    launch
+    parameter
+  DESTINATION share/${PROJECT_NAME}
+)
+install(
   TARGETS iotbot-shield eduart-iotbot-shield eduart-robot-eduard eduart-robot
   EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
