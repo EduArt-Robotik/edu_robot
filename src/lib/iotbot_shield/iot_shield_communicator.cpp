@@ -208,12 +208,14 @@ void IotShieldCommunicator::sendingData(const uart::message::TxMessageDataBuffer
 {
 #if _WITH_MRAA
   const std::size_t sent_bytes = _uart->write((char*)tx_buffer.data(), tx_buffer.size());
-    
-  std::cout << "send data: ";
-  for (const auto& byte : tx_buffer) {
-    std::cout << std::hex << static_cast<unsigned int>(byte) << " ";
-  }
-  std::cout << std::endl;
+  
+  // DEBUG BEGIN    
+  // std::cout << "send data: ";
+  // for (const auto& byte : tx_buffer) {
+  //   std::cout << std::hex << static_cast<unsigned int>(byte) << " ";
+  // }
+  // std::cout << std::endl;
+  // DEBUG END
 
   if (sent_bytes != tx_buffer.size()) {
     throw HardwareError(State::UART_SENDING_FAILED, "Less byte sent as expected.");
@@ -237,11 +239,11 @@ uart::message::RxMessageDataBuffer IotShieldCommunicator::receivingData()
 #endif
 
   // DEBUG BEGIN
-  std::cout << "received data: ";
-  for (const auto& byte : rx_buffer) {
-    std::cout << std::hex << static_cast<unsigned int>(byte) << " ";
-  }
-  std::cout << std::endl;
+  // std::cout << "received data: ";
+  // for (const auto& byte : rx_buffer) {
+  //   std::cout << std::hex << static_cast<unsigned int>(byte) << " ";
+  // }
+  // std::cout << std::endl;
   // DEBUG END
 
   if (received_bytes != rx_buffer.size()) {
