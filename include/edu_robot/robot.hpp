@@ -10,6 +10,7 @@
 #include "edu_robot/robot_hardware_interface.hpp"
 #include "edu_robot/sensor.hpp"
 #include "edu_robot/processing_component/collison_avoidance.hpp"
+#include "edu_robot/mode.hpp"
 
 #include "edu_robot/msg/mode.hpp"
 #include "edu_robot/msg/set_lighting_color.hpp"
@@ -97,9 +98,14 @@ protected:
   std::shared_ptr<processing::CollisionAvoidance> _collision_avoidance_component;
   std::shared_ptr<processing::DetectCharging> _detect_charging_component;
 
+  // Mode
+  Mode _mode;
+
 private:
   void processStatusReport();
   void processTfPublishing();
+  void processWatchDogBarking();
+  void setLightingForMode(const Mode mode);
 
   // ROS related members
   std::shared_ptr<rclcpp::Publisher<nav_msgs::msg::Odometry>> _pub_odometry;
@@ -115,6 +121,7 @@ private:
   // Timer used for synchronous processing
   std::shared_ptr<rclcpp::TimerBase> _timer_status_report; 
   std::shared_ptr<rclcpp::TimerBase> _timer_tf_publishing;
+  std::shared_ptr<rclcpp::TimerBase> _timer_watch_dog;
 
   // Mounted components that are controlled by the hardware interface.
   std::map<std::string, std::shared_ptr<Lighting>> _lightings;

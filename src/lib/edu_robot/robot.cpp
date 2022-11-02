@@ -2,10 +2,12 @@
 #include "edu_robot/hardware_error.hpp"
 #include "edu_robot/lighting.hpp"
 
+#include "edu_robot/mode.hpp"
 #include "edu_robot/msg/detail/mode__struct.hpp"
 #include "edu_robot/msg_conversion.hpp"
 #include "edu_robot/msg/detail/robot_status_report__struct.hpp"
 #include "edu_robot/processing_component/collison_avoidance.hpp"
+#include "edu_robot/processing_component/processing_detect_charging.hpp"
 
 #include <geometry_msgs/msg/detail/twist__struct.hpp>
 #include <memory>
@@ -42,6 +44,7 @@ static Robot::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
 Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface)
   : rclcpp::Node(robot_name)
   , _hardware_interface(std::move(hardware_interface))
+  , _mode(Mode::UNCONFIGURED)
   , _tf_broadcaster(std::make_unique<tf2_ros::TransformBroadcaster>(*this))
 {
   _parameter = get_robot_ros_parameter(*this);
@@ -73,10 +76,15 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterfa
 
   _timer_status_report = create_wall_timer(100ms, std::bind(&Robot::processStatusReport, this));
   _timer_tf_publishing = create_wall_timer(100ms, std::bind(&Robot::processTfPublishing, this));
+  _timer_watch_dog = create_wall_timer(500ms, std::bind(&Robot::processWatchDogBarking, this));
 
   // Initialize Processing Components
   _collision_avoidance_component = std::make_shared<processing::CollisionAvoidance>(
     processing::CollisionAvoidance::Parameter{ 0.3f, 0.05f },
+    *this
+  );
+  _detect_charging_component = std::make_shared<processing::DetectCharging>(
+    processing::DetectCharging::Parameter{},
     *this
   );
 }
@@ -92,6 +100,9 @@ Robot::~Robot()
 
 void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> twist_msg)
 {
+  // Kick Watch Dog
+  // _timer_status_report->reset();
+
   try {
     // \todo maybe a size check would be great!
     Eigen::Vector3f velocity_cmd(twist_msg->linear.x, twist_msg->linear.y, twist_msg->angular.z);
@@ -114,12 +125,19 @@ void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> tw
 
 void Robot::callbackSetLightingColor(std::shared_ptr<const edu_robot::msg::SetLightingColor> msg)
 {
+  // Kick Watch Dog
+  // _timer_status_report->reset();
+
   const auto search = _lightings.find(msg->lighting_name);
 
   if (search == _lightings.end()) {
     RCLCPP_ERROR_STREAM(get_logger(), "Lighting with name \"" << msg->lighting_name
                         << "\" wasn't found. Can't set color.");
     return;                        
+  }
+  if (_detect_charging_component->isCharging()) {
+    // do not accept lighting command during charging
+    return;
   }
 
   // try to set new values
@@ -140,12 +158,23 @@ void Robot::callbackSetLightingColor(std::shared_ptr<const edu_robot::msg::SetLi
 void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode::Request> request,
                                    std::shared_ptr<edu_robot::srv::SetMode::Response> response)
 {
+  // Kick Watch Dog
+  // _timer_status_report->reset();
+
   try {
     if (request->mode.value == edu_robot::msg::Mode::REMOTE_CONTROLLED) {
       _hardware_interface->enable();
+      _mode = Mode::REMOTE_CONTROLLED;
+      if (_detect_charging_component->isCharging() == false) {
+        setLightingForMode(_mode);
+      }
     }
     else if (request->mode.value == edu_robot::msg::Mode::INACTIVE) {
       _hardware_interface->disable();
+      _mode = Mode::INACTIVE;
+      if (_detect_charging_component->isCharging() == false) {
+        setLightingForMode(_mode);
+      }
     }
     else {
       RCLCPP_ERROR_STREAM(get_logger(), "Unsupported mode. Can't set new mode. Canceling.");
@@ -222,6 +251,47 @@ void Robot::processTfPublishing()
 
   for (const auto& sensor : _sensors) {
     _tf_broadcaster->sendTransform(sensor.second->getTransformMsg(stamp));
+  }
+}
+
+void Robot::processWatchDogBarking()
+{
+  // HACK: only used for indication of charging at the moment
+  // _mode = Mode::INACTIVE;
+  // setLightingForMode(_mode);
+  static bool last_state = _detect_charging_component->isCharging();
+
+  if (last_state == false && _detect_charging_component->isCharging() == true) {
+    setLightingForMode(Mode::INACTIVE);
+  }
+
+  last_state = _detect_charging_component->isCharging();
+}
+
+void Robot::setLightingForMode(const Mode mode)
+{
+  auto search = _lightings.find("all");
+
+  if (search == _lightings.end()) {
+    RCLCPP_WARN(get_logger(), "Can't set lighting to indicate inactive mode. Lighting \"all\" was not found.");
+  }
+
+  if (_detect_charging_component->isCharging()) {
+    search->second->setColor(Color{170, 0, 0}, Lighting::Mode::ROTATION);
+  }
+  else {
+    switch (mode) {
+      case Mode::INACTIVE:
+        search->second->setColor(Color{170, 0, 0}, Lighting::Mode::PULSATION);
+        break;
+
+      case Mode::REMOTE_CONTROLLED:
+        search->second->setColor(Color{170, 170, 170}, Lighting::Mode::DIM);
+        break;
+
+      default:
+        break;
+    }
   }
 }
 

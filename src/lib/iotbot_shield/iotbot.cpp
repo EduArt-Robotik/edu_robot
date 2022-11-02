@@ -49,6 +49,7 @@ IotBot::IotBot()
          .addImuSensor("imu", "imu_hardware", robot::ImuSensor::Parameter{ });
 
   initialize(factory);
+  iot_shield->registerComponentInput(_detect_charging_component);
 }
 
 IotBot::~IotBot()

@@ -4,6 +4,7 @@ namespace eduart {
 namespace robot {
 
 enum class Mode {
+  UNCONFIGURED,
   INACTIVE,
   REMOTE_CONTROLLED,
   FLEET_MASTER,

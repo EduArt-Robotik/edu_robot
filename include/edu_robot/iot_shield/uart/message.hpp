@@ -85,7 +85,7 @@ struct DataField {
   // It is a default serialization. On demand customization should take place in derived classes.
   inline static constexpr std::array<Byte, size()> serialize(const DataType value)
   {
-    std::array<Byte, size()> serialized_bytes = {0};
+    std::array<Byte, size()> serialized_bytes = { 0 };
     void* data_address = static_cast<void*>(serialized_bytes.data());
     *static_cast<DataType*>(data_address) = value;
 
@@ -161,7 +161,7 @@ protected:
 template <class... Elements>
 constexpr TxMessageDataBuffer serialize(const typename Elements::type&... element_value, const std::tuple<Elements...>)
 {
-  TxMessageDataBuffer tx_buffer;
+  TxMessageDataBuffer tx_buffer = { 0 };
   std::size_t byte_offset = 0;
 
   ([&]{
@@ -177,7 +177,7 @@ template <std::size_t... Indices, class... Elements>
 inline constexpr auto make_message_search_pattern(const std::tuple<Elements...>)
 {
   constexpr std::size_t bytes = (std::tuple_element<Indices, std::tuple<Elements...>>::type::size() + ...);
-  std::array<Byte, bytes> search_pattern;
+  std::array<Byte, bytes> search_pattern = { 0 };
   auto it_search_pattern = search_pattern.begin();
 
   ([&]{
@@ -205,6 +205,9 @@ struct Int16  : public impl::DataField<std::int16_t> {
 struct Uint8  : public impl::DataField<std::uint8_t> {
   inline static constexpr std::array<Byte, size()> serialize(const bool value) {
     return impl::DataField<std::uint8_t>::serialize(static_cast<std::uint8_t>(value));
+  }
+  inline static constexpr std::array<Byte, size()> serialize(const std::uint8_t value) {
+    return impl::DataField<std::uint8_t>::serialize(value);
   }
 };
 struct Uint32 : public impl::DataField<std::uint32_t> { };
