@@ -14,8 +14,10 @@ RUN add-apt-repository ppa:mraa/mraa \
     && apt-get install -y libmraa2 libmraa-dev libmraa-java python-mraa python3-mraa mraa-tools
 
 # install Joystick Driver for ROS2 foxy
-RUN sudo apt-get install -y ros-$ROS_DISTRO-joy
-
+RUN sudo apt-get install -y \
+    ros-$ROS_DISTRO-joy \
+    ros-$ROS_DISTRO-rmw-fastrtps-cpp \
+    ros-$ROS_DISTRO-fastrtps
 
 # set up iotbot workspace
 RUN mkdir -p /home/iotbot_ws/src/iotbot
@@ -26,11 +28,13 @@ COPY ./edu_robot_control /home/iotbot_ws/src/edu_robot_control
 WORKDIR /home/iotbot_ws
 
 # build EduArt packages nodes
-RUN source /opt/ros/$ROS_DISTRO/setup.bash \
-    && MAKEFLAGS="-j1" colcon build edu_robot edu_robot_control --symlink-install --executor sequential
+RUN export RMW_IMPLEMENTATION=rmw_fastrtps_cpp \
+    && source /opt/ros/$ROS_DISTRO/setup.bash \
+    && MAKEFLAGS="-j1" colcon build --symlink-install --executor sequential
 
 # write source commands to .bashrc -> no need to source afterwards
 RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc \
+    && echo "export RMW_IMPLEMENTATION=rmw_fastrtps_cpp" >> ~/.bashrc \
     && echo "source /home/iotbot_ws/install/setup.bash" >> ~/.bashrc
 
 # launch control node and joy interpreter
