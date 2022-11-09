@@ -50,6 +50,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 add_subdirectory(src/lib/robot)
 add_subdirectory(src/lib/eduard)
 add_subdirectory(src/lib/iotbot_shield)
+add_subdirectory(src/lib/ethernet_gateway)
 add_subdirectory(src/node)
 
 ## Installing of Content
@@ -64,7 +65,7 @@ install(
   DESTINATION share/${PROJECT_NAME}
 )
 install(
-  TARGETS iotbot-shield eduart-iotbot-shield eduart-robot-eduard eduart-robot
+  TARGETS iotbot-shield eduart-iotbot-shield eduart-robot-eduard eduart-robot eduart-ethernet-gateway
   EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
