@@ -34,7 +34,7 @@ MotorController::Parameter get_motor_controller_parameter(
   parameter.weight_low_pass_encoder = ros_node.get_parameter(name + "/weight_low_pass_encoder").as_double();
 
   return parameter;
-}  
+}
 
 MotorController::MotorController(const std::string& name, const std::uint8_t id, const Parameter& parameter,
                                  const std::string& urdf_joint_name, rclcpp::Node& ros_node,
