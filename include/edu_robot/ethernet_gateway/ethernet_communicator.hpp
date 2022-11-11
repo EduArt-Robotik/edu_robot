@@ -5,6 +5,7 @@
  */
 #pragma once
 
+#include "edu_robot/ethernet_gateway/tcp/message.hpp"
 #include "edu_robot/ethernet_gateway/tcp/message_definition.hpp"
 #include "edu_robot/ethernet_gateway/tcp/protocol.hpp"
 
@@ -51,6 +52,8 @@ public:
   }
   Request(Request&&) = default;
 
+  inline const tcp::message::RxMessageDataBuffer& response() const { return _response_message; }
+
 private:
   template <class CommandByte, class... Elements>
   Request(const tcp::message::MessageFrame<CommandByte, Elements...>, const typename Elements::type&... element_value) {
@@ -74,7 +77,7 @@ private:
 template <typename Duration>
 inline void wait_for_future(std::future<Request>& future, const Duration& timeout) {
   if (future.wait_for(timeout) == std::future_status::timeout) {
-    throw HardwareError(State::SHIELD_REQUEST_TIMEOUT, "TCP Request Timeout! Cancel set RPM to motor controller.");
+    throw HardwareError(State::SHIELD_REQUEST_TIMEOUT, "TCP Request Timeout!.");
   }
 }
 
@@ -84,7 +87,7 @@ class EthernetCommunicator
   using TaskReceiving = std::packaged_task<tcp::message::RxMessageDataBuffer()>;
 
 public:
-  EthernetCommunicator(char const* const device_name, const std::uint16_t port);
+  EthernetCommunicator(char const* const ip_address, const std::uint16_t port);
   ~EthernetCommunicator();
 
   std::future<Request> sendRequest(Request request);
@@ -112,12 +115,12 @@ private:
 
   // Sending Thread
   std::chrono::milliseconds _wait_time_after_sending;
-
   std::queue<TaskSendingUart> _sending_in_progress;
   std::mutex _mutex_sending_data;
   std::thread _tcp_sending_thread;
 
   // Reading Thread
+  static constexpr std::size_t _max_rx_buffer_queue_size = 100;
   std::mutex _mutex_receiving_data;
   std::mutex _mutex_received_data_copy;
   std::thread _tcp_receiving_thread;

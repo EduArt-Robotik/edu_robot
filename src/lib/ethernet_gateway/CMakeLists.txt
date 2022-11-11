@@ -1,6 +1,7 @@
 # Library Eduart IotBot Shield
 add_library(eduart-ethernet-gateway
   ethernet_communicator.cpp
+  ethernet_gateway_shield.cpp
 )
 
 target_link_libraries(eduart-ethernet-gateway

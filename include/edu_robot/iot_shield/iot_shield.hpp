@@ -13,10 +13,7 @@
 #include <edu_robot/robot_status_report.hpp>
 #include <edu_robot/processing_component/processing_component.hpp>
 
-#include <rclcpp/timer.hpp>
-
 #include <memory>
-#include <array>
 #include <vector>
 
 namespace eduart {

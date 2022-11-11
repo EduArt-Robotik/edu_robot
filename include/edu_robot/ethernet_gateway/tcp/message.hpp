@@ -84,6 +84,7 @@ struct DataField {
   inline static constexpr bool isElementValid(const Byte[size()]) { return true; }
 };
 
+// (Partial-)Specialized Data Fields
 template <typename DataType, DataType Value>
 struct ConstDataField : public DataField<DataType> {
   using DataField<DataType>::size;
@@ -91,14 +92,18 @@ struct ConstDataField : public DataField<DataType> {
 
   inline static constexpr DataType value() { return Value; }
   inline static constexpr std::array<Byte, size()> serialize(const DataType) {
-    return DataField<DataType>::serialize(Value); }
+    return DataField<DataType>::serialize(Value);
+  }
   inline static constexpr bool isElementValid(const Byte data[size()]) {
     return Value == DataField<DataType>::deserialize(data);
   }
   inline static constexpr std::array<Byte, size()> makeSearchPattern() {
-    return DataField<DataType>::serialize(Value); }
+    return DataField<DataType>::serialize(Value);
+  }
 };
 
+
+// Helper for Message Element Handling
 template <std::size_t Index, class Message>
 struct element_byte_index;
 
@@ -108,7 +113,8 @@ struct element_byte_index<Index, std::tuple<Elements...>> : element_byte_index<I
                                      + element_byte_index<Index - 1, std::tuple<Elements...>>::size();
 protected:
   inline constexpr static std::size_t size() { 
-    return std::tuple_element<Index, std::tuple<Elements...>>::type::size(); }
+    return std::tuple_element<Index, std::tuple<Elements...>>::type::size();
+  }
 };
 
 template <class... Elements>
@@ -116,7 +122,8 @@ struct element_byte_index<0, std::tuple<Elements...>> {
   constexpr static std::size_t value = 0;
 protected:
   inline constexpr static std::size_t size() { 
-    return std::tuple_element<0, std::tuple<Elements...>>::type::size(); }
+    return std::tuple_element<0, std::tuple<Elements...>>::type::size();
+  }
 };
 
 // Helper Functions for Message Handling
@@ -157,10 +164,19 @@ inline constexpr auto make_message_search_pattern(const std::tuple<Elements...>)
 // Specializations of Message Elements
 using StartByte = impl::ConstDataField<Byte, PROTOCOL::BUFFER::START_BYTE>;
 using StopByte  = impl::ConstDataField<Byte, PROTOCOL::BUFFER::END_BYTE>;
-using SequenceNumber = impl::DataField<Byte>;
+struct SequenceNumber : public impl::DataField<Byte> {
+  inline static constexpr std::array<Byte, SequenceNumber::size()> makeSearchPattern(const Byte sequence_number) {
+    return impl::DataField<Byte>::serialize(sequence_number);
+  } 
+};
 
-template <Byte UartCommand>
-struct Command : public impl::ConstDataField<Byte, UartCommand> { };
+template <Byte TcpCommand>
+struct Command : public impl::ConstDataField<Byte, TcpCommand> {
+  inline static constexpr std::array<Byte, Command::size()> makeSearchPattern() {
+    return impl::DataField<Byte>::serialize(TcpCommand & (1 << 8));
+  }
+};
+
 struct Float  : public impl::DataField<float> { };
 struct Int16  : public impl::DataField<std::int16_t> {
   inline static constexpr std::array<Byte, size()> serialize(const Rpm value) {
@@ -210,7 +226,7 @@ public:
     return MessageType::serialize(0, sequence_number, CommandByte::value(), element_value..., 0);
   }
   inline constexpr static auto makeSearchPattern() {
-    return element::impl::make_message_search_pattern<1>(MessageType{});
+    return element::impl::make_message_search_pattern<0>(MessageType{});
   }
 };
 

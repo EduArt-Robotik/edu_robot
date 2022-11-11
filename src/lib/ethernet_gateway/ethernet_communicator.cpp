@@ -3,7 +3,9 @@
 #include "edu_robot/ethernet_gateway/tcp/protocol.hpp"
 #include "edu_robot/state.hpp"
 
+#include <algorithm>
 #include <edu_robot/hardware_error.hpp>
+#include <edu_robot/component_error.hpp>
 
 #include <chrono>
 #include <cstddef>
@@ -11,6 +13,7 @@
 #include <functional>
 #include <future>
 #include <iostream>
+#include <iterator>
 #include <mutex>
 #include <sys/socket.h>
 #include <thread>
@@ -24,6 +27,8 @@ namespace robot {
 namespace ethernet {
 
 using namespace std::chrono_literals;
+
+std::uint8_t eduart::robot::ethernet::Request::_sequence_number = 0;
 
 EthernetCommunicator::EthernetCommunicator(char const* const ip_address, const std::uint16_t port)
   : _is_running(true)
@@ -112,7 +117,7 @@ void EthernetCommunicator::processing()
       std::scoped_lock lock(_mutex_sending_data, _mutex_data_input);
       auto request = std::move(_incoming_requests.front());
       _incoming_requests.pop();
-      // Add tx message to sending queue.
+      // Add tx message to sending queue. The data pointer must not be changed as long the data will be sent. 
       tcp::message::Byte const *const tx_buffer = request.first._request_message.data();
       const std::size_t length = request.first._request_message.size();
       TaskSendingUart task([this, tx_buffer, length]{
@@ -173,7 +178,7 @@ void EthernetCommunicator::processing()
             it = _open_request.erase(it);
 
             request.first._state = Request::State::RECEIVED;
-            request.first._response_message = rx_buffer;
+            request.first._response_message = std::move(rx_buffer);
             request.second.set_value(std::move(request.first));
             break;
           }
@@ -204,18 +209,25 @@ void EthernetCommunicator::sendingData(tcp::message::Byte const *const tx_buffer
 
 tcp::message::RxMessageDataBuffer EthernetCommunicator::receivingData()
 {
-  tcp::message::RxMessageDataBuffer rx_buffer;
+  std::uint8_t buffer[_max_rx_buffer_queue_size];
 
-  // Allocate memory and store received message in.
-  rx_buffer.reserve(tcp::message::MAX_MESSAGE_SIZE);
-  const int received_bytes = ::recv(_socket_fd, rx_buffer.data(), rx_buffer.size(), MSG_CMSG_CLOEXEC);
+  const int received_bytes = ::recv(_socket_fd, buffer, _max_rx_buffer_queue_size, MSG_DONTWAIT);
 
   if (received_bytes < 0) {
     return { };
   }
 
   // Set correct size to rx buffer.
+  tcp::message::RxMessageDataBuffer rx_buffer;
+
   rx_buffer.resize(received_bytes);
+  std::copy(std::begin(buffer), std::begin(buffer) + received_bytes, rx_buffer.begin());
+  
+  std::cout << std::hex;
+  for (const auto byte : rx_buffer) {
+    std::cout << static_cast<int>(byte) << " ";
+  }
+  std::cout << std::dec << std::endl;
 
   return rx_buffer;
 }
@@ -262,20 +274,33 @@ void EthernetCommunicator::processSending(const std::chrono::milliseconds wait_t
 void EthernetCommunicator::processReceiving()
 {
   while (_is_running) {
-    int count;
-    ioctl(_socket_fd, FIONREAD, &count);
+    // int count;
+    // ioctl(_socket_fd, FIONREAD, &count);
+    // std::uint8_t buffer[_max_rx_buffer_queue_size];
+    // const int count = ::recv(_socket_fd, buffer, _max_rx_buffer_queue_size, MSG_PEEK | MSG_DONTWAIT);
 
-    if (count <= 0) {
-      std::this_thread::sleep_for(1ms);
-      continue;
-    }
+
+    // if (count <= 0) {
+    //   std::this_thread::sleep_for(1ms);
+    //   continue;
+    // }
 
     try {
       tcp::message::RxMessageDataBuffer rx_buffer;
       rx_buffer = receivingData();
 
+    if (rx_buffer.size() <= 0) {
+      std::this_thread::sleep_for(1ms);
+      continue;
+    }
+
       {
         std::unique_lock lock(_mutex_receiving_data);
+
+        if (_rx_buffer_queue.size() >= _max_rx_buffer_queue_size) {
+          throw ComponentError(State::TCP_SOCKET_ERROR, "Max rx buffer queue size is reached.");
+        }
+
         _rx_buffer_queue.emplace(rx_buffer);
         _new_received_data = true;
       }
