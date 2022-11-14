@@ -33,7 +33,7 @@ std::uint8_t eduart::robot::ethernet::Request::_sequence_number = 0;
 EthernetCommunicator::EthernetCommunicator(char const* const ip_address, const std::uint16_t port)
   : _is_running(true)
   , _new_incoming_requests(false)
-  , _wait_time_after_sending(1ms) // \todo check if wait time is still needed.
+  , _wait_time_after_sending(50ms) // \todo check if wait time is still needed.
   , _new_received_data(false)
 {
   _socket_address.sin_addr.s_addr = inet_addr(ip_address);
@@ -150,7 +150,7 @@ void EthernetCommunicator::processing()
     }
 
     // Handle Received Tcp Data
-    if (_new_received_data == true) {
+    if (_new_received_data == true && _open_request.empty() == false) {
       // Reading data thread is waiting.
       try {
         tcp::message::RxMessageDataBuffer rx_buffer;
@@ -289,10 +289,10 @@ void EthernetCommunicator::processReceiving()
       tcp::message::RxMessageDataBuffer rx_buffer;
       rx_buffer = receivingData();
 
-    if (rx_buffer.size() <= 0) {
-      std::this_thread::sleep_for(1ms);
-      continue;
-    }
+      if (rx_buffer.empty()) {
+        std::this_thread::sleep_for(1ms);
+        continue;
+      }
 
       {
         std::unique_lock lock(_mutex_receiving_data);
