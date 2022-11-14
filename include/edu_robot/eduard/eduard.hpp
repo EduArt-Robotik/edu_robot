@@ -23,17 +23,24 @@ struct COLOR {
   };
 };
 
+struct KINEMATIC {
+  static constexpr char const *const SKID = "skid";
+  static constexpr char const *const MECANUM = "mecanum";
+};
+
 class Eduard : public robot::Robot
 {
 public:
   struct Parameter {
     std::string tf_footprint_frame = "base_footprint";
+    std::string kinematic = KINEMATIC::SKID;
   };
 
   Eduard(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface);
   ~Eduard() override;
 
 protected:
+  // Needs to be called by derived classes.
   void initialize(EduardHardwareComponentFactory& factory);
 
   Parameter _parameter;

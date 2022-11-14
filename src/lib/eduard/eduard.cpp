@@ -8,14 +8,42 @@
 #include <edu_robot/imu_sensor.hpp>
 
 #include <memory>
+#include <rclcpp/logging.hpp>
+#include <stdexcept>
+#include <string>
 #include <tf2/LinearMath/Transform.h>
 
 namespace eduart {
 namespace robot {
 namespace eduard {
 
+static Eduard::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
+{
+  Eduard::Parameter parameter;
+
+  // Declaring of Parameters
+  ros_node.declare_parameter<std::string>("tf_footprint_frame", parameter.tf_footprint_frame);
+  ros_node.declare_parameter<std::string>("kinematic", parameter.kinematic);
+
+  // Reading Parameters
+  parameter.tf_footprint_frame = ros_node.get_parameter("tf_footprint_frame").as_string();
+  const std::string kinematic = ros_node.get_parameter("kinematic").as_string();
+
+  if (kinematic == KINEMATIC::SKID || kinematic == KINEMATIC::MECANUM) {
+    parameter.kinematic = kinematic;
+  }
+  else {
+    // keep default kinematic
+    RCLCPP_WARN(ros_node.get_logger(), "Via parameter given kinematic is not supported: given = %s", kinematic.c_str());
+    RCLCPP_WARN(ros_node.get_logger(), "Fallback to default kinematic \"%s\".", parameter.kinematic.c_str());
+  }
+
+  return parameter;
+}
+
 Eduard::Eduard(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface)
   : robot::Robot(robot_name, std::move(hardware_interface))
+  , _parameter(get_robot_ros_parameter(*this))
 { }
 
 void Eduard::initialize(EduardHardwareComponentFactory& factory)
@@ -123,12 +151,25 @@ void Eduard::initialize(EduardHardwareComponentFactory& factory)
   constexpr float l_squared = l_x * l_x + l_y * l_y;
   constexpr float wheel_diameter = 0.17f;
 
-  _kinematic_matrix.resize(4, 3);
-  _kinematic_matrix << -1.0f, 0.0f, -l_squared / (2.0f * l_y),
-                       -1.0f, 0.0f, -l_squared / (2.0f * l_y),
-                        1.0f, 0.0f, -l_squared / (2.0f * l_y),
-                        1.0f, 0.0f, -l_squared / (2.0f * l_y);
-  _kinematic_matrix *= 1.0f / wheel_diameter;
+  if (_parameter.kinematic == KINEMATIC::SKID) {
+    _kinematic_matrix.resize(4, 3);
+    _kinematic_matrix << -1.0f, 0.0f, -l_squared / (2.0f * l_y),
+                         -1.0f, 0.0f, -l_squared / (2.0f * l_y),
+                          1.0f, 0.0f, -l_squared / (2.0f * l_y),
+                          1.0f, 0.0f, -l_squared / (2.0f * l_y);
+    _kinematic_matrix *= 1.0f / wheel_diameter;
+  }
+  else if (_parameter.kinematic == KINEMATIC::MECANUM) {
+    _kinematic_matrix.resize(4, 3);
+    _kinematic_matrix << -1.0f,  1.0f, -(l_x + l_y) * 0.5f,
+                         -1.0f, -1.0f, -(l_x + l_y) * 0.5f,
+                          1.0f,  1.0f, -(l_x + l_y) * 0.5f,
+                          1.0f, -1.0f, -(l_x + l_y) * 0.5f;
+    _kinematic_matrix *= 1.0f / wheel_diameter;    
+  }
+  else {
+    throw std::invalid_argument("Eduard: given kinematic is not supported.");
+  }
 }
 
 Eduard::~Eduard()

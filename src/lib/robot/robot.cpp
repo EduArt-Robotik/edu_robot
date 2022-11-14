@@ -106,7 +106,7 @@ void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> tw
   try {
     // \todo maybe a size check would be great!
     Eigen::Vector3f velocity_cmd(twist_msg->linear.x, twist_msg->linear.y, twist_msg->angular.z);
-    velocity_cmd *= _collision_avoidance_component->getVelocityReduceFactor();
+    // velocity_cmd *= _collision_avoidance_component->getVelocityReduceFactor();
     Eigen::VectorXf rps = _kinematic_matrix * velocity_cmd / (2.0f * M_PI);
 
     for (Eigen::Index i = 0; i < rps.size(); ++i) {

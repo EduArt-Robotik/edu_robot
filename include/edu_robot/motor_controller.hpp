@@ -31,6 +31,7 @@ class MotorController
 public:
   struct Parameter
   {
+    bool inverted = false;
     float gear_ratio = 70.0f;
     float encoder_ratio = 2048.0f;
     float max_rpm = 140.0f;
@@ -54,6 +55,9 @@ public:
 
   inline const std::string& name() const { return _name; }
   inline std::uint8_t id() const { return _id; }
+  /**
+   * \brief Sets RPM of this motor. Positive RPM 
+   */
   void setRpm(const Rpm rpm);
   inline Rpm getMeasuredRpm() const { return _measured_rpm; }
 

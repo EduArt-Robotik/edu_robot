@@ -31,6 +31,7 @@ RangeSensor::RangeSensor(const std::string& name, const std::string& frame_id, c
                          const tf2::Transform sensor_transform, const Parameter parameter, rclcpp::Node& ros_node,
                          std::shared_ptr<HardwareSensorInterface<float>> hardware_interface)
   : Sensor(name, frame_id, reference_frame_id, sensor_transform)
+  , processing::ProcessingComponentOutput<float>(name)
   , _parameter(get_range_sensor_parameter(name, parameter, ros_node))
   , _publisher(ros_node.create_publisher<sensor_msgs::msg::Range>(name + "/range", rclcpp::SensorDataQoS()))
   , _clock(ros_node.get_clock())

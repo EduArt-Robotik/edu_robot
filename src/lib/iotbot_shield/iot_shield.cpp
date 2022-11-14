@@ -18,7 +18,8 @@ using uart::message::UART;
 using namespace std::chrono_literals;
 
 IotShield::IotShield(char const* const device_name)
-  : _communicator(std::make_shared<IotShieldCommunicator>(device_name))
+  : processing::ProcessingComponentOutput<float>("iot_shield")
+  ,_communicator(std::make_shared<IotShieldCommunicator>(device_name)) 
 {
   // set UART timeout
   auto request = ShieldRequest::make_request<uart::message::SetValueF<UART::COMMAND::SET::UART_TIMEOUT>>(
