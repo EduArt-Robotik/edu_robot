@@ -58,7 +58,7 @@ private:
   template <class CommandByte, class... Elements>
   Request(const tcp::message::MessageFrame<CommandByte, Elements...>, const typename Elements::type&... element_value) {
     _request_message = tcp::message::MessageFrame<CommandByte, Elements...>::serialize(++_sequence_number, element_value...);
-    const auto search_pattern = tcp::message::MessageFrame<CommandByte, Elements...>::makeSearchPattern();
+    const auto search_pattern = tcp::message::MessageFrame<CommandByte, Elements...>::makeSearchPattern(_sequence_number);
 
     _response_search_pattern.resize(search_pattern.size());
     std::copy(search_pattern.begin(), search_pattern.end(), _response_search_pattern.begin());

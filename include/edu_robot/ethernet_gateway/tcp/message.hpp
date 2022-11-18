@@ -30,6 +30,9 @@ using TxMessageDataBuffer = std::vector<Byte>;
 using RxMessageDataBuffer = std::vector<Byte>;
 
 namespace element {
+
+struct SequenceNumber;
+
 namespace impl {
 
 template <typename DataType>
@@ -144,16 +147,23 @@ TxMessageDataBuffer serialize(const typename Elements::type&... element_value, c
 }
 
 template <std::size_t... Indices, class... Elements>
-inline constexpr auto make_message_search_pattern(const std::tuple<Elements...>)
+inline constexpr auto make_message_search_pattern(const Byte sequence_number, const std::tuple<Elements...>)
 {
   constexpr std::size_t bytes = (std::tuple_element<Indices, std::tuple<Elements...>>::type::size() + ...);
   std::array<Byte, bytes> search_pattern = { 0 };
   auto it_search_pattern = search_pattern.begin();
 
   ([&]{
-    const auto element_pattern = std::tuple_element<Indices, std::tuple<Elements...>>::type::makeSearchPattern();
-    std::copy(element_pattern.begin(), element_pattern.end(), it_search_pattern);
-    it_search_pattern += element_pattern.size();
+    if constexpr (std::is_same<typename std::tuple_element<Indices, std::tuple<Elements...>>::type, SequenceNumber>::value) {
+      const auto element_pattern = std::tuple_element<Indices, std::tuple<Elements...>>::type::makeSearchPattern(sequence_number);
+      std::copy(element_pattern.begin(), element_pattern.end(), it_search_pattern);
+      it_search_pattern += element_pattern.size();
+    }
+    else {
+      const auto element_pattern = std::tuple_element<Indices, std::tuple<Elements...>>::type::makeSearchPattern();
+      std::copy(element_pattern.begin(), element_pattern.end(), it_search_pattern);
+      it_search_pattern += element_pattern.size();      
+    }
   }(), ...);
 
   return search_pattern;
@@ -173,9 +183,11 @@ struct SequenceNumber : public impl::DataField<Byte> {
 template <Byte TcpCommand>
 struct Command : public impl::ConstDataField<Byte, TcpCommand> {
   inline static constexpr std::array<Byte, Command::size()> makeSearchPattern() {
-    return impl::DataField<Byte>::serialize(TcpCommand & (1 << 8));
+    return impl::DataField<Byte>::serialize(TcpCommand | 0x80);
   }
 };
+template <Byte TcpCommand>
+struct Response : public Command<TcpCommand | 0x80> { };
 
 struct Float  : public impl::DataField<float> { };
 struct Int16  : public impl::DataField<std::int16_t> {
@@ -191,6 +203,7 @@ struct Uint8  : public impl::DataField<std::uint8_t> {
     return impl::DataField<std::uint8_t>::serialize(value);
   }
 };
+struct Uint16 : public impl::DataField<std::uint16_t> { };
 struct Uint32 : public impl::DataField<std::uint32_t> { };
 
 } // end namespace element
@@ -221,12 +234,18 @@ public:
   using MessageType::size;
 
   inline static TxMessageDataBuffer serialize(
-    const std::uint8_t sequence_number, const typename Elements::type&... element_value)
+    const Byte sequence_number, const typename Elements::type&... element_value)
   {
     return MessageType::serialize(0, sequence_number, CommandByte::value(), element_value..., 0);
   }
-  inline constexpr static auto makeSearchPattern() {
-    return element::impl::make_message_search_pattern<0>(MessageType{});
+  inline constexpr static auto makeSearchPattern(const Byte sequence_number) {
+    return element::impl::make_message_search_pattern<0, 1, 2>(sequence_number, MessageType{});
+  }
+  template <std::size_t Index>
+  inline constexpr static typename std::tuple_element<Index, std::tuple<Elements...>>::type::type deserialize(
+    const RxMessageDataBuffer& rx_buffer)
+  {
+    return MessageType::template deserialize<Index + 1>(rx_buffer);
   }
 };
 
