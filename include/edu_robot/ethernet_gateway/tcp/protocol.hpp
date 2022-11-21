@@ -24,6 +24,14 @@ struct PROTOCOL {
     struct GET {
       static constexpr Byte FIRMWARE_VERSION = 0x01;
     };
+    struct SET {
+      static constexpr Byte MOTOR_CONTROLLER_PARAMETER = 0x11;
+      static constexpr Byte ENCODER_PARAMETER = 0x12;
+      static constexpr Byte PID_CONTROLLER_PARAMETER = 0x13;
+      static constexpr Byte MOTOR_RPM = 0x14;
+      static constexpr Byte MOTOR_ENABLE = 0x15;
+      static constexpr Byte MOTOR_DISABLE = 0x16;
+    };
   };
 };
 

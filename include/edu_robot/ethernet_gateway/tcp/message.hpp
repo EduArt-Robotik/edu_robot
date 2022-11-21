@@ -48,19 +48,21 @@ struct DataField {
       return { value };
     }
     else if constexpr (size() == sizeof(std::uint16_t)) {
-      const std::uint16_t network_order = ::htons(value);
+      const std::uint16_t host_order = *static_cast<const std::uint16_t*>(static_cast<const void*>(&value));
+      const std::uint16_t network_order = ::htons(host_order);
       std::array<Byte, size()> serialized_bytes = { 0 };
     
       void* data_address = static_cast<void*>(serialized_bytes.data());
-      *static_cast<DataType*>(data_address) = network_order;
+      *static_cast<std::uint16_t*>(data_address) = network_order;
       return serialized_bytes;
     }
     else if constexpr (size() == sizeof(std::uint32_t)) {
-      const std::uint32_t network_order = ::htonl(value);
+      const std::uint32_t host_order = *static_cast<const std::uint32_t*>(static_cast<const void*>(&value));
+      const std::uint32_t network_order = ::htonl(host_order);
       std::array<Byte, size()> serialized_bytes = { 0 };
     
       void* data_address = static_cast<void*>(serialized_bytes.data());
-      *static_cast<DataType*>(data_address) = network_order;
+      *static_cast<std::uint32_t*>(data_address) = network_order;
       return serialized_bytes;
     }
     // else
@@ -69,7 +71,7 @@ struct DataField {
   inline static constexpr DataType deserialize(const Byte data[size()])
   {
     if constexpr (size() == sizeof(Byte)) {
-      return data;
+      return data[0];
     }
     else if constexpr (size() == sizeof(std::uint16_t)) {
       const std::uint16_t host_order = ::ntohs(data);
@@ -242,9 +244,7 @@ public:
     return element::impl::make_message_search_pattern<0, 1, 2>(sequence_number, MessageType{});
   }
   template <std::size_t Index>
-  inline constexpr static typename std::tuple_element<Index, std::tuple<Elements...>>::type::type deserialize(
-    const RxMessageDataBuffer& rx_buffer)
-  {
+  inline constexpr static auto deserialize(const RxMessageDataBuffer& rx_buffer) {
     return MessageType::template deserialize<Index + 1>(rx_buffer);
   }
 };
