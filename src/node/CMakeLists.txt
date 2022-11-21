@@ -13,10 +13,10 @@ ament_target_dependencies(iotbot-shield
 
 ### Ehternet Gateway
 add_executable(ethernet-gateway
-  ethernet_gateway_node.cpp
+  ethernet_gateway_bot_node.cpp
 )
 target_link_libraries(ethernet-gateway
-eduart-ethernet-gateway
+  eduart-ethernet-gateway
 )
 ament_target_dependencies(ethernet-gateway
   "rclcpp"
