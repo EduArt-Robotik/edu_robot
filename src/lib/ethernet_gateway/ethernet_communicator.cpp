@@ -33,7 +33,7 @@ std::uint8_t eduart::robot::ethernet::Request::_sequence_number = 0;
 EthernetCommunicator::EthernetCommunicator(char const* const ip_address, const std::uint16_t port)
   : _is_running(true)
   , _new_incoming_requests(false)
-  , _wait_time_after_sending(50ms) // \todo check if wait time is still needed.
+  , _wait_time_after_sending(20ms) // \todo check if wait time is still needed.
   , _new_received_data(false)
 {
   _socket_address.sin_addr.s_addr = inet_addr(ip_address);
