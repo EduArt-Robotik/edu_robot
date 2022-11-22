@@ -25,6 +25,7 @@ using GetFirmwareVersion = MessageFrame<element::Command<PROTOCOL::COMMAND::GET:
 // Set Motor Controller Parameters
 using SetMotorControllerParameter = MessageFrame<element::Command<PROTOCOL::COMMAND::SET::MOTOR_CONTROLLER_PARAMETER>,
                                                  element::Uint8,   // Motor ID
+                                                 element::Uint8,   // CAN ID
                                                  element::Float,   // Gear Ratio
                                                  element::Float,   // Max RPM
                                                  element::Float,   // Threshold Time Stalled Detection
@@ -33,12 +34,14 @@ using SetMotorControllerParameter = MessageFrame<element::Command<PROTOCOL::COMM
 
 using SetEncoderParameter = MessageFrame<element::Command<PROTOCOL::COMMAND::SET::ENCODER_PARAMETER>,
                                                           element::Uint8,  // Motor ID
+                                                          element::Uint8,  // CAN ID
                                                           element::Uint32, // Ticks per Rotation
                                                           element::Float,  // Input Filter Weight
                                                           element::Uint8>; // Inverted Flag
 
 using SetPidControllerParameter = MessageFrame<element::Command<PROTOCOL::COMMAND::SET::PID_CONTROLLER_PARAMETER>,
                                                element::Uint8,  // Motor ID
+                                               element::Uint8,  // CAN ID
                                                element::Float,  // Kp
                                                element::Float,  // Ki
                                                element::Float,  // Kd
@@ -48,6 +51,7 @@ using SetPidControllerParameter = MessageFrame<element::Command<PROTOCOL::COMMAN
                                                element::Uint8>; // Use Anti Windup Flag
 
 using SetMotorRpm = MessageFrame<element::Command<PROTOCOL::COMMAND::SET::MOTOR_RPM>,
+                                 element::Uint8,  // CAN ID
                                  element::Float,  // Set Point RPM Motor 0
                                  element::Float>; // Set Point RPM Motor 1
 

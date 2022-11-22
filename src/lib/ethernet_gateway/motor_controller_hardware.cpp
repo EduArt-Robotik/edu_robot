@@ -58,6 +58,7 @@ CompoundMotorControllerHardware::CompoundMotorControllerHardware(const std::stri
   {
     auto request = Request::make_request<SetMotorControllerParameter>(
       0,
+      _can_id,
       parameter.gear_ratio,
       parameter.max_rpm,
       parameter.threshold_stall_check,
@@ -76,6 +77,7 @@ CompoundMotorControllerHardware::CompoundMotorControllerHardware(const std::stri
   {
     auto request = Request::make_request<SetEncoderParameter>(
       0,
+      _can_id,
       parameter.encoder_ratio,
       parameter.weight_low_pass_encoder,
       parameter.encoder_inverted
@@ -92,6 +94,7 @@ CompoundMotorControllerHardware::CompoundMotorControllerHardware(const std::stri
   {
     auto request = Request::make_request<SetPidControllerParameter>(
       0,
+      _can_id,
       parameter.kp,
       parameter.ki,
       parameter.kd,
@@ -131,12 +134,8 @@ void CompoundMotorControllerHardware::processRxData(const tcp::message::RxMessag
 
 void CompoundMotorControllerHardware::processSetValue(const Rpm& rpm)
 {
-  if (_can_id != 0) {
-    // for debugging
-    return;
-  }
-
   auto request = Request::make_request<tcp::message::SetMotorRpm>(
+    _can_id,
     _dummy_motor_controller->_current_set_value,
     rpm
   );
