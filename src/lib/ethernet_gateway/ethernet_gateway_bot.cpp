@@ -22,8 +22,9 @@ using namespace std::chrono_literals;
 
 EthernetGatewayBot::EthernetGatewayBot()
   : eduart::robot::eduard::Eduard(
-    "IotBot",
-    std::make_unique<EthernetGatewayShield>("192.168.1.20", 2345)
+    "ipc_bot",
+    // std::make_unique<EthernetGatewayShield>("192.168.1.20", 2345)
+    std::make_unique<EthernetGatewayShield>("192.168.1.20", 1234)  
   )
 {
   auto shield = std::dynamic_pointer_cast<EthernetGatewayShield>(_hardware_interface);

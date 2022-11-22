@@ -39,7 +39,8 @@ EthernetCommunicator::EthernetCommunicator(char const* const ip_address, const s
   _socket_address.sin_addr.s_addr = inet_addr(ip_address);
 	_socket_address.sin_family = AF_INET;
 	_socket_address.sin_port = htons( port );
-  _socket_fd = ::socket(AF_INET , SOCK_STREAM , 0);
+  // _socket_fd = ::socket(AF_INET , SOCK_STREAM , 0);
+  _socket_fd = ::socket(AF_INET , SOCK_DGRAM , IPPROTO_UDP);
 
   if (_socket_fd < -1) {
     throw HardwareError(State::TCP_SOCKET_ERROR, "Error occurred during opening TCP socket.");

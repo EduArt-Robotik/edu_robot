@@ -50,7 +50,7 @@ void EthernetGatewayShield::enable()
   wait_for_future(future_response, 100ms);
 
   auto got = future_response.get();
-  if (Acknowledgement<PROTOCOL::COMMAND::SET::MOTOR_CONTROLLER_PARAMETER>::wasAcknowledged(got.response()) == false) {
+  if (Acknowledgement<PROTOCOL::COMMAND::SET::MOTOR_ENABLE>::wasAcknowledged(got.response()) == false) {
     throw std::runtime_error("Request \"Set Motor Enabled\" was not acknowledged.");
   }
 }
@@ -62,7 +62,7 @@ void EthernetGatewayShield::disable()
   wait_for_future(future_response, 100ms);
 
   auto got = future_response.get();
-  if (Acknowledgement<PROTOCOL::COMMAND::SET::MOTOR_CONTROLLER_PARAMETER>::wasAcknowledged(got.response()) == false) {
+  if (Acknowledgement<PROTOCOL::COMMAND::SET::MOTOR_DISABLE>::wasAcknowledged(got.response()) == false) {
     throw std::runtime_error("Request \"Set Motor Enabled\" was not acknowledged.");
   }
 }

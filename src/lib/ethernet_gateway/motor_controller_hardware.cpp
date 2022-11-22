@@ -4,6 +4,7 @@
 #include "edu_robot/ethernet_gateway/tcp/protocol.hpp"
 #include "edu_robot/hardware_error.hpp"
 
+#include <exception>
 #include <memory>
 #include <stdexcept>
 
@@ -135,7 +136,6 @@ void CompoundMotorControllerHardware::processSetValue(const Rpm& rpm)
 
   auto future_response = _communicator->sendRequest(std::move(request));
   wait_for_future(future_response, 100ms);
-  future_response.get();
 
   auto got = future_response.get();
   if (Acknowledgement<PROTOCOL::COMMAND::SET::MOTOR_RPM>::wasAcknowledged(got.response()) == false) {
