@@ -24,10 +24,11 @@ HardwareComponentFactory::addLighting(const std::string& lighting_name, const st
 
 HardwareComponentFactory&
 HardwareComponentFactory::addMotorController(
-  const std::string& motor_name, const std::string& hardware_name, const eduart::robot::MotorController::Parameter& parameter)
+  const std::string& motor_name, const std::string& hardware_name,
+  const eduart::robot::MotorController::Parameter& parameter)
 {
   auto compound_motor = std::make_shared<CompoundMotorControllerHardware>(
-    hardware_name + "_a", hardware_name + "_b", parameter, _shield->getCommunicator()
+    hardware_name + "_a", hardware_name + "_b", parameter, 0, _shield->getCommunicator()
   );
 
   _motor_controller_hardware[motor_name + "_a"] = compound_motor->dummyMotorController();
@@ -36,7 +37,7 @@ HardwareComponentFactory::addMotorController(
   _motor_sensor_hardware[motor_name + "_b"] = compound_motor;
 
   compound_motor = std::make_shared<CompoundMotorControllerHardware>(
-    hardware_name + "_c", hardware_name + "_d", parameter, _shield->getCommunicator()
+    hardware_name + "_c", hardware_name + "_d", parameter, 1, _shield->getCommunicator()
   );  
   _motor_controller_hardware[motor_name + "_c"] = compound_motor->dummyMotorController();
   _motor_controller_hardware[motor_name + "_d"] = compound_motor;

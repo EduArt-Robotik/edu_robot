@@ -9,6 +9,7 @@
 
 #include <edu_robot/eduard/eduard_hardware_component_factory.hpp>
 
+#include <cstdint>
 #include <map>
 #include <memory>
 #include <string>
@@ -26,8 +27,9 @@ public:
   ~HardwareComponentFactory() override = default;
 
   HardwareComponentFactory& addLighting(const std::string& lighting_name, const std::string& hardware_name);
-  HardwareComponentFactory& addMotorController(const std::string& motor_name, const std::string& hardware_name,
-                                                     const eduart::robot::MotorController::Parameter& parameter);
+  HardwareComponentFactory& addMotorController(
+    const std::string& motor_name, const std::string& hardware_name,
+    const eduart::robot::MotorController::Parameter& parameter);
   HardwareComponentFactory& addRangeSensor(const std::string& sensor_name, const std::string& hardware_name,
                                                  const std::uint8_t id, const RangeSensorHardware::Parameter& parameter);
   HardwareComponentFactory& addImuSensor(const std::string& sensor_name, const std::string& hardware_name,

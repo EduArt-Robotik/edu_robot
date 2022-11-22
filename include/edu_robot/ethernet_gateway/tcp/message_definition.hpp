@@ -63,7 +63,7 @@ struct Acknowledgement : public MessageFrame<element::Response<TcpCommand>, elem
 };
 
 } // end namespace message
+} // end namespace tcp
 } // end namespace ethernet
-} // end namespace iotbot
 } // end namespace eduart
 } // end namespace robot

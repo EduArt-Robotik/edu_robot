@@ -41,9 +41,11 @@ void DummyMotorControllerHardware::processSetValue(const Rpm& rpm)
 CompoundMotorControllerHardware::CompoundMotorControllerHardware(const std::string& hardware_name_motor_a,
                                                                  const std::string& hardware_name_motor_b,
                                                                  const eduart::robot::MotorController::Parameter& parameter,
+                                                                 const std::uint8_t can_id,
                                                                  std::shared_ptr<EthernetCommunicator> communicator)
   : EthernetGatewayDevice(hardware_name_motor_b)
   , EthernetGatewayTxRxDevice(hardware_name_motor_b, communicator)
+  , _can_id(can_id)
 {
   _dummy_motor_controller = std::make_shared<DummyMotorControllerHardware>(hardware_name_motor_a);
 
@@ -129,6 +131,11 @@ void CompoundMotorControllerHardware::processRxData(const tcp::message::RxMessag
 
 void CompoundMotorControllerHardware::processSetValue(const Rpm& rpm)
 {
+  if (_can_id != 0) {
+    // for debugging
+    return;
+  }
+
   auto request = Request::make_request<tcp::message::SetMotorRpm>(
     _dummy_motor_controller->_current_set_value,
     rpm

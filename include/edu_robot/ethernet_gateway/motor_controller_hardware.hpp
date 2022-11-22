@@ -42,6 +42,7 @@ public:
   CompoundMotorControllerHardware(const std::string& hardware_name_motor_a,
                                   const std::string& hardware_name_motor_b,
                                   const eduart::robot::MotorController::Parameter& parameter,
+                                  const std::uint8_t can_id,
                                   std::shared_ptr<EthernetCommunicator> communicator);
   ~CompoundMotorControllerHardware() override;
 
@@ -54,6 +55,7 @@ public:
 
 private:
   std::shared_ptr<DummyMotorControllerHardware> _dummy_motor_controller;
+  std::uint8_t _can_id;
 };
 
 } // end namespace ethernet
