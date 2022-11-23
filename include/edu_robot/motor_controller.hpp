@@ -31,9 +31,9 @@ class MotorController
 public:
   struct Parameter
   {
-    float gear_ratio = 70.0f;
+    float gear_ratio = 89.0f;
     float encoder_ratio = 2048.0f;
-    float max_rpm = 140.0f;
+    float max_rpm = 100.0f;
     float threshold_stall_check = 0.25f;
     std::uint32_t control_frequency = 16000;
     bool encoder_inverted = false;
