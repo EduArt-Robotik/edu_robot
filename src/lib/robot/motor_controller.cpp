@@ -8,7 +8,7 @@
 namespace eduart {
 namespace robot {
 
-MotorController::Parameter get_motor_controller_parameter(
+MotorController::Parameter MotorController::get_motor_controller_parameter(
   const std::string& name, const MotorController::Parameter default_parameter, rclcpp::Node& ros_node)
 {
   MotorController::Parameter parameter;
@@ -22,6 +22,7 @@ MotorController::Parameter get_motor_controller_parameter(
   ros_node.declare_parameter<float>(name + "/pid/kd", default_parameter.kd);
   ros_node.declare_parameter<float>(name + "/weight_low_pass_set_point", default_parameter.weight_low_pass_set_point);
   ros_node.declare_parameter<float>(name + "/weight_low_pass_encoder", default_parameter.weight_low_pass_encoder);
+  ros_node.declare_parameter<bool>(name + "/encoder_inverted", default_parameter.encoder_inverted);
 
   parameter.gear_ratio = ros_node.get_parameter(name + "/gear_ratio").as_double();
   parameter.encoder_ratio = ros_node.get_parameter(name + "/encoder_ratio").as_double();
@@ -32,15 +33,16 @@ MotorController::Parameter get_motor_controller_parameter(
   parameter.kd = ros_node.get_parameter(name + "/pid/kd").as_double();
   parameter.weight_low_pass_set_point = ros_node.get_parameter(name + "/weight_low_pass_set_point").as_double();
   parameter.weight_low_pass_encoder = ros_node.get_parameter(name + "/weight_low_pass_encoder").as_double();
+  parameter.encoder_inverted = ros_node.get_parameter(name + "/encoder_inverted").as_bool();
 
   return parameter;
-}  
+}
 
 MotorController::MotorController(const std::string& name, const std::uint8_t id, const Parameter& parameter,
                                  const std::string& urdf_joint_name, rclcpp::Node& ros_node,
                                  std::shared_ptr<HardwareComponentInterface<Rpm>> hardware_component_interface,
                                  std::shared_ptr<HardwareSensorInterface<Rpm>> hardware_sensor_interface)
-  : _parameter(get_motor_controller_parameter(name, parameter, ros_node))
+  : _parameter(parameter)
   , _name(name)
   , _id(id)
   , _urdf_joint_name(urdf_joint_name)

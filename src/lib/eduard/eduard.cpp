@@ -68,7 +68,9 @@ void Eduard::initialize(EduardHardwareComponentFactory& factory)
     registerMotorController(std::make_shared<robot::MotorController>(
       motor_controller_name[i],
       i,
-      motor_controller_default_parameter,
+      robot::MotorController::get_motor_controller_parameter(
+        motor_controller_name[i], motor_controller_default_parameter, *this
+      ),
       motor_controller_joint_name[i],
       *this,
       factory.motorControllerHardware().at(motor_controller_name[i]),
@@ -124,10 +126,10 @@ void Eduard::initialize(EduardHardwareComponentFactory& factory)
   constexpr float wheel_diameter = 0.17f;
 
   _kinematic_matrix.resize(4, 3);
-  _kinematic_matrix << -1.0f, 0.0f, -l_squared / (2.0f * l_y),
-                       -1.0f, 0.0f, -l_squared / (2.0f * l_y),
-                        1.0f, 0.0f, -l_squared / (2.0f * l_y),
-                        1.0f, 0.0f, -l_squared / (2.0f * l_y);
+  _kinematic_matrix << -1.0f, 0.0f, l_squared / (2.0f * l_y),
+                       -1.0f, 0.0f, l_squared / (2.0f * l_y),
+                        1.0f, 0.0f, l_squared / (2.0f * l_y),
+                        1.0f, 0.0f, l_squared / (2.0f * l_y);
   _kinematic_matrix *= 1.0f / wheel_diameter;
 }
 

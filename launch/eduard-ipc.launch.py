@@ -15,17 +15,19 @@ def generate_launch_description():
     parameter_file = os.path.join(
       package_path,
       'parameter',
-      'eduard.yaml'
+      'chrischan.yaml'
     )
 
-    eduard_iot2050 = Node(
+    eduard_ipc = Node(
       package='edu_robot',
-      executable='iotbot-shield',
-      name='eduard_iot2050',
-      parameters= [parameter_file]
+      executable='ethernet-gateway',
+      name='eduard_ipc',
+      parameters= [parameter_file],
+      # prefix=['gdbserver localhost:3000'],
+      output='screen'
     )
 
     return LaunchDescription([
-      eduard_iot2050
+      eduard_ipc
     ])
     

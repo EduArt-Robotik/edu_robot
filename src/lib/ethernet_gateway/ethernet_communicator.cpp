@@ -1,7 +1,11 @@
-#include "edu_robot/iot_shield/iot_shield_communicator.hpp"
-#include "edu_robot/hardware_error.hpp"
-#include "edu_robot/iot_shield/iot_shield_device.hpp"
-#include "edu_robot/iot_shield/uart/message.hpp"
+#include "edu_robot/ethernet_gateway/ethernet_communicator.hpp"
+#include "edu_robot/ethernet_gateway/tcp/message.hpp"
+#include "edu_robot/ethernet_gateway/tcp/protocol.hpp"
+#include "edu_robot/state.hpp"
+
+#include <algorithm>
+#include <edu_robot/hardware_error.hpp>
+#include <edu_robot/component_error.hpp>
 
 #include <chrono>
 #include <cstddef>
@@ -9,50 +13,47 @@
 #include <functional>
 #include <future>
 #include <iostream>
+#include <iterator>
 #include <mutex>
+#include <sys/socket.h>
 #include <thread>
 #include <utility>
+#include <sys/ioctl.h>
+#include <arpa/inet.h>
+#include <unistd.h>
 
 namespace eduart {
 namespace robot {
-namespace iotbot {
+namespace ethernet {
 
 using namespace std::chrono_literals;
 
-IotShieldCommunicator::IotShieldCommunicator(char const* const device_name)
+std::uint8_t eduart::robot::ethernet::Request::_sequence_number = 0;
+
+EthernetCommunicator::EthernetCommunicator(char const* const ip_address, const std::uint16_t port)
   : _is_running(true)
   , _new_incoming_requests(false)
-  , _wait_time_after_sending(8ms)
+  , _wait_time_after_sending(20ms) // \todo check if wait time is still needed.
   , _new_received_data(false)
 {
-  // \todo check for better logging instance.
-#if _WITH_MRAA
-  std::cout << "open uart device \"" << device_name << "\"" << std::endl;
-  _uart = std::make_unique<mraa::Uart>(device_name);
+  _socket_address.sin_addr.s_addr = inet_addr(ip_address);
+	_socket_address.sin_family = AF_INET;
+	_socket_address.sin_port = htons( port );
+  // _socket_fd = ::socket(AF_INET , SOCK_STREAM , 0);
+  _socket_fd = ::socket(AF_INET , SOCK_DGRAM , IPPROTO_UDP);
 
-  if (_uart->setBaudRate(115200) != mraa::SUCCESS) {
-     std::cerr << "Error setting parity on UART" << std::endl;
+  if (_socket_fd < -1) {
+    throw HardwareError(State::TCP_SOCKET_ERROR, "Error occurred during opening TCP socket.");
+  }
+  if (::connect(_socket_fd, (struct sockaddr*)&_socket_address, sizeof(_socket_address)) < 0) {
+    ::close(_socket_fd);
+    throw HardwareError(State::TCP_SOCKET_ERROR, "Error occurred during opening TCP socket.");
   }
 
-  if (_uart->setMode(8, mraa::UART_PARITY_NONE, 1) != mraa::SUCCESS) {
-     std::cerr << "Error setting parity on UART" << std::endl;
-  }
-
-  if (_uart->setFlowcontrol(false, false) != mraa::SUCCESS) {
-     std::cerr << "Error setting flow control UART" << std::endl;
-  }
-   
-  _uart->flush();
-  while (_uart->dataAvailable(1) == true) { char buffer; _uart->read(&buffer, 1); }
-#else
-  (void)device_name;
-  std::cerr << "UART interface not available. MRAA is missing!" << std::endl;
-#endif
-
-  _uart_sending_thread = std::thread([this]{
+  _tcp_sending_thread = std::thread([this]{
     processSending(_wait_time_after_sending);
   });
-  _uart_receiving_thread = std::thread([this]{
+  _tcp_receiving_thread = std::thread([this]{
     processReceiving();
   });
   _handling_thread = std::thread([this]{
@@ -60,27 +61,20 @@ IotShieldCommunicator::IotShieldCommunicator(char const* const device_name)
   });
 }
 
-IotShieldCommunicator::~IotShieldCommunicator()
+EthernetCommunicator::~EthernetCommunicator()
 {
-  std::cout << "Shuting down shield communicator." << std::endl;
-#if _WITH_MRAA
-  _uart->flush();
-#endif
+  std::cout << "Shuting down TCP communicator." << std::endl;
+
   _is_running = false;
   _handling_thread.join();
-  _uart_sending_thread.join();
-  _uart_receiving_thread.join();  
+  _tcp_sending_thread.join();
+  _tcp_receiving_thread.join();  
+  ::close(_socket_fd);
 }
 
-void IotShieldCommunicator::registerProcessReceivedBytes(
-  std::function<void(const uart::message::RxMessageDataBuffer&)> callback)
+std::future<Request> EthernetCommunicator::sendRequest(Request request)
 {
-  _process_received_bytes = callback;
-}
-
-std::future<ShieldRequest> IotShieldCommunicator::sendRequest(ShieldRequest request)
-{
-  std::promise<ShieldRequest> feedback;
+  std::promise<Request> feedback;
   auto future = feedback.get_future();
   {
     std::lock_guard lock(_mutex_data_input);
@@ -91,7 +85,7 @@ std::future<ShieldRequest> IotShieldCommunicator::sendRequest(ShieldRequest requ
   return future;
 }
 
-uart::message::RxMessageDataBuffer IotShieldCommunicator::getRxBuffer()
+tcp::message::RxMessageDataBuffer EthernetCommunicator::getRxBuffer()
 {
   // Make received data available for polling.
   std::lock_guard guard(_mutex_received_data_copy);
@@ -113,18 +107,22 @@ static bool is_same(const Left& lhs, const Right& rhs) {
   return is_same;
 }
 
-void IotShieldCommunicator::processing()
+void EthernetCommunicator::processing()
 {
   while (_is_running) {
     auto start = std::chrono::system_clock::now();
 
     // Process New Input Requests
     if (_new_incoming_requests) {
+      // Get next tx message that should be sent.
       std::scoped_lock lock(_mutex_sending_data, _mutex_data_input);
       auto request = std::move(_incoming_requests.front());
       _incoming_requests.pop();
-      TaskSendingUart task([this, &request]{ // \todo fix here, local variable captured as reference!!!
-        sendingData(request.first._request_message);
+      // Add tx message to sending queue. The data pointer must not be changed as long the data will be sent. 
+      tcp::message::Byte const *const tx_buffer = request.first._request_message.data();
+      const std::size_t length = request.first._request_message.size();
+      TaskSendingUart task([this, tx_buffer, length]{
+        sendingData(tx_buffer, length);
       });
       auto future = task.get_future();
       _sending_in_progress.emplace(std::move(task));
@@ -143,7 +141,7 @@ void IotShieldCommunicator::processing()
         // If get doesn't throw an exception --> sending was ok.
         future.get();
         // Request was successfully sent to the shield.
-        request.first._state = ShieldRequest::State::SENT;
+        request.first._state = Request::State::SENT;
         _open_request.emplace_back(std::move(request));
       }
       catch (...) {
@@ -152,14 +150,14 @@ void IotShieldCommunicator::processing()
       }
     }
 
-    // Handle Received Uart Data
-    if (_new_received_data == true) {
+    // Handle Received Tcp Data
+    if (_new_received_data == true && _open_request.empty() == false) {
       // Reading data thread is waiting.
       try {
-        uart::message::RxMessageDataBuffer rx_buffer;
+        tcp::message::RxMessageDataBuffer rx_buffer;
         {
           std::unique_lock lock(_mutex_receiving_data);
-          rx_buffer = _rx_buffer_queue.front();
+          rx_buffer = std::move(_rx_buffer_queue.front());
           _rx_buffer_queue.pop();
 
           if (_rx_buffer_queue.size() == 0) {
@@ -180,8 +178,8 @@ void IotShieldCommunicator::processing()
             auto request = std::move(*it);
             it = _open_request.erase(it);
 
-            request.first._state = ShieldRequest::State::RECEIVED;
-            request.first._response_message = rx_buffer;
+            request.first._state = Request::State::RECEIVED;
+            request.first._response_message = std::move(rx_buffer);
             request.second.set_value(std::move(request.first));
             break;
           }
@@ -191,7 +189,7 @@ void IotShieldCommunicator::processing()
       }
       catch (std::exception& ex) {
         // \todo this class needs an logger!
-        std::cout << "Error occurred during reading UART interface: what() = " << ex.what() << std::endl;
+        std::cout << "Error occurred during reading TCP interface: what() = " << ex.what() << std::endl;
       }
     }
 
@@ -204,56 +202,38 @@ void IotShieldCommunicator::processing()
   }
 }
 
-void IotShieldCommunicator::sendingData(const uart::message::TxMessageDataBuffer& tx_buffer)
+void EthernetCommunicator::sendingData(tcp::message::Byte const *const tx_buffer, const std::size_t length)
 {
-#if _WITH_MRAA
-  const std::size_t sent_bytes = _uart->write((char*)tx_buffer.data(), tx_buffer.size());
-  
-  // DEBUG BEGIN    
-  // std::cout << "send data: ";
-  // for (const auto& byte : tx_buffer) {
-  //   std::cout << std::hex << static_cast<unsigned int>(byte) << " ";
-  // }
-  // std::cout << std::endl;
-  // DEBUG END
-
-  if (sent_bytes != tx_buffer.size()) {
-    throw HardwareError(State::UART_SENDING_FAILED, "Less byte sent as expected.");
-  }
-#else
-(void)tx_buffer;
-#endif
+  // \todo think about it! If there is only one line here remove the sending method.
+  ::send(_socket_fd, tx_buffer, length, 0);
 }
 
-uart::message::RxMessageDataBuffer IotShieldCommunicator::receivingData()
+tcp::message::RxMessageDataBuffer EthernetCommunicator::receivingData()
 {
-  uart::message::RxMessageDataBuffer rx_buffer;
-  std::size_t received_bytes = 0;
+  std::uint8_t buffer[_max_rx_buffer_queue_size];
 
-#if _WITH_MRAA
-  while (received_bytes < rx_buffer.size() && _uart->dataAvailable(100)) {
-    received_bytes += _uart->read(
-      static_cast<char*>(static_cast<void*>(rx_buffer.data())) + received_bytes, 1
-    );
+  const int received_bytes = ::recv(_socket_fd, buffer, _max_rx_buffer_queue_size, MSG_DONTWAIT);
+
+  if (received_bytes < 0) {
+    return { };
   }
-#endif
 
-  // DEBUG BEGIN
-  // std::cout << "received data: ";
-  // for (const auto& byte : rx_buffer) {
-  //   std::cout << std::hex << static_cast<unsigned int>(byte) << " ";
-  // }
-  // std::cout << std::endl;
-  // DEBUG END
+  // Set correct size to rx buffer.
+  tcp::message::RxMessageDataBuffer rx_buffer;
 
-  if (received_bytes != rx_buffer.size()) {
-    throw HardwareError(State::UART_RECEIVING_FAILED, "Received bytes do not fit to rx buffer.");
+  rx_buffer.resize(received_bytes);
+  std::copy(std::begin(buffer), std::begin(buffer) + received_bytes, rx_buffer.begin());
+  
+  std::cout << std::hex;
+  for (const auto byte : rx_buffer) {
+    std::cout << static_cast<int>(byte) << " ";
   }
+  std::cout << std::dec << std::endl;
 
   return rx_buffer;
 }
 
-void IotShieldCommunicator::processSending(const std::chrono::milliseconds wait_time_after_sending)
+void EthernetCommunicator::processSending(const std::chrono::milliseconds wait_time_after_sending)
 {
   std::chrono::time_point<std::chrono::system_clock> last_sending = std::chrono::system_clock::now();
 
@@ -267,6 +247,7 @@ void IotShieldCommunicator::processSending(const std::chrono::milliseconds wait_
       now = std::chrono::system_clock::now();
     }       
 
+    // Check if data is available for sending.
     bool sending_data_available;
     {
       std::lock_guard guard(_mutex_sending_data);
@@ -291,23 +272,36 @@ void IotShieldCommunicator::processSending(const std::chrono::milliseconds wait_
   }
 }
 
-void IotShieldCommunicator::processReceiving()
+void EthernetCommunicator::processReceiving()
 {
   while (_is_running) {
-#if _WITH_MRAA
-    if (_uart->dataAvailable(1000) == false) {
-      continue;
-    }
-#else
-  std::this_thread::sleep_for(1000ms);
-#endif
+    // int count;
+    // ioctl(_socket_fd, FIONREAD, &count);
+    // std::uint8_t buffer[_max_rx_buffer_queue_size];
+    // const int count = ::recv(_socket_fd, buffer, _max_rx_buffer_queue_size, MSG_PEEK | MSG_DONTWAIT);
+
+
+    // if (count <= 0) {
+    //   std::this_thread::sleep_for(1ms);
+    //   continue;
+    // }
 
     try {
-      uart::message::RxMessageDataBuffer rx_buffer;
+      tcp::message::RxMessageDataBuffer rx_buffer;
       rx_buffer = receivingData();
+
+      if (rx_buffer.empty()) {
+        std::this_thread::sleep_for(1ms);
+        continue;
+      }
 
       {
         std::unique_lock lock(_mutex_receiving_data);
+
+        if (_rx_buffer_queue.size() >= _max_rx_buffer_queue_size) {
+          throw ComponentError(State::TCP_SOCKET_ERROR, "Max rx buffer queue size is reached.");
+        }
+
         _rx_buffer_queue.emplace(rx_buffer);
         _new_received_data = true;
       }
@@ -317,14 +311,9 @@ void IotShieldCommunicator::processReceiving()
       std::cout << "drop message" << std::endl;
       continue;
     }
-    // {
-    //   std::unique_lock lock(_mutex_receiving_data);
-    //   _new_received_data = true;
-    //   _cv_receiving_data.wait(lock);
-    // }
   }
 }
 
-} // end namespace iotbot
+} // end namespace ethernet
 } // end namespace eduart
 } // end namespace robot
