@@ -18,52 +18,44 @@ namespace iotbot {
 namespace uart {
 namespace message {
 
-using SetRpm = MessageFrame<element::Command<UART::COMMAND::SET::RPM>, element::Int16, element::Int16, element::Int16, element::Int16>;
-//   SetRpm(const Rpm rpm_0, const Rpm rpm_1, const Rpm rpm_2, const Rpm rpm_3)
-//     : MessageFrame<element::Command<UART::COMMAND::SET::RPM>, element::Int16, element::Int16, element::Int16, element::Int16>(
-//         static_cast<element::Int16::DataType>(rpm_0 * 100.f + 0.5f),
-//         static_cast<element::Int16::DataType>(rpm_1 * 100.f + 0.5f),
-//         static_cast<element::Int16::DataType>(rpm_2 * 100.f + 0.5f),
-//         static_cast<element::Int16::DataType>(rpm_3 * 100.f + 0.5f)
-//       )
-//   { }
-// };
+using SetRpm = MessageFrame<element::Command<UART::COMMAND::SET::RPM>,
+                            element::Int16,  // RPM set point motor 1
+                            element::Int16,  // RPM set point motor 2
+                            element::Int16,  // RPM set point motor 3
+                            element::Int16>; // RPM set point motor 4
 
 template <Byte UartCommand>
-using SetLighting = MessageFrame<element::Command<UartCommand>, element::Uint8, element::Uint8, element::Uint8, /* spacer */ element::Uint8 , element::Uint32>;
-//   SetLighting(const Color& color)
-//     : MessageFrame<element::Command<UartCommand>, element::Uint8, element::Uint8, element::Uint8, /* spacer */ element::Uint8 , element::Uint32>(
-//         color.r, color.g, color.b, 0u, 0u) {
-//   }
-// };
+using SetLighting = MessageFrame<element::Command<UartCommand>,
+                                 element::Uint8,   // r value
+                                 element::Uint8,   // g value
+                                 element::Uint8,   // b value
+                                 element::Uint8,   // spacer
+                                 element::Uint32>; // spacer
+
 
 template <Byte UartCommand>
-using SetValueF = MessageFrame<element::Command<UartCommand>, element::Float, /* spacer */ element::Uint32>;
-//   SetValueF(const element::Float::DataType value)
-//     : MessageFrame<element::Command<UartCommand>, element::Float, element::Uint32>(value, 0u) {
-//   }    
-// };
+using SetValueF = MessageFrame<element::Command<UartCommand>,
+                               element::Float,   // float value
+                               element::Uint32>; // spacer
 
 template <Byte UartCommand>
-using SetValueU = MessageFrame<element::Command<UartCommand>, element::Uint32, /* spacer */ element::Uint32>;
-//   SetValueU(const element::Uint32::DataType value)
-//     : MessageFrame<element::Command<UartCommand>, element::Uint32, element::Uint32>(value, 0u) {
-//   }
-// };
+using SetValueU = MessageFrame<element::Command<UartCommand>,
+                               element::Uint32,  // unsigned int value
+                               element::Uint32>; // spacer
 
-using SetImuRawDataMode = MessageFrame<element::Command<UART::COMMAND::SET::IMU_RAW_DATA>, element::Uint8, /* spacer */ element::Uint8, element::Int16, element::Uint32>;
-//   SetImuRawDataMode(const bool enable)
-//     : MessageFrame<element::Command<UART::COMMAND::SET::IMU_RAW_DATA>, element::Uint8, element::Uint8, element::Int16, element::Uint32>(enable ? 0xff : 0x00, 0u, 0u, 0u) {
-//   }
-// };
+using SetImuRawDataMode = MessageFrame<element::Command<UART::COMMAND::SET::IMU_RAW_DATA>,
+                                       element::Uint8,   // enable flag
+                                       element::Uint8,   // spacer
+                                       element::Int16,   // spacer
+                                       element::Uint32>; // spacer
 
-using Enable = MessageFrame<element::Command<UART::COMMAND::ENABLE>, /* spacer */ element::Uint32, element::Uint32>;
-//   Enable() : MessageFrame<element::Command<UART::COMMAND::ENABLE>, element::Uint32, element::Uint32>(0u, 0u) { }
-// };
+using Enable = MessageFrame<element::Command<UART::COMMAND::ENABLE>,
+                            element::Uint32,  // spacer
+                            element::Uint32>; // spacer
 
-using Disable = MessageFrame<element::Command<UART::COMMAND::DISABLE>, /* spacer */ element::Uint32, element::Uint32>;
-//   Disable() : MessageFrame<element::Command<UART::COMMAND::DISABLE>, element::Uint32, element::Uint32>(0u, 0u) { }
-// };
+using Disable = MessageFrame<element::Command<UART::COMMAND::DISABLE>,
+                             element::Uint32,  // spacer
+                             element::Uint32>; // spacer
 
 struct ShieldResponse : public uart::message::Message<element::Uint8, element::Int16,  element::Int16, element::Int16,  element::Int16, element::Int16, element::Int16, element::Int16, element::Int16, element::Int16,
                                                       element::Int16, element::Int16, element::Int16, element::Int16, element::Int16,  element::Int16, element::Uint8>

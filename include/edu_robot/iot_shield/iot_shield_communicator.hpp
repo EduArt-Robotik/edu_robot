@@ -99,7 +99,7 @@ private:
   void processSending(const std::chrono::milliseconds wait_time_after_sending);
   void processReceiving();
   void processing();
-  void sendingData(const uart::message::TxMessageDataBuffer& tx_buffer);
+  void sendingData(uart::message::Byte const *const tx_buffer, const std::size_t length);
   uart::message::RxMessageDataBuffer receivingData();
 
   std::function<void(const uart::message::RxMessageDataBuffer&)> _process_received_bytes;

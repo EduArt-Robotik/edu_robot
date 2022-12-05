@@ -123,8 +123,11 @@ void IotShieldCommunicator::processing()
       std::scoped_lock lock(_mutex_sending_data, _mutex_data_input);
       auto request = std::move(_incoming_requests.front());
       _incoming_requests.pop();
-      TaskSendingUart task([this, &request]{
-        sendingData(request.first._request_message);
+      // Add tx message to sending queue. The data pointer must not be changed as long the data will be sent. 
+      uart::message::Byte const *const tx_buffer = request.first._request_message.data();
+      const std::size_t length = request.first._request_message.size();      
+      TaskSendingUart task([this, tx_buffer, length]{
+        sendingData(tx_buffer, length); // \todo check why length do not need to be captured.
       });
       auto future = task.get_future();
       _sending_in_progress.emplace(std::move(task));
@@ -204,10 +207,11 @@ void IotShieldCommunicator::processing()
   }
 }
 
-void IotShieldCommunicator::sendingData(const uart::message::TxMessageDataBuffer& tx_buffer)
+void IotShieldCommunicator::sendingData(uart::message::Byte const *const tx_buffer, const std::size_t length)
 {
 #if _WITH_MRAA
-  const std::size_t sent_bytes = _uart->write((char*)tx_buffer.data(), tx_buffer.size());
+  const char* data = static_cast<const char*>(static_cast<const void*>(tx_buffer));
+  const std::size_t sent_bytes = _uart->write(data, length);
   
   // DEBUG BEGIN    
   // std::cout << "send data: ";
@@ -217,11 +221,13 @@ void IotShieldCommunicator::sendingData(const uart::message::TxMessageDataBuffer
   // std::cout << std::endl;
   // DEBUG END
 
-  if (sent_bytes != tx_buffer.size()) {
+  if (sent_bytes != length) {
     throw HardwareError(State::UART_SENDING_FAILED, "Less byte sent as expected.");
   }
+
 #else
-(void)tx_buffer;
+  (void)tx_buffer;
+  (void)length;
 #endif
 }
 
