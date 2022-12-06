@@ -3,5 +3,9 @@ uint8 value
 # defined enums that have to be used for mode
 uint8 INACTIVE=1
 uint8 REMOTE_CONTROLLED=2
-uint8 FLEET_MASTER=3
-uint8 FLEET_SLAVE=4
+uint8 FLEET_MASTER=4
+uint8 FLEET_SLAVE=8
+uint8 SKID_DRIVE=16
+uint8 MECANUM_DRIVE=32
+uint8 MASK_UNSET_DRIVING_MODE=240
+uint8 MASK_UNSET_KINEMATIC_MODE=207

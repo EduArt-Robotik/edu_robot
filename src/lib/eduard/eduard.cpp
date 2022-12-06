@@ -1,4 +1,5 @@
 #include "edu_robot/eduard/eduard_hardware_component_factory.hpp"
+#include <Eigen/src/Core/Matrix.h>
 #include <cstddef>
 #include <edu_robot/eduard/eduard.hpp>
 #include <edu_robot/hardware_component_interface.hpp>
@@ -23,20 +24,15 @@ static Eduard::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
 
   // Declaring of Parameters
   ros_node.declare_parameter<std::string>("tf_footprint_frame", parameter.tf_footprint_frame);
-  ros_node.declare_parameter<std::string>("kinematic", parameter.kinematic);
+  ros_node.declare_parameter<float>("l_x", parameter.l.x);
+  ros_node.declare_parameter<float>("l_y", parameter.l.y);
+  ros_node.declare_parameter<float>("wheel_diameter", parameter.wheel_diameter);
 
   // Reading Parameters
   parameter.tf_footprint_frame = ros_node.get_parameter("tf_footprint_frame").as_string();
-  const std::string kinematic = ros_node.get_parameter("kinematic").as_string();
-
-  if (kinematic == KINEMATIC::SKID || kinematic == KINEMATIC::MECANUM) {
-    parameter.kinematic = kinematic;
-  }
-  else {
-    // keep default kinematic
-    RCLCPP_WARN(ros_node.get_logger(), "Via parameter given kinematic is not supported: given = %s", kinematic.c_str());
-    RCLCPP_WARN(ros_node.get_logger(), "Fallback to default kinematic \"%s\".", parameter.kinematic.c_str());
-  }
+  parameter.l.x = ros_node.get_parameter("l_x").as_double();
+  parameter.l.y = ros_node.get_parameter("l_y").as_double();
+  parameter.wheel_diameter = ros_node.get_parameter("wheel_diameter").as_double();
 
   return parameter;
 }
@@ -143,38 +139,44 @@ void Eduard::initialize(EduardHardwareComponentFactory& factory)
   );
   registerSensor(imu_sensor);
 
-  // Set Up Drive Kinematic
-  // \todo make it configurable
-  // \todo handle Mecanum kinematic, too
-  constexpr float l_y = 0.32f;
-  constexpr float l_x = 0.25f;
-  constexpr float l_squared = l_x * l_x + l_y * l_y;
-  constexpr float wheel_diameter = 0.17f;
-
-  if (_parameter.kinematic == KINEMATIC::SKID) {
-    _kinematic_matrix.resize(4, 3);
-    _kinematic_matrix << -1.0f, 0.0f, -l_squared / (2.0f * l_y),
-                         -1.0f, 0.0f, -l_squared / (2.0f * l_y),
-                          1.0f, 0.0f, -l_squared / (2.0f * l_y),
-                          1.0f, 0.0f, -l_squared / (2.0f * l_y);
-    _kinematic_matrix *= 1.0f / wheel_diameter;
-  }
-  else if (_parameter.kinematic == KINEMATIC::MECANUM) {
-    _kinematic_matrix.resize(4, 3);
-    _kinematic_matrix << -1.0f,  1.0f, -(l_x + l_y) * 0.5f,
-                         -1.0f, -1.0f, -(l_x + l_y) * 0.5f,
-                          1.0f,  1.0f, -(l_x + l_y) * 0.5f,
-                          1.0f, -1.0f, -(l_x + l_y) * 0.5f;
-    _kinematic_matrix *= 1.0f / wheel_diameter;    
-  }
-  else {
-    throw std::invalid_argument("Eduard: given kinematic is not supported.");
-  }
+  // Set Up Default Drive Kinematic
+  _kinematic_matrix = getKinematicMatrix(Mode::SKID_DRIVE);
 }
 
 Eduard::~Eduard()
 {
 
+}
+
+Eigen::MatrixXf Eduard::getKinematicMatrix(const Mode mode) const
+{
+  Eigen::MatrixXf kinematic_matrix;
+  const float l_x = _parameter.l.x;
+  const float l_y = _parameter.l.y;
+  const float wheel_diameter = _parameter.wheel_diameter;
+  const float l_squared = l_x * l_x + l_y * l_y;
+  
+  if (mode & Mode::SKID_DRIVE) {
+    kinematic_matrix.resize(4, 3);
+    kinematic_matrix << -1.0f, 0.0f, -l_squared / (2.0f * l_y),
+                        -1.0f, 0.0f, -l_squared / (2.0f * l_y),
+                         1.0f, 0.0f, -l_squared / (2.0f * l_y),
+                         1.0f, 0.0f, -l_squared / (2.0f * l_y);
+    kinematic_matrix *= 1.0f / wheel_diameter;
+  }
+  else if (mode & Mode::MECANUM_DRIVE) {
+    kinematic_matrix.resize(4, 3);
+    kinematic_matrix << -1.0f,  1.0f, -(l_x + l_y) * 0.5f,
+                        -1.0f, -1.0f, -(l_x + l_y) * 0.5f,
+                         1.0f,  1.0f, -(l_x + l_y) * 0.5f,
+                         1.0f, -1.0f, -(l_x + l_y) * 0.5f;
+    kinematic_matrix *= 1.0f / wheel_diameter;    
+  }
+  else {
+    throw std::invalid_argument("Eduard: given kinematic is not supported.");
+  }
+
+  return kinematic_matrix;
 }
 
 } // end namespace eduard

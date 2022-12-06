@@ -125,9 +125,9 @@ void IotShieldCommunicator::processing()
       _incoming_requests.pop();
       // Add tx message to sending queue. The data pointer must not be changed as long the data will be sent. 
       uart::message::Byte const *const tx_buffer = request.first._request_message.data();
-      const std::size_t length = request.first._request_message.size();      
-      TaskSendingUart task([this, tx_buffer, length]{
-        sendingData(tx_buffer, length); // \todo check why length do not need to be captured.
+      constexpr std::size_t length = request.first._request_message.size();
+      TaskSendingUart task([this, tx_buffer]{
+        sendingData(tx_buffer, length); // length is constexpr --> no need to captured it.
       });
       auto future = task.get_future();
       _sending_in_progress.emplace(std::move(task));

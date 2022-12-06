@@ -48,6 +48,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 # rosidl_get_typesupport_target(CPP_TYPESUPPORT_TARGET "${PROJECT_NAME}" "rosidl_typesupport_cpp")
 
 add_subdirectory(src/lib/robot)
+add_subdirectory(src/lib/processing_component)
 add_subdirectory(src/lib/eduard)
 add_subdirectory(src/lib/iotbot_shield)
 add_subdirectory(src/node)

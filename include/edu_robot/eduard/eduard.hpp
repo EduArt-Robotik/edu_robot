@@ -23,23 +23,23 @@ struct COLOR {
   };
 };
 
-struct KINEMATIC {
-  static constexpr char const *const SKID = "skid";
-  static constexpr char const *const MECANUM = "mecanum";
-};
-
 class Eduard : public robot::Robot
 {
 public:
   struct Parameter {
     std::string tf_footprint_frame = "base_footprint";
-    std::string kinematic = KINEMATIC::SKID;
+    struct {
+      float x = 0.32f;
+      float y = 0.25f;
+    }l;
+    float wheel_diameter = 0.17f;
   };
 
   Eduard(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface);
   ~Eduard() override;
 
 protected:
+  Eigen::MatrixXf getKinematicMatrix(const Mode mode) const override;
   // Needs to be called by derived classes.
   void initialize(EduardHardwareComponentFactory& factory);
 

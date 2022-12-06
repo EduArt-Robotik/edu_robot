@@ -9,6 +9,7 @@
 #include "edu_robot/processing_component/collison_avoidance.hpp"
 #include "edu_robot/processing_component/processing_detect_charging.hpp"
 
+#include <cstdint>
 #include <geometry_msgs/msg/detail/twist__struct.hpp>
 #include <memory>
 #include <nav_msgs/msg/detail/odometry__struct.hpp>
@@ -106,7 +107,20 @@ void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> tw
   try {
     // \todo maybe a size check would be great!
     Eigen::Vector3f velocity_cmd(twist_msg->linear.x, twist_msg->linear.y, twist_msg->angular.z);
-    // velocity_cmd *= _collision_avoidance_component->getVelocityReduceFactor();
+
+    // Reduce the velocity if collision avoidance was enabled.
+    if (_parameter.enable_collision_avoidance) {
+      if (velocity_cmd.x() >= 0.0) {
+        // Driving Forward
+        velocity_cmd.x() *= _collision_avoidance_component->getVelocityReduceFactorFront();
+      }
+      else {
+        // Driving Backwards
+        velocity_cmd.x() *= _collision_avoidance_component->getVelocityReduceFactorRear();
+      }
+    }
+
+    // Calculate wheel rotation speed using provided kinematic matrix.
     Eigen::VectorXf rps = _kinematic_matrix * velocity_cmd / (2.0f * M_PI);
 
     for (Eigen::Index i = 0; i < rps.size(); ++i) {
@@ -162,26 +176,40 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
   // _timer_status_report->reset();
 
   try {
-    if (request->mode.value == edu_robot::msg::Mode::REMOTE_CONTROLLED) {
+    // Drive Mode Handling
+    if (request->mode.value & edu_robot::msg::Mode::REMOTE_CONTROLLED) {
       _hardware_interface->enable();
-      _mode = Mode::REMOTE_CONTROLLED;
+      _mode &= Mode::MASK_UNSET_DRIVING_MODE;
+      _mode |= Mode::REMOTE_CONTROLLED;
       if (_detect_charging_component->isCharging() == false) {
         setLightingForMode(_mode);
       }
     }
-    else if (request->mode.value == edu_robot::msg::Mode::INACTIVE) {
+    else if (request->mode.value & edu_robot::msg::Mode::INACTIVE) {
       _hardware_interface->disable();
-      _mode = Mode::INACTIVE;
+      _mode &= Mode::MASK_UNSET_KINEMATIC_MODE;
+      _mode |= Mode::INACTIVE;
       if (_detect_charging_component->isCharging() == false) {
         setLightingForMode(_mode);
       }
+    }
+    // Kinematic Mode Handling
+    else if (request->mode.value & edu_robot::msg::Mode::SKID_DRIVE) {
+      _mode &= Mode::MASK_UNSET_KINEMATIC_MODE;
+      _mode |= Mode::SKID_DRIVE;
+      _kinematic_matrix = getKinematicMatrix(Mode::SKID_DRIVE);
+    }
+    else if (request->mode.value & edu_robot::msg::Mode::MECANUM_DRIVE) {
+      _mode &= Mode::MASK_UNSET_KINEMATIC_MODE;
+      _mode |= Mode::MECANUM_DRIVE;
+      _kinematic_matrix = getKinematicMatrix(Mode::MECANUM_DRIVE);
     }
     else {
       RCLCPP_ERROR_STREAM(get_logger(), "Unsupported mode. Can't set new mode. Canceling.");
       return;
     }
 
-    response->state.mode = request->mode;
+    response->state.mode.value = static_cast<std::uint8_t>(_mode);
     response->state.info_message = "OK";
     response->state.state.value = response->state.state.OK;
   }
