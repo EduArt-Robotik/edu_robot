@@ -50,7 +50,7 @@ protected:
 public:
   struct Parameter {
     std::string tf_base_frame = "base_link";
-    bool enable_collision_avoidance = false;
+    bool enable_collision_avoidance = true;
   };
 
   virtual ~Robot();
