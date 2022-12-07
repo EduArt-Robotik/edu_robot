@@ -65,7 +65,7 @@ install(
   DESTINATION share/${PROJECT_NAME}
 )
 install(
-  TARGETS iotbot-shield eduart-iotbot-shield eduart-robot-eduard eduart-robot
+  TARGETS iotbot-shield eduart-iotbot-shield eduart-robot-eduard eduart-robot processing-component
   EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}

@@ -28,11 +28,21 @@ class Eduard : public robot::Robot
 public:
   struct Parameter {
     std::string tf_footprint_frame = "base_footprint";
+
     struct {
-      float x = 0.32f;
-      float y = 0.25f;
-    }l;
-    float wheel_diameter = 0.17f;
+      struct {
+        float x = 0.25f;
+        float y = 0.32f;
+      } length;
+      float wheel_diameter = 0.17f;
+    } skid;
+    struct {
+      struct {
+        float x = 0.25f;
+        float y = 0.36f;
+      } length;
+      float wheel_diameter = 0.1f;
+    } mecanum;    
   };
 
   Eduard(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface);

@@ -109,14 +109,16 @@ void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> tw
     Eigen::Vector3f velocity_cmd(twist_msg->linear.x, twist_msg->linear.y, twist_msg->angular.z);
 
     // Reduce the velocity if collision avoidance was enabled.
-    if (_parameter.enable_collision_avoidance) {
+    if (_parameter.enable_collision_avoidance && (_mode & Mode::COLLISION_AVOIDANCE_OVERRIDE_ENABLED) == false) {
       if (velocity_cmd.x() >= 0.0) {
         // Driving Forward
         velocity_cmd.x() *= _collision_avoidance_component->getVelocityReduceFactorFront();
+        velocity_cmd.z() *= _collision_avoidance_component->getVelocityReduceFactorFront();
       }
       else {
         // Driving Backwards
         velocity_cmd.x() *= _collision_avoidance_component->getVelocityReduceFactorRear();
+        velocity_cmd.z() *= _collision_avoidance_component->getVelocityReduceFactorRear();
       }
     }
 
@@ -187,12 +189,21 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
     }
     else if (request->mode.value & edu_robot::msg::Mode::INACTIVE) {
       _hardware_interface->disable();
-      _mode &= Mode::MASK_UNSET_KINEMATIC_MODE;
+      _mode &= Mode::MASK_UNSET_DRIVING_MODE;
       _mode |= Mode::INACTIVE;
       if (_detect_charging_component->isCharging() == false) {
         setLightingForMode(_mode);
       }
     }
+    // Collision Avoidance
+    else if (request->mode.value & edu_robot::msg::Mode::COLLISION_AVOIDANCE_OVERRIDE_ENABLED) {
+      _mode &= Mode::MASK_UNSET_COLLISION_AVOIDANCE_OVERRIDE;
+      _mode |= Mode::COLLISION_AVOIDANCE_OVERRIDE_ENABLED;
+    }
+    else if (request->mode.value & edu_robot::msg::Mode::COLLISION_AVOIDANCE_OVERRIDE_DISABLED) {
+      _mode &= Mode::MASK_UNSET_COLLISION_AVOIDANCE_OVERRIDE;
+      _mode |= Mode::COLLISION_AVOIDANCE_OVERRIDE_DISABLED;
+    }    
     // Kinematic Mode Handling
     else if (request->mode.value & edu_robot::msg::Mode::SKID_DRIVE) {
       _mode &= Mode::MASK_UNSET_KINEMATIC_MODE;
@@ -305,16 +316,16 @@ void Robot::setLightingForMode(const Mode mode)
   }
 
   if (_detect_charging_component->isCharging()) {
-    search->second->setColor(Color{170, 0, 0}, Lighting::Mode::ROTATION);
+    search->second->setColor(Color{34, 0, 0}, Lighting::Mode::ROTATION);
   }
   else {
     switch (mode) {
       case Mode::INACTIVE:
-        search->second->setColor(Color{170, 0, 0}, Lighting::Mode::PULSATION);
+        search->second->setColor(Color{34, 0, 0}, Lighting::Mode::PULSATION);
         break;
 
       case Mode::REMOTE_CONTROLLED:
-        search->second->setColor(Color{170, 170, 170}, Lighting::Mode::DIM);
+        search->second->setColor(Color{34, 34, 34}, Lighting::Mode::DIM);
         break;
 
       default:

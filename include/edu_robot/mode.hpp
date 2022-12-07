@@ -13,10 +13,15 @@ enum class Mode {
   REMOTE_CONTROLLED         = edu_robot::msg::Mode::REMOTE_CONTROLLED,
   FLEET_MASTER              = edu_robot::msg::Mode::FLEET_MASTER,
   FLEET_SLAVE               = edu_robot::msg::Mode::FLEET_SLAVE,
+  MASK_UNSET_DRIVING_MODE   = edu_robot::msg::Mode::MASK_UNSET_DRIVING_MODE,
+
   SKID_DRIVE                = edu_robot::msg::Mode::SKID_DRIVE,
   MECANUM_DRIVE             = edu_robot::msg::Mode::MECANUM_DRIVE,
-  MASK_UNSET_DRIVING_MODE   = edu_robot::msg::Mode::MASK_UNSET_DRIVING_MODE,
-  MASK_UNSET_KINEMATIC_MODE = edu_robot::msg::Mode::MASK_UNSET_KINEMATIC_MODE
+  MASK_UNSET_KINEMATIC_MODE = edu_robot::msg::Mode::MASK_UNSET_KINEMATIC_MODE,
+
+  COLLISION_AVOIDANCE_OVERRIDE_ENABLED    = edu_robot::msg::Mode::COLLISION_AVOIDANCE_OVERRIDE_ENABLED,
+  COLLISION_AVOIDANCE_OVERRIDE_DISABLED   = edu_robot::msg::Mode::COLLISION_AVOIDANCE_OVERRIDE_DISABLED,
+  MASK_UNSET_COLLISION_AVOIDANCE_OVERRIDE = edu_robot::msg::Mode::MASK_UNSET_COLLISION_AVOIDANCE_OVERRIDE,
 };
 
 inline Mode& operator|=(Mode& lhs, const Mode rhs)

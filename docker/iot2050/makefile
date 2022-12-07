@@ -4,13 +4,13 @@ download-sources:
 	# mkdir -p /tmp/eduart_robot_ws
 	# cp Dockerfile /tmp/eduart_robot_ws
 	# cd /tmp/eduart_robot_ws
-	git clone --branch 0.1.0-alpha https://github.com/EduArt-Robotik/edu_robot.git
+	git clone --branch feature/mecanum-kinematic https://github.com/EduArt-Robotik/edu_robot.git
 	git clone --branch main https://github.com/EduArt-Robotik/edu_robot_control.git
 	# cd $(current_dir)
 
 build-docker: download-sources
 	# cd /tmp/eduart_robot_ws
-	docker build -t eduard-iotbot:alpha .
+	docker build -t eduard-iotbot:beta .
 	# cd $(current_dir)
 
 all: download-sources build-docker

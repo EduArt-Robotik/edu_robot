@@ -24,15 +24,25 @@ static Eduard::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
 
   // Declaring of Parameters
   ros_node.declare_parameter<std::string>("tf_footprint_frame", parameter.tf_footprint_frame);
-  ros_node.declare_parameter<float>("l_x", parameter.l.x);
-  ros_node.declare_parameter<float>("l_y", parameter.l.y);
-  ros_node.declare_parameter<float>("wheel_diameter", parameter.wheel_diameter);
+
+  ros_node.declare_parameter<float>("skid/length/x", parameter.skid.length.x);
+  ros_node.declare_parameter<float>("skid/length/y", parameter.skid.length.y);
+  ros_node.declare_parameter<float>("skid/wheel_diameter", parameter.skid.wheel_diameter);
+  
+  ros_node.declare_parameter<float>("mecanum/length/x", parameter.mecanum.length.x);
+  ros_node.declare_parameter<float>("mecanum/length/y", parameter.mecanum.length.y);
+  ros_node.declare_parameter<float>("mecanum/wheel_diameter", parameter.mecanum.wheel_diameter);
 
   // Reading Parameters
   parameter.tf_footprint_frame = ros_node.get_parameter("tf_footprint_frame").as_string();
-  parameter.l.x = ros_node.get_parameter("l_x").as_double();
-  parameter.l.y = ros_node.get_parameter("l_y").as_double();
-  parameter.wheel_diameter = ros_node.get_parameter("wheel_diameter").as_double();
+
+  parameter.skid.length.x = ros_node.get_parameter("skid/length/x").as_double();
+  parameter.skid.length.y = ros_node.get_parameter("skid/length/y").as_double();
+  parameter.skid.wheel_diameter = ros_node.get_parameter("skid/wheel_diameter").as_double();
+
+  parameter.mecanum.length.x = ros_node.get_parameter("mecanum/length/x").as_double();
+  parameter.mecanum.length.y = ros_node.get_parameter("mecanum/length/y").as_double();
+  parameter.mecanum.wheel_diameter = ros_node.get_parameter("mecanum/wheel_diameter").as_double();
 
   return parameter;
 }
@@ -151,12 +161,13 @@ Eduard::~Eduard()
 Eigen::MatrixXf Eduard::getKinematicMatrix(const Mode mode) const
 {
   Eigen::MatrixXf kinematic_matrix;
-  const float l_x = _parameter.l.x;
-  const float l_y = _parameter.l.y;
-  const float wheel_diameter = _parameter.wheel_diameter;
-  const float l_squared = l_x * l_x + l_y * l_y;
-  
+
   if (mode & Mode::SKID_DRIVE) {
+    const float l_x = _parameter.skid.length.x;
+    const float l_y = _parameter.skid.length.y;
+    const float wheel_diameter = _parameter.skid.wheel_diameter;
+    const float l_squared = l_x * l_x + l_y * l_y;
+
     kinematic_matrix.resize(4, 3);
     kinematic_matrix << -1.0f, 0.0f, -l_squared / (2.0f * l_y),
                         -1.0f, 0.0f, -l_squared / (2.0f * l_y),
@@ -165,6 +176,10 @@ Eigen::MatrixXf Eduard::getKinematicMatrix(const Mode mode) const
     kinematic_matrix *= 1.0f / wheel_diameter;
   }
   else if (mode & Mode::MECANUM_DRIVE) {
+    const float l_x = _parameter.mecanum.length.x;
+    const float l_y = _parameter.mecanum.length.y;
+    const float wheel_diameter = _parameter.mecanum.wheel_diameter;
+
     kinematic_matrix.resize(4, 3);
     kinematic_matrix << -1.0f,  1.0f, -(l_x + l_y) * 0.5f,
                         -1.0f, -1.0f, -(l_x + l_y) * 0.5f,
