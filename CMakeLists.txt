@@ -48,6 +48,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 # rosidl_get_typesupport_target(CPP_TYPESUPPORT_TARGET "${PROJECT_NAME}" "rosidl_typesupport_cpp")
 
 add_subdirectory(src/lib/robot)
+add_subdirectory(src/lib/processing_component)
 add_subdirectory(src/lib/eduard)
 add_subdirectory(src/lib/iotbot_shield)
 add_subdirectory(src/lib/ethernet_gateway)
@@ -65,7 +66,7 @@ install(
   DESTINATION share/${PROJECT_NAME}
 )
 install(
-  TARGETS iotbot-shield eduart-iotbot-shield eduart-robot-eduard eduart-robot eduart-ethernet-gateway ethernet-gateway
+  TARGETS iotbot-shield eduart-iotbot-shield eduart-robot-eduard eduart-robot processing-component eduart-ethernet-gateway ethernet-gateway
   EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}

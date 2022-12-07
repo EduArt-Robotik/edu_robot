@@ -13,6 +13,7 @@ MotorController::Parameter MotorController::get_motor_controller_parameter(
 {
   MotorController::Parameter parameter;
 
+  ros_node.declare_parameter<bool>(name + "/inverted", default_parameter.inverted);
   ros_node.declare_parameter<float>(name + "/gear_ratio", default_parameter.gear_ratio);
   ros_node.declare_parameter<float>(name + "/encoder_ratio", default_parameter.encoder_ratio);
   ros_node.declare_parameter<float>(name + "/max_rpm", default_parameter.max_rpm);
@@ -23,7 +24,8 @@ MotorController::Parameter MotorController::get_motor_controller_parameter(
   ros_node.declare_parameter<float>(name + "/weight_low_pass_set_point", default_parameter.weight_low_pass_set_point);
   ros_node.declare_parameter<float>(name + "/weight_low_pass_encoder", default_parameter.weight_low_pass_encoder);
   ros_node.declare_parameter<bool>(name + "/encoder_inverted", default_parameter.encoder_inverted);
-
+  
+  parameter.inverted = ros_node.get_parameter(name + "/inverted").as_bool();
   parameter.gear_ratio = ros_node.get_parameter(name + "/gear_ratio").as_double();
   parameter.encoder_ratio = ros_node.get_parameter(name + "/encoder_ratio").as_double();
   parameter.max_rpm = ros_node.get_parameter(name + "/max_rpm").as_double();

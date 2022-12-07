@@ -11,6 +11,7 @@ add_library(eduart-robot
 target_link_libraries(eduart-robot
   # ${CPP_TYPESUPPORT_TARGET} needed for ROS distro humble and newer. TODO: handle this somehow!
   Eigen3::Eigen
+  processing-component
 )
 target_compile_features(eduart-robot PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 target_include_directories(eduart-robot PUBLIC

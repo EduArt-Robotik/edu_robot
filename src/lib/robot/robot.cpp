@@ -9,16 +9,14 @@
 #include "edu_robot/processing_component/collison_avoidance.hpp"
 #include "edu_robot/processing_component/processing_detect_charging.hpp"
 
-#include <geometry_msgs/msg/detail/twist__struct.hpp>
-#include <memory>
-#include <nav_msgs/msg/detail/odometry__struct.hpp>
 #include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/qos.hpp>
 
+#include <memory>
 #include <cstdio>
 #include <exception>
 #include <functional>
-#include <rclcpp/node.hpp>
-#include <rclcpp/qos.hpp>
 #include <stdexcept>
 
 namespace eduart {
@@ -32,11 +30,15 @@ static Robot::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
   
   // Declare Parameters
   ros_node.declare_parameter<std::string>("tf_base_frame", parameter.tf_base_frame);
-  ros_node.declare_parameter<bool>("enable_collision_avoidance", parameter.enable_collision_avoidance);
+  ros_node.declare_parameter<bool>("collision_avoidance/enable", parameter.enable_collision_avoidance);
+  ros_node.declare_parameter<float>("collision_avoidance/distance_reduce_velocity", parameter.collision_avoidance.distance_reduce_velocity);
+  ros_node.declare_parameter<float>("collision_avoidance/distance_velocity_zero", parameter.collision_avoidance.distance_velocity_zero);
 
   // Get Parameter Values
   parameter.tf_base_frame = ros_node.get_parameter("tf_base_frame").as_string();
-  parameter.enable_collision_avoidance = ros_node.get_parameter("enable_collision_avoidance").as_bool();
+  parameter.enable_collision_avoidance = ros_node.get_parameter("collision_avoidance/enable").as_bool();
+  parameter.collision_avoidance.distance_reduce_velocity = ros_node.get_parameter("collision_avoidance/distance_reduce_velocity").as_double();
+  parameter.collision_avoidance.distance_velocity_zero = ros_node.get_parameter("collision_avoidance/distance_velocity_zero").as_double();
 
   return parameter;
 }
@@ -80,7 +82,7 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterfa
 
   // Initialize Processing Components
   _collision_avoidance_component = std::make_shared<processing::CollisionAvoidance>(
-    processing::CollisionAvoidance::Parameter{ 0.3f, 0.05f },
+    _parameter.collision_avoidance,
     *this
   );
   _detect_charging_component = std::make_shared<processing::DetectCharging>(
@@ -106,7 +108,31 @@ void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> tw
   try {
     // \todo maybe a size check would be great!
     Eigen::Vector3f velocity_cmd(twist_msg->linear.x, twist_msg->linear.y, twist_msg->angular.z);
-    velocity_cmd *= _collision_avoidance_component->getVelocityReduceFactor();
+
+    // Reduce the velocity if collision avoidance was enabled.
+    if (_parameter.enable_collision_avoidance && (_mode & Mode::COLLISION_AVOIDANCE_OVERRIDE_ENABLED) == false) {
+      // \todo Move lines blew in collision avoidance processing component.
+      if (velocity_cmd.x() > 0.0) {
+        // Driving Forward
+        velocity_cmd.x() *= _collision_avoidance_component->getVelocityReduceFactorFront();
+        velocity_cmd.z() *= _collision_avoidance_component->getVelocityReduceFactorFront();
+      }
+      else if (velocity_cmd.x() < 0.0) {
+        // Driving Backwards
+        velocity_cmd.x() *= _collision_avoidance_component->getVelocityReduceFactorRear();
+        velocity_cmd.z() *= _collision_avoidance_component->getVelocityReduceFactorRear();
+      }
+      else {
+        // No Driving in x direction, only rotation is addressed.
+        const float reduce_factor = std::min(
+          _collision_avoidance_component->getVelocityReduceFactorFront(),
+          _collision_avoidance_component->getVelocityReduceFactorRear()
+        );
+        velocity_cmd.z() *= reduce_factor;
+      }
+    }
+
+    // Calculate wheel rotation speed using provided kinematic matrix.
     Eigen::VectorXf rps = _kinematic_matrix * velocity_cmd / (2.0f * M_PI);
 
     for (Eigen::Index i = 0; i < rps.size(); ++i) {
@@ -162,26 +188,49 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
   // _timer_status_report->reset();
 
   try {
-    if (request->mode.value == edu_robot::msg::Mode::REMOTE_CONTROLLED) {
+    // Drive Mode Handling
+    if (request->mode.value & edu_robot::msg::Mode::REMOTE_CONTROLLED) {
       _hardware_interface->enable();
-      _mode = Mode::REMOTE_CONTROLLED;
+      _mode &= Mode::MASK_UNSET_DRIVING_MODE;
+      _mode |= Mode::REMOTE_CONTROLLED;
       if (_detect_charging_component->isCharging() == false) {
         setLightingForMode(_mode);
       }
     }
-    else if (request->mode.value == edu_robot::msg::Mode::INACTIVE) {
+    else if (request->mode.value & edu_robot::msg::Mode::INACTIVE) {
       _hardware_interface->disable();
-      _mode = Mode::INACTIVE;
+      _mode &= Mode::MASK_UNSET_DRIVING_MODE;
+      _mode |= Mode::INACTIVE;
       if (_detect_charging_component->isCharging() == false) {
         setLightingForMode(_mode);
       }
+    }
+    // Collision Avoidance
+    else if (request->mode.value & edu_robot::msg::Mode::COLLISION_AVOIDANCE_OVERRIDE_ENABLED) {
+      _mode &= Mode::MASK_UNSET_COLLISION_AVOIDANCE_OVERRIDE;
+      _mode |= Mode::COLLISION_AVOIDANCE_OVERRIDE_ENABLED;
+    }
+    else if (request->mode.value & edu_robot::msg::Mode::COLLISION_AVOIDANCE_OVERRIDE_DISABLED) {
+      _mode &= Mode::MASK_UNSET_COLLISION_AVOIDANCE_OVERRIDE;
+      _mode |= Mode::COLLISION_AVOIDANCE_OVERRIDE_DISABLED;
+    }    
+    // Kinematic Mode Handling
+    else if (request->mode.value & edu_robot::msg::Mode::SKID_DRIVE) {
+      _mode &= Mode::MASK_UNSET_KINEMATIC_MODE;
+      _mode |= Mode::SKID_DRIVE;
+      _kinematic_matrix = getKinematicMatrix(Mode::SKID_DRIVE);
+    }
+    else if (request->mode.value & edu_robot::msg::Mode::MECANUM_DRIVE) {
+      _mode &= Mode::MASK_UNSET_KINEMATIC_MODE;
+      _mode |= Mode::MECANUM_DRIVE;
+      _kinematic_matrix = getKinematicMatrix(Mode::MECANUM_DRIVE);
     }
     else {
       RCLCPP_ERROR_STREAM(get_logger(), "Unsupported mode. Can't set new mode. Canceling.");
       return;
     }
 
-    response->state.mode = request->mode;
+    response->state.mode.value = static_cast<std::uint8_t>(_mode);
     response->state.info_message = "OK";
     response->state.state.value = response->state.state.OK;
   }
@@ -277,16 +326,16 @@ void Robot::setLightingForMode(const Mode mode)
   }
 
   if (_detect_charging_component->isCharging()) {
-    search->second->setColor(Color{170, 0, 0}, Lighting::Mode::ROTATION);
+    search->second->setColor(Color{34, 0, 0}, Lighting::Mode::ROTATION);
   }
   else {
     switch (mode) {
       case Mode::INACTIVE:
-        search->second->setColor(Color{170, 0, 0}, Lighting::Mode::PULSATION);
+        search->second->setColor(Color{34, 0, 0}, Lighting::Mode::PULSATION);
         break;
 
       case Mode::REMOTE_CONTROLLED:
-        search->second->setColor(Color{170, 170, 170}, Lighting::Mode::DIM);
+        search->second->setColor(Color{34, 34, 34}, Lighting::Mode::DIM);
         break;
 
       default:

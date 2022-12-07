@@ -28,12 +28,29 @@ class Eduard : public robot::Robot
 public:
   struct Parameter {
     std::string tf_footprint_frame = "base_footprint";
+
+    struct {
+      struct {
+        float x = 0.25f;
+        float y = 0.32f;
+      } length;
+      float wheel_diameter = 0.17f;
+    } skid;
+    struct {
+      struct {
+        float x = 0.25f;
+        float y = 0.36f;
+      } length;
+      float wheel_diameter = 0.1f;
+    } mecanum;    
   };
 
   Eduard(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface);
   ~Eduard() override;
 
 protected:
+  Eigen::MatrixXf getKinematicMatrix(const Mode mode) const override;
+  // Needs to be called by derived classes.
   void initialize(EduardHardwareComponentFactory& factory);
 
   Parameter _parameter;

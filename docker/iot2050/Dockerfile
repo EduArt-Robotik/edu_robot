@@ -30,7 +30,7 @@ WORKDIR /home/iotbot_ws
 # build EduArt packages nodes
 RUN export RMW_IMPLEMENTATION=rmw_fastrtps_cpp \
     && source /opt/ros/$ROS_DISTRO/setup.bash \
-    && MAKEFLAGS="-j1" colcon build --symlink-install --executor sequential
+    && MAKEFLAGS="-j1" colcon build --symlink-install --executor sequential --event-handlers console_direct+ --cmake-args -DCMAKE_BUILD_TYPE=Release
 
 # write source commands to .bashrc -> no need to source afterwards
 RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc \
