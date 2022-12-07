@@ -33,11 +33,15 @@ static Robot::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
   
   // Declare Parameters
   ros_node.declare_parameter<std::string>("tf_base_frame", parameter.tf_base_frame);
-  ros_node.declare_parameter<bool>("enable_collision_avoidance", parameter.enable_collision_avoidance);
+  ros_node.declare_parameter<bool>("collision_avoidance/enable", parameter.enable_collision_avoidance);
+  ros_node.declare_parameter<float>("collision_avoidance/distance_reduce_velocity", parameter.collision_avoidance.distance_reduce_velocity);
+  ros_node.declare_parameter<float>("collision_avoidance/distance_velocity_zero", parameter.collision_avoidance.distance_velocity_zero);
 
   // Get Parameter Values
   parameter.tf_base_frame = ros_node.get_parameter("tf_base_frame").as_string();
-  parameter.enable_collision_avoidance = ros_node.get_parameter("enable_collision_avoidance").as_bool();
+  parameter.enable_collision_avoidance = ros_node.get_parameter("collision_avoidance/enable").as_bool();
+  parameter.collision_avoidance.distance_reduce_velocity = ros_node.get_parameter("collision_avoidance/distance_reduce_velocity").as_double();
+  parameter.collision_avoidance.distance_velocity_zero = ros_node.get_parameter("collision_avoidance/distance_velocity_zero").as_double();
 
   return parameter;
 }
@@ -81,7 +85,7 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterfa
 
   // Initialize Processing Components
   _collision_avoidance_component = std::make_shared<processing::CollisionAvoidance>(
-    processing::CollisionAvoidance::Parameter{ 0.3f, 0.05f },
+    _parameter.collision_avoidance,
     *this
   );
   _detect_charging_component = std::make_shared<processing::DetectCharging>(
@@ -110,15 +114,24 @@ void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> tw
 
     // Reduce the velocity if collision avoidance was enabled.
     if (_parameter.enable_collision_avoidance && (_mode & Mode::COLLISION_AVOIDANCE_OVERRIDE_ENABLED) == false) {
-      if (velocity_cmd.x() >= 0.0) {
+      // \todo Move lines blew in collision avoidance processing component.
+      if (velocity_cmd.x() > 0.0) {
         // Driving Forward
         velocity_cmd.x() *= _collision_avoidance_component->getVelocityReduceFactorFront();
         velocity_cmd.z() *= _collision_avoidance_component->getVelocityReduceFactorFront();
       }
-      else {
+      else if (velocity_cmd.x() < 0.0) {
         // Driving Backwards
         velocity_cmd.x() *= _collision_avoidance_component->getVelocityReduceFactorRear();
         velocity_cmd.z() *= _collision_avoidance_component->getVelocityReduceFactorRear();
+      }
+      else {
+        // No Driving in x direction, only rotation is addressed.
+        const float reduce_factor = std::min(
+          _collision_avoidance_component->getVelocityReduceFactorFront(),
+          _collision_avoidance_component->getVelocityReduceFactorRear()
+        );
+        velocity_cmd.z() *= reduce_factor;
       }
     }
 

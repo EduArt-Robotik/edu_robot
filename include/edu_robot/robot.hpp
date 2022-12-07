@@ -51,6 +51,7 @@ public:
   struct Parameter {
     std::string tf_base_frame = "base_link";
     bool enable_collision_avoidance = true;
+    processing::CollisionAvoidance::Parameter collision_avoidance;
   };
 
   virtual ~Robot();

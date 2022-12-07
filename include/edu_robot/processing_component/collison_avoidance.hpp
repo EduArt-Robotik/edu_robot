@@ -22,7 +22,7 @@ class CollisionAvoidance : public ProcessingComponent
 {
 public:
   struct Parameter {
-    float distance_reduce_velocity = 0.3f;
+    float distance_reduce_velocity = 0.4f;
     float distance_velocity_zero = 0.05;
   };
 
