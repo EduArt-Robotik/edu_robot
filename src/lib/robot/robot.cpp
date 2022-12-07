@@ -9,17 +9,14 @@
 #include "edu_robot/processing_component/collison_avoidance.hpp"
 #include "edu_robot/processing_component/processing_detect_charging.hpp"
 
-#include <cstdint>
-#include <geometry_msgs/msg/detail/twist__struct.hpp>
-#include <memory>
-#include <nav_msgs/msg/detail/odometry__struct.hpp>
 #include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/qos.hpp>
 
+#include <memory>
 #include <cstdio>
 #include <exception>
 #include <functional>
-#include <rclcpp/node.hpp>
-#include <rclcpp/qos.hpp>
 #include <stdexcept>
 
 namespace eduart {

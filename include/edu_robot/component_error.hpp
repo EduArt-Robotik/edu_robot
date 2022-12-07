@@ -15,10 +15,10 @@ namespace robot {
 /**
  * \brief Represents an hardware error that is occurred during runtime.
  */
-class HardwareError : public std::runtime_error
+class ComponentError : public std::runtime_error
 {
 public:
-  HardwareError(const State error, const std::string& error_message)
+  ComponentError(const State error, const std::string& error_message)
     : std::runtime_error(error_message)
     , _error(error)
   { }

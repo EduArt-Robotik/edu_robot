@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.8)
 project(edu_robot)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic -O2)
+  add_compile_options(-Wall -Wextra -Wpedantic)# -O2)
 endif()
 
 ## Dependencies
@@ -51,6 +51,7 @@ add_subdirectory(src/lib/robot)
 add_subdirectory(src/lib/processing_component)
 add_subdirectory(src/lib/eduard)
 add_subdirectory(src/lib/iotbot_shield)
+add_subdirectory(src/lib/ethernet_gateway)
 add_subdirectory(src/node)
 
 ## Installing of Content
@@ -65,7 +66,7 @@ install(
   DESTINATION share/${PROJECT_NAME}
 )
 install(
-  TARGETS iotbot-shield eduart-iotbot-shield eduart-robot-eduard eduart-robot processing-component
+  TARGETS iotbot-shield eduart-iotbot-shield eduart-robot-eduard eduart-robot processing-component eduart-ethernet-gateway ethernet-gateway
   EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}

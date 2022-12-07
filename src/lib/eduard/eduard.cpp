@@ -102,7 +102,9 @@ void Eduard::initialize(EduardHardwareComponentFactory& factory)
     registerMotorController(std::make_shared<robot::MotorController>(
       motor_controller_name[i],
       i,
-      motor_controller_default_parameter,
+      robot::MotorController::get_motor_controller_parameter(
+        motor_controller_name[i], motor_controller_default_parameter, *this
+      ),
       motor_controller_joint_name[i],
       *this,
       factory.motorControllerHardware().at(motor_controller_name[i]),
