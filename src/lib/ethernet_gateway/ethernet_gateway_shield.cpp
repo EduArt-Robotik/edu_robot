@@ -21,7 +21,8 @@ using tcp::message::SetMotorControllerParameter;
 using tcp::message::SetPidControllerParameter;
 
 EthernetGatewayShield::EthernetGatewayShield(char const* const ip_address, const std::uint16_t port)
-  : _communicator(std::make_shared<EthernetCommunicator>(ip_address, port))
+  : processing::ProcessingComponentOutput<float>("ethernet_gateway_shield")
+  , _communicator(std::make_shared<EthernetCommunicator>(ip_address, port))
 {
   auto request = Request::make_request<tcp::message::GetFirmwareVersion>();
   auto future_response = _communicator->sendRequest(std::move(request));
