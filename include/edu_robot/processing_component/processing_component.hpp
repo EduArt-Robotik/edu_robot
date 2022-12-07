@@ -34,8 +34,10 @@ template <typename Output>
 class ProcessingComponentOutput
 {
 public:
+  ProcessingComponentOutput(const std::string& name) : _name(name) { }
   virtual ~ProcessingComponentOutput() = default;
 
+  const std::string& name() const { return _name; }
   void registerComponentInput(std::shared_ptr<ProcessingComponentInput<Output>> input)
   {
     if (std::find(_inputs.begin(), _inputs.end(), input) != _inputs.end()) {
@@ -54,6 +56,7 @@ protected:
   }
 
 private:
+  std::string _name;
   std::vector<std::shared_ptr<ProcessingComponentInput<Output>>> _inputs;
 };
 
@@ -69,6 +72,8 @@ protected:
 public:
   ProcessingComponent(const ProcessingComponent&) = delete;
   virtual ~ProcessingComponent() = default;
+
+  const std::string& name() const { return _name; }
 
 private:
   std::string _name;

@@ -47,14 +47,14 @@ To operate the Robot, the following buttons and axes of the controller are assig
 
 | Button    | DS5           | Idle position | Value range   | function          | 
 |-----------|---------------|---------------|---------------|-------------------|
-| [0]       | Cross         | 0             | 0 or 1        | not in use
-| [1]       | Cyrcle        | 0             | 0 or 1        | Light pattern: Operation
-| [2]       | Triangle      | 0             | 0 or 1        | not in use
-| [3]       | Square        | 0             | 0 or 1        | Light pattern: Parking light
+| [0]       | Square        | 0             | 0 or 1        | Switch to Skid Drive Kinematic
+| [1]       | Cross         | 0             | 0 or 1        | Light pattern: Operation
+| [2]       | Circle        | 0             | 0 or 1        | Switch to Mecanum Drive Kinematic
+| [3]       | Triangle      | 0             | 0 or 1        | Light pattern: Operation
 | [4]       | L1            | 0             | 0 or 1        | Light pattern: Turning left
 | [5]       | R1            | 0             | 0 or 1        | Light pattern: Turning right
 | [6]       | L2            | 0             | 0 or 1        | not in use
-| [7]       | R2            | 0             | 0 or 1        | not in use
+| [7]       | R2            | 0             | 0 or 1        | Override collision avoidance
 | [8]       | SHARE         | 0             | 0 or 1        | Disable driving
 | [9]       | OPTIONS       | 0             | 0 or 1        | Enable driving
 | [10]      | PS            | 0             | 0 or 1        | Connect Controller to Eduard
@@ -82,6 +82,8 @@ Using make the Docker image can be build:
 make all
 make clean
 ```
+
+Note: this could take some while, ~15min.
 
 After executing these command a new Docker image with the name "eduard-iotbot:alpha" should be created. It can be checked by following command:
 

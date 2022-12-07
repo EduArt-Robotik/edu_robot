@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.8)
 project(edu_robot)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic -O2)
+  add_compile_options(-Wall -Wextra -Wpedantic)# -O2)
 endif()
 
 ## Dependencies
@@ -47,94 +47,12 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 ## Line below needed for ROS distro humble and newer. TODO: handle this somehow!
 # rosidl_get_typesupport_target(CPP_TYPESUPPORT_TARGET "${PROJECT_NAME}" "rosidl_typesupport_cpp")
 
-
-## Build Library needed for ROS Nodes
-# Library Eduart Robot
-add_library(eduart-robot
-  src/lib/edu_robot/robot.cpp
-  src/lib/edu_robot/lighting.cpp
-  src/lib/edu_robot/motor_controller.cpp
-  src/lib/edu_robot/sensor.cpp
-  src/lib/edu_robot/range_sensor.cpp
-  src/lib/edu_robot/imu_sensor.cpp
-)
-target_link_libraries(eduart-robot
-  # ${CPP_TYPESUPPORT_TARGET} needed for ROS distro humble and newer. TODO: handle this somehow!
-  Eigen3::Eigen
-)
-target_compile_features(eduart-robot PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
-target_include_directories(eduart-robot PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
-)
-ament_target_dependencies(
-  eduart-robot
-  "rclcpp"
-  "tf2"
-  "tf2_ros"
-  "tf2_geometry_msgs"
-  "nav_msgs"
-  "std_msgs"
-  "geometry_msgs"
-  "sensor_msgs"
-)
-rosidl_target_interfaces(eduart-robot ${PROJECT_NAME} "rosidl_typesupport_cpp")
-
-# Library Robot Eduard
-add_library(eduart-robot-eduard
-  src/lib/eduard/eduard.cpp
-)
-target_include_directories(eduart-robot-eduard PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
-)
-target_link_libraries(eduart-robot-eduard
-  eduart-robot
-)
-
-# Library Eduart IotBot Shield
-add_library(eduart-iotbot-shield
-  src/lib/iotbot_shield/iot_shield.cpp
-  src/lib/iotbot_shield/iot_shield_communicator.cpp
-  src/lib/iotbot_shield/lighting_hardware.cpp
-  src/lib/iotbot_shield/iotbot.cpp
-  src/lib/iotbot_shield/motor_controller_hardware.cpp
-  src/lib/iotbot_shield/range_sensor_hardware.cpp
-  src/lib/iotbot_shield/imu_sensor_hardware.cpp
-  src/lib/iotbot_shield/iotbot_hardware_component_factory.cpp
-)
-if(HAVE_MRAA) ## TODO: use string for dependencies, so onyl one target_link_libraries is there!
-  message("MRAA library found")
-  target_link_libraries(eduart-iotbot-shield
-    # ${CPP_TYPESUPPORT_TARGET} needed for ROS distro humble and newer. TODO: handle this somehow!
-    eduart-robot-eduard
-    mraa
-  )
-else()
-  message("MRAA library not found")
-  target_link_libraries(eduart-iotbot-shield
-    # ${CPP_TYPESUPPORT_TARGET} needed for ROS distro humble and newer. TODO: handle this somehow!
-    eduart-robot-eduard
-  )
-endif()
-target_compile_features(eduart-iotbot-shield PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
-target_include_directories(eduart-iotbot-shield PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
-)
-# rosidl_target_interfaces(eduart-iotbot-shield ${PROJECT_NAME} "rosidl_typesupport_cpp")
-
-## Build Nodes
-add_executable(iotbot-shield
-  src/node/iotbot_shield_node.cpp
-)
-target_link_libraries(iotbot-shield
-  eduart-iotbot-shield
-)
-ament_target_dependencies(iotbot-shield
-  "rclcpp"
-)
-# rosidl_target_interfaces(iotbot-shield ${PROJECT_NAME} "rosidl_typesupport_cpp")
+add_subdirectory(src/lib/robot)
+add_subdirectory(src/lib/processing_component)
+add_subdirectory(src/lib/eduard)
+add_subdirectory(src/lib/iotbot_shield)
+add_subdirectory(src/lib/ethernet_gateway)
+add_subdirectory(src/node)
 
 ## Installing of Content
 install(
@@ -148,7 +66,7 @@ install(
   DESTINATION share/${PROJECT_NAME}
 )
 install(
-  TARGETS iotbot-shield eduart-iotbot-shield eduart-robot-eduard eduart-robot
+  TARGETS iotbot-shield eduart-iotbot-shield eduart-robot-eduard eduart-robot processing-component eduart-ethernet-gateway ethernet-gateway
   EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}

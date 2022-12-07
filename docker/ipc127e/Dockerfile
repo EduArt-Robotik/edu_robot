@@ -30,7 +30,7 @@ WORKDIR /home/iotbot_ws
 # build EduArt packages nodes
 RUN export RMW_IMPLEMENTATION=rmw_fastrtps_cpp \
     && source /opt/ros/$ROS_DISTRO/setup.bash \
-    && MAKEFLAGS="-j1" colcon build --symlink-install --executor sequential --event-handlers console_direct+ --cmake-args -DCMAKE_BUILD_TYPE=Release
+    && MAKEFLAGS="-j2" colcon build --symlink-install --executor sequential
 
 # write source commands to .bashrc -> no need to source afterwards
 RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc \
@@ -40,4 +40,4 @@ RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc \
 # launch control node and joy interpreter
 CMD source /home/iotbot_ws/install/setup.bash \
     && (ros2 launch edu_robot_control robot_remote_control.launch.py \
-    & ros2 launch edu_robot eduard-iot2050.launch.py)
+    & ros2 launch edu_robot eduard-ipc.launch.py)

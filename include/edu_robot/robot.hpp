@@ -50,7 +50,8 @@ protected:
 public:
   struct Parameter {
     std::string tf_base_frame = "base_link";
-    bool enable_collision_avoidance = false;
+    bool enable_collision_avoidance = true;
+    processing::CollisionAvoidance::Parameter collision_avoidance;
   };
 
   virtual ~Robot();
@@ -82,6 +83,8 @@ protected:
   void registerLighting(std::shared_ptr<Lighting> lighting);
   void registerMotorController(std::shared_ptr<MotorController> motor_controller);
   void registerSensor(std::shared_ptr<Sensor> sensor);
+  // Each robot must provide a kinematic matrix based on given mode.
+  virtual Eigen::MatrixXf getKinematicMatrix(const Mode mode) const = 0;
 
   inline std::shared_ptr<tf2_ros::TransformBroadcaster> getTfBroadcaster() { return _tf_broadcaster; }
 

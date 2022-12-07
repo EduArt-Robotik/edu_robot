@@ -31,10 +31,13 @@ class MotorController
 public:
   struct Parameter
   {
-    float gear_ratio = 70.0f;
+    bool inverted = false;
+    float gear_ratio = 89.0f;
     float encoder_ratio = 2048.0f;
-    float max_rpm = 140.0f;
+    float max_rpm = 100.0f;
+    float threshold_stall_check = 0.25f;
     std::uint32_t control_frequency = 16000;
+    bool encoder_inverted = false;
 
     float kp = 0.5f;
     float ki = 5.0f;
@@ -54,8 +57,14 @@ public:
 
   inline const std::string& name() const { return _name; }
   inline std::uint8_t id() const { return _id; }
+  /**
+   * \brief Sets RPM of this motor. Positive RPM 
+   */
   void setRpm(const Rpm rpm);
   inline Rpm getMeasuredRpm() const { return _measured_rpm; }
+
+  static MotorController::Parameter get_motor_controller_parameter(
+    const std::string& name, const MotorController::Parameter default_parameter, rclcpp::Node& ros_node);
 
 private:
   void processMeasurementData(const Rpm measurement);
