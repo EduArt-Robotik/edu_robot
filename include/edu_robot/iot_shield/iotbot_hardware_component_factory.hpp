@@ -8,7 +8,7 @@
 #include "edu_robot/iot_shield/iot_shield.hpp"
 #include "edu_robot/iot_shield/range_sensor_hardware.hpp"
 
-#include <edu_robot/eduard/eduard_hardware_component_factory.hpp>
+#include <edu_robot/hardware_component_factory.hpp>
 
 #include <map>
 #include <memory>
@@ -18,7 +18,7 @@ namespace eduart {
 namespace robot {
 namespace iotbot {
 
-class IotBotHardwareComponentFactory : public eduard::EduardHardwareComponentFactory
+class IotBotHardwareComponentFactory : public eduart::robot::HardwareComponentFactory
 {
 public:
   IotBotHardwareComponentFactory(std::shared_ptr<IotShield> shield) : _shield(shield) { }

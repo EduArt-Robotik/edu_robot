@@ -66,7 +66,7 @@ CompoundMotorControllerHardware::CompoundMotorControllerHardware(const std::stri
       32
     );
     auto future_response = _communicator->sendRequest(std::move(request));
-    wait_for_future(future_response, 100ms);
+    wait_for_future(future_response, 200ms);
 
     auto got = future_response.get();
     if (Acknowledgement<PROTOCOL::COMMAND::SET::MOTOR_CONTROLLER_PARAMETER>::wasAcknowledged(got.response()) == false) {
@@ -83,7 +83,7 @@ CompoundMotorControllerHardware::CompoundMotorControllerHardware(const std::stri
       parameter.encoder_inverted
     );
     auto future_response = _communicator->sendRequest(std::move(request));
-    wait_for_future(future_response, 100ms);
+    wait_for_future(future_response, 200ms);
 
     auto got = future_response.get();
     if (Acknowledgement<PROTOCOL::COMMAND::SET::ENCODER_PARAMETER>::wasAcknowledged(got.response()) == false) {
@@ -104,7 +104,7 @@ CompoundMotorControllerHardware::CompoundMotorControllerHardware(const std::stri
       true
     );
     auto future_response = _communicator->sendRequest(std::move(request));
-    wait_for_future(future_response, 100ms);
+    wait_for_future(future_response, 200ms);
 
     auto got = future_response.get();
     if (Acknowledgement<PROTOCOL::COMMAND::SET::PID_CONTROLLER_PARAMETER>::wasAcknowledged(got.response()) == false) {
@@ -141,7 +141,7 @@ void CompoundMotorControllerHardware::processSetValue(const Rpm& rpm)
   );
 
   auto future_response = _communicator->sendRequest(std::move(request));
-  wait_for_future(future_response, 100ms);
+  wait_for_future(future_response, 200ms);
 
   auto got = future_response.get();
   if (Acknowledgement<PROTOCOL::COMMAND::SET::MOTOR_RPM>::wasAcknowledged(got.response()) == false) {

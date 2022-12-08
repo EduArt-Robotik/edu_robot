@@ -16,13 +16,12 @@
 
 namespace eduart {
 namespace robot {
-namespace eduard {
 
-class EduardHardwareComponentFactory
+class HardwareComponentFactory
 {
 public:
-  EduardHardwareComponentFactory() = default;
-  virtual ~EduardHardwareComponentFactory() = default;
+  HardwareComponentFactory() = default;
+  virtual ~HardwareComponentFactory() = default;
 
   inline std::map<std::string, std::shared_ptr<HardwareComponentInterface<Color, Lighting::Mode>>>
   lightingHardware() { return _lighting_hardware; }
@@ -43,6 +42,5 @@ protected:
   std::map<std::string, std::shared_ptr<HardwareSensorInterface<Eigen::Quaterniond>>> _imu_sensor_hardware;
 };
 
-} // end namespace eduard
 } // end namespace robot
 } // end namespace eduart

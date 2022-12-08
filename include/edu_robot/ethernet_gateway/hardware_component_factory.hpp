@@ -7,7 +7,7 @@
 
 #include "edu_robot/ethernet_gateway/range_sensor_hardware.hpp"
 
-#include <edu_robot/eduard/eduard_hardware_component_factory.hpp>
+#include <edu_robot/hardware_component_factory.hpp>
 
 #include <cstdint>
 #include <map>
@@ -20,7 +20,7 @@ namespace ethernet {
 
 class EthernetGatewayShield;
 
-class HardwareComponentFactory : public eduard::EduardHardwareComponentFactory
+class HardwareComponentFactory : public eduart::robot::HardwareComponentFactory
 {
 public:
   HardwareComponentFactory(std::shared_ptr<EthernetGatewayShield> shield) : _shield(shield) { }

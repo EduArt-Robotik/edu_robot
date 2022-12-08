@@ -1,18 +1,21 @@
-#include "edu_robot/eduard/eduard_hardware_component_factory.hpp"
-#include <Eigen/src/Core/Matrix.h>
-#include <cstddef>
 #include <edu_robot/eduard/eduard.hpp>
+#include <edu_robot/hardware_component_factory.hpp>
+
 #include <edu_robot/hardware_component_interface.hpp>
 #include <edu_robot/motor_controller.hpp>
 #include <edu_robot/robot.hpp>
 #include <edu_robot/range_sensor.hpp>
 #include <edu_robot/imu_sensor.hpp>
 
-#include <memory>
+#include <tf2/LinearMath/Transform.h>
 #include <rclcpp/logging.hpp>
+
+#include <Eigen/src/Core/Matrix.h>
+
+#include <memory>
+#include <cstddef>
 #include <stdexcept>
 #include <string>
-#include <tf2/LinearMath/Transform.h>
 
 namespace eduart {
 namespace robot {
@@ -52,7 +55,7 @@ Eduard::Eduard(const std::string& robot_name, std::unique_ptr<RobotHardwareInter
   , _parameter(get_robot_ros_parameter(*this))
 { }
 
-void Eduard::initialize(EduardHardwareComponentFactory& factory)
+void Eduard::initialize(eduart::robot::HardwareComponentFactory& factory)
 {
   // Lightings
   registerLighting(std::make_shared<robot::Lighting>(

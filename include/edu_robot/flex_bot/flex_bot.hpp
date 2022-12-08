@@ -14,7 +14,7 @@
 
 namespace eduart {
 namespace robot {
-namespace eduard {
+namespace flex_bot {
 
 struct COLOR {
   struct DEFAULT {
@@ -23,7 +23,7 @@ struct COLOR {
   };
 };
 
-class Eduard : public robot::Robot
+class FlexBot : public robot::Robot
 {
 public:
   struct Parameter {
@@ -45,8 +45,8 @@ public:
     } mecanum;    
   };
 
-  Eduard(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface);
-  ~Eduard() override;
+  FlexBot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface);
+  ~FlexBot() override;
 
 protected:
   Eigen::MatrixXf getKinematicMatrix(const Mode mode) const override;
@@ -56,6 +56,6 @@ protected:
   Parameter _parameter;
 };
 
-} // end namespace eduard
+} // end namespace flex_bot
 } // end namespace robot
 } // end namespace eduart

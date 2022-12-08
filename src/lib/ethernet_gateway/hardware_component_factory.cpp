@@ -44,6 +44,14 @@ HardwareComponentFactory::addMotorController(
   _motor_sensor_hardware[motor_name + "_c"] = compound_motor->dummyMotorController();
   _motor_sensor_hardware[motor_name + "_d"] = compound_motor;
 
+  compound_motor = std::make_shared<CompoundMotorControllerHardware>(
+    hardware_name + "_e", hardware_name + "_f", parameter, 2, _shield->getCommunicator()
+  );  
+  _motor_controller_hardware[motor_name + "_e"] = compound_motor->dummyMotorController();
+  _motor_controller_hardware[motor_name + "_f"] = compound_motor;
+  _motor_sensor_hardware[motor_name + "_e"] = compound_motor->dummyMotorController();
+  _motor_sensor_hardware[motor_name + "_f"] = compound_motor;
+
   // _shield->registerIotShieldRxDevice(compound_motor);
 
   return *this;
