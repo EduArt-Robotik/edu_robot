@@ -85,7 +85,7 @@ make clean
 
 Note: this could take some while, ~15min.
 
-After executing these command a new Docker image with the name "eduard-iotbot:alpha" should be created. It can be checked by following command:
+After executing these command a new Docker image with the name "eduard-iotbot:0.1.1-beta" should be created. It can be checked by following command:
 
 ```bash
 docker image ls
@@ -94,7 +94,44 @@ docker image ls
 The docker container can easily started by the command:
 
 ```bash
-docker run --name eduart-iotbot-alpha --restart=always --privileged -v /dev:/dev --network host --group-add dialout eduard-iotbot:alpha
+docker run --name eduard-iotbot:0.1.1-beta --restart=always --privileged -v /dev:/dev --network host --group-add dialout eduard-iotbot:0.1.1-beta
+```
+
+With the flag "--restart=always" the container will come up after rebooting the system. If this is not wanted please remove this flag.
+
+# Deploying on IPC127e
+
+This section describes how the software is deployed on an IPC127e in a Docker environment. First clone the repository on the robot by executing this command:
+
+```bash
+git clone https://github.com/EduArt-Robotik/edu_robot.git
+```
+
+Then navigate into the docker folder in the cloned repository:
+
+```bash
+cd edu_robot/docker/ipc127e
+```
+
+Using make the Docker image can be build:
+
+```bash
+make all
+make clean
+```
+
+Note: this could take some while, ~8min.
+
+After executing these command a new Docker image with the name "eduard-ipc127e:0.1.1-beta" should be created. It can be checked by following command:
+
+```bash
+docker image ls
+```
+
+The docker container can easily started by the command:
+
+```bash
+docker run --name eduard-ipc127e:0.1.1-beta --restart=always --privileged -v /dev:/dev --network host --group-add dialout eduard-ipc127e:0.1.1-beta
 ```
 
 With the flag "--restart=always" the container will come up after rebooting the system. If this is not wanted please remove this flag.
