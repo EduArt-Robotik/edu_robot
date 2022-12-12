@@ -42,8 +42,8 @@ MotorController::Parameter MotorController::get_motor_controller_parameter(
 
 MotorController::MotorController(const std::string& name, const std::uint8_t id, const Parameter& parameter,
                                  const std::string& urdf_joint_name, rclcpp::Node& ros_node,
-                                 std::shared_ptr<HardwareComponentInterface<Rpm>> hardware_component_interface,
-                                 std::shared_ptr<HardwareSensorInterface<Rpm>> hardware_sensor_interface)
+                                 std::shared_ptr<ComponentInterface> hardware_component_interface,
+                                 std::shared_ptr<SensorInterface> hardware_sensor_interface)
   : _parameter(parameter)
   , _name(name)
   , _id(id)

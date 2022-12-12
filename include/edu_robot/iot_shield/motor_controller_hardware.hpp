@@ -20,8 +20,8 @@ namespace eduart {
 namespace robot {
 namespace iotbot {
 
-class DummyMotorControllerHardware : public HardwareComponentInterface<Rpm>
-                                   , public HardwareSensorInterface<Rpm>
+class DummyMotorControllerHardware : public MotorController::ComponentInterface
+                                   , public MotorController::SensorInterface
 {
 public:
   friend class CompoundMotorControllerHardware;
@@ -30,22 +30,23 @@ public:
   ~DummyMotorControllerHardware() override;
 
   void processSetValue(const Rpm& rpm) override;
+  void initialize(const MotorController::Parameter& parameter) override;
 
 private:
   Rpm _current_set_value;
 };
 
-class CompoundMotorControllerHardware : public HardwareComponentInterface<Rpm>
+class CompoundMotorControllerHardware : public MotorController::ComponentInterface
                                       , public eduart::robot::iotbot::IotShieldTxRxDevice
-                                      , public HardwareSensorInterface<Rpm>
+                                      , public MotorController::SensorInterface
 {
 public:
-  CompoundMotorControllerHardware(const std::string& name, const eduart::robot::MotorController::Parameter& parameter,
-                                  std::shared_ptr<IotShieldCommunicator> communicator);
+  CompoundMotorControllerHardware(const std::string& name, std::shared_ptr<IotShieldCommunicator> communicator);
   ~CompoundMotorControllerHardware() override;
 
   void processRxData(const uart::message::RxMessageDataBuffer& data) override;
   void processSetValue(const Rpm& rpm) override;
+  void initialize(const MotorController::Parameter& parameter) override;
 
   inline const std::array<std::shared_ptr<DummyMotorControllerHardware>, 3u>& dummyMotorController() const {
     return _dummy_motor_controllers;

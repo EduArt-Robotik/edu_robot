@@ -19,8 +19,8 @@ namespace eduart {
 namespace robot {
 namespace ethernet {
 
-class DummyMotorControllerHardware : public HardwareComponentInterface<Rpm>
-                                   , public HardwareSensorInterface<Rpm>
+class DummyMotorControllerHardware : public MotorController::ComponentInterface
+                                   , public MotorController::SensorInterface
 {
 public:
   friend class CompoundMotorControllerHardware;
@@ -29,24 +29,25 @@ public:
   ~DummyMotorControllerHardware() override;
 
   void processSetValue(const Rpm& rpm) override;
+  void initialize(const MotorController::Parameter& parameter) override;
 
 private:
   Rpm _current_set_value;
 };
 
-class CompoundMotorControllerHardware : public HardwareComponentInterface<Rpm>
+class CompoundMotorControllerHardware : public MotorController::ComponentInterface
                                       , public EthernetGatewayTxRxDevice
-                                      , public HardwareSensorInterface<Rpm>
+                                      , public MotorController::SensorInterface
 {
 public:
   CompoundMotorControllerHardware(const std::string& hardware_name_motor_a,
                                   const std::string& hardware_name_motor_b,
-                                  const eduart::robot::MotorController::Parameter& parameter,
                                   const std::uint8_t can_id,
                                   std::shared_ptr<EthernetCommunicator> communicator);
   ~CompoundMotorControllerHardware() override;
 
   void processSetValue(const Rpm& rpm) override;
+  void initialize(const MotorController::Parameter& parameter) override;
   void processRxData(const tcp::message::RxMessageDataBuffer& data) override;
 
   inline const std::shared_ptr<DummyMotorControllerHardware>& dummyMotorController() const {

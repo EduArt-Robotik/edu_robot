@@ -26,7 +26,7 @@ static ImuSensor::Parameter get_imu_sensor_parameter(
 ImuSensor::ImuSensor(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
                      const tf2::Transform sensor_transform, const Parameter parameter,
                      std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster, rclcpp::Node& ros_node,
-                     std::shared_ptr<HardwareSensorInterface<Eigen::Quaterniond>> hardware_interface)
+                     std::shared_ptr<SensorInterface> hardware_interface)
   : Sensor(name, frame_id, reference_frame_id, sensor_transform)
   , _parameter(get_imu_sensor_parameter(name, parameter, ros_node))
   , _tf_broadcaster(tf_broadcaster)

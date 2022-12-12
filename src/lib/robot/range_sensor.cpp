@@ -29,7 +29,7 @@ static RangeSensor::Parameter get_range_sensor_parameter(
 
 RangeSensor::RangeSensor(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
                          const tf2::Transform sensor_transform, const Parameter parameter, rclcpp::Node& ros_node,
-                         std::shared_ptr<HardwareSensorInterface<float>> hardware_interface)
+                         std::shared_ptr<SensorInterface> hardware_interface)
   : Sensor(name, frame_id, reference_frame_id, sensor_transform)
   , processing::ProcessingComponentOutput<float>(name)
   , _parameter(get_range_sensor_parameter(name, parameter, ros_node))

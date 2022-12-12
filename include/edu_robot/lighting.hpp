@@ -33,8 +33,14 @@ public:
     RUNNING,
   };
 
+  struct Parameter {
+
+  };
+
+  using ComponentInterface = HardwareComponentInterface<Parameter, Color, Mode>;
+
   Lighting(const std::string& name, const Color default_color, const float default_brightness,
-           std::shared_ptr<HardwareComponentInterface<Color, Mode>> hardware_interface);
+           std::shared_ptr<ComponentInterface> hardware_interface);
   virtual ~Lighting() = default;
 
   /**
@@ -61,7 +67,7 @@ private:
   Color _color;
   float _brightness;
   std::string _name;
-  std::shared_ptr<HardwareComponentInterface<Color, Mode>> _hardware_interface;
+  std::shared_ptr<ComponentInterface> _hardware_interface;
 };
 
 } // end namespace eduart

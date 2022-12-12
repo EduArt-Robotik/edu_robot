@@ -5,7 +5,7 @@ namespace eduart {
 namespace robot {
 
 Lighting::Lighting(const std::string& name, const Color default_color, const float default_brightness,
-                   std::shared_ptr<HardwareComponentInterface<Color, Mode>> hardware_interface)
+                   std::shared_ptr<ComponentInterface> hardware_interface)
   : _name(name)
   , _hardware_interface(std::move(hardware_interface))
 {

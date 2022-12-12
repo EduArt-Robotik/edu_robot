@@ -26,10 +26,12 @@ public:
     std::string rotated_frame = "imu/rotated";
   };
 
+  using SensorInterface = HardwareSensorInterface<Parameter, Eigen::Quaterniond>;
+
   ImuSensor(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
             const tf2::Transform sensor_transform, const Parameter parameter,
             std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster, rclcpp::Node& ros_node,
-            std::shared_ptr<HardwareSensorInterface<Eigen::Quaterniond>> hardware_interface);
+            std::shared_ptr<SensorInterface> hardware_interface);
   ~ImuSensor() override = default;
 
 protected:
@@ -39,7 +41,7 @@ private:
   const Parameter _parameter;
   std::shared_ptr<tf2_ros::TransformBroadcaster> _tf_broadcaster;
   std::shared_ptr<rclcpp::Clock> _clock;
-  std::shared_ptr<HardwareSensorInterface<Eigen::Quaterniond>> _hardware_interface;
+  std::shared_ptr<SensorInterface> _hardware_interface;
 };
 
 } // end namespace eduart

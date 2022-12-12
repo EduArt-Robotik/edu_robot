@@ -39,7 +39,7 @@ EthernetGatewayFlexBot::EthernetGatewayFlexBot()
          //.addLighting("back", "back_lighting")
          //.addLighting("all", "all_lighting")
          // Motor Controller
-         .addMotorController("motor", "motor_hardware", robot::MotorController::Parameter{ });
+         .addMotorController("motor", "motor_hardware");
          // Range Sensor
          //.addRangeSensor("range/front/left", "range/front/left/hardware",
          //                0u, RangeSensorHardware::Parameter{ })

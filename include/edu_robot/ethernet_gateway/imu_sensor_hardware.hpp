@@ -16,15 +16,15 @@ namespace ethernet {
 
 class EthernetCommunicator;
 
-class ImuSensorHardware : public robot::HardwareSensorInterface<Eigen::Quaterniond>
+class ImuSensorHardware : public ImuSensor::SensorInterface
                         , public EthernetGatewayTxRxDevice
 {
 public:
-  ImuSensorHardware(const std::string& hardware_name, const ImuSensor::Parameter parameter,
-            std::shared_ptr<EthernetCommunicator> communicator);
+  ImuSensorHardware(const std::string& hardware_name, std::shared_ptr<EthernetCommunicator> communicator);
   ~ImuSensorHardware() override = default;
 
   void processRxData(const tcp::message::RxMessageDataBuffer& data) override;
+  void initialize(const ImuSensor::Parameter& parameter) override;
 };
 
 } // end namespace ethernet

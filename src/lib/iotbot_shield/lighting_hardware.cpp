@@ -108,6 +108,11 @@ void LightingHardware::processSetValue(const Color& color, const robot::Lighting
   }
 }
 
+void LightingHardware::initialize(const Lighting::Parameter& parameter)
+{
+  (void)parameter;
+}
+
 } // end namespace iotbot
 } // end namespace eduart
 } // end namespace robot

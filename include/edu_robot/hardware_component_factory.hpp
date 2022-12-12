@@ -23,23 +23,23 @@ public:
   HardwareComponentFactory() = default;
   virtual ~HardwareComponentFactory() = default;
 
-  inline std::map<std::string, std::shared_ptr<HardwareComponentInterface<Color, Lighting::Mode>>>
+  inline std::map<std::string, std::shared_ptr<Lighting::ComponentInterface>>
   lightingHardware() { return _lighting_hardware; }
-  inline std::map<std::string, std::shared_ptr<HardwareComponentInterface<Rpm>>>
+  inline std::map<std::string, std::shared_ptr<MotorController::ComponentInterface>>
   motorControllerHardware() { return _motor_controller_hardware; }
-  inline std::map<std::string, std::shared_ptr<HardwareSensorInterface<Rpm>>>
+  inline std::map<std::string, std::shared_ptr<MotorController::SensorInterface>>
   motorSensorHardware() { return _motor_sensor_hardware; }
-  inline std::map<std::string, std::shared_ptr<HardwareSensorInterface<float>>>
+  inline std::map<std::string, std::shared_ptr<RangeSensor::SensorInterface>>
   rangeSensorHardware() { return _range_sensor_hardware; }
-  inline std::map<std::string, std::shared_ptr<HardwareSensorInterface<Eigen::Quaterniond>>>
+  inline std::map<std::string, std::shared_ptr<ImuSensor::SensorInterface>>
   imuSensorHardware() { return _imu_sensor_hardware; }
 
 protected:
-  std::map<std::string, std::shared_ptr<HardwareComponentInterface<Color, Lighting::Mode>>> _lighting_hardware;
-  std::map<std::string, std::shared_ptr<HardwareComponentInterface<Rpm>>> _motor_controller_hardware;
-  std::map<std::string, std::shared_ptr<HardwareSensorInterface<Rpm>>> _motor_sensor_hardware;
-  std::map<std::string, std::shared_ptr<HardwareSensorInterface<float>>> _range_sensor_hardware;
-  std::map<std::string, std::shared_ptr<HardwareSensorInterface<Eigen::Quaterniond>>> _imu_sensor_hardware;
+  std::map<std::string, std::shared_ptr<Lighting::ComponentInterface>> _lighting_hardware;
+  std::map<std::string, std::shared_ptr<MotorController::ComponentInterface>> _motor_controller_hardware;
+  std::map<std::string, std::shared_ptr<MotorController::SensorInterface>> _motor_sensor_hardware;
+  std::map<std::string, std::shared_ptr<RangeSensor::SensorInterface>> _range_sensor_hardware;
+  std::map<std::string, std::shared_ptr<ImuSensor::SensorInterface>> _imu_sensor_hardware;
 };
 
 } // end namespace robot
