@@ -1,4 +1,4 @@
-/ipc_bot:
+/ethernet_gateway_flex_bot:
   ros__parameters:
     collision_avoidance/distance_reduce_velocity: 0.4000000059604645
     collision_avoidance/distance_velocity_zero: 0.05000000074505806
@@ -7,7 +7,7 @@
     mecanum/length/y: 0.36000001430511475
     mecanum/wheel_diameter: 0.10000000149011612
     motor_a/control_frequency: 16000
-    motor_a/encoder_inverted: false
+    motor_a/encoder_inverted: true
     motor_a/encoder_ratio: 64.0
     motor_a/gear_ratio: 100.0
     motor_a/inverted: false
@@ -18,7 +18,7 @@
     motor_a/weight_low_pass_encoder: 0.30000001192092896
     motor_a/weight_low_pass_set_point: 0.20000000298023224
     motor_b/control_frequency: 16000
-    motor_b/encoder_inverted: false
+    motor_b/encoder_inverted: true
     motor_b/encoder_ratio: 64.0
     motor_b/gear_ratio: 100.0
     motor_b/inverted: false
@@ -29,7 +29,7 @@
     motor_b/weight_low_pass_encoder: 0.30000001192092896
     motor_b/weight_low_pass_set_point: 0.20000000298023224
     motor_c/control_frequency: 16000
-    motor_c/encoder_inverted: false
+    motor_c/encoder_inverted: true
     motor_c/encoder_ratio: 64.0
     motor_c/gear_ratio: 100.0
     motor_c/inverted: false
@@ -40,7 +40,7 @@
     motor_c/weight_low_pass_encoder: 0.30000001192092896
     motor_c/weight_low_pass_set_point: 0.20000000298023224
     motor_d/control_frequency: 16000
-    motor_d/encoder_inverted: false
+    motor_d/encoder_inverted: true
     motor_d/encoder_ratio: 64.0
     motor_d/gear_ratio: 100.0
     motor_d/inverted: false
@@ -50,6 +50,28 @@
     motor_d/pid/kp: 0.5
     motor_d/weight_low_pass_encoder: 0.30000001192092896
     motor_d/weight_low_pass_set_point: 0.20000000298023224
+    motor_e/control_frequency: 16000
+    motor_e/encoder_inverted: true
+    motor_e/encoder_ratio: 64.0
+    motor_e/gear_ratio: 100.0
+    motor_e/inverted: false
+    motor_e/max_rpm: 100.0
+    motor_e/pid/kd: 0.0
+    motor_e/pid/ki: 5.0
+    motor_e/pid/kp: 0.5
+    motor_e/weight_low_pass_encoder: 0.30000001192092896
+    motor_e/weight_low_pass_set_point: 0.20000000298023224
+    motor_f/control_frequency: 16000
+    motor_f/encoder_inverted: true
+    motor_f/encoder_ratio: 64.0
+    motor_f/gear_ratio: 100.0
+    motor_f/inverted: false
+    motor_f/max_rpm: 100.0
+    motor_f/pid/kd: 0.0
+    motor_f/pid/ki: 5.0
+    motor_f/pid/kp: 0.5
+    motor_f/weight_low_pass_encoder: 0.30000001192092896
+    motor_f/weight_low_pass_set_point: 0.20000000298023224
     qos_overrides:
       /parameter_events:
         publisher:

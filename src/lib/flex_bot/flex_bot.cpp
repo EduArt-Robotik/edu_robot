@@ -58,23 +58,28 @@ void FlexBot::initialize(eduart::robot::HardwareComponentFactory& factory)
 {
   // Motor Controllers
   constexpr robot::MotorController::Parameter motor_controller_default_parameter{ };
-  constexpr std::array<const char*, 4> motor_controller_name = {
-    "motor_a", "motor_b", "motor_c", "motor_d" };
-  constexpr std::array<const char*, 4> motor_controller_joint_name = {
-    "base_to_wheel_rear_right", "base_to_wheel_front_right", "base_to_wheel_rear_left", "base_to_wheel_front_left" };
+  constexpr std::array<const char*, 6> motor_controller_name = {
+    "motor_a", "motor_b", "motor_c", "motor_d", "motor_e", "motor_f"};
+  // \todo fix the wrong order of joints!
+  constexpr std::array<const char*, 6> motor_controller_joint_name = {
+    "base_to_wheel_rear_right", "base_to_wheel_front_right", "base_to_wheel_rear_left",
+    "base_to_wheel_front_left", "base_to_wheel_middle_right", "base_to_wheel_middle_left" };
 
   for (std::size_t i = 0; i < motor_controller_name.size(); ++i) {
+    const auto motor_controller_parameter = robot::MotorController::get_motor_controller_parameter(
+      motor_controller_name[i], motor_controller_default_parameter, *this
+    );
     registerMotorController(std::make_shared<robot::MotorController>(
       motor_controller_name[i],
       i,
-      robot::MotorController::get_motor_controller_parameter(
-        motor_controller_name[i], motor_controller_default_parameter, *this
-      ),
+      motor_controller_parameter,
       motor_controller_joint_name[i],
       *this,
       factory.motorControllerHardware().at(motor_controller_name[i]),
       factory.motorSensorHardware().at(motor_controller_name[i])
     ));
+    factory.motorControllerHardware().at(motor_controller_name[i])->initialize(motor_controller_parameter);
+    factory.motorSensorHardware().at(motor_controller_name[i])->initialize(motor_controller_parameter);
   }
 
   // Set Up Default Drive Kinematic

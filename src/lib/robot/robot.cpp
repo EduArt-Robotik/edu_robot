@@ -323,6 +323,7 @@ void Robot::setLightingForMode(const Mode mode)
 
   if (search == _lightings.end()) {
     RCLCPP_WARN(get_logger(), "Can't set lighting to indicate inactive mode. Lighting \"all\" was not found.");
+    return;
   }
 
   if (_detect_charging_component->isCharging()) {

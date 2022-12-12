@@ -18,7 +18,9 @@ def generate_launch_description():
       package='edu_robot',
       executable='ethernet-gateway-flex-bot',
       name='ethernet_gateway_flex_bot',
-      parameters= [parameter_file]
+      # prefix=['gdbserver localhost:3000'],
+      parameters=[parameter_file],
+      output='screen'
     )
 
     return LaunchDescription([

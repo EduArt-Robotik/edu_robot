@@ -102,17 +102,21 @@ void Eduard::initialize(eduart::robot::HardwareComponentFactory& factory)
     "base_to_wheel_rear_right", "base_to_wheel_front_right", "base_to_wheel_rear_left", "base_to_wheel_front_left" };
 
   for (std::size_t i = 0; i < motor_controller_name.size(); ++i) {
+    const auto motor_controller_parameter = robot::MotorController::get_motor_controller_parameter(
+        motor_controller_name[i], motor_controller_default_parameter, *this
+    );
+
     registerMotorController(std::make_shared<robot::MotorController>(
       motor_controller_name[i],
       i,
-      robot::MotorController::get_motor_controller_parameter(
-        motor_controller_name[i], motor_controller_default_parameter, *this
-      ),
+      motor_controller_parameter,
       motor_controller_joint_name[i],
       *this,
       factory.motorControllerHardware().at(motor_controller_name[i]),
       factory.motorSensorHardware().at(motor_controller_name[i])
     ));
+    factory.motorControllerHardware().at(motor_controller_name[i])->initialize(motor_controller_parameter);
+    factory.motorSensorHardware().at(motor_controller_name[i])->initialize(motor_controller_parameter);
   }
 
 
@@ -139,20 +143,23 @@ void Eduard::initialize(eduart::robot::HardwareComponentFactory& factory)
     );
     registerSensor(range_sensor);
     range_sensor->registerComponentInput(_collision_avoidance_component);
+    factory.rangeSensorHardware().at(range_sensor_name[i])->initialize(range_sensor_parameter);
   }
 
   // IMU Sensor
+  const ImuSensor::Parameter imu_parameter{ false, Robot::_parameter.tf_base_frame };
   auto imu_sensor = std::make_shared<robot::ImuSensor>(
     "imu",
     /*get_effective_namespace() + "/*/"imu/base",
     /*get_effective_namespace() + "/*/_parameter.tf_footprint_frame,
     tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.0, 0.0, 0.1)),
-    ImuSensor::Parameter{ false, Robot::_parameter.tf_base_frame },
+    imu_parameter,
     getTfBroadcaster(),
     *this,
     factory.imuSensorHardware().at("imu")
   );
   registerSensor(imu_sensor);
+  factory.imuSensorHardware().at("imu")->initialize(imu_parameter);
 
   // Set Up Default Drive Kinematic
   _kinematic_matrix = getKinematicMatrix(Mode::SKID_DRIVE);
