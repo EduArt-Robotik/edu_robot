@@ -2,7 +2,7 @@
 
 Welcome to the alpha of EduArt ROS2 robot control software. In first place it provides a ROS2 node for controlling and monitoring the EduArt robots, at the moment Eduard as offroad (skid drive) is supported only. Mecanum kinematic will be supported soon. In future also a ROS2 Gazebo plugin is provided for an easy SIL test environment.
 
-> **_NOTE:_** For further help please visit our [Discord channel](https://discord.gg/tXnjH2cF) or write a e-mail at info@eduart-robotik.com.
+> **_NOTE:_** For further help please visit our [Forum](https://forum.eduart-robotik.com) or write a e-mail at info@eduart-robotik.com.
 
 
 # Eduard's ROS Interfaces
