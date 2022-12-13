@@ -30,10 +30,6 @@ static FlexBot::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
   ros_node.declare_parameter<float>("skid/length/x", parameter.skid.length.x);
   ros_node.declare_parameter<float>("skid/length/y", parameter.skid.length.y);
   ros_node.declare_parameter<float>("skid/wheel_diameter", parameter.skid.wheel_diameter);
-  
-  ros_node.declare_parameter<float>("mecanum/length/x", parameter.mecanum.length.x);
-  ros_node.declare_parameter<float>("mecanum/length/y", parameter.mecanum.length.y);
-  ros_node.declare_parameter<float>("mecanum/wheel_diameter", parameter.mecanum.wheel_diameter);
 
   // Reading Parameters
   parameter.tf_footprint_frame = ros_node.get_parameter("tf_footprint_frame").as_string();
@@ -41,10 +37,6 @@ static FlexBot::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
   parameter.skid.length.x = ros_node.get_parameter("skid/length/x").as_double();
   parameter.skid.length.y = ros_node.get_parameter("skid/length/y").as_double();
   parameter.skid.wheel_diameter = ros_node.get_parameter("skid/wheel_diameter").as_double();
-
-  parameter.mecanum.length.x = ros_node.get_parameter("mecanum/length/x").as_double();
-  parameter.mecanum.length.y = ros_node.get_parameter("mecanum/length/y").as_double();
-  parameter.mecanum.wheel_diameter = ros_node.get_parameter("mecanum/wheel_diameter").as_double();
 
   return parameter;
 }
@@ -101,11 +93,13 @@ Eigen::MatrixXf FlexBot::getKinematicMatrix(const Mode mode) const
     const float wheel_diameter = _parameter.skid.wheel_diameter;
     const float l_squared = l_x * l_x + l_y * l_y;
 
-    kinematic_matrix.resize(4, 3);
-    kinematic_matrix << -1.0f, 0.0f, -l_squared / (2.0f * l_y),
-                        -1.0f, 0.0f, -l_squared / (2.0f * l_y),
-                         1.0f, 0.0f, -l_squared / (2.0f * l_y),
-                         1.0f, 0.0f, -l_squared / (2.0f * l_y);
+    kinematic_matrix.resize(6, 3);
+    kinematic_matrix <<  1.0f, 0.0f, l_squared / (2.0f * l_y),
+                        -0.0f, 0.0f, l_squared / (2.0f * l_y),
+                         0.0f, 0.0f, l_y / 2.0f,
+                        -0.0f, 0.0f, l_y / 2.0f,
+                         0.0f, 0.0f, l_squared / (2.0f * l_y),
+                        -0.0f, 0.0f, l_squared / (2.0f * l_y);
     kinematic_matrix *= 1.0f / wheel_diameter;
   }
   else {

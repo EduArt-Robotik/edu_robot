@@ -36,13 +36,6 @@ public:
       } length;
       float wheel_diameter = 0.17f;
     } skid;
-    struct {
-      struct {
-        float x = 0.25f;
-        float y = 0.36f;
-      } length;
-      float wheel_diameter = 0.1f;
-    } mecanum;    
   };
 
   FlexBot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface);
