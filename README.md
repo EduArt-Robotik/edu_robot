@@ -62,7 +62,89 @@ To operate the Robot, the following buttons and axes of the controller are assig
 | [12]      | R3            | 0             | 0 or 1        | not in use
 | [13]      | Map           | 0             | 0 or 1        | Light pattern: Warning light
 
-# Deploying on IoT2050
+# Setting up your Joystick;
+
+A joystick can be used to operate Eduard. For this purpose, the robot must be extended by a Debian-compatible Bluetooth stick. PlayStation&reg; 4 and PlayStation&reg; 5 controllers were used, which are interpreted identically in their operating interface. The initial start-up of a Bluetooth controller follows.
+
+Start the Bluetooth controller in the operating system:
+
+```console
+$ bluetoothctl
+```
+
+Set up the controller and prepare for scanning:
+
+```console
+$ agent on 
+$ default-agent 
+$ power on 
+$ discoverable on 
+$ pairable on
+```
+
+Put the PlayStation&reg; Controller into connection mode by pressing the Share and PS buttons simultaneously. 
+Rapid flashing indicates the status.
+
+<img src="documentation/images/controller_pairing.jpg" width="500" /> <br>
+
+Now start the scanning process:
+
+```console
+$ scan on
+```
+
+The connection process so far should look like this. Your joystick is now recognised as a wireless controller. Copy the MAC address of the device for the rest of the procedure.
+
+```console
+root@iot2050-debian:~# bluetoothctl
+Agent registered
+[bluetooth] # agent on
+Agent is already registered
+[bluetooth] # power on
+Changing the power on succeeded
+[bluetooth] # discoverable on
+Changing discoverable on succeeded
+[CHG] Controller XX:XX:XX:XX:XX:XX Discoverable: yes
+[bluetooth] # pairable on
+Discovery started
+[CHG] Controller XX:XX:XX:XX:XX:XX Discovering:yes
+[NEW] Device XX:XX:XX:XX:XX:XX Wireless Controller
+[bluetooth] # 
+```
+
+Connect the controller using the following commands and its MAC address. If needed, press the PlayStation button again when the light signals stop flashing.
+
+```console
+$ pair XX:XX:XX:XX:XX:XX 
+$ trust XX:XX:XX:XX:XX:XX 
+$ connect XX:XX:XX:XX:XX:XX
+$ exit 
+```
+
+NOTE: These steps are only required once at the very beginning. From now on, when the PS button is pressed, the joystick should automatically connect to the IOT2050 once it has successfully booted up. These operations are only then necessary again if the controller has been connected to another device in the meantime.
+
+# Deploying
+
+A Docker container is used to run this software on our robots. Normally, all our robots are shipped with a Docker container registered to start after a reboot. If you want to deploy a newer version, or whatever the reason, make sure to remove the previously deployed container. To check which containers are running, use the following command:
+
+```bash
+docker container ls 
+```
+A typically print out looks like:
+
+```bash
+CONTAINER ID   IMAGE                      COMMAND                  CREATED      STATUS          PORTS     NAMES
+46c8590424c0   eduard-iotbot:0.1.1-beta   "/ros_entrypoint.sh …"   6 days ago   Up 21 minutes             eduard-iotbot-0.1.1-beta
+```
+
+To stop and remove the container, use the following command with the container ID displayed by the above command:
+
+```bash
+docker stop <container id>
+docker rm <container id>
+```
+
+## Deploying on IoT2050
 
 This section describes how the software is deployed on an IoT2050 in a Docker environment. First clone the repository on the robot by executing this command:
 
@@ -99,7 +181,7 @@ docker run --name eduard-iotbot-0.1.1-beta --restart=always --privileged -v /dev
 
 With the flag "--restart=always" the container will come up after rebooting the system. If this is not wanted please remove this flag.
 
-# Deploying on IPC127e
+## Deploying on IPC127e
 
 This section describes how the software is deployed on an IPC127e in a Docker environment. First clone the repository on the robot by executing this command:
 
