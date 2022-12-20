@@ -50,6 +50,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 add_subdirectory(src/lib/robot)
 add_subdirectory(src/lib/processing_component)
 add_subdirectory(src/lib/eduard)
+add_subdirectory(src/lib/flex_bot)
 add_subdirectory(src/lib/iotbot_shield)
 add_subdirectory(src/lib/ethernet_gateway)
 add_subdirectory(src/node)
@@ -66,7 +67,7 @@ install(
   DESTINATION share/${PROJECT_NAME}
 )
 install(
-  TARGETS iotbot-shield eduart-iotbot-shield eduart-robot-eduard eduart-robot processing-component eduart-ethernet-gateway ethernet-gateway
+  TARGETS iotbot-shield eduart-iotbot-shield eduart-robot-eduard eduart-robot processing-component eduart-ethernet-gateway ethernet-gateway ethernet-gateway-flex-bot eduart-robot-flex-bot
   EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}

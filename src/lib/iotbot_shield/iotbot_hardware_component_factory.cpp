@@ -19,10 +19,9 @@ IotBotHardwareComponentFactory::addLighting(const std::string& lighting_name, co
 } 
 
 IotBotHardwareComponentFactory&
-IotBotHardwareComponentFactory::addMotorController(const std::string& motor_name, const std::string& hardware_name,
-                                                   const eduart::robot::MotorController::Parameter& parameter)
+IotBotHardwareComponentFactory::addMotorController(const std::string& motor_name, const std::string& hardware_name)
 {
-  auto compound_motor = std::make_shared<CompoundMotorControllerHardware>(hardware_name, parameter, _shield->getCommunicator());
+  auto compound_motor = std::make_shared<CompoundMotorControllerHardware>(hardware_name, _shield->getCommunicator());
 
   _motor_controller_hardware[motor_name + "_a"] = compound_motor->dummyMotorController()[0];
   _motor_controller_hardware[motor_name + "_b"] = compound_motor->dummyMotorController()[1];
@@ -40,20 +39,19 @@ IotBotHardwareComponentFactory::addMotorController(const std::string& motor_name
 }
 
 IotBotHardwareComponentFactory&
-IotBotHardwareComponentFactory::addRangeSensor(const std::string& sensor_name, const std::string& hardware_name,
-                                               const std::uint8_t id, const RangeSensorHardware::Parameter& parameter)
+IotBotHardwareComponentFactory::addRangeSensor(
+  const std::string& sensor_name, const std::string& hardware_name, const std::uint8_t id)
 {
-  auto range_sensor_hardware = std::make_shared<RangeSensorHardware>(hardware_name, id, parameter);
+  auto range_sensor_hardware = std::make_shared<RangeSensorHardware>(hardware_name, id);
   _shield->registerIotShieldRxDevice(range_sensor_hardware);
   _range_sensor_hardware[sensor_name] = range_sensor_hardware;
   return *this;
 }                                               
   
 IotBotHardwareComponentFactory&
-IotBotHardwareComponentFactory::addImuSensor(const std::string& sensor_name, const std::string& hardware_name,
-                                             const robot::ImuSensor::Parameter parameter)
+IotBotHardwareComponentFactory::addImuSensor(const std::string& sensor_name, const std::string& hardware_name)
 {
-  auto imu_hardware = std::make_shared<ImuSensorHardware>(hardware_name, parameter, _shield->getCommunicator());
+  auto imu_hardware = std::make_shared<ImuSensorHardware>(hardware_name, _shield->getCommunicator());
   _shield->registerIotShieldRxDevice(imu_hardware);
   _imu_sensor_hardware[sensor_name] = imu_hardware;
   return *this;

@@ -31,6 +31,11 @@ void LightingHardware::processSetValue(const Color& color, const robot::Lighting
   (void)mode;
 }
 
+void LightingHardware::initialize(const Lighting::Parameter& parameter)
+{
+  (void)parameter;
+}
+
 } // end namespace ethernet
 } // end namespace eduart
 } // end namespace robot

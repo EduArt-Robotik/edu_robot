@@ -7,7 +7,7 @@
 
 #include "edu_robot/ethernet_gateway/range_sensor_hardware.hpp"
 
-#include <edu_robot/eduard/eduard_hardware_component_factory.hpp>
+#include <edu_robot/hardware_component_factory.hpp>
 
 #include <cstdint>
 #include <map>
@@ -20,20 +20,17 @@ namespace ethernet {
 
 class EthernetGatewayShield;
 
-class HardwareComponentFactory : public eduard::EduardHardwareComponentFactory
+class HardwareComponentFactory : public eduart::robot::HardwareComponentFactory
 {
 public:
   HardwareComponentFactory(std::shared_ptr<EthernetGatewayShield> shield) : _shield(shield) { }
   ~HardwareComponentFactory() override = default;
 
   HardwareComponentFactory& addLighting(const std::string& lighting_name, const std::string& hardware_name);
-  HardwareComponentFactory& addMotorController(
-    const std::string& motor_name, const std::string& hardware_name,
-    const eduart::robot::MotorController::Parameter& parameter);
-  HardwareComponentFactory& addRangeSensor(const std::string& sensor_name, const std::string& hardware_name,
-                                                 const std::uint8_t id, const RangeSensorHardware::Parameter& parameter);
-  HardwareComponentFactory& addImuSensor(const std::string& sensor_name, const std::string& hardware_name,
-                                               const robot::ImuSensor::Parameter parameter);
+  HardwareComponentFactory& addMotorController(const std::string& motor_name, const std::string& hardware_name);
+  HardwareComponentFactory& addRangeSensor(
+    const std::string& sensor_name, const std::string& hardware_name, const std::uint8_t id);
+  HardwareComponentFactory& addImuSensor(const std::string& sensor_name, const std::string& hardware_name);
 
 private:
   std::shared_ptr<EthernetGatewayShield> _shield;

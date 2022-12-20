@@ -9,11 +9,9 @@ namespace eduart {
 namespace robot {
 namespace ethernet {
 
-RangeSensorHardware::RangeSensorHardware(const std::string& hardware_name, const std::uint8_t id, 
-                                         const Parameter& parameter)
+RangeSensorHardware::RangeSensorHardware(const std::string& hardware_name, const std::uint8_t id)
   : EthernetGatewayDevice(hardware_name)
   , EthernetGatewayRxDevice(hardware_name)
-  , _parameter(parameter)
   , _id(id)
 {
 
@@ -26,6 +24,13 @@ void RangeSensorHardware::processRxData(const tcp::message::RxMessageDataBuffer&
   if (_callback_process_measurement == nullptr) {
     return;
   }
+
+  // \todo implement data processing!
+}
+
+void RangeSensorHardware::initialize(const RangeSensor::Parameter& parameter)
+{
+  (void)parameter;
 }
 
 } // end namespace ethernet

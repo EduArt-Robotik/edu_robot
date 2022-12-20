@@ -29,6 +29,7 @@ namespace robot {
 class MotorController
 {
 public:
+
   struct Parameter
   {
     bool inverted = false;
@@ -49,10 +50,13 @@ public:
     bool isValid() const { return true; } // \todo implement properly
   };
 
+  using ComponentInterface = HardwareComponentInterface<Parameter, Rpm>;
+  using SensorInterface = HardwareSensorInterface<Parameter, Rpm>;
+
   MotorController(const std::string& name, const std::uint8_t id, const Parameter& parameter,
                   const std::string& urdf_joint_name, rclcpp::Node& ros_node,
-                  std::shared_ptr<HardwareComponentInterface<Rpm>> hardware_component_interface,
-                  std::shared_ptr<HardwareSensorInterface<Rpm>> hardware_sensor_interface);
+                  std::shared_ptr<ComponentInterface> hardware_component_interface,
+                  std::shared_ptr<SensorInterface> hardware_sensor_interface);
   virtual ~MotorController();
 
   inline const std::string& name() const { return _name; }
@@ -80,8 +84,8 @@ private:
   rclcpp::Time _stamp_last_measurement;
   Angle0To2Pi _current_wheel_position = 0.0;
 
-  std::shared_ptr<HardwareComponentInterface<Rpm>> _hardware_component_interface;
-  std::shared_ptr<HardwareSensorInterface<Rpm>> _hardware_sensor_interface;
+  std::shared_ptr<ComponentInterface> _hardware_component_interface;
+  std::shared_ptr<SensorInterface> _hardware_sensor_interface;
 };
 
 } // end namespace robot

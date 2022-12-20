@@ -14,15 +14,15 @@ namespace eduart {
 namespace robot {
 namespace iotbot {
 
-class ImuSensorHardware : public robot::HardwareSensorInterface<Eigen::Quaterniond>
+class ImuSensorHardware : public ImuSensor::SensorInterface
                         , public IotShieldTxRxDevice
 {
 public:
-  ImuSensorHardware(const std::string& hardware_name, const ImuSensor::Parameter parameter,
-            std::shared_ptr<IotShieldCommunicator> communicator);
+  ImuSensorHardware(const std::string& hardware_name, std::shared_ptr<IotShieldCommunicator> communicator);
   ~ImuSensorHardware() override = default;
 
   void processRxData(const uart::message::RxMessageDataBuffer& data) override;
+  void initialize(const ImuSensor::Parameter& parameter) override;
 };
 
 } // end namespace iotbot
