@@ -23,7 +23,7 @@ using namespace std::chrono_literals;
 
 EthernetGatewayFlexBot::EthernetGatewayFlexBot()
   : eduart::robot::flex_bot::FlexBot(
-    "ipc_bot",
+    "flex_bot",
     // std::make_unique<EthernetGatewayShield>("192.168.1.20", 2345)
     std::make_unique<EthernetGatewayShield>("192.168.1.20", 1234)  
   )

@@ -28,24 +28,24 @@ static Eduard::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
   // Declaring of Parameters
   ros_node.declare_parameter<std::string>("tf_footprint_frame", parameter.tf_footprint_frame);
 
-  ros_node.declare_parameter<float>("skid/length/x", parameter.skid.length.x);
-  ros_node.declare_parameter<float>("skid/length/y", parameter.skid.length.y);
-  ros_node.declare_parameter<float>("skid/wheel_diameter", parameter.skid.wheel_diameter);
+  ros_node.declare_parameter<float>("skid.length.x", parameter.skid.length.x);
+  ros_node.declare_parameter<float>("skid.length.y", parameter.skid.length.y);
+  ros_node.declare_parameter<float>("skid.wheel_diameter", parameter.skid.wheel_diameter);
   
-  ros_node.declare_parameter<float>("mecanum/length/x", parameter.mecanum.length.x);
-  ros_node.declare_parameter<float>("mecanum/length/y", parameter.mecanum.length.y);
-  ros_node.declare_parameter<float>("mecanum/wheel_diameter", parameter.mecanum.wheel_diameter);
+  ros_node.declare_parameter<float>("mecanum.length.x", parameter.mecanum.length.x);
+  ros_node.declare_parameter<float>("mecanum.length.y", parameter.mecanum.length.y);
+  ros_node.declare_parameter<float>("mecanum.wheel_diameter", parameter.mecanum.wheel_diameter);
 
   // Reading Parameters
   parameter.tf_footprint_frame = ros_node.get_parameter("tf_footprint_frame").as_string();
 
-  parameter.skid.length.x = ros_node.get_parameter("skid/length/x").as_double();
-  parameter.skid.length.y = ros_node.get_parameter("skid/length/y").as_double();
-  parameter.skid.wheel_diameter = ros_node.get_parameter("skid/wheel_diameter").as_double();
+  parameter.skid.length.x = ros_node.get_parameter("skid.length.x").as_double();
+  parameter.skid.length.y = ros_node.get_parameter("skid.length.y").as_double();
+  parameter.skid.wheel_diameter = ros_node.get_parameter("skid.wheel_diameter").as_double();
 
-  parameter.mecanum.length.x = ros_node.get_parameter("mecanum/length/x").as_double();
-  parameter.mecanum.length.y = ros_node.get_parameter("mecanum/length/y").as_double();
-  parameter.mecanum.wheel_diameter = ros_node.get_parameter("mecanum/wheel_diameter").as_double();
+  parameter.mecanum.length.x = ros_node.get_parameter("mecanum.length.x").as_double();
+  parameter.mecanum.length.y = ros_node.get_parameter("mecanum.length.y").as_double();
+  parameter.mecanum.wheel_diameter = ros_node.get_parameter("mecanum.wheel_diameter").as_double();
 
   return parameter;
 }

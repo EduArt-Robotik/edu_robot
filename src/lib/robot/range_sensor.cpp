@@ -1,10 +1,12 @@
 #include "edu_robot/range_sensor.hpp"
 #include "edu_robot/sensor.hpp"
+
 #include <functional>
 #include <memory>
+
 #include <rclcpp/qos.hpp>
 #include <rclcpp/time.hpp>
-#include <sensor_msgs/msg/detail/range__struct.hpp>
+
 
 namespace eduart {
 namespace robot {
@@ -13,15 +15,17 @@ namespace robot {
 static RangeSensor::Parameter get_range_sensor_parameter(
   const std::string& name, const RangeSensor::Parameter& default_parameter, rclcpp::Node& ros_node)
 {
+  std::string prefix = name;
+  std::replace(prefix.begin(), prefix.end(), '/', '.');
   RangeSensor::Parameter parameter;
 
-  ros_node.declare_parameter<float>(name + "/field_of_view", default_parameter.field_of_view);
-  ros_node.declare_parameter<float>(name + "/range_min", default_parameter.range_min);
-  ros_node.declare_parameter<float>(name + "/range_max", default_parameter.range_max);
+  ros_node.declare_parameter<float>(prefix + ".field_of_view", default_parameter.field_of_view);
+  ros_node.declare_parameter<float>(prefix + ".range_min", default_parameter.range_min);
+  ros_node.declare_parameter<float>(prefix + ".range_max", default_parameter.range_max);
 
-  parameter.field_of_view = ros_node.get_parameter(name + "/field_of_view").as_double();
-  parameter.range_min = ros_node.get_parameter(name + "/range_min").as_double();
-  parameter.range_max = ros_node.get_parameter(name + "/range_max").as_double();
+  parameter.field_of_view = ros_node.get_parameter(prefix + ".field_of_view").as_double();
+  parameter.range_min = ros_node.get_parameter(prefix + ".range_min").as_double();
+  parameter.range_max = ros_node.get_parameter(prefix + ".range_max").as_double();
 
   return parameter;  
 }

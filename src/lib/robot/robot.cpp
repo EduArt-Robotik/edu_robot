@@ -30,15 +30,15 @@ static Robot::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
   
   // Declare Parameters
   ros_node.declare_parameter<std::string>("tf_base_frame", parameter.tf_base_frame);
-  ros_node.declare_parameter<bool>("collision_avoidance/enable", parameter.enable_collision_avoidance);
-  ros_node.declare_parameter<float>("collision_avoidance/distance_reduce_velocity", parameter.collision_avoidance.distance_reduce_velocity);
-  ros_node.declare_parameter<float>("collision_avoidance/distance_velocity_zero", parameter.collision_avoidance.distance_velocity_zero);
+  ros_node.declare_parameter<bool>("collision_avoidance.enable", parameter.enable_collision_avoidance);
+  ros_node.declare_parameter<float>("collision_avoidance.distance_reduce_velocity", parameter.collision_avoidance.distance_reduce_velocity);
+  ros_node.declare_parameter<float>("collision_avoidance.distance_velocity_zero", parameter.collision_avoidance.distance_velocity_zero);
 
   // Get Parameter Values
   parameter.tf_base_frame = ros_node.get_parameter("tf_base_frame").as_string();
-  parameter.enable_collision_avoidance = ros_node.get_parameter("collision_avoidance/enable").as_bool();
-  parameter.collision_avoidance.distance_reduce_velocity = ros_node.get_parameter("collision_avoidance/distance_reduce_velocity").as_double();
-  parameter.collision_avoidance.distance_velocity_zero = ros_node.get_parameter("collision_avoidance/distance_velocity_zero").as_double();
+  parameter.enable_collision_avoidance = ros_node.get_parameter("collision_avoidance.enable").as_bool();
+  parameter.collision_avoidance.distance_reduce_velocity = ros_node.get_parameter("collision_avoidance.distance_reduce_velocity").as_double();
+  parameter.collision_avoidance.distance_velocity_zero = ros_node.get_parameter("collision_avoidance.distance_velocity_zero").as_double();
 
   return parameter;
 }

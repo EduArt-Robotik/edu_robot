@@ -12,13 +12,15 @@ namespace robot {
 static ImuSensor::Parameter get_imu_sensor_parameter(
   const std::string sensor_name, const ImuSensor::Parameter& default_parameter, rclcpp::Node& ros_node)
 {
+  std::string sensor_prefix = sensor_name;
+  std::replace(sensor_prefix.begin(), sensor_prefix.end(), '/', '.');
   ImuSensor::Parameter parameter;
 
-  ros_node.declare_parameter<bool>(sensor_name + "/raw_data_mode", default_parameter.raw_data_mode);
-  ros_node.declare_parameter<std::string>(sensor_name + "/tf_frame_rotated", default_parameter.rotated_frame);
+  ros_node.declare_parameter<bool>(sensor_prefix + ".raw_data_mode", default_parameter.raw_data_mode);
+  ros_node.declare_parameter<std::string>(sensor_prefix + ".tf_frame_rotated", default_parameter.rotated_frame);
 
-  parameter.raw_data_mode = ros_node.get_parameter(sensor_name + "/raw_data_mode").as_bool();
-  parameter.rotated_frame = ros_node.get_parameter(sensor_name + "/tf_frame_rotated").as_string();
+  parameter.raw_data_mode = ros_node.get_parameter(sensor_prefix + ".raw_data_mode").as_bool();
+  parameter.rotated_frame = ros_node.get_parameter(sensor_prefix + ".tf_frame_rotated").as_string();
 
   return parameter;
 }
