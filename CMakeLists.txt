@@ -54,6 +54,7 @@ add_subdirectory(src/lib/flex_bot)
 add_subdirectory(src/lib/iotbot_shield)
 add_subdirectory(src/lib/ethernet_gateway)
 add_subdirectory(src/node)
+add_subdirectory(src/test)
 
 ## Installing of Content
 install(
