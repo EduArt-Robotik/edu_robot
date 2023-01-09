@@ -31,6 +31,10 @@ struct StateVector<AttributePack<Attributes...>>
   typename resolve_type<Target>::type get() const {
     return std::get<AttributePack<Attributes...>::template index<Target>()>(_data);
   }
+  template <Attribute Target>
+  typename resolve_type<Target>::type set(const typename resolve_type<Target>::type value) {
+    return std::get<AttributePack<Attributes...>::template index<Target>()>(_data) = value;
+  }
 
   std::tuple<typename resolve_type<Attributes>::type...> _data;
 };

@@ -11,5 +11,11 @@ TEST_CASE("kinematic_state_vector", "[unittest]")
 {
   StateVector<AttributePack<Attribute::POS_X, Attribute::POS_Y>> vector;
 
-  vector.get<Attribute::POS_X>();
+  SECTION("set and get values") {
+    vector.set<Attribute::POS_X>(1.0);
+    vector.set<Attribute::POS_Y>(2.0);
+
+    CHECK(vector.get<Attribute::POS_X>() == 1.0);
+    CHECK(vector.get<Attribute::POS_Y>() == 2.0);
+  }
 }

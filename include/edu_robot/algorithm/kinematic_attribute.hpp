@@ -52,7 +52,16 @@ struct AttributePack
     std::size_t counter = 0;
     bool found = false;
 
-    ((found == false && Target == Attributes ? found = true : ++counter), ...);
+    ([&]{
+      if constexpr (Attributes == Target) {
+        found = true;
+      }
+      else {
+        if (found == false) {
+          ++counter;
+        }
+      }
+    }(), ...);
 
     assert(found == true); // "Given Attribute is not contained in this AttributePack!");
 
