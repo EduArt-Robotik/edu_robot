@@ -1,4 +1,6 @@
 #include <catch2/catch.hpp>
+#include <cstddef>
+#include <iostream>
 
 #include "edu_robot/algorithm/kinematic_attribute.hpp"
 
@@ -7,7 +9,8 @@ using namespace eduart::robot::algorithm::kinematic;
 TEST_CASE("kinematic_attribute_pack", "[unittest]")
 {
   using Pack = AttributePack<Attribute::POS_X, Attribute::POS_Y, Attribute::YAW, Attribute::YAW_RATE>;
-
+  constexpr std::size_t index = Pack::index<Attribute::POS_X>();
+  std::cout << index << std::endl;
   SECTION("method index") {
     CHECK(Pack::index<Attribute::POS_X>() == 0);
     CHECK(Pack::index<Attribute::POS_Y>() == 1);

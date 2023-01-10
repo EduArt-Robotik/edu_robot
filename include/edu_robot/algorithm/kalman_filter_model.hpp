@@ -29,15 +29,16 @@ template <kinematic::Attribute... Attributes>
 class KalmanFilterModel<kinematic::AttributePack<Attributes...>>
 {
 public:
-  using StateVector = kinematic::StateVector<kinematic::AttributePack<Attributes...>>;
-  static constexpr std::size_t dimension = StateVector::count();
+  using AttributePack = kinematic::AttributePack<Attributes...>;
+  using StateVector = kinematic::StateVector<AttributePack>;
+  static constexpr std::size_t dimension = AttributePack::count();
   using Matrix = Eigen::Matrix<double, dimension, dimension>;
 
   KalmanFilterModel() { }
 
   /**
    * \brief Provides a matrix that can be used to predict in time the current state.
-   * \param delta_time Is delta t. The state wil be predicted by this time step.
+   * \param delta_time Is delta t. The state will be predicted by this time step.
    * \return Prediction matrix with dimension of this model.
    */
   virtual Matrix getPredictionMatrix(const StateVector& current_state, const double delta_time) const = 0;

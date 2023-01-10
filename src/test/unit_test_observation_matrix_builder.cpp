@@ -12,8 +12,6 @@ TEST_CASE("observation_matrix_builder", "[unittest]")
 {
   using StateAttributes = AttributePack<Attribute::POS_X, Attribute::POS_Y, Attribute::VEL_X, Attribute::VEL_Y, Attribute::YAW, Attribute::YAW_RATE>;
   using SensorAttributes = AttributePack<Attribute::VEL_X, Attribute::VEL_Y>;
-  using FilterStateVector = StateVector<StateAttributes>;
-  using MeasurementVector = StateVector<SensorAttributes>;
 
   const auto observation_matrix = ObservationMatrixBuilder<StateAttributes, SensorAttributes>::build();
 
@@ -23,12 +21,17 @@ TEST_CASE("observation_matrix_builder", "[unittest]")
 
     // Check State Entries against Sensor VEL_X attribute.
     CHECK(observation_matrix(0, 0) == 0);
-    CHECK(observation_matrix(0, 0) == 0);
-    CHECK(observation_matrix(0, 0) == 0);
-    CHECK(observation_matrix(0, 0) == 0);
-    CHECK(observation_matrix(0, 0) == 0);
-    CHECK(observation_matrix(0, 0) == 0);
+    CHECK(observation_matrix(1, 0) == 0);
+    CHECK(observation_matrix(2, 0) == 1);
+    CHECK(observation_matrix(3, 0) == 0);
+    CHECK(observation_matrix(4, 0) == 0);
+    CHECK(observation_matrix(5, 0) == 0);
 
-    std::cout << "observation_matrix:\n" << observation_matrix << std::endl;
+    CHECK(observation_matrix(0, 1) == 0);
+    CHECK(observation_matrix(1, 1) == 0);
+    CHECK(observation_matrix(2, 1) == 0);
+    CHECK(observation_matrix(3, 1) == 1);
+    CHECK(observation_matrix(4, 1) == 0);
+    CHECK(observation_matrix(5, 1) == 0);
   }
 }

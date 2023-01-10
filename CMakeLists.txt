@@ -5,6 +5,8 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)# -O2)
 endif()
 
+set(CMAKE_CXX_STANDARD 17)
+
 ## Dependencies
 # find dependencies
 find_package(ament_cmake REQUIRED)
@@ -53,6 +55,7 @@ add_subdirectory(src/lib/eduard)
 add_subdirectory(src/lib/flex_bot)
 add_subdirectory(src/lib/iotbot_shield)
 add_subdirectory(src/lib/ethernet_gateway)
+add_subdirectory(src/lib/algorithm)
 add_subdirectory(src/node)
 add_subdirectory(src/test)
 
