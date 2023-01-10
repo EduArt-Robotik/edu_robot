@@ -10,6 +10,7 @@
 #include <array>
 #include <cassert>
 #include <cstddef>
+#include <stdexcept>
 #include <tuple>
 
 namespace eduart {
@@ -79,6 +80,14 @@ struct AttributePack
     std::array<Attribute, sizeof...(Attributes)> helper = { Attributes... };
     return helper[Index];
   }
+  inline static constexpr Attribute attribute(const std::size_t index) {
+    if (index >= sizeof...(Attributes)) {
+      throw std::invalid_argument("Given Index is out of range!");
+    }
+
+    std::array<Attribute, sizeof...(Attributes)> helper = { Attributes... };
+    return helper[index];
+  }  
 
   template <Attribute Target>
   inline static constexpr bool isContained() {

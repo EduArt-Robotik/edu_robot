@@ -22,20 +22,22 @@ struct resolve_type { using type = double; };
  *        functionality to handle its data safely (for example angle normalization).
  */
 template <typename>
-struct StateVector;
+class StateVector;
 
 template <Attribute... Attributes>
-struct StateVector<AttributePack<Attributes...>>
+class StateVector<AttributePack<Attributes...>>
 {
+public:
   template <Attribute Target>
   typename resolve_type<Target>::type get() const {
     return std::get<AttributePack<Attributes...>::template index<Target>()>(_data);
   }
   template <Attribute Target>
-  typename resolve_type<Target>::type set(const typename resolve_type<Target>::type value) {
-    return std::get<AttributePack<Attributes...>::template index<Target>()>(_data) = value;
+  void set(const typename resolve_type<Target>::type value) {
+    std::get<AttributePack<Attributes...>::template index<Target>()>(_data) = value;
   }
 
+private:
   std::tuple<typename resolve_type<Attributes>::type...> _data;
 };
 
