@@ -90,7 +90,7 @@ void CompoundMotorControllerHardware::initialize(const MotorController::Paramete
       parameter.max_rpm,
       parameter.threshold_stall_check,
       parameter.weight_low_pass_set_point,
-      32
+      32 // \todo make it configurable
     );
     auto future_response = _communicator->sendRequest(std::move(request));
     wait_for_future(future_response, 200ms);

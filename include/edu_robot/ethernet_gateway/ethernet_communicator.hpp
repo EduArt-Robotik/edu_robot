@@ -74,6 +74,25 @@ private:
   static std::uint8_t _sequence_number;
 };
 
+class RxDataEndPoint
+{
+  friend class EthernetCommunicator;
+
+public:
+  RxDataEndPoint(RxDataEndPoint&&) = default;
+
+private:
+  RxDataEndPoint(
+    const std::vector<tcp::message::Byte>& search_pattern,
+    std::function<void(const tcp::message::RxMessageDataBuffer&)>& callback_process_data)
+  : _response_search_pattern(search_pattern)
+  , _callback_process_data(callback_process_data)
+  { }
+
+  std::vector<tcp::message::Byte> _response_search_pattern;
+  std::function<void(const tcp::message::RxMessageDataBuffer&)> _callback_process_data;
+};
+
 template <typename Duration>
 inline void wait_for_future(std::future<Request>& future, const Duration& timeout) {
   if (future.wait_for(timeout) == std::future_status::timeout) {

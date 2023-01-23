@@ -65,6 +65,8 @@ EthernetCommunicator::~EthernetCommunicator()
 {
   std::cout << "Shuting down TCP communicator." << std::endl;
 
+  // \todo disable sending of measurement data
+
   _is_running = false;
   _handling_thread.join();
   _tcp_sending_thread.join();
@@ -186,6 +188,7 @@ void EthernetCommunicator::processing()
           // else
           ++it;
         }
+        // \todo handle rx data end points here
       }
       catch (std::exception& ex) {
         // \todo this class needs an logger!

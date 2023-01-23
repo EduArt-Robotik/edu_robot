@@ -56,7 +56,15 @@ using SetMotorRpm = MessageFrame<element::Command<PROTOCOL::COMMAND::SET::MOTOR_
                                  element::Float>; // Set Point RPM Motor 1
 
 using SetMotorEnabled = MessageFrame<element::Command<PROTOCOL::COMMAND::SET::MOTOR_ENABLE>>;
-using SetMotorDisabled = MessageFrame<element::Command<PROTOCOL::COMMAND::SET::MOTOR_DISABLE>>;                                 
+using SetMotorDisabled = MessageFrame<element::Command<PROTOCOL::COMMAND::SET::MOTOR_DISABLE>>;
+using SetMotorMeasurement = MessageFrame<element::Command<PROTOCOL::COMMAND::SET::MOTOR_MEASUREMENT>,
+                                         element::Uint8>; // Enable Flag
+using SetImuMeasurement = MessageFrame<element::Command<PROTOCOL::COMMAND::SET::IMU_MEASUREMENT>,
+                                       element::Uint8>; // Enable Flag
+using SetDistanceSensorMeasurement = MessageFrame<element::Command<PROTOCOL::COMMAND::SET::DISTANCE_SENSOR_MEASUREMENT>,
+                                                  element::Uint8>; // Enable Flag
+using SetDisableAllMeasurements = MessageFrame<element::Command<PROTOCOL::COMMAND::SET::DISABLE_ALL_MEASUREMENTS>>;
+
 
 // Responses
 template <Byte TcpCommand>
@@ -65,6 +73,8 @@ struct Acknowledgement : public MessageFrame<element::Response<TcpCommand>, elem
     return MessageFrame<element::Response<TcpCommand>, element::Uint8>::template deserialize<2>(rx_buffer);
   }
 };
+
+
 
 } // end namespace message
 } // end namespace tcp

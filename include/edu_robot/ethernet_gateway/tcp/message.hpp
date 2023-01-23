@@ -245,7 +245,7 @@ public:
   }
   template <std::size_t Index>
   inline constexpr static auto deserialize(const RxMessageDataBuffer& rx_buffer) {
-    return MessageType::template deserialize<Index + 1>(rx_buffer);
+    return MessageType::template deserialize<Index + 1>(rx_buffer); // \todo clarify if + 1 is a bug
   }
 };
 

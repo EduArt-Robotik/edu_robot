@@ -31,6 +31,10 @@ struct PROTOCOL {
       static constexpr Byte MOTOR_RPM = 0x14;
       static constexpr Byte MOTOR_ENABLE = 0x15;
       static constexpr Byte MOTOR_DISABLE = 0x16;
+      static constexpr Byte MOTOR_MEASUREMENT = 0x17;
+      static constexpr Byte IMU_MEASUREMENT = 0x18;
+      static constexpr Byte DISTANCE_SENSOR_MEASUREMENT = 0x19;
+      static constexpr Byte DISABLE_ALL_MEASUREMENTS = 0x1a;
     };
   };
 };
