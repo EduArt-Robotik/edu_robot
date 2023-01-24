@@ -70,11 +70,26 @@ using SetDisableAllMeasurements = MessageFrame<element::Command<PROTOCOL::COMMAN
 template <Byte TcpCommand>
 struct Acknowledgement : public MessageFrame<element::Response<TcpCommand>, element::Uint8> {
   inline static constexpr bool wasAcknowledged(const RxMessageDataBuffer& rx_buffer) {
-    return MessageFrame<element::Response<TcpCommand>, element::Uint8>::template deserialize<2>(rx_buffer);
+    return MessageFrame<element::Response<TcpCommand>, element::Uint8>::template deserialize<0>(rx_buffer);
   }
 };
 
 
+// Measurements
+struct RpmMeasurement : public MeasurementFrame<element::Command<PROTOCOL::MEASUREMENT::MOTOR_CONTROLLER_RPM>,
+                                                element::Uint8,
+                                                element::Float,
+                                                element::Float> {
+  inline constexpr static std::uint8_t canId(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<0>(rx_buffer);
+  }                                                  
+  inline static constexpr Rpm rpm0(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<1>(rx_buffer);
+  }
+  inline static constexpr Rpm rpm1(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<2>(rx_buffer);
+  }  
+};
 
 } // end namespace message
 } // end namespace tcp

@@ -21,6 +21,8 @@ using tcp::message::Acknowledgement;
 using tcp::message::SetEncoderParameter;
 using tcp::message::SetMotorControllerParameter;
 using tcp::message::SetPidControllerParameter;
+using tcp::message::SetMotorRpm;
+using tcp::message::SetMotorMeasurement;
 
 DummyMotorControllerHardware::DummyMotorControllerHardware(const std::string& hardware_name)
   : _current_set_value(0.0)
@@ -61,17 +63,12 @@ CompoundMotorControllerHardware::~CompoundMotorControllerHardware()
 
 void CompoundMotorControllerHardware::processRxData(const tcp::message::RxMessageDataBuffer &data)
 {
-  (void)data;
-
-  if (_callback_process_measurement == nullptr) {
+  if (_callback_process_measurement == nullptr || tcp::message::RpmMeasurement::canId(data) != _can_id) {
     return;
   }
   
-  // \todo implement data processing
-  // _dummy_motor_controllers[0]->_callback_process_measurement(uart::message::ShieldResponse::rpm0(data));
-  // _dummy_motor_controllers[1]->_callback_process_measurement(uart::message::ShieldResponse::rpm1(data));
-  // _dummy_motor_controllers[2]->_callback_process_measurement(uart::message::ShieldResponse::rpm2(data));
-  // _callback_process_measurement(uart::message::ShieldResponse::rpm3(data));
+  _dummy_motor_controller->_callback_process_measurement(tcp::message::RpmMeasurement::rpm0(data));
+  _callback_process_measurement(tcp::message::RpmMeasurement::rpm1(data));
 }
 
 void CompoundMotorControllerHardware::initialize(const MotorController::Parameter& parameter)
@@ -138,6 +135,17 @@ void CompoundMotorControllerHardware::initialize(const MotorController::Paramete
       throw std::runtime_error("Request \"Set Pid Controller Parameter\" was not acknowledged.");
     }
   }
+  // Enable RPM Measurement Feedback
+  {
+    auto request = Request::make_request<SetMotorMeasurement>(true);
+    auto future_response = _communicator->sendRequest(std::move(request));
+    wait_for_future(future_response, 200ms);
+
+    auto got = future_response.get();
+    if (Acknowledgement<PROTOCOL::COMMAND::SET::MOTOR_MEASUREMENT>::wasAcknowledged(got.response()) == false) {
+      throw std::runtime_error("Request \"Set Motor RPM Measurement\" was not acknowledged.");
+    }
+  }  
 }
 
 void CompoundMotorControllerHardware::processSetValue(const Rpm& rpm)
@@ -153,7 +161,7 @@ void CompoundMotorControllerHardware::processSetValue(const Rpm& rpm)
 
   auto got = future_response.get();
   if (Acknowledgement<PROTOCOL::COMMAND::SET::MOTOR_RPM>::wasAcknowledged(got.response()) == false) {
-    throw std::runtime_error("Request \"Set Pid Controller Parameter\" was not acknowledged.");
+    throw std::runtime_error("Request \"Set RPM Value\" was not acknowledged.");
   }  
 }
 

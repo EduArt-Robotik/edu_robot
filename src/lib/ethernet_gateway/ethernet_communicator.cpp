@@ -1,5 +1,6 @@
 #include "edu_robot/ethernet_gateway/ethernet_communicator.hpp"
 #include "edu_robot/ethernet_gateway/tcp/message.hpp"
+#include "edu_robot/ethernet_gateway/tcp/message_definition.hpp"
 #include "edu_robot/ethernet_gateway/tcp/protocol.hpp"
 #include "edu_robot/state.hpp"
 
@@ -65,7 +66,13 @@ EthernetCommunicator::~EthernetCommunicator()
 {
   std::cout << "Shuting down TCP communicator." << std::endl;
 
-  // \todo disable sending of measurement data
+  auto request = Request::make_request<tcp::message::SetDisableAllMeasurements>();
+  auto future_response = sendRequest(std::move(request));
+  wait_for_future(future_response, 200ms);
+  auto got = future_response.get();
+  // if (Acknowledgement<PROTOCOL::COMMAND::SET::MOTOR_MEASUREMENT>::wasAcknowledged(got.response()) == false) {
+  //   throw std::runtime_error("Request \"Set Motor RPM Measurement\" was not acknowledged.");
+  // }
 
   _is_running = false;
   _handling_thread.join();
@@ -85,6 +92,12 @@ std::future<Request> EthernetCommunicator::sendRequest(Request request)
   }
 
   return future;
+}
+
+void EthernetCommunicator::registerRxDataEndpoint(RxDataEndPoint&& endpoint)
+{
+  std::lock_guard guard(_mutex_rx_data_endpoint);
+  _rx_data_endpoint.emplace_back(std::move(endpoint));
 }
 
 tcp::message::RxMessageDataBuffer EthernetCommunicator::getRxBuffer()
@@ -153,7 +166,8 @@ void EthernetCommunicator::processing()
     }
 
     // Handle Received Tcp Data
-    if (_new_received_data == true && _open_request.empty() == false) {
+    // if (_new_received_data == true && _open_request.empty() == false) {
+    if (_new_received_data == true) {      
       // Reading data thread is waiting.
       try {
         tcp::message::RxMessageDataBuffer rx_buffer;
@@ -172,6 +186,7 @@ void EthernetCommunicator::processing()
           _rx_buffer_copy = rx_buffer;
         }
 
+        // Check if received data matches to an open request.
         for (auto it =_open_request.begin(); it != _open_request.end();) {
           const auto& search_pattern = it->first._response_search_pattern;
 
@@ -188,7 +203,17 @@ void EthernetCommunicator::processing()
           // else
           ++it;
         }
-        // \todo handle rx data end points here
+
+        // Check if received data matches to an end point and call it if it does.
+        {
+          std::lock_guard guard(_mutex_rx_data_endpoint);
+
+          for (auto& endpoint : _rx_data_endpoint) {
+            if (is_same(endpoint._response_search_pattern, rx_buffer)) {
+              endpoint._callback_process_data(rx_buffer);
+            }
+          }
+        }
       }
       catch (std::exception& ex) {
         // \todo this class needs an logger!

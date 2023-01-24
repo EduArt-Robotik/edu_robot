@@ -79,13 +79,17 @@ void MotorController::setRpm(const Rpm rpm)
 
 void MotorController::processMeasurementData(const Rpm rpm)
 {
+  {
+    std::lock_guard guard(_mutex_access_data);
+    _measured_rpm = rpm;
+  }
+
   // \todo Check if calculation is correct! At the moment used for visualization only, so no need for accurate calc...
   // perform wheel position calculation
   const auto stamp = _clock->now();
   const auto delta_t = stamp - _stamp_last_measurement;
 
   _current_wheel_position += delta_t.seconds() * rpm.radps();
-  _measured_rpm = rpm;
   _stamp_last_measurement = stamp;
 
   // publish wheel position as tf message

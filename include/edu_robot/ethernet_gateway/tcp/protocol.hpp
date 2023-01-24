@@ -37,6 +37,11 @@ struct PROTOCOL {
       static constexpr Byte DISABLE_ALL_MEASUREMENTS = 0x1a;
     };
   };
+  struct MEASUREMENT {
+    static constexpr Byte MOTOR_CONTROLLER_RPM = 0x31;
+    static constexpr Byte IMU = 0x32;
+    static constexpr Byte DISTANCE = 0x33;
+  };
 };
 
 } // end namespace message
