@@ -74,6 +74,17 @@ struct Acknowledgement : public MessageFrame<element::Response<TcpCommand>, elem
   }
 };
 
+struct AcknowledgedMotorRpm : public MessageFrame<element::Response<PROTOCOL::COMMAND::SET::MOTOR_RPM>,
+                                                  element::Float,
+                                                  element::Float> {
+  inline static constexpr Rpm rpm0(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<0>(rx_buffer);
+  }
+  inline static constexpr Rpm rpm1(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<1>(rx_buffer);
+  }  
+};
+
 
 // Measurements
 struct RpmMeasurement : public MeasurementFrame<element::Command<PROTOCOL::MEASUREMENT::MOTOR_CONTROLLER_RPM>,

@@ -23,6 +23,7 @@ using tcp::message::SetMotorControllerParameter;
 using tcp::message::SetPidControllerParameter;
 using tcp::message::SetMotorRpm;
 using tcp::message::SetMotorMeasurement;
+using tcp::message::AcknowledgedMotorRpm;
 
 DummyMotorControllerHardware::DummyMotorControllerHardware(const std::string& hardware_name)
   : _current_set_value(0.0)
@@ -136,16 +137,17 @@ void CompoundMotorControllerHardware::initialize(const MotorController::Paramete
     }
   }
   // Enable RPM Measurement Feedback
-  {
-    auto request = Request::make_request<SetMotorMeasurement>(true);
-    auto future_response = _communicator->sendRequest(std::move(request));
-    wait_for_future(future_response, 200ms);
+  // Note: disabled for the moment.
+  // {
+  //   auto request = Request::make_request<SetMotorMeasurement>(true);
+  //   auto future_response = _communicator->sendRequest(std::move(request));
+  //   wait_for_future(future_response, 200ms);
 
-    auto got = future_response.get();
-    if (Acknowledgement<PROTOCOL::COMMAND::SET::MOTOR_MEASUREMENT>::wasAcknowledged(got.response()) == false) {
-      throw std::runtime_error("Request \"Set Motor RPM Measurement\" was not acknowledged.");
-    }
-  }  
+  //   auto got = future_response.get();
+  //   if (Acknowledgement<PROTOCOL::COMMAND::SET::MOTOR_MEASUREMENT>::wasAcknowledged(got.response()) == false) {
+  //     throw std::runtime_error("Request \"Set Motor RPM Measurement\" was not acknowledged.");
+  //   }
+  // }  
 }
 
 void CompoundMotorControllerHardware::processSetValue(const Rpm& rpm)
@@ -158,11 +160,15 @@ void CompoundMotorControllerHardware::processSetValue(const Rpm& rpm)
 
   auto future_response = _communicator->sendRequest(std::move(request));
   wait_for_future(future_response, 200ms);
-
   auto got = future_response.get();
-  if (Acknowledgement<PROTOCOL::COMMAND::SET::MOTOR_RPM>::wasAcknowledged(got.response()) == false) {
-    throw std::runtime_error("Request \"Set RPM Value\" was not acknowledged.");
-  }  
+
+  if (_callback_process_measurement == nullptr) {
+    return;
+  }
+  
+  std::cout << "RPM0 = " << AcknowledgedMotorRpm::rpm0(got.response()) << std::endl;
+  _dummy_motor_controller->_callback_process_measurement(AcknowledgedMotorRpm::rpm0(got.response()));
+  _callback_process_measurement(AcknowledgedMotorRpm::rpm1(got.response()));  
 }
 
 } // end namespace iotbot
