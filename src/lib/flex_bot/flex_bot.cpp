@@ -74,6 +74,21 @@ void FlexBot::initialize(eduart::robot::HardwareComponentFactory& factory)
     factory.motorSensorHardware().at(motor_controller_name[i])->initialize(motor_controller_parameter);
   }
 
+  // IMU Sensor
+  const ImuSensor::Parameter imu_parameter{ false, Robot::_parameter.tf_base_frame };
+  auto imu_sensor = std::make_shared<robot::ImuSensor>(
+    "imu",
+    /*get_effective_namespace() + "/*/"imu/base",
+    /*get_effective_namespace() + "/*/_parameter.tf_footprint_frame,
+    tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.0, 0.0, 0.1)),
+    imu_parameter,
+    getTfBroadcaster(),
+    *this,
+    factory.imuSensorHardware().at("imu")
+  );
+  registerSensor(imu_sensor);
+  factory.imuSensorHardware().at("imu")->initialize(imu_parameter);
+
   // Set Up Default Drive Kinematic
   _kinematic_matrix = getKinematicMatrix(Mode::SKID_DRIVE);
 }

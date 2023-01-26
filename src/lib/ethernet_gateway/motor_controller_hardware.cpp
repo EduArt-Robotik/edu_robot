@@ -165,8 +165,7 @@ void CompoundMotorControllerHardware::processSetValue(const Rpm& rpm)
   if (_callback_process_measurement == nullptr) {
     return;
   }
-  
-  std::cout << "RPM0 = " << AcknowledgedMotorRpm::rpm0(got.response()) << std::endl;
+
   _dummy_motor_controller->_callback_process_measurement(AcknowledgedMotorRpm::rpm0(got.response()));
   _callback_process_measurement(AcknowledgedMotorRpm::rpm1(got.response()));  
 }

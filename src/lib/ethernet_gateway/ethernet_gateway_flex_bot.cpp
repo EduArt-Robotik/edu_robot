@@ -7,13 +7,7 @@
 #include "edu_robot/ethernet_gateway/hardware_component_factory.hpp"
 #include "edu_robot/flex_bot/flex_bot.hpp"
 
-#include <algorithm>
 #include <memory>
-
-#include <rclcpp/create_timer.hpp>
-#include <tf2/LinearMath/Quaternion.h>
-#include <tf2/LinearMath/Transform.h>
-#include <tf2/LinearMath/Vector3.h>
 
 namespace eduart {
 namespace robot {
@@ -25,7 +19,7 @@ EthernetGatewayFlexBot::EthernetGatewayFlexBot()
   : eduart::robot::flex_bot::FlexBot(
     "flex_bot",
     // std::make_unique<EthernetGatewayShield>("192.168.1.20", 2345)
-    std::make_unique<EthernetGatewayShield>("192.168.1.20", 1234)  
+    std::make_unique<EthernetGatewayShield>("192.168.1.20", 1234)
   )
 {
   auto shield = std::dynamic_pointer_cast<EthernetGatewayShield>(_hardware_interface);
@@ -39,7 +33,7 @@ EthernetGatewayFlexBot::EthernetGatewayFlexBot()
          //.addLighting("back", "back_lighting")
          //.addLighting("all", "all_lighting")
          // Motor Controller
-         .addMotorController("motor", "motor_hardware");
+         .addMotorController("motor", "motor_hardware")
          // Range Sensor
          //.addRangeSensor("range/front/left", "range/front/left/hardware",
          //                0u, RangeSensorHardware::Parameter{ })
@@ -50,7 +44,7 @@ EthernetGatewayFlexBot::EthernetGatewayFlexBot()
          //.addRangeSensor("range/rear/right", "range/rear/right/hardware",
          //                3u, RangeSensorHardware::Parameter{ })
          // IMU Sensor
-         //.addImuSensor("imu", "imu_hardware", robot::ImuSensor::Parameter{ });
+         .addImuSensor("imu", "imu_hardware", *this);
 
   initialize(factory);
   shield->registerComponentInput(_detect_charging_component);

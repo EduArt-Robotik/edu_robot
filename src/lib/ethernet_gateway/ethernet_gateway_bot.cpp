@@ -45,7 +45,7 @@ EthernetGatewayBot::EthernetGatewayBot()
          .addRangeSensor("range/rear/left", "range/rear/left/hardware", 2u)
          .addRangeSensor("range/rear/right", "range/rear/right/hardware", 3u)
          // IMU Sensor
-         .addImuSensor("imu", "imu_hardware");
+         .addImuSensor("imu", "imu_hardware", *this);
 
   initialize(factory);
   shield->registerComponentInput(_detect_charging_component);

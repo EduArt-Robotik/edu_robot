@@ -9,6 +9,7 @@
 #include "edu_robot/ethernet_gateway/tcp/message.hpp"
 
 #include <Eigen/Dense>
+#include <Eigen/src/Geometry/Quaternion.h>
 #include <array>
 #include <edu_robot/rotation_per_minute.hpp>
 #include <edu_robot/color.hpp>
@@ -21,6 +22,8 @@ namespace message {
 
 // Request Firmware Version
 using GetFirmwareVersion = MessageFrame<element::Command<PROTOCOL::COMMAND::GET::FIRMWARE_VERSION>>;
+using GetImuMeasurement = MessageFrame<element::Command<PROTOCOL::COMMAND::GET::IMU_MEASUREMENT>>;
+using GetStatus = MessageFrame<element::Command<PROTOCOL::COMMAND::GET::STATUS>>;
 
 // Set Motor Controller Parameters
 using SetMotorControllerParameter = MessageFrame<element::Command<PROTOCOL::COMMAND::SET::MOTOR_CONTROLLER_PARAMETER>,
@@ -85,6 +88,27 @@ struct AcknowledgedMotorRpm : public MessageFrame<element::Response<PROTOCOL::CO
   }  
 };
 
+struct AcknowledgedImuMeasurement : MessageFrame<element::Response<PROTOCOL::COMMAND::GET::IMU_MEASUREMENT>,
+                                                 element::Float,  // angular velocity x
+                                                 element::Float,  // angular velocity y
+                                                 element::Float,  // angular velocity z
+                                                 element::Float,  // linear velocity x
+                                                 element::Float,  // linear velocity y
+                                                 element::Float,  // linear velocity z
+                                                 element::Float,  // orientation x
+                                                 element::Float,  // orientation x
+                                                 element::Float,  // orientation x
+                                                 element::Float>{ // orientation x
+  inline static Eigen::Vector3d angularVelocity(const RxMessageDataBuffer& rx_buffer) {
+    return { deserialize<0>(rx_buffer), deserialize<1>(rx_buffer), deserialize<2>(rx_buffer) };
+  }
+  inline static Eigen::Vector3d linearVelocity(const RxMessageDataBuffer& rx_buffer) {
+    return { deserialize<3>(rx_buffer), deserialize<4>(rx_buffer), deserialize<5>(rx_buffer) };
+  }
+  inline static Eigen::Quaterniond orientation(const RxMessageDataBuffer& rx_buffer) {
+    return { deserialize<9>(rx_buffer), deserialize<6>(rx_buffer), deserialize<7>(rx_buffer), deserialize<8>(rx_buffer) };
+  }    
+};                                                 
 
 // Measurements
 struct RpmMeasurement : public MeasurementFrame<element::Command<PROTOCOL::MEASUREMENT::MOTOR_CONTROLLER_RPM>,
