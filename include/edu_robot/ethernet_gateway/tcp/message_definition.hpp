@@ -67,7 +67,11 @@ using SetImuMeasurement = MessageFrame<element::Command<PROTOCOL::COMMAND::SET::
 using SetDistanceSensorMeasurement = MessageFrame<element::Command<PROTOCOL::COMMAND::SET::DISTANCE_SENSOR_MEASUREMENT>,
                                                   element::Uint8>; // Enable Flag
 using SetDisableAllMeasurements = MessageFrame<element::Command<PROTOCOL::COMMAND::SET::DISABLE_ALL_MEASUREMENTS>>;
-
+using SetLighting = MessageFrame<element::Command<PROTOCOL::COMMAND::SET::LIGHTING_COLOR_AND_MODE>,
+                                 element::Uint8,  // lighting mode
+                                 element::Uint8,  // r value
+                                 element::Uint8,  // g value
+                                 element::Uint8>; // b value
 
 // Responses
 template <Byte TcpCommand>

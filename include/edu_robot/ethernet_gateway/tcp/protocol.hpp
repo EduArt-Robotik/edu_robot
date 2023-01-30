@@ -37,12 +37,28 @@ struct PROTOCOL {
       static constexpr Byte IMU_MEASUREMENT = 0x18;
       static constexpr Byte DISTANCE_SENSOR_MEASUREMENT = 0x19;
       static constexpr Byte DISABLE_ALL_MEASUREMENTS = 0x1a;
+      static constexpr Byte LIGHTING_COLOR_AND_MODE = 0x1b;
     };
   };
   struct MEASUREMENT {
     static constexpr Byte MOTOR_CONTROLLER_RPM = 0x31;
     static constexpr Byte IMU = 0x32;
     static constexpr Byte DISTANCE = 0x33;
+  };
+  struct LIGHTING {
+    struct MODE {
+      static constexpr Byte LIGHTS_OFF = 2;   // Lights off
+      static constexpr Byte DIM_LIGHT  = 3;   // Dimmed headlight
+      static constexpr Byte HIGH_BEAM  = 4;   // high beam headlight
+      struct FLASH {
+        static constexpr Byte ALL   = 5;   // Flash lights
+        static constexpr Byte LEFT  = 6;   // Flash lights to the left
+        static constexpr Byte RIGHT = 7;   // Flash lights to the right
+      };
+      static constexpr Byte PULSATION = 8;   // Pulsation
+      static constexpr Byte ROTATION  = 9;   // Rotating light
+      static constexpr Byte RUNNING   = 10;  // Running light
+    };
   };
 };
 
