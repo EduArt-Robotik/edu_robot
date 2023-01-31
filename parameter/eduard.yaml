@@ -1,4 +1,4 @@
-/IotBot:
+/eduard:
   ros__parameters:
     enable_collision_avoidance: false
     tf_base_frame: base_link
@@ -10,47 +10,51 @@
 
     motor_a:
       control_frequency: 16000
+      encoder_inverted: true
       encoder_ratio: 2048.0
-      gear_ratio: 70.0
+      gear_ratio: 89.0
       max_rpm: 140.0
       pid/kd: 0.0
       pid/ki: 5.0
       pid/kp: 0.5
-      weight_low_pass_encoder: 0.30000001192092896
-      weight_low_pass_set_point: 0.20000000298023224
+      weight_low_pass_encoder: 0.3
+      weight_low_pass_set_point: 0.2
 
     motor_b:  
       control_frequency: 16000
+      encoder_inverted: true      
       encoder_ratio: 2048.0
-      gear_ratio: 70.0
+      gear_ratio: 89.0
       max_rpm: 140.0
       pid/kd: 0.0
       pid/ki: 5.0
       pid/kp: 0.5
-      weight_low_pass_encoder: 0.30000001192092896
-      weight_low_pass_set_point: 0.20000000298023224
+      weight_low_pass_encoder: 0.3
+      weight_low_pass_set_point: 0.2
 
     motor_c:  
       control_frequency: 16000
+      encoder_inverted: true
       encoder_ratio: 2048.0
-      gear_ratio: 70.0
+      gear_ratio: 89.0
       max_rpm: 140.0
       pid/kd: 0.0
       pid/ki: 5.0
       pid/kp: 0.5
-      weight_low_pass_encoder: 0.30000001192092896
-      weight_low_pass_set_point: 0.20000000298023224
+      weight_low_pass_encoder: 0.3
+      weight_low_pass_set_point: 0.2
 
     motor_d:
       control_frequency: 16000
+      encoder_inverted: true      
       encoder_ratio: 2048.0
-      gear_ratio: 70.0
+      gear_ratio: 89.0
       max_rpm: 140.0
       pid/kd: 0.0
       pid/ki: 5.0
       pid/kp: 0.5
-      weight_low_pass_encoder: 0.30000001192092896
-      weight_low_pass_set_point: 0.20000000298023224
+      weight_low_pass_encoder: 0.3
+      weight_low_pass_set_point: 0.2
 
     range:  
       front:

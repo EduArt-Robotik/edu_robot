@@ -22,9 +22,9 @@ using namespace std::chrono_literals;
 
 EthernetGatewayBot::EthernetGatewayBot()
   : eduart::robot::eduard::Eduard(
-    "ipc_bot",
+    "eduard",
     // std::make_unique<EthernetGatewayShield>("192.168.1.20", 2345)
-    std::make_unique<EthernetGatewayShield>("192.168.0.20", 1234)  
+    std::make_unique<EthernetGatewayShield>("192.168.1.20", 1234)  
   )
 {
   auto shield = std::dynamic_pointer_cast<EthernetGatewayShield>(_hardware_interface);
@@ -40,10 +40,10 @@ EthernetGatewayBot::EthernetGatewayBot()
          // Motor Controller
          .addMotorController("motor", "motor_hardware")
          // Range Sensor
-         .addRangeSensor("range/front/left", "range/front/left/hardware", 0u)
-         .addRangeSensor("range/front/right", "range/front/right/hardware", 1u)
-         .addRangeSensor("range/rear/left", "range/rear/left/hardware", 2u)
-         .addRangeSensor("range/rear/right", "range/rear/right/hardware", 3u)
+         .addRangeSensor("range/front/left", "range/front/left/hardware", 0u, *this)
+         .addRangeSensor("range/front/right", "range/front/right/hardware", 1u, *this)
+         .addRangeSensor("range/rear/left", "range/rear/left/hardware", 2u, *this)
+         .addRangeSensor("range/rear/right", "range/rear/right/hardware", 3u, *this)
          // IMU Sensor
          .addImuSensor("imu", "imu_hardware", *this);
 

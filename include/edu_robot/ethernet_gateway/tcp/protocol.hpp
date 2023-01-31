@@ -25,6 +25,7 @@ struct PROTOCOL {
       static constexpr Byte FIRMWARE_VERSION = 0x01;
       static constexpr Byte IMU_MEASUREMENT = 0x02;
       static constexpr Byte STATUS = 0x03;
+      static constexpr Byte DISTANCE_MEASUREMENT = 0x04;
     };
     struct SET {
       static constexpr Byte MOTOR_CONTROLLER_PARAMETER = 0x11;

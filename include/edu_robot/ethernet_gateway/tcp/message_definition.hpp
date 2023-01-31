@@ -24,6 +24,8 @@ namespace message {
 using GetFirmwareVersion = MessageFrame<element::Command<PROTOCOL::COMMAND::GET::FIRMWARE_VERSION>>;
 using GetImuMeasurement = MessageFrame<element::Command<PROTOCOL::COMMAND::GET::IMU_MEASUREMENT>>;
 using GetStatus = MessageFrame<element::Command<PROTOCOL::COMMAND::GET::STATUS>>;
+using GetDistanceMeasurement = MessageFrame<element::Command<PROTOCOL::COMMAND::GET::DISTANCE_MEASUREMENT>,
+                                            element::Uint8>; // Distance Sensor ID
 
 // Set Motor Controller Parameters
 using SetMotorControllerParameter = MessageFrame<element::Command<PROTOCOL::COMMAND::SET::MOTOR_CONTROLLER_PARAMETER>,
@@ -113,6 +115,13 @@ struct AcknowledgedImuMeasurement : MessageFrame<element::Response<PROTOCOL::COM
     return { deserialize<9>(rx_buffer), deserialize<6>(rx_buffer), deserialize<7>(rx_buffer), deserialize<8>(rx_buffer) };
   }    
 };                                                 
+
+struct AcknowledgedDistanceMeasurement : MessageFrame<element::Response<PROTOCOL::COMMAND::GET::DISTANCE_MEASUREMENT>,
+                                                      element::Float> { // distance measurement in meter
+  inline static constexpr float distance(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<0>(rx_buffer);
+  }
+};
 
 // Measurements
 struct RpmMeasurement : public MeasurementFrame<element::Command<PROTOCOL::MEASUREMENT::MOTOR_CONTROLLER_RPM>,

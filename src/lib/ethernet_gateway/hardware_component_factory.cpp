@@ -57,9 +57,10 @@ HardwareComponentFactory& HardwareComponentFactory::addMotorController(
 }
 
 HardwareComponentFactory& HardwareComponentFactory::addRangeSensor(
-  const std::string& sensor_name, const std::string& hardware_name, const std::uint8_t id)
+  const std::string& sensor_name, const std::string& hardware_name, const std::uint8_t id, rclcpp::Node& ros_node)
 {
-  auto range_sensor_hardware = std::make_shared<RangeSensorHardware>(hardware_name, id);
+  auto range_sensor_hardware = std::make_shared<RangeSensorHardware>(
+    hardware_name, id, ros_node, _shield->getCommunicator());
   // _shield->registerIotShieldRxDevice(range_sensor_hardware);
   _range_sensor_hardware[sensor_name] = range_sensor_hardware;
   return *this;
