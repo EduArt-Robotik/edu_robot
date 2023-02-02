@@ -15,7 +15,7 @@ def generate_launch_description():
     parameter_file = os.path.join(
       package_path,
       'parameter',
-      'eduard.yaml'
+      'eduard-ipc127e.yaml'
     )
 
     eduard_ipc = Node(

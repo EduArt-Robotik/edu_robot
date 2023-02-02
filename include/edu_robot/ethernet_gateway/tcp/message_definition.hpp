@@ -66,6 +66,12 @@ using SetMotorMeasurement = MessageFrame<element::Command<PROTOCOL::COMMAND::SET
                                          element::Uint8>; // Enable Flag
 using SetImuMeasurement = MessageFrame<element::Command<PROTOCOL::COMMAND::SET::IMU_MEASUREMENT>,
                                        element::Uint8>; // Enable Flag
+using SetImuParameter = MessageFrame<element::Command<PROTOCOL::COMMAND::SET::IMU_PARAMETER>,
+                                     element::Uint8,  // Enable Submitting Raw Data
+                                     element::Float,  // Fusion Weight
+                                     element::Float,  // Mounting Orientation Roll Angle
+                                     element::Float,  // Mounting Orientation Pitch Angle
+                                     element::Float>; // Mounting Orientation Yaw Angle
 using SetDistanceSensorMeasurement = MessageFrame<element::Command<PROTOCOL::COMMAND::SET::DISTANCE_SENSOR_MEASUREMENT>,
                                                   element::Uint8>; // Enable Flag
 using SetDisableAllMeasurements = MessageFrame<element::Command<PROTOCOL::COMMAND::SET::DISABLE_ALL_MEASUREMENTS>>;

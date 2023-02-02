@@ -39,6 +39,7 @@ struct PROTOCOL {
       static constexpr Byte DISTANCE_SENSOR_MEASUREMENT = 0x19;
       static constexpr Byte DISABLE_ALL_MEASUREMENTS = 0x1a;
       static constexpr Byte LIGHTING_COLOR_AND_MODE = 0x1b;
+      static constexpr Byte IMU_PARAMETER = 0x1c;
     };
   };
   struct MEASUREMENT {

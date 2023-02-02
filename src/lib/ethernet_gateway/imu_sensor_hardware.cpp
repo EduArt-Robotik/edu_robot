@@ -2,6 +2,7 @@
 #include "edu_robot/ethernet_gateway/ethernet_gateway_device.hpp"
 #include "edu_robot/ethernet_gateway/ethernet_communicator.hpp"
 #include "edu_robot/ethernet_gateway/tcp/message_definition.hpp"
+#include "edu_robot/ethernet_gateway/tcp/protocol.hpp"
 
 namespace eduart {
 namespace robot {
@@ -10,7 +11,11 @@ namespace ethernet {
 using namespace std::chrono_literals;
 
 using tcp::message::GetImuMeasurement;
+using tcp::message::SetImuParameter;
+using tcp::message::Acknowledgement;
 using tcp::message::AcknowledgedImuMeasurement;
+
+using tcp::message::PROTOCOL;
 
 ImuSensorHardware::ImuSensorHardware(
   const std::string& hardware_name, rclcpp::Node& ros_node, std::shared_ptr<EthernetCommunicator> communicator)
@@ -34,12 +39,20 @@ void ImuSensorHardware::processRxData(const tcp::message::RxMessageDataBuffer& d
 
 void ImuSensorHardware::initialize(const ImuSensor::Parameter& parameter)
 {
-  (void)parameter;
-  // set IMU data mode
-  // auto request = ShieldRequest::make_request<tcp::message::SetImuRawDataMode>(parameter.raw_data_mode, 0, 0, 0);
-  // auto response = _communicator->sendRequest(std::move(request));
-  // wait_for_future(response, 100ms);
-  // response.get();  
+  auto request = Request::make_request<SetImuParameter>(
+    parameter.raw_data_mode,
+    parameter.fusion_weight,
+    parameter.mount_orientation.roll,
+    parameter.mount_orientation.pitch,
+    parameter.mount_orientation.yaw
+  );
+  auto future_response = _communicator->sendRequest(std::move(request));
+  wait_for_future(future_response, 100ms);
+
+  auto got = future_response.get();
+  if (Acknowledgement<PROTOCOL::COMMAND::SET::IMU_PARAMETER>::wasAcknowledged(got.response()) == false) {
+    throw std::runtime_error("Request \"Set Motor Controller Parameter\" was not acknowledged.");
+  } 
 }
 
 void ImuSensorHardware::processMeasurement()

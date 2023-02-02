@@ -1,10 +1,16 @@
 /eduard:
   ros__parameters:
-    enable_collision_avoidance: false
+    enable_collision_avoidance: true
     tf_base_frame: base_link
+    tf_footprint_frame: base_footprint
     use_sim_time: false
 
     imu:
+      fusion_weight: 0.029999999329447746
+      mounting_orientation:
+        pitch: 0.0
+        roll: 0.0
+        yaw: 0.0 
       raw_data_mode: false
       tf_frame_rotated: base_link
 
@@ -78,3 +84,16 @@
           field_of_view: 0.1745329201221466
           range_max: 5.0
           range_min: 0.009999999776482582
+
+    skid:
+      length:
+        x: 0.25
+        y: 0.3199999928474426
+      wheel_diameter: 0.17000000178813934
+
+    mecanum:
+      length:
+        x: 0.25
+        y: 0.36000001430511475
+      wheel_diameter: 0.10000000149011612
+      

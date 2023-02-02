@@ -15,7 +15,7 @@ def generate_launch_description():
     parameter_file = os.path.join(
       package_path,
       'parameter',
-      'eduard.yaml'
+      'eduard-iot2050.yaml'
     )
 
     eduard_iot2050 = Node(

@@ -9,8 +9,8 @@
 namespace eduart {
 namespace robot {
 
-MotorController::Parameter MotorController::get_motor_controller_parameter(
-  const std::string& name, const MotorController::Parameter default_parameter, rclcpp::Node& ros_node)
+MotorController::Parameter MotorController::get_parameter(
+  const std::string& name, const MotorController::Parameter& default_parameter, rclcpp::Node& ros_node)
 {
   std::string prefix = name;
   std::replace(prefix.begin(), prefix.end(), '/', '.');

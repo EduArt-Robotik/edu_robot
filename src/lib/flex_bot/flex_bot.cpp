@@ -58,7 +58,7 @@ void FlexBot::initialize(eduart::robot::HardwareComponentFactory& factory)
     "base_to_wheel_front_left", "base_to_wheel_middle_right", "base_to_wheel_middle_left" };
 
   for (std::size_t i = 0; i < motor_controller_name.size(); ++i) {
-    const auto motor_controller_parameter = robot::MotorController::get_motor_controller_parameter(
+    const auto motor_controller_parameter = robot::MotorController::get_parameter(
       motor_controller_name[i], motor_controller_default_parameter, *this
     );
     registerMotorController(std::make_shared<robot::MotorController>(
@@ -75,7 +75,11 @@ void FlexBot::initialize(eduart::robot::HardwareComponentFactory& factory)
   }
 
   // IMU Sensor
-  const ImuSensor::Parameter imu_parameter{ false, Robot::_parameter.tf_base_frame };
+  ImuSensor::Parameter imu_parameter;
+  imu_parameter.raw_data_mode = false;
+  imu_parameter.rotated_frame = Robot::_parameter.tf_base_frame;
+  imu_parameter = ImuSensor::get_parameter("imu", imu_parameter, *this);
+  
   auto imu_sensor = std::make_shared<robot::ImuSensor>(
     "imu",
     /*get_effective_namespace() + "/*/"imu/base",

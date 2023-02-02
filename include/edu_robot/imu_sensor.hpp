@@ -23,6 +23,13 @@ class ImuSensor : public Sensor
 public:
   struct Parameter {
     bool raw_data_mode = false;
+    float fusion_weight = 0.03f;
+    struct {
+      // Use mounting orientation from IoT Shield as default.
+      float roll  = -90.0f * M_PI / 180.0f;
+      float pitch = -90.0f * M_PI / 180.0f;
+      float yaw   = -90.0f * M_PI / 180.0f;
+    } mount_orientation;
     std::string rotated_frame = "imu/rotated";
   };
 
@@ -33,6 +40,9 @@ public:
             std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster, rclcpp::Node& ros_node,
             std::shared_ptr<SensorInterface> hardware_interface);
   ~ImuSensor() override = default;
+
+  static ImuSensor::Parameter get_parameter(
+    const std::string& name, const ImuSensor::Parameter& default_parameter, rclcpp::Node& ros_node);
 
 protected:
   void processMeasurementData(const Eigen::Quaterniond& measurement);

@@ -9,17 +9,34 @@
 namespace eduart {
 namespace robot {
 
-static ImuSensor::Parameter get_imu_sensor_parameter(
-  const std::string sensor_name, const ImuSensor::Parameter& default_parameter, rclcpp::Node& ros_node)
+ImuSensor::Parameter ImuSensor::get_parameter(
+  const std::string& sensor_name, const ImuSensor::Parameter& default_parameter, rclcpp::Node& ros_node)
 {
   std::string sensor_prefix = sensor_name;
   std::replace(sensor_prefix.begin(), sensor_prefix.end(), '/', '.');
   ImuSensor::Parameter parameter;
 
-  ros_node.declare_parameter<bool>(sensor_prefix + ".raw_data_mode", default_parameter.raw_data_mode);
-  ros_node.declare_parameter<std::string>(sensor_prefix + ".tf_frame_rotated", default_parameter.rotated_frame);
+  ros_node.declare_parameter<bool>(
+    sensor_prefix + ".raw_data_mode", default_parameter.raw_data_mode);
+  ros_node.declare_parameter<float>(
+    sensor_prefix + ".fusion_weight", default_parameter.fusion_weight);
+  ros_node.declare_parameter<float>(
+    sensor_prefix + ".mounting_orientation.roll", default_parameter.mount_orientation.roll);
+  ros_node.declare_parameter<float>(
+    sensor_prefix + ".mounting_orientation.pitch", default_parameter.mount_orientation.pitch);
+  ros_node.declare_parameter<float>(
+    sensor_prefix + ".mounting_orientation.yaw", default_parameter.mount_orientation.yaw);        
+  ros_node.declare_parameter<std::string>(
+    sensor_prefix + ".tf_frame_rotated", default_parameter.rotated_frame);
 
   parameter.raw_data_mode = ros_node.get_parameter(sensor_prefix + ".raw_data_mode").as_bool();
+  parameter.fusion_weight = ros_node.get_parameter(sensor_prefix + ".fusion_weight").as_double();
+  parameter.mount_orientation.roll = ros_node.get_parameter(
+    sensor_prefix + ".mounting_orientation.roll").as_double();
+  parameter.mount_orientation.pitch = ros_node.get_parameter(
+    sensor_prefix + ".mounting_orientation.pitch").as_double();
+  parameter.mount_orientation.yaw = ros_node.get_parameter(
+    sensor_prefix + ".mounting_orientation.yaw").as_double();        
   parameter.rotated_frame = ros_node.get_parameter(sensor_prefix + ".tf_frame_rotated").as_string();
 
   return parameter;
@@ -30,7 +47,7 @@ ImuSensor::ImuSensor(const std::string& name, const std::string& frame_id, const
                      std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster, rclcpp::Node& ros_node,
                      std::shared_ptr<SensorInterface> hardware_interface)
   : Sensor(name, frame_id, reference_frame_id, sensor_transform)
-  , _parameter(get_imu_sensor_parameter(name, parameter, ros_node))
+  , _parameter(parameter)
   , _tf_broadcaster(tf_broadcaster)
   , _clock(ros_node.get_clock())
   , _hardware_interface(std::move(hardware_interface))

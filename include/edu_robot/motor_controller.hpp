@@ -71,8 +71,8 @@ public:
     return _measured_rpm;
   }
 
-  static MotorController::Parameter get_motor_controller_parameter(
-    const std::string& name, const MotorController::Parameter default_parameter, rclcpp::Node& ros_node);
+  static MotorController::Parameter get_parameter(
+    const std::string& name, const MotorController::Parameter& default_parameter, rclcpp::Node& ros_node);
 
 private:
   void processMeasurementData(const Rpm measurement);
