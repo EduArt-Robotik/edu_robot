@@ -34,7 +34,11 @@ void ImuSensorHardware::processRxData(const tcp::message::RxMessageDataBuffer& d
     return;
   }
   
-  _callback_process_measurement(AcknowledgedImuMeasurement::orientation(data));
+  _callback_process_measurement(
+    AcknowledgedImuMeasurement::orientation(data),
+    AcknowledgedImuMeasurement::angularVelocity(data),
+    AcknowledgedImuMeasurement::linearAcceleration(data)
+  );
 }
 
 void ImuSensorHardware::initialize(const ImuSensor::Parameter& parameter)

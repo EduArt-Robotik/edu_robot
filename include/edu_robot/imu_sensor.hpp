@@ -11,7 +11,9 @@
 #include <Eigen/Dense>
 
 #include <rclcpp/clock.hpp>
+#include <rclcpp/publisher.hpp>
 #include <tf2_ros/transform_broadcaster.h>
+#include <sensor_msgs/msg/imu.hpp>
 
 #include <memory>
 
@@ -33,7 +35,7 @@ public:
     std::string rotated_frame = "imu/rotated";
   };
 
-  using SensorInterface = HardwareSensorInterface<Parameter, Eigen::Quaterniond>;
+  using SensorInterface = HardwareSensorInterface<Parameter, Eigen::Quaterniond, Eigen::Vector3d, Eigen::Vector3d>;
 
   ImuSensor(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
             const tf2::Transform sensor_transform, const Parameter parameter,
@@ -45,11 +47,14 @@ public:
     const std::string& name, const ImuSensor::Parameter& default_parameter, rclcpp::Node& ros_node);
 
 protected:
-  void processMeasurementData(const Eigen::Quaterniond& measurement);
+  void processMeasurementData(
+    const Eigen::Quaterniond& measurement, const Eigen::Vector3d& angular_velocity,
+    const Eigen::Vector3d& linear_acceleration);
 
 private:
   const Parameter _parameter;
   std::shared_ptr<tf2_ros::TransformBroadcaster> _tf_broadcaster;
+  std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::Imu>> _pub_imu_message;
   std::shared_ptr<rclcpp::Clock> _clock;
   std::shared_ptr<SensorInterface> _hardware_interface;
 };

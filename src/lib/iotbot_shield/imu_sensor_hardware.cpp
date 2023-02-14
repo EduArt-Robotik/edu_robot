@@ -2,6 +2,7 @@
 #include "edu_robot/imu_sensor.hpp"
 #include "edu_robot/iot_shield/iot_shield_device.hpp"
 #include "edu_robot/iot_shield/uart/message_definition.hpp"
+#include <Eigen/src/Core/Matrix.h>
 
 namespace eduart {
 namespace robot {
@@ -22,7 +23,9 @@ void ImuSensorHardware::processRxData(const uart::message::RxMessageDataBuffer& 
     return;
   }
   
-  _callback_process_measurement(uart::message::ShieldResponse::imuOrientation(data));
+  _callback_process_measurement(
+    uart::message::ShieldResponse::imuOrientation(data), Eigen::Vector3d::Zero(), Eigen::Vector3d::Zero()
+  );
 }
 
 void ImuSensorHardware::initialize(const ImuSensor::Parameter& parameter)

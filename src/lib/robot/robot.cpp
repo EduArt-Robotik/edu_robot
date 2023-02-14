@@ -137,7 +137,7 @@ void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> tw
 
     for (Eigen::Index i = 0; i < rps.size(); ++i) {
       _motor_controllers[i]->setRpm(Rpm::fromRps(rps(i)));
-    }
+    }              
   }
   catch (HardwareError& ex) {
     RCLCPP_ERROR_STREAM(get_logger(), "Hardware error occurred while trying to set new values for motor controller."
