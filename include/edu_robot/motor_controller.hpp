@@ -73,11 +73,12 @@ public:
 
   static MotorController::Parameter get_parameter(
     const std::string& name, const MotorController::Parameter& default_parameter, rclcpp::Node& ros_node);
+  const Parameter& parameter() const { return _parameter; }    
 
 private:
   void processMeasurementData(const Rpm measurement);
 
-  Parameter _parameter;
+  const Parameter _parameter;
   Rpm _set_rpm;
   Rpm _measured_rpm;
   std::string _name;

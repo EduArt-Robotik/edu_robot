@@ -133,10 +133,15 @@ void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> tw
     }
 
     // Calculate wheel rotation speed using provided kinematic matrix.
+    // Apply velocity reduction if a limit is reached.
     Eigen::VectorXf rps = _kinematic_matrix * velocity_cmd / (2.0f * M_PI);
+    float reduce_factor = 1.0f;
 
     for (Eigen::Index i = 0; i < rps.size(); ++i) {
-      _motor_controllers[i]->setRpm(Rpm::fromRps(rps(i)));
+      reduce_factor = std::min(_motor_controllers[i]->parameter().max_rpm / Rpm::fromRps(rps(i)), reduce_factor);
+    }
+    for (Eigen::Index i = 0; i < rps.size(); ++i) {
+      _motor_controllers[i]->setRpm(Rpm::fromRps(rps(i)) * reduce_factor);
     }              
   }
   catch (HardwareError& ex) {
