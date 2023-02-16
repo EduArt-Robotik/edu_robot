@@ -77,9 +77,9 @@ public:
 
 private:
   std::string _name;
-  std::shared_ptr<rclcpp::Clock> _clock;
 
 protected:
+  std::shared_ptr<rclcpp::Clock> _clock;
   rclcpp::Time _last_processing;
 };
 

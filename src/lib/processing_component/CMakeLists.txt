@@ -1,7 +1,9 @@
 add_library(processing-component
   collison_avoidance.cpp
+  odometry_estimator.cpp
 )
 target_link_libraries(processing-component
+  Eigen3::Eigen
   # ${CPP_TYPESUPPORT_TARGET} needed for ROS distro humble and newer. TODO: handle this somehow!
 )
 target_compile_features(processing-component PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17

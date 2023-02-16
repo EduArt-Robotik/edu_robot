@@ -6,11 +6,12 @@
 #pragma once
 
 #include "edu_robot/motor_controller.hpp"
-#include "edu_robot/processing_component/processing_detect_charging.hpp"
 #include "edu_robot/robot_hardware_interface.hpp"
 #include "edu_robot/sensor.hpp"
-#include "edu_robot/processing_component/collison_avoidance.hpp"
 #include "edu_robot/mode.hpp"
+#include "edu_robot/processing_component/collison_avoidance.hpp"
+#include "edu_robot/processing_component/processing_detect_charging.hpp"
+#include "edu_robot/processing_component/odometry_estimator.hpp"
 
 #include "edu_robot/msg/mode.hpp"
 #include "edu_robot/msg/set_lighting_color.hpp"
@@ -19,6 +20,7 @@
 
 #include <Eigen/Core>
 
+#include <Eigen/src/Core/Matrix.h>
 #include <rclcpp/node.hpp>
 #include <rclcpp/publisher.hpp>
 #include <rclcpp/service.hpp>
@@ -96,10 +98,12 @@ protected:
 
   // Drive Kinematic
   Eigen::MatrixXf _kinematic_matrix;
+  Eigen::MatrixXf _inverse_kinematic_matrix;
 
   // Processing Components
   std::shared_ptr<processing::CollisionAvoidance> _collision_avoidance_component;
   std::shared_ptr<processing::DetectCharging> _detect_charging_component;
+  std::shared_ptr<processing::OdometryEstimator> _odometry_component;
 
   // Mode
   Mode _mode;

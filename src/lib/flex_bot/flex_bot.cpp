@@ -93,8 +93,11 @@ void FlexBot::initialize(eduart::robot::HardwareComponentFactory& factory)
   registerSensor(imu_sensor);
   factory.imuSensorHardware().at("imu")->initialize(imu_parameter);
 
-  // Set Up Default Drive Kinematic
+  // Set Up Default Drive Kinematic. Needs to be done here, because method can't be called in constructor 
+  // of robot base class.
+  // \todo maybe introduce an initialize method that can be called after construction of robot class.
   _kinematic_matrix = getKinematicMatrix(Mode::SKID_DRIVE);
+  _inverse_kinematic_matrix = _kinematic_matrix.completeOrthogonalDecomposition().pseudoInverse(); 
 }
 
 FlexBot::~FlexBot()

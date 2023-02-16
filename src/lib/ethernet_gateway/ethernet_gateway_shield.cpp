@@ -70,6 +70,7 @@ void EthernetGatewayShield::disable()
 
 RobotStatusReport EthernetGatewayShield::getStatusReport()
 {
+  // \todo implement status report
   return { };
 }
 
