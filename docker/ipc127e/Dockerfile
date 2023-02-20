@@ -40,6 +40,7 @@ RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc \
     && echo "source /home/ipcbot_ws/install/setup.bash" >> ~/.bashrc
 
 # launch control node and joy interpreter
-CMD source /home/ipcbot_ws/install/setup.bash \
+CMD source ~/.bashrc \
+    && source /home/ipcbot_ws/install/setup.bash \
     && (ros2 launch edu_robot_control robot_remote_control.launch.py \
     & ros2 launch edu_robot eduard-ipc127e.launch.py)
