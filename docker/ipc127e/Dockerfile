@@ -40,7 +40,8 @@ RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc \
     && echo "source /home/ipcbot_ws/install/setup.bash" >> ~/.bashrc
 
 # launch control node and joy interpreter
-CMD source ~/.bashrc \
+CMD export RMW_IMPLEMENTATION=rmw_fastrtps_cpp \
+    && export FASTRTPS_DEFAULT_PROFILES_FILE=/home/ipcbot_ws/fastrtps_profile.xml \
     && source /home/ipcbot_ws/install/setup.bash \
     && (ros2 launch edu_robot_control robot_remote_control.launch.py \
     & ros2 launch edu_robot eduard-ipc127e.launch.py)
