@@ -20,12 +20,13 @@ RUN sudo apt-get install -y \
     ros-$ROS_DISTRO-fastrtps
 
 # set up iotbot workspace
-RUN mkdir -p /home/iotbot_ws/src/iotbot
+RUN mkdir -p /home/ipcbot_ws/src/iotbot
 
-COPY ./edu_robot /home/iotbot_ws/src/edu_robot
-COPY ./edu_robot_control /home/iotbot_ws/src/edu_robot_control
+COPY ./edu_robot /home/ipcbot_ws/src/edu_robot
+COPY ./edu_robot_control /home/ipcbot_ws/src/edu_robot_control
+COPY ./fastrtps_profile.xml /home/ipcbot_ws
 
-WORKDIR /home/iotbot_ws
+WORKDIR /home/ipcbot_ws
 
 # build EduArt packages nodes
 RUN export RMW_IMPLEMENTATION=rmw_fastrtps_cpp \
@@ -35,9 +36,10 @@ RUN export RMW_IMPLEMENTATION=rmw_fastrtps_cpp \
 # write source commands to .bashrc -> no need to source afterwards
 RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc \
     && echo "export RMW_IMPLEMENTATION=rmw_fastrtps_cpp" >> ~/.bashrc \
-    && echo "source /home/iotbot_ws/install/setup.bash" >> ~/.bashrc
+    && echo "export FASTRTPS_DEFAULT_PROFILES_FILE=/home/ipcbot_ws/fastrtps_profile.xml" >> ~/.bashrc \
+    && echo "source /home/ipcbot_ws/install/setup.bash" >> ~/.bashrc
 
 # launch control node and joy interpreter
-CMD source /home/iotbot_ws/install/setup.bash \
+CMD source /home/ipcbot_ws/install/setup.bash \
     && (ros2 launch edu_robot_control robot_remote_control.launch.py \
     & ros2 launch edu_robot eduard-ipc127e.launch.py)
