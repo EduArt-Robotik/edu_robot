@@ -184,7 +184,7 @@ Eigen::MatrixXf Eduard::getKinematicMatrix(const Mode mode) const
   if (mode & Mode::SKID_DRIVE) {
     const float l_x = _parameter.skid.length.x;
     const float l_y = _parameter.skid.length.y;
-    const float wheel_diameter = _parameter.skid.wheel_diameter;
+    const float wheel_radius = _parameter.skid.wheel_diameter * 0.5f;
     const float l_squared = l_x * l_x + l_y * l_y;
 
     kinematic_matrix.resize(4, 3);
@@ -192,19 +192,19 @@ Eigen::MatrixXf Eduard::getKinematicMatrix(const Mode mode) const
                          1.0f, 0.0f, l_squared / (2.0f * l_y),
                         -1.0f, 0.0f, l_squared / (2.0f * l_y),
                         -1.0f, 0.0f, l_squared / (2.0f * l_y);
-    kinematic_matrix *= 1.0f / wheel_diameter;
+    kinematic_matrix *= 1.0f / wheel_radius;
   }
   else if (mode & Mode::MECANUM_DRIVE) {
     const float l_x = _parameter.mecanum.length.x;
     const float l_y = _parameter.mecanum.length.y;
-    const float wheel_diameter = _parameter.mecanum.wheel_diameter;
+    const float wheel_radius = _parameter.mecanum.wheel_diameter;
 
     kinematic_matrix.resize(4, 3);
     kinematic_matrix <<  1.0f, -1.0f, (l_x + l_y) * 0.5f,
                          1.0f,  1.0f, (l_x + l_y) * 0.5f,
                         -1.0f, -1.0f, (l_x + l_y) * 0.5f,
                         -1.0f,  1.0f, (l_x + l_y) * 0.5f;
-    kinematic_matrix *= 1.0f / wheel_diameter;    
+    kinematic_matrix *= 1.0f / wheel_radius;    
   }
   else {
     throw std::invalid_argument("Eduard: given kinematic is not supported.");

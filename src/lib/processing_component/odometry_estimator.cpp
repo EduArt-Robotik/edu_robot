@@ -1,9 +1,6 @@
 #include "edu_robot/processing_component/odometry_estimator.hpp"
 #include "edu_robot/processing_component/processing_component.hpp"
 
-#include <Eigen/src/Core/Matrix.h>
-#include <Eigen/src/Geometry/AngleAxis.h>
-#include <Eigen/src/Geometry/Quaternion.h>
 #include <Eigen/Geometry> 
 
 namespace eduart {
@@ -28,9 +25,12 @@ nav_msgs::msg::Odometry OdometryEstimator::processOdometryMessage(
   _last_processing = now;
 
   // Processing Velocity
+  const Eigen::Vector2f liner_velocity(measured_velocity.x(), measured_velocity.y());
+  const Eigen::Vector2f direction = Eigen::Rotation2Df(_orientation) * liner_velocity;
+
   _orientation += measured_velocity.z() * dt;
-  _position_x  += measured_velocity.x() * dt;
-  _position_y  += measured_velocity.y() * dt;
+  _position_x  += direction.x() * dt;
+  _position_y  += direction.y() * dt;
 
 
   // Constructing Message
@@ -55,8 +55,8 @@ nav_msgs::msg::Odometry OdometryEstimator::processOdometryMessage(
   const Eigen::Quaternionf q_orientation(Eigen::AngleAxisf(_orientation, Eigen::Vector3f::UnitZ()));
   odometry_msg.pose.pose.orientation.w = q_orientation.w();
   odometry_msg.pose.pose.orientation.x = q_orientation.x();
-  odometry_msg.pose.pose.orientation.x = q_orientation.y();
-  odometry_msg.pose.pose.orientation.x = q_orientation.z();
+  odometry_msg.pose.pose.orientation.y = q_orientation.y();
+  odometry_msg.pose.pose.orientation.z = q_orientation.z();
 
   odometry_msg.pose.pose.position.x = _position_x;
   odometry_msg.pose.pose.position.y = _position_y;

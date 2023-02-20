@@ -144,26 +144,26 @@ void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> tw
 
     // Calculate wheel rotation speed using provided kinematic matrix.
     // Apply velocity reduction if a limit is reached.
-    Eigen::VectorXf rps = _kinematic_matrix * velocity_cmd / (2.0f * M_PI);
+    Eigen::VectorXf radps = _kinematic_matrix * velocity_cmd;
     float reduce_factor = 1.0f;
-
-    for (Eigen::Index i = 0; i < rps.size(); ++i) {
+  
+    for (Eigen::Index i = 0; i < radps.size(); ++i) {
       reduce_factor = std::min(
-        std::abs(_motor_controllers[i]->parameter().max_rpm / Rpm::fromRps(rps(i))), reduce_factor
+        std::abs(_motor_controllers[i]->parameter().max_rpm / Rpm::fromRadps(radps(i))), reduce_factor
       );
     }
-    for (Eigen::Index i = 0; i < rps.size(); ++i) {
-      _motor_controllers[i]->setRpm(Rpm::fromRps(rps(i)) * reduce_factor);
+    for (Eigen::Index i = 0; i < radps.size(); ++i) {
+      _motor_controllers[i]->setRpm(Rpm::fromRadps(radps(i)) * reduce_factor);
     }
 
     // Calculating Odometry and Publishing it
-    Eigen::VectorXf rps_measured(_motor_controllers.size());
+    Eigen::VectorXf radps_measured(_motor_controllers.size());
 
     for (std::size_t i = 0; i < _motor_controllers.size(); ++i) {
-      rps_measured(i) = _motor_controllers[i]->getMeasuredRpm().rps();
+      radps_measured(i) = _motor_controllers[i]->getMeasuredRpm().radps();
     }
 
-    const Eigen::Vector3f velocity_measured = _inverse_kinematic_matrix * rps_measured;
+    const Eigen::Vector3f velocity_measured = _inverse_kinematic_matrix * radps_measured;
     const auto odometry_msg = _odometry_component->processOdometryMessage(
       _parameter.tf_base_frame, velocity_measured
     );
