@@ -5,7 +5,6 @@
 #include <memory>
 
 #include <rclcpp/node.hpp>
-#include <sensor_msgs/msg/detail/imu__struct.hpp>
 
 namespace eduart {
 namespace robot {

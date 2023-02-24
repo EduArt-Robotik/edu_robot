@@ -108,9 +108,9 @@ struct AcknowledgedImuMeasurement : MessageFrame<element::Response<PROTOCOL::COM
                                                  element::Float,  // angular velocity y
                                                  element::Float,  // angular velocity z
                                                  element::Float,  // orientation x
-                                                 element::Float,  // orientation x
-                                                 element::Float,  // orientation x
-                                                 element::Float>{ // orientation x
+                                                 element::Float,  // orientation y
+                                                 element::Float,  // orientation z
+                                                 element::Float>{ // orientation w
   inline static Eigen::Vector3d angularVelocity(const RxMessageDataBuffer& rx_buffer) {
     return { deserialize<3>(rx_buffer), deserialize<4>(rx_buffer), deserialize<5>(rx_buffer) };
   }
