@@ -21,10 +21,10 @@
       gear_ratio: 89.0
       max_rpm: 140.0
       pid/kd: 0.0
-      pid/ki: 5.0
+      pid/ki: 7.0
       pid/kp: 0.5
-      weight_low_pass_encoder: 0.3
-      weight_low_pass_set_point: 0.2
+      weight_low_pass_encoder: 0.8
+      weight_low_pass_set_point: 0.8
 
     motor_b:  
       control_frequency: 16000
@@ -33,10 +33,10 @@
       gear_ratio: 89.0
       max_rpm: 140.0
       pid/kd: 0.0
-      pid/ki: 5.0
+      pid/ki: 7.0
       pid/kp: 0.5
-      weight_low_pass_encoder: 0.3
-      weight_low_pass_set_point: 0.2
+      weight_low_pass_encoder: 0.8
+      weight_low_pass_set_point: 0.8
 
     motor_c:  
       control_frequency: 16000
@@ -45,10 +45,10 @@
       gear_ratio: 89.0
       max_rpm: 140.0
       pid/kd: 0.0
-      pid/ki: 5.0
+      pid/ki: 7.0
       pid/kp: 0.5
-      weight_low_pass_encoder: 0.3
-      weight_low_pass_set_point: 0.2
+      weight_low_pass_encoder: 0.8
+      weight_low_pass_set_point: 0.8
 
     motor_d:
       control_frequency: 16000
@@ -57,10 +57,10 @@
       gear_ratio: 89.0
       max_rpm: 140.0
       pid/kd: 0.0
-      pid/ki: 5.0
+      pid/ki: 7.0
       pid/kp: 0.5
-      weight_low_pass_encoder: 0.3
-      weight_low_pass_set_point: 0.2
+      weight_low_pass_encoder: 0.8
+      weight_low_pass_set_point: 0.8
 
     range:  
       front:
