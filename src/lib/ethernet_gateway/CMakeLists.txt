@@ -12,7 +12,7 @@ add_library(eduart-ethernet-gateway
 )
 
 target_link_libraries(eduart-ethernet-gateway
-  # ${CPP_TYPESUPPORT_TARGET} needed for ROS distro humble and newer. TODO: handle this somehow!
+  "${cpp_typesupport_target}"
   eduart-robot-eduard
   eduart-robot-flex-bot
 )
@@ -21,4 +21,3 @@ target_include_directories(eduart-ethernet-gateway PUBLIC
   $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
-# rosidl_target_interfaces(eduart-iotbot-shield ${PROJECT_NAME} "rosidl_typesupport_cpp")

@@ -12,14 +12,14 @@ add_library(eduart-iotbot-shield
 if(HAVE_MRAA) ## TODO: use string for dependencies, so onyl one target_link_libraries is there!
   message("MRAA library found")
   target_link_libraries(eduart-iotbot-shield
-    # ${CPP_TYPESUPPORT_TARGET} needed for ROS distro humble and newer. TODO: handle this somehow!
+    "${cpp_typesupport_target}"
     eduart-robot-eduard
     mraa
   )
 else()
   message("MRAA library not found")
   target_link_libraries(eduart-iotbot-shield
-    # ${CPP_TYPESUPPORT_TARGET} needed for ROS distro humble and newer. TODO: handle this somehow!
+    "${cpp_typesupport_target}"
     eduart-robot-eduard
   )
 endif()
@@ -28,4 +28,3 @@ target_include_directories(eduart-iotbot-shield PUBLIC
   $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
-# rosidl_target_interfaces(eduart-iotbot-shield ${PROJECT_NAME} "rosidl_typesupport_cpp")

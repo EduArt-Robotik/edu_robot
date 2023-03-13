@@ -44,8 +44,8 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   DEPENDENCIES
   std_msgs
 )
-## Line below needed for ROS distro humble and newer. TODO: handle this somehow!
-# rosidl_get_typesupport_target(CPP_TYPESUPPORT_TARGET "${PROJECT_NAME}" "rosidl_typesupport_cpp")
+# Create a target that can be used by all buildiung targets when the custom message are required for them.
+rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
 add_subdirectory(src/lib/robot)
 add_subdirectory(src/lib/processing_component)
