@@ -1,17 +1,12 @@
-FROM ros:humble-ros-base-focal
+FROM ros:galactic-ros-base-focal
 
 # using bash
 SHELL ["/bin/bash", "-c"]
-ENV ROS_DISTRO humble
+ENV ROS_DISTRO galactic
 
 RUN \
     apt-get update \
     && apt-get install -y software-properties-common
-
-# install mraa lib for UART communication in shield node
-RUN add-apt-repository ppa:mraa/mraa \
-    && apt-get update \
-    && apt-get install -y libmraa2 libmraa-dev libmraa-java python-mraa python3-mraa mraa-tools
 
 # install Joystick Driver for ROS2 foxy
 RUN sudo apt-get install -y \
