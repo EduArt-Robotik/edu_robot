@@ -8,8 +8,9 @@ RUN \
     apt-get update \
     && apt-get install -y software-properties-common
 
-# install Joystick Driver for ROS2 foxy
-RUN sudo apt-get install -y \
+# install Joystick Driver for ROS2
+RUN apt-get update \
+    && sudo apt-get install -y \
     ros-$ROS_DISTRO-joy \
     ros-$ROS_DISTRO-rmw-fastrtps-cpp \
     ros-$ROS_DISTRO-fastrtps
