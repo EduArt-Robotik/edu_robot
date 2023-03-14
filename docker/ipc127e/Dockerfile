@@ -1,8 +1,8 @@
-FROM ros:galactic-ros-base-focal
+FROM ros:humble-ros-base-focal
 
 # using bash
 SHELL ["/bin/bash", "-c"]
-ENV ROS_DISTRO galactic
+ENV ROS_DISTRO humble
 
 RUN \
     apt-get update \
