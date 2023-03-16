@@ -4,7 +4,7 @@ download-sources:
 	# mkdir -p /tmp/eduart_robot_ws
 	# cp Dockerfile /tmp/eduart_robot_ws
 	# cd /tmp/eduart_robot_ws
-	git clone --branch feature/ethernet_gateway_six_wheeled_robot https://github.com/EduArt-Robotik/edu_robot.git
+	git clone --branch develop https://github.com/EduArt-Robotik/edu_robot.git
 	git clone --branch develop https://github.com/EduArt-Robotik/edu_robot_control.git
 	# cd $(current_dir)
 
