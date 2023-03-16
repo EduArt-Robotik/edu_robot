@@ -26,6 +26,7 @@
 #include <condition_variable>
 #include <future>
 #include <queue>
+#include <vector>
 
 namespace eduart {
 namespace robot {
@@ -74,6 +75,41 @@ private:
   static std::uint8_t _sequence_number;
 };
 
+class RxDataEndPoint
+{
+  friend class EthernetCommunicator;
+
+public:
+  using CallbackProcessData = std::function<void(const tcp::message::RxMessageDataBuffer&)>;
+
+  RxDataEndPoint(RxDataEndPoint&&) = default;
+
+  /**
+   * \brief Creates an data endpoint that processes incoming data from the ethernet gateway.
+   * \param callback The callback function that is been called when the message search pattern matches.
+   *                 Note: the callback must be threadsafe!
+   * \return Return an data endpoint ready to use by the ethernet communicator.
+   */
+  template <class Message>
+  inline static RxDataEndPoint make_data_endpoint(const CallbackProcessData& callback) {
+    const auto search_pattern = Message::makeSearchPattern();
+    std::vector<tcp::message::Byte> search_pattern_vector(search_pattern.begin(), search_pattern.end());
+    return RxDataEndPoint(search_pattern, callback);
+  }
+
+private:
+  template <class Message>
+  RxDataEndPoint(
+    std::vector<tcp::message::Byte>& search_pattern,
+    std::function<void(const tcp::message::RxMessageDataBuffer&)>& callback_process_data)
+    : _response_search_pattern(std::move(search_pattern))
+    , _callback_process_data(callback_process_data)
+  { }
+
+  std::vector<tcp::message::Byte> _response_search_pattern;
+  std::function<void(const tcp::message::RxMessageDataBuffer&)> _callback_process_data;
+};
+
 template <typename Duration>
 inline void wait_for_future(std::future<Request>& future, const Duration& timeout) {
   if (future.wait_for(timeout) == std::future_status::timeout) {
@@ -91,6 +127,7 @@ public:
   ~EthernetCommunicator();
 
   std::future<Request> sendRequest(Request request);
+  void registerRxDataEndpoint(RxDataEndPoint&& endpoint);
   tcp::message::RxMessageDataBuffer getRxBuffer();
 
 private:
@@ -107,11 +144,13 @@ private:
   // Handling Thread
   std::thread _handling_thread;
   std::mutex _mutex_data_input;
+  std::mutex _mutex_rx_data_endpoint;
   std::atomic_bool _is_running;
   std::atomic_bool _new_incoming_requests;
   std::queue<std::pair<Request, std::promise<Request>>> _incoming_requests;
   std::queue<std::pair<std::pair<Request, std::promise<Request>>, std::future<void>>> _is_being_send;
   std::list<std::pair<Request, std::promise<Request>>> _open_request;
+  std::vector<RxDataEndPoint> _rx_data_endpoint;
 
   // Sending Thread
   std::chrono::milliseconds _wait_time_after_sending;

@@ -102,7 +102,7 @@ void Eduard::initialize(eduart::robot::HardwareComponentFactory& factory)
     "base_to_wheel_rear_right", "base_to_wheel_front_right", "base_to_wheel_rear_left", "base_to_wheel_front_left" };
 
   for (std::size_t i = 0; i < motor_controller_name.size(); ++i) {
-    const auto motor_controller_parameter = robot::MotorController::get_motor_controller_parameter(
+    const auto motor_controller_parameter = robot::MotorController::get_parameter(
         motor_controller_name[i], motor_controller_default_parameter, *this
     );
 
@@ -147,7 +147,11 @@ void Eduard::initialize(eduart::robot::HardwareComponentFactory& factory)
   }
 
   // IMU Sensor
-  const ImuSensor::Parameter imu_parameter{ false, Robot::_parameter.tf_base_frame };
+  ImuSensor::Parameter imu_parameter;
+  imu_parameter.raw_data_mode = false;
+  imu_parameter.rotated_frame = Robot::_parameter.tf_base_frame;
+  imu_parameter = ImuSensor::get_parameter("imu", imu_parameter, *this);
+
   auto imu_sensor = std::make_shared<robot::ImuSensor>(
     "imu",
     /*get_effective_namespace() + "/*/"imu/base",
@@ -161,8 +165,11 @@ void Eduard::initialize(eduart::robot::HardwareComponentFactory& factory)
   registerSensor(imu_sensor);
   factory.imuSensorHardware().at("imu")->initialize(imu_parameter);
 
-  // Set Up Default Drive Kinematic
+  // Set Up Default Drive Kinematic. Needs to be done here, because method can't be called in constructor 
+  // of robot base class.
+  // \todo maybe introduce an initialize method that can be called after construction of robot class.
   _kinematic_matrix = getKinematicMatrix(Mode::SKID_DRIVE);
+  _inverse_kinematic_matrix = _kinematic_matrix.completeOrthogonalDecomposition().pseudoInverse();  
 }
 
 Eduard::~Eduard()
@@ -177,27 +184,27 @@ Eigen::MatrixXf Eduard::getKinematicMatrix(const Mode mode) const
   if (mode & Mode::SKID_DRIVE) {
     const float l_x = _parameter.skid.length.x;
     const float l_y = _parameter.skid.length.y;
-    const float wheel_diameter = _parameter.skid.wheel_diameter;
+    const float wheel_radius = _parameter.skid.wheel_diameter * 0.5f;
     const float l_squared = l_x * l_x + l_y * l_y;
 
     kinematic_matrix.resize(4, 3);
-    kinematic_matrix << -1.0f, 0.0f, -l_squared / (2.0f * l_y),
-                        -1.0f, 0.0f, -l_squared / (2.0f * l_y),
-                         1.0f, 0.0f, -l_squared / (2.0f * l_y),
-                         1.0f, 0.0f, -l_squared / (2.0f * l_y);
-    kinematic_matrix *= 1.0f / wheel_diameter;
+    kinematic_matrix <<  1.0f, 0.0f, l_squared / (2.0f * l_y),
+                         1.0f, 0.0f, l_squared / (2.0f * l_y),
+                        -1.0f, 0.0f, l_squared / (2.0f * l_y),
+                        -1.0f, 0.0f, l_squared / (2.0f * l_y);
+    kinematic_matrix *= 1.0f / wheel_radius;
   }
   else if (mode & Mode::MECANUM_DRIVE) {
     const float l_x = _parameter.mecanum.length.x;
     const float l_y = _parameter.mecanum.length.y;
-    const float wheel_diameter = _parameter.mecanum.wheel_diameter;
+    const float wheel_radius = _parameter.mecanum.wheel_diameter;
 
     kinematic_matrix.resize(4, 3);
-    kinematic_matrix << -1.0f,  1.0f, -(l_x + l_y) * 0.5f,
-                        -1.0f, -1.0f, -(l_x + l_y) * 0.5f,
-                         1.0f,  1.0f, -(l_x + l_y) * 0.5f,
-                         1.0f, -1.0f, -(l_x + l_y) * 0.5f;
-    kinematic_matrix *= 1.0f / wheel_diameter;    
+    kinematic_matrix <<  1.0f, -1.0f, (l_x + l_y) * 0.5f,
+                         1.0f,  1.0f, (l_x + l_y) * 0.5f,
+                        -1.0f, -1.0f, (l_x + l_y) * 0.5f,
+                        -1.0f,  1.0f, (l_x + l_y) * 0.5f;
+    kinematic_matrix *= 1.0f / wheel_radius;    
   }
   else {
     throw std::invalid_argument("Eduard: given kinematic is not supported.");

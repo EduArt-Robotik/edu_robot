@@ -9,8 +9,8 @@
 namespace eduart {
 namespace robot {
 
-MotorController::Parameter MotorController::get_motor_controller_parameter(
-  const std::string& name, const MotorController::Parameter default_parameter, rclcpp::Node& ros_node)
+MotorController::Parameter MotorController::get_parameter(
+  const std::string& name, const MotorController::Parameter& default_parameter, rclcpp::Node& ros_node)
 {
   std::string prefix = name;
   std::replace(prefix.begin(), prefix.end(), '/', '.');
@@ -79,13 +79,17 @@ void MotorController::setRpm(const Rpm rpm)
 
 void MotorController::processMeasurementData(const Rpm rpm)
 {
+  {
+    std::lock_guard guard(_mutex_access_data);
+    _measured_rpm = rpm;
+  }
+
   // \todo Check if calculation is correct! At the moment used for visualization only, so no need for accurate calc...
   // perform wheel position calculation
   const auto stamp = _clock->now();
   const auto delta_t = stamp - _stamp_last_measurement;
 
   _current_wheel_position += delta_t.seconds() * rpm.radps();
-  _measured_rpm = rpm;
   _stamp_last_measurement = stamp;
 
   // publish wheel position as tf message

@@ -7,8 +7,13 @@
 #include "edu_robot/msg_conversion.hpp"
 #include "edu_robot/msg/detail/robot_status_report__struct.hpp"
 #include "edu_robot/processing_component/collison_avoidance.hpp"
+#include "edu_robot/processing_component/odometry_estimator.hpp"
 #include "edu_robot/processing_component/processing_detect_charging.hpp"
 
+#include <Eigen/Dense>
+#include <Eigen/QR>
+
+#include <nav_msgs/msg/detail/odometry__struct.hpp>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/qos.hpp>
@@ -18,6 +23,7 @@
 #include <exception>
 #include <functional>
 #include <stdexcept>
+#include <cstddef>
 
 namespace eduart {
 namespace robot {
@@ -89,6 +95,10 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterfa
     processing::DetectCharging::Parameter{},
     *this
   );
+  _odometry_component = std::make_shared<processing::OdometryEstimator>(
+    processing::OdometryEstimator::Parameter{},
+    *this
+  );
 }
 
 Robot::~Robot()
@@ -133,11 +143,31 @@ void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> tw
     }
 
     // Calculate wheel rotation speed using provided kinematic matrix.
-    Eigen::VectorXf rps = _kinematic_matrix * velocity_cmd / (2.0f * M_PI);
-
-    for (Eigen::Index i = 0; i < rps.size(); ++i) {
-      _motor_controllers[i]->setRpm(Rpm::fromRps(rps(i)));
+    // Apply velocity reduction if a limit is reached.
+    Eigen::VectorXf radps = _kinematic_matrix * velocity_cmd;
+    float reduce_factor = 1.0f;
+  
+    for (Eigen::Index i = 0; i < radps.size(); ++i) {
+      reduce_factor = std::min(
+        std::abs(_motor_controllers[i]->parameter().max_rpm / Rpm::fromRadps(radps(i))), reduce_factor
+      );
     }
+    for (Eigen::Index i = 0; i < radps.size(); ++i) {
+      _motor_controllers[i]->setRpm(Rpm::fromRadps(radps(i)) * reduce_factor);
+    }
+
+    // Calculating Odometry and Publishing it
+    Eigen::VectorXf radps_measured(_motor_controllers.size());
+
+    for (std::size_t i = 0; i < _motor_controllers.size(); ++i) {
+      radps_measured(i) = _motor_controllers[i]->getMeasuredRpm().radps();
+    }
+
+    const Eigen::Vector3f velocity_measured = _inverse_kinematic_matrix * radps_measured;
+    const auto odometry_msg = _odometry_component->processOdometryMessage(
+      _parameter.tf_base_frame, velocity_measured
+    );
+    _pub_odometry->publish(odometry_msg);
   }
   catch (HardwareError& ex) {
     RCLCPP_ERROR_STREAM(get_logger(), "Hardware error occurred while trying to set new values for motor controller."
@@ -219,11 +249,13 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
       _mode &= Mode::MASK_UNSET_KINEMATIC_MODE;
       _mode |= Mode::SKID_DRIVE;
       _kinematic_matrix = getKinematicMatrix(Mode::SKID_DRIVE);
+      _inverse_kinematic_matrix = _kinematic_matrix.completeOrthogonalDecomposition().pseudoInverse();
     }
     else if (request->mode.value & edu_robot::msg::Mode::MECANUM_DRIVE) {
       _mode &= Mode::MASK_UNSET_KINEMATIC_MODE;
       _mode |= Mode::MECANUM_DRIVE;
       _kinematic_matrix = getKinematicMatrix(Mode::MECANUM_DRIVE);
+      _inverse_kinematic_matrix = _kinematic_matrix.completeOrthogonalDecomposition().pseudoInverse();      
     }
     else {
       RCLCPP_ERROR_STREAM(get_logger(), "Unsupported mode. Can't set new mode. Canceling.");

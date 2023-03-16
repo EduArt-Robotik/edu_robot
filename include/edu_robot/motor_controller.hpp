@@ -9,6 +9,7 @@
 #include "edu_robot/rotation_per_minute.hpp"
 #include "edu_robot/angle.hpp"
 
+#include <mutex>
 #include <rclcpp/node.hpp>
 #include <rclcpp/clock.hpp>
 #include <rclcpp/publisher.hpp>
@@ -65,15 +66,19 @@ public:
    * \brief Sets RPM of this motor. Positive RPM 
    */
   void setRpm(const Rpm rpm);
-  inline Rpm getMeasuredRpm() const { return _measured_rpm; }
+  inline Rpm getMeasuredRpm() const {
+    std::lock_guard guard(_mutex_access_data);
+    return _measured_rpm;
+  }
 
-  static MotorController::Parameter get_motor_controller_parameter(
-    const std::string& name, const MotorController::Parameter default_parameter, rclcpp::Node& ros_node);
+  static MotorController::Parameter get_parameter(
+    const std::string& name, const MotorController::Parameter& default_parameter, rclcpp::Node& ros_node);
+  const Parameter& parameter() const { return _parameter; }    
 
 private:
   void processMeasurementData(const Rpm measurement);
 
-  Parameter _parameter;
+  const Parameter _parameter;
   Rpm _set_rpm;
   Rpm _measured_rpm;
   std::string _name;
@@ -83,6 +88,7 @@ private:
   std::shared_ptr<rclcpp::Clock> _clock;
   rclcpp::Time _stamp_last_measurement;
   Angle0To2Pi _current_wheel_position = 0.0;
+  mutable std::mutex _mutex_access_data;
 
   std::shared_ptr<ComponentInterface> _hardware_component_interface;
   std::shared_ptr<SensorInterface> _hardware_sensor_interface;

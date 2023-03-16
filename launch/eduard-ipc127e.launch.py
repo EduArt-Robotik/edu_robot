@@ -15,14 +15,14 @@ def generate_launch_description():
     parameter_file = os.path.join(
       package_path,
       'parameter',
-      'chrischan.yaml'
+      'eduard-ipc127e.yaml'
     )
 
     eduard_ipc = Node(
       package='edu_robot',
       executable='ethernet-gateway',
-      name='eduard_ipc',
-      parameters= [parameter_file],
+      name='eduard',
+      parameters=[parameter_file],
       # prefix=['gdbserver localhost:3000'],
       output='screen'
     )

@@ -7,13 +7,14 @@
 
 #include <functional>
 #include <memory>
+#include <rclcpp/node.hpp>
 
 namespace eduart {
 namespace robot {
 namespace ethernet {
 
-HardwareComponentFactory&
-HardwareComponentFactory::addLighting(const std::string& lighting_name, const std::string& hardware_name)
+HardwareComponentFactory& HardwareComponentFactory::addLighting(
+  const std::string& lighting_name, const std::string& hardware_name)
 {
   _lighting_hardware[lighting_name] = std::make_unique<ethernet::LightingHardware>(
     hardware_name, _shield->getCommunicator()
@@ -22,8 +23,7 @@ HardwareComponentFactory::addLighting(const std::string& lighting_name, const st
   return *this;
 } 
 
-HardwareComponentFactory&
-HardwareComponentFactory::addMotorController(
+HardwareComponentFactory& HardwareComponentFactory::addMotorController(
   const std::string& motor_name, const std::string& hardware_name)
 {
   auto compound_motor = std::make_shared<CompoundMotorControllerHardware>(
@@ -56,20 +56,22 @@ HardwareComponentFactory::addMotorController(
   return *this;
 }
 
-HardwareComponentFactory&
-HardwareComponentFactory::addRangeSensor(
-  const std::string& sensor_name, const std::string& hardware_name, const std::uint8_t id)
+HardwareComponentFactory& HardwareComponentFactory::addRangeSensor(
+  const std::string& sensor_name, const std::string& hardware_name, const std::uint8_t id, rclcpp::Node& ros_node)
 {
-  auto range_sensor_hardware = std::make_shared<RangeSensorHardware>(hardware_name, id);
+  auto range_sensor_hardware = std::make_shared<RangeSensorHardware>(
+    hardware_name, id, ros_node, _shield->getCommunicator());
   // _shield->registerIotShieldRxDevice(range_sensor_hardware);
   _range_sensor_hardware[sensor_name] = range_sensor_hardware;
   return *this;
 }                                               
   
-HardwareComponentFactory&
-HardwareComponentFactory::addImuSensor(const std::string& sensor_name, const std::string& hardware_name)
+HardwareComponentFactory& HardwareComponentFactory::addImuSensor(
+  const std::string& sensor_name, const std::string& hardware_name, rclcpp::Node& ros_node)
 {
-  auto imu_hardware = std::make_shared<ImuSensorHardware>(hardware_name, _shield->getCommunicator());
+  auto imu_hardware = std::make_shared<ImuSensorHardware>(
+    hardware_name, ros_node, _shield->getCommunicator()
+  );
   // _shield->registerIotShieldRxDevice(imu_hardware);
   _imu_sensor_hardware[sensor_name] = imu_hardware;
   return *this;

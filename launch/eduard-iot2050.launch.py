@@ -15,14 +15,14 @@ def generate_launch_description():
     parameter_file = os.path.join(
       package_path,
       'parameter',
-      'eduard.yaml'
+      'eduard-iot2050.yaml'
     )
 
     eduard_iot2050 = Node(
       package='edu_robot',
       executable='iotbot-shield',
-      name='eduard_iot2050',
-      parameters= [parameter_file]
+      name='eduard',
+      parameters=[parameter_file]
     )
 
     return LaunchDescription([
