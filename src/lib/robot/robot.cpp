@@ -72,7 +72,7 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterfa
   );
 
   _sub_twist = create_subscription<geometry_msgs::msg::Twist>(
-    "cmd_vel",
+    "/cmd_vel",
     rclcpp::QoS(2).best_effort().durability_volatile(),
     std::bind(&Robot::callbackVelocity, this, std::placeholders::_1)
   );
@@ -217,9 +217,13 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
   // Kick Watch Dog
   // _timer_status_report->reset();
 
+  // \todo code below smells extremely! It seems a state machine with transitions would do a good job here.
   try {
     // Drive Mode Handling
     if (request->mode.value & edu_robot::msg::Mode::REMOTE_CONTROLLED) {
+      if (_mode & Mode::FLEET_MASTER || _mode & Mode::FLEET_SLAVE) {
+        remapTwistSubscription("/cmd_vel"); // do not respect robot namespace
+      }
       _hardware_interface->enable();
       _mode &= Mode::MASK_UNSET_DRIVING_MODE;
       _mode |= Mode::REMOTE_CONTROLLED;
@@ -228,12 +232,27 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
       }
     }
     else if (request->mode.value & edu_robot::msg::Mode::INACTIVE) {
+      if (_mode & Mode::FLEET_MASTER || _mode & Mode::FLEET_SLAVE) {
+        remapTwistSubscription("/cmd_vel"); // do not respect robot namespace
+      }      
       _hardware_interface->disable();
       _mode &= Mode::MASK_UNSET_DRIVING_MODE;
       _mode |= Mode::INACTIVE;
       if (_detect_charging_component->isCharging() == false) {
         setLightingForMode(_mode);
       }
+    }
+    else if (request->mode.value & edu_robot::msg::Mode::FLEET_MASTER) {
+      remapTwistSubscription("cmd_vel"); // do respect robot namespace      
+      _hardware_interface->enable();
+      _mode &= Mode::MASK_UNSET_DRIVING_MODE;
+      _mode |= Mode::FLEET_MASTER;      
+    }
+    else if (request->mode.value & edu_robot::msg::Mode::FLEET_SLAVE) {
+      remapTwistSubscription("cmd_vel"); // do respect robot namespace
+      _hardware_interface->enable();
+      _mode &= Mode::MASK_UNSET_DRIVING_MODE;
+      _mode |= Mode::FLEET_SLAVE; 
     }
     // Collision Avoidance
     else if (request->mode.value & edu_robot::msg::Mode::COLLISION_AVOIDANCE_OVERRIDE_ENABLED) {
@@ -375,6 +394,14 @@ void Robot::setLightingForMode(const Mode mode)
         break;
     }
   }
+}
+
+void Robot::remapTwistSubscription(const std::string& new_topic_name)
+{
+  const auto qos = _sub_twist->get_actual_qos();
+  _sub_twist = create_subscription<geometry_msgs::msg::Twist>(
+    new_topic_name, qos, std::bind(&Robot::callbackVelocity, this, std::placeholders::_1)
+  );
 }
 
 } // end namespace robot

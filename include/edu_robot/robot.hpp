@@ -113,6 +113,7 @@ private:
   void processTfPublishing();
   void processWatchDogBarking();
   void setLightingForMode(const Mode mode);
+  void remapTwistSubscription(const std::string& new_topic_name);
 
   // ROS related members
   std::shared_ptr<rclcpp::Publisher<nav_msgs::msg::Odometry>> _pub_odometry;
