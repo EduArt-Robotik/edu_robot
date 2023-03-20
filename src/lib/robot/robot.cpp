@@ -72,7 +72,7 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterfa
   );
 
   _sub_twist = create_subscription<geometry_msgs::msg::Twist>(
-    "/cmd_vel",
+    "cmd_vel",
     rclcpp::QoS(2).best_effort().durability_volatile(),
     std::bind(&Robot::callbackVelocity, this, std::placeholders::_1)
   );
@@ -222,7 +222,7 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
     // Drive Mode Handling
     if (request->mode.value & edu_robot::msg::Mode::REMOTE_CONTROLLED) {
       if (_mode & Mode::FLEET_MASTER || _mode & Mode::FLEET_SLAVE) {
-        remapTwistSubscription("/cmd_vel"); // do not respect robot namespace
+        remapTwistSubscription("cmd_vel"); // do not respect robot namespace
       }
       _hardware_interface->enable();
       _mode &= Mode::MASK_UNSET_DRIVING_MODE;
@@ -233,7 +233,7 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
     }
     else if (request->mode.value & edu_robot::msg::Mode::INACTIVE) {
       if (_mode & Mode::FLEET_MASTER || _mode & Mode::FLEET_SLAVE) {
-        remapTwistSubscription("/cmd_vel"); // do not respect robot namespace
+        remapTwistSubscription("cmd_vel"); // do not respect robot namespace
       }      
       _hardware_interface->disable();
       _mode &= Mode::MASK_UNSET_DRIVING_MODE;
@@ -243,13 +243,13 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
       }
     }
     else if (request->mode.value & edu_robot::msg::Mode::FLEET_MASTER) {
-      remapTwistSubscription("cmd_vel"); // do respect robot namespace      
+      remapTwistSubscription("fleet_master/cmd_vel"); // do respect robot namespace      
       _hardware_interface->enable();
       _mode &= Mode::MASK_UNSET_DRIVING_MODE;
       _mode |= Mode::FLEET_MASTER;      
     }
     else if (request->mode.value & edu_robot::msg::Mode::FLEET_SLAVE) {
-      remapTwistSubscription("cmd_vel"); // do respect robot namespace
+      remapTwistSubscription("fleet_slave/cmd_vel"); // do respect robot namespace
       _hardware_interface->enable();
       _mode &= Mode::MASK_UNSET_DRIVING_MODE;
       _mode |= Mode::FLEET_SLAVE; 
