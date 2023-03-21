@@ -404,5 +404,12 @@ void Robot::remapTwistSubscription(const std::string& new_topic_name)
   );
 }
 
+std::string Robot::getFrameIdPrefix() const
+{
+  // remove slash at the beginning
+  const std::string frame_id_prefix(get_effective_namespace().begin() + 1, get_effective_namespace().end());
+  return frame_id_prefix;
+}
+
 } // end namespace robot
 } // end namespace eduart

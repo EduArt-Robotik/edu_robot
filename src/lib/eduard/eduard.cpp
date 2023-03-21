@@ -110,7 +110,7 @@ void Eduard::initialize(eduart::robot::HardwareComponentFactory& factory)
       motor_controller_name[i],
       i,
       motor_controller_parameter,
-      motor_controller_joint_name[i],
+      motor_controller_joint_name[i], // \todo a prefix is needed here, too
       *this,
       factory.motorControllerHardware().at(motor_controller_name[i]),
       factory.motorSensorHardware().at(motor_controller_name[i])
@@ -134,7 +134,7 @@ void Eduard::initialize(eduart::robot::HardwareComponentFactory& factory)
   for (std::size_t i = 0; i < range_sensor_name.size(); ++i) {
     auto range_sensor = std::make_shared<robot::RangeSensor>(
       range_sensor_name[i],
-      /*get_effective_namespace() + "/" + */range_sensor_name[i],
+      getFrameIdPrefix() + range_sensor_name[i],
       Robot::_parameter.tf_base_frame,
       range_sensor_pose[i],
       range_sensor_parameter,
@@ -154,8 +154,8 @@ void Eduard::initialize(eduart::robot::HardwareComponentFactory& factory)
 
   auto imu_sensor = std::make_shared<robot::ImuSensor>(
     "imu",
-    /*get_effective_namespace() + "/*/"imu/base",
-    /*get_effective_namespace() + "/*/_parameter.tf_footprint_frame,
+    getFrameIdPrefix() + "imu/base",
+    getFrameIdPrefix() + _parameter.tf_footprint_frame,
     tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.0, 0.0, 0.1)),
     imu_parameter,
     getTfBroadcaster(),

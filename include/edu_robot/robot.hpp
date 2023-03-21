@@ -89,6 +89,7 @@ protected:
   virtual Eigen::MatrixXf getKinematicMatrix(const Mode mode) const = 0;
 
   inline std::shared_ptr<tf2_ros::TransformBroadcaster> getTfBroadcaster() { return _tf_broadcaster; }
+  std::string getFrameIdPrefix() const;
 
   // Parameter
   Parameter _parameter;
