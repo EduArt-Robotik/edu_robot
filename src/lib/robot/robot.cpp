@@ -222,7 +222,7 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
     // Drive Mode Handling
     if (request->mode.value & edu_robot::msg::Mode::REMOTE_CONTROLLED) {
       if (_mode & Mode::FLEET_MASTER || _mode & Mode::FLEET_SLAVE) {
-        remapTwistSubscription("cmd_vel"); // do not respect robot namespace
+        remapTwistSubscription("cmd_vel");
       }
       _hardware_interface->enable();
       _mode &= Mode::MASK_UNSET_DRIVING_MODE;
@@ -233,7 +233,7 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
     }
     else if (request->mode.value & edu_robot::msg::Mode::INACTIVE) {
       if (_mode & Mode::FLEET_MASTER || _mode & Mode::FLEET_SLAVE) {
-        remapTwistSubscription("cmd_vel"); // do not respect robot namespace
+        remapTwistSubscription("cmd_vel");
       }      
       _hardware_interface->disable();
       _mode &= Mode::MASK_UNSET_DRIVING_MODE;
@@ -243,13 +243,13 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
       }
     }
     else if (request->mode.value & edu_robot::msg::Mode::FLEET_MASTER) {
-      remapTwistSubscription("fleet_master/cmd_vel"); // do respect robot namespace      
+      remapTwistSubscription("cmd_vel");      
       _hardware_interface->enable();
       _mode &= Mode::MASK_UNSET_DRIVING_MODE;
       _mode |= Mode::FLEET_MASTER;      
     }
     else if (request->mode.value & edu_robot::msg::Mode::FLEET_SLAVE) {
-      remapTwistSubscription("fleet_slave/cmd_vel"); // do respect robot namespace
+      remapTwistSubscription("fleet/cmd_vel");
       _hardware_interface->enable();
       _mode &= Mode::MASK_UNSET_DRIVING_MODE;
       _mode |= Mode::FLEET_SLAVE; 
@@ -407,7 +407,11 @@ void Robot::remapTwistSubscription(const std::string& new_topic_name)
 std::string Robot::getFrameIdPrefix() const
 {
   // remove slash at the beginning
-  const std::string frame_id_prefix(get_effective_namespace().begin() + 1, get_effective_namespace().end());
+  std::string frame_id_prefix(get_effective_namespace().begin() + 1, get_effective_namespace().end());
+  // add slash at the end if it is missing
+  if (frame_id_prefix.back() != '/') {
+    frame_id_prefix.push_back('/');
+  }
   return frame_id_prefix;
 }
 
