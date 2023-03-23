@@ -1,4 +1,4 @@
-/eduard:
+/**:
   ros__parameters:
     enable_collision_avoidance: true
     tf_base_frame: base_link
