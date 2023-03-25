@@ -53,7 +53,7 @@ To operate the Robot, the following buttons and axes of the controller are assig
 | [3]       | Triangle      | 0             | 0 or 1        | Light pattern: Operation
 | [4]       | L1            | 0             | 0 or 1        | Light pattern: Turning left
 | [5]       | R1            | 0             | 0 or 1        | Light pattern: Turning right
-| [6]       | L2            | 0             | 0 or 1        | not in use
+| [6]       | L2            | 0             | 0 or 1        | Enable Fleet Drive
 | [7]       | R2            | 0             | 0 or 1        | Override collision avoidance
 | [8]       | SHARE         | 0             | 0 or 1        | Disable driving
 | [9]       | OPTIONS       | 0             | 0 or 1        | Enable driving

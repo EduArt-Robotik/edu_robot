@@ -221,7 +221,7 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
   try {
     // Drive Mode Handling
     if (request->mode.value & edu_robot::msg::Mode::REMOTE_CONTROLLED) {
-      if (_mode & Mode::FLEET_MASTER || _mode & Mode::FLEET_SLAVE) {
+      if (_mode & Mode::FLEET) {
         remapTwistSubscription("cmd_vel");
       }
       _hardware_interface->enable();
@@ -232,7 +232,7 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
       }
     }
     else if (request->mode.value & edu_robot::msg::Mode::INACTIVE) {
-      if (_mode & Mode::FLEET_MASTER || _mode & Mode::FLEET_SLAVE) {
+      if (_mode & Mode::FLEET) {
         remapTwistSubscription("cmd_vel");
       }      
       _hardware_interface->disable();
@@ -242,17 +242,11 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
         setLightingForMode(_mode);
       }
     }
-    else if (request->mode.value & edu_robot::msg::Mode::FLEET_MASTER) {
-      remapTwistSubscription("cmd_vel");      
-      _hardware_interface->enable();
-      _mode &= Mode::MASK_UNSET_DRIVING_MODE;
-      _mode |= Mode::FLEET_MASTER;      
-    }
-    else if (request->mode.value & edu_robot::msg::Mode::FLEET_SLAVE) {
+    else if (request->mode.value & edu_robot::msg::Mode::FLEET) {
       remapTwistSubscription("fleet/cmd_vel");
       _hardware_interface->enable();
       _mode &= Mode::MASK_UNSET_DRIVING_MODE;
-      _mode |= Mode::FLEET_SLAVE; 
+      _mode |= Mode::FLEET; 
     }
     // Collision Avoidance
     else if (request->mode.value & edu_robot::msg::Mode::COLLISION_AVOIDANCE_OVERRIDE_ENABLED) {
