@@ -40,6 +40,7 @@ public:
     float threshold_stall_check = 0.25f;
     std::uint32_t control_frequency = 16000;
     bool encoder_inverted = false;
+    bool closed_loop = true;
 
     float kp = 0.5f;
     float ki = 5.0f;

@@ -27,6 +27,7 @@ MotorController::Parameter MotorController::get_parameter(
   ros_node.declare_parameter<float>(prefix + ".weight_low_pass_set_point", default_parameter.weight_low_pass_set_point);
   ros_node.declare_parameter<float>(prefix + ".weight_low_pass_encoder", default_parameter.weight_low_pass_encoder);
   ros_node.declare_parameter<bool>(prefix + ".encoder_inverted", default_parameter.encoder_inverted);
+  ros_node.declare_parameter<bool>(prefix + ".closed_loop", default_parameter.closed_loop);
   
   parameter.inverted = ros_node.get_parameter(prefix + ".inverted").as_bool();
   parameter.gear_ratio = ros_node.get_parameter(prefix + ".gear_ratio").as_double();
@@ -39,6 +40,7 @@ MotorController::Parameter MotorController::get_parameter(
   parameter.weight_low_pass_set_point = ros_node.get_parameter(prefix + ".weight_low_pass_set_point").as_double();
   parameter.weight_low_pass_encoder = ros_node.get_parameter(prefix + ".weight_low_pass_encoder").as_double();
   parameter.encoder_inverted = ros_node.get_parameter(prefix + ".encoder_inverted").as_bool();
+  parameter.closed_loop = ros_node.get_parameter(prefix + ".closed_loop").as_bool();
 
   return parameter;
 }

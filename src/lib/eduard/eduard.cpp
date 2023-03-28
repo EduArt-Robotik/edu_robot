@@ -197,7 +197,7 @@ Eigen::MatrixXf Eduard::getKinematicMatrix(const Mode mode) const
   else if (mode & Mode::MECANUM_DRIVE) {
     const float l_x = _parameter.mecanum.length.x;
     const float l_y = _parameter.mecanum.length.y;
-    const float wheel_radius = _parameter.mecanum.wheel_diameter;
+    const float wheel_radius = _parameter.mecanum.wheel_diameter * 0.5f;
 
     kinematic_matrix.resize(4, 3);
     kinematic_matrix <<  1.0f, -1.0f, (l_x + l_y) * 0.5f,
