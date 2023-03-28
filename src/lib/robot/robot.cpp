@@ -70,6 +70,10 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterfa
     "set_mode",
     std::bind(&Robot::callbackServiceSetMode, this, std::placeholders::_1, std::placeholders::_2)
   );
+  _srv_get_kinematic_description = create_service<edu_robot::srv::GetKinematicDescription>(
+    "get_kinematic_description",
+    std::bind(&Robot::callbackServiceGetKinematicDescription, this, std::placeholders::_1, std::placeholders::_2)
+  );
 
   _sub_twist = create_subscription<geometry_msgs::msg::Twist>(
     "cmd_vel",
@@ -226,7 +230,10 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
       }
       _hardware_interface->enable();
       _mode &= Mode::MASK_UNSET_DRIVING_MODE;
+      _mode &= Mode::MASK_UNSET_COLLISION_AVOIDANCE_OVERRIDE;      
       _mode |= Mode::REMOTE_CONTROLLED;
+      _mode |= Mode::COLLISION_AVOIDANCE_OVERRIDE_DISABLED;
+
       if (_detect_charging_component->isCharging() == false) {
         setLightingForMode(_mode);
       }
@@ -237,7 +244,10 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
       }      
       _hardware_interface->disable();
       _mode &= Mode::MASK_UNSET_DRIVING_MODE;
+      _mode &= Mode::MASK_UNSET_COLLISION_AVOIDANCE_OVERRIDE;      
       _mode |= Mode::INACTIVE;
+      _mode |= Mode::COLLISION_AVOIDANCE_OVERRIDE_DISABLED;
+
       if (_detect_charging_component->isCharging() == false) {
         setLightingForMode(_mode);
       }
@@ -246,6 +256,8 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
       remapTwistSubscription("fleet/cmd_vel");
       _hardware_interface->enable();
       _mode &= Mode::MASK_UNSET_DRIVING_MODE;
+      _mode &= Mode::MASK_UNSET_COLLISION_AVOIDANCE_OVERRIDE;      
+      _mode |= Mode::COLLISION_AVOIDANCE_OVERRIDE_ENABLED;
       _mode |= Mode::FLEET; 
     }
     // Collision Avoidance
@@ -286,6 +298,25 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
   catch (std::exception& ex) {
     RCLCPP_ERROR_STREAM(get_logger(), "Error occurred while trying to set new mode. what() = " << ex.what());
     return;
+  }
+}
+
+void Robot::callbackServiceGetKinematicDescription(
+  const std::shared_ptr<edu_robot::srv::GetKinematicDescription::Request> request,
+  std::shared_ptr<edu_robot::srv::GetKinematicDescription::Response> response)
+{
+  (void)request;
+  response->kinematic.k.cols = _kinematic_matrix.cols();
+  response->kinematic.k.rows = _kinematic_matrix.rows();
+  response->kinematic.k.data.resize(_kinematic_matrix.cols() * _kinematic_matrix.rows());
+
+  for (Eigen::Index row = 0; row < _kinematic_matrix.rows(); ++row) {
+    for (Eigen::Index col = 0; col < _kinematic_matrix.cols(); ++col) {
+      response->kinematic.k.data[row * _kinematic_matrix.cols() + col] = _kinematic_matrix(row, col);
+    }
+  }
+  for (const auto& motor : _motor_controllers) {
+    response->kinematic.wheel_limits.push_back(motor.second->parameter().max_rpm);
   }
 }
 

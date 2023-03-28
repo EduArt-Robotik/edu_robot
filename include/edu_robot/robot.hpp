@@ -17,6 +17,7 @@
 #include "edu_robot/msg/set_lighting_color.hpp"
 #include "edu_robot/msg/robot_status_report.hpp"
 #include "edu_robot/srv/set_mode.hpp"
+#include "edu_robot/srv/get_kinematic_description.hpp"
 
 #include <Eigen/Core>
 
@@ -58,6 +59,7 @@ public:
 
   virtual ~Robot();
 
+protected:
   /**
    * \brief Callback used to process received twist messages by passing it to the hardware abstraction layer.
    *
@@ -79,8 +81,9 @@ public:
    */
   void callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode::Request> request,
                               std::shared_ptr<edu_robot::srv::SetMode::Response> response);
-
-protected:
+  void callbackServiceGetKinematicDescription(
+    const std::shared_ptr<edu_robot::srv::GetKinematicDescription::Request> request,
+    std::shared_ptr<edu_robot::srv::GetKinematicDescription::Response> response);
   // Configuration Methods
   void registerLighting(std::shared_ptr<Lighting> lighting);
   void registerMotorController(std::shared_ptr<MotorController> motor_controller);
@@ -121,6 +124,7 @@ private:
   std::shared_ptr<rclcpp::Publisher<edu_robot::msg::RobotStatusReport>> _pub_status_report;
 
   std::shared_ptr<rclcpp::Service<edu_robot::srv::SetMode>> _srv_set_mode;
+  std::shared_ptr<rclcpp::Service<edu_robot::srv::GetKinematicDescription>> _srv_get_kinematic_description;
 
   std::shared_ptr<rclcpp::Subscription<geometry_msgs::msg::Twist>> _sub_twist;
   std::shared_ptr<rclcpp::Subscription<edu_robot::msg::SetLightingColor>> _sub_set_lighting_color;

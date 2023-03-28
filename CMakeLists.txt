@@ -39,8 +39,11 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/RobotState.msg"
   "msg/SetLightingColor.msg"
   "msg/RobotStatusReport.msg"
+  "msg/Matrix.msg"
+  "msg/RobotKinematicDescription.msg"
 # Services
   "srv/SetMode.srv"
+  "srv/GetKinematicDescription.srv"
   DEPENDENCIES
   std_msgs
 )
