@@ -1,4 +1,5 @@
 #include "edu_robot/robot.hpp"
+#include "edu_robot/color.hpp"
 #include "edu_robot/hardware_error.hpp"
 #include "edu_robot/lighting.hpp"
 
@@ -233,10 +234,6 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
       _mode &= Mode::MASK_UNSET_COLLISION_AVOIDANCE_OVERRIDE;      
       _mode |= Mode::REMOTE_CONTROLLED;
       _mode |= Mode::COLLISION_AVOIDANCE_OVERRIDE_DISABLED;
-
-      if (_detect_charging_component->isCharging() == false) {
-        setLightingForMode(_mode);
-      }
     }
     else if (request->mode.value & edu_robot::msg::Mode::INACTIVE) {
       if (_mode & Mode::FLEET) {
@@ -247,18 +244,17 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
       _mode &= Mode::MASK_UNSET_COLLISION_AVOIDANCE_OVERRIDE;      
       _mode |= Mode::INACTIVE;
       _mode |= Mode::COLLISION_AVOIDANCE_OVERRIDE_DISABLED;
-
-      if (_detect_charging_component->isCharging() == false) {
-        setLightingForMode(_mode);
-      }
     }
     else if (request->mode.value & edu_robot::msg::Mode::FLEET) {
       remapTwistSubscription("fleet/cmd_vel");
       _hardware_interface->enable();
+      _kinematic_matrix = getKinematicMatrix(Mode::MECANUM_DRIVE);
+      _inverse_kinematic_matrix = _kinematic_matrix.completeOrthogonalDecomposition().pseudoInverse();
+
       _mode &= Mode::MASK_UNSET_DRIVING_MODE;
       _mode &= Mode::MASK_UNSET_COLLISION_AVOIDANCE_OVERRIDE;      
       _mode |= Mode::COLLISION_AVOIDANCE_OVERRIDE_ENABLED;
-      _mode |= Mode::FLEET; 
+      _mode |= Mode::FLEET;
     }
     // Collision Avoidance
     else if (request->mode.value & edu_robot::msg::Mode::COLLISION_AVOIDANCE_OVERRIDE_ENABLED) {
@@ -285,6 +281,11 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
     else {
       RCLCPP_ERROR_STREAM(get_logger(), "Unsupported mode. Can't set new mode. Canceling.");
       return;
+    }
+
+    // Setting of Lighting Regarding set Mode
+    if (_detect_charging_component->isCharging() == false) {
+      setLightingForMode(_mode);
     }
 
     response->state.mode.value = static_cast<std::uint8_t>(_mode);
@@ -405,20 +406,16 @@ void Robot::setLightingForMode(const Mode mode)
   if (_detect_charging_component->isCharging()) {
     search->second->setColor(Color{34, 0, 0}, Lighting::Mode::ROTATION);
   }
-  else {
-    switch (mode) {
-      case Mode::INACTIVE:
-        search->second->setColor(Color{34, 0, 0}, Lighting::Mode::PULSATION);
-        break;
-
-      case Mode::REMOTE_CONTROLLED:
-        search->second->setColor(Color{34, 34, 34}, Lighting::Mode::DIM);
-        break;
-
-      default:
-        break;
-    }
+  else if (mode & Mode::INACTIVE) {
+    search->second->setColor(Color{34, 0, 0}, Lighting::Mode::PULSATION);
   }
+  else if (mode & Mode::REMOTE_CONTROLLED) {
+    search->second->setColor(Color{34, 34, 34}, Lighting::Mode::DIM);
+  }
+  else if (mode & Mode::FLEET) {
+    search->second->setColor(Color{25, 25, 25}, Lighting::Mode::FLASH);
+  }
+  // else do nothing
 }
 
 void Robot::remapTwistSubscription(const std::string& new_topic_name)
