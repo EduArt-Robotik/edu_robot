@@ -61,7 +61,7 @@ add_subdirectory(src/node)
 ## Installing of Content
 install(
   DIRECTORY include/
-  DESTINATION include
+  DESTINATION include#/${PROJECT_NAME}
 )
 install(
   DIRECTORY
@@ -69,11 +69,30 @@ install(
     parameter
   DESTINATION share/${PROJECT_NAME}
 )
+
 install(
-  TARGETS iotbot-shield eduart-iotbot-shield eduart-robot-eduard eduart-robot processing-component eduart-ethernet-gateway ethernet-gateway ethernet-gateway-flex-bot eduart-robot-flex-bot
+  TARGETS
+    iotbot-shield
+    ethernet-gateway
+    ethernet-gateway-flex-bot
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
+)
+install(
+  TARGETS
+    eduart-robot-flex-bot
+    eduart-iotbot-shield
+    eduart-robot-eduard
+    eduart-robot
+    processing-component
+    eduart-ethernet-gateway
   EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
-  RUNTIME DESTINATION lib/${PROJECT_NAME}
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
 )
 
 if(BUILD_TESTING)
@@ -88,4 +107,18 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
+ament_export_include_directories(
+  include
+)
+ament_export_libraries(
+  eduart-iotbot-shield
+  eduart-robot-eduard
+  eduart-robot
+  processing-component
+  eduart-ethernet-gateway
+  eduart-robot-flex-bot
+)
+ament_export_targets(
+  export_${PROJECT_NAME}
+)
 ament_package()
