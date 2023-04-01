@@ -1,6 +1,5 @@
 #pragma once
 
-#include "edu_robot/msg/detail/mode__struct.hpp"
 #include "edu_robot/msg/mode.hpp"
 #include <cstdint>
 

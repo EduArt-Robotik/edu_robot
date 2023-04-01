@@ -27,6 +27,7 @@ class HardwareSensorInterface
 public:
   using ProcessMeasurementCallback = std::function<void(const Data&...)>;
 
+  virtual ~HardwareSensorInterface() = default;
   void registerCallbackProcessMeasurementData(ProcessMeasurementCallback callback) {
     _callback_process_measurement = callback;
   }
