@@ -50,8 +50,8 @@ static Robot::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
   return parameter;
 }
 
-Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface)
-  : rclcpp::Node(robot_name)
+Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface, const std::string& ns)
+  : rclcpp::Node(robot_name, ns)
   , _hardware_interface(std::move(hardware_interface))
   , _mode(Mode::UNCONFIGURED)
   , _tf_broadcaster(std::make_unique<tf2_ros::TransformBroadcaster>(*this))

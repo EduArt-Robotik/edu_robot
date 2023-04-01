@@ -50,8 +50,9 @@ static Eduard::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
   return parameter;
 }
 
-Eduard::Eduard(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface)
-  : robot::Robot(robot_name, std::move(hardware_interface))
+Eduard::Eduard(
+  const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface, const std::string& ns)
+  : robot::Robot(robot_name, std::move(hardware_interface), ns)
   , _parameter(get_robot_ros_parameter(*this))
 { }
 

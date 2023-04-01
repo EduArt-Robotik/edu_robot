@@ -48,7 +48,7 @@ class Lighting;
 class Robot : public rclcpp::Node
 {
 protected:
-  Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface);
+  Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface, const std::string& ns = "");
 
 public:
   struct Parameter {
@@ -112,6 +112,11 @@ protected:
   // Mode
   Mode _mode;
 
+  // Mounted components that are controlled by the hardware interface.
+  std::map<std::string, std::shared_ptr<Lighting>> _lightings;
+  std::map<std::uint8_t, std::shared_ptr<MotorController>> _motor_controllers;
+  std::map<std::string, std::shared_ptr<Sensor>> _sensors;
+
 private:
   void processStatusReport();
   void processTfPublishing();
@@ -135,11 +140,6 @@ private:
   std::shared_ptr<rclcpp::TimerBase> _timer_status_report; 
   std::shared_ptr<rclcpp::TimerBase> _timer_tf_publishing;
   std::shared_ptr<rclcpp::TimerBase> _timer_watch_dog;
-
-  // Mounted components that are controlled by the hardware interface.
-  std::map<std::string, std::shared_ptr<Lighting>> _lightings;
-  std::map<std::uint8_t, std::shared_ptr<MotorController>> _motor_controllers;
-  std::map<std::string, std::shared_ptr<Sensor>> _sensors;
 };
 
 } // end namespace robot
