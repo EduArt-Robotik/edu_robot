@@ -66,15 +66,19 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterfa
     "status_report",
     rclcpp::QoS(2).best_effort().durability_volatile()
   );
+  _pub_kinematic_description = create_publisher<edu_robot::msg::RobotKinematicDescription>(
+    "robot_kinematic_description",
+    rclcpp::QoS(2).reliable().transient_local()
+  );
 
   _srv_set_mode = create_service<edu_robot::srv::SetMode>(
     "set_mode",
     std::bind(&Robot::callbackServiceSetMode, this, std::placeholders::_1, std::placeholders::_2)
   );
-  _srv_get_kinematic_description = create_service<edu_robot::srv::GetKinematicDescription>(
-    "get_kinematic_description",
-    std::bind(&Robot::callbackServiceGetKinematicDescription, this, std::placeholders::_1, std::placeholders::_2)
-  );
+  // _srv_get_kinematic_description = create_service<edu_robot::srv::GetKinematicDescription>(
+  //   "get_kinematic_description",
+  //   std::bind(&Robot::callbackServiceGetKinematicDescription, this, std::placeholders::_1, std::placeholders::_2)
+  // );
 
   _sub_twist = create_subscription<geometry_msgs::msg::Twist>(
     "cmd_vel",
@@ -247,14 +251,15 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
     }
     else if (request->mode.value & edu_robot::msg::Mode::FLEET) {
       remapTwistSubscription("fleet/cmd_vel");
+      switchKinematic(Mode::MECANUM_DRIVE);
       _hardware_interface->enable();
-      _kinematic_matrix = getKinematicMatrix(Mode::MECANUM_DRIVE);
-      _inverse_kinematic_matrix = _kinematic_matrix.completeOrthogonalDecomposition().pseudoInverse();
 
       _mode &= Mode::MASK_UNSET_DRIVING_MODE;
-      _mode &= Mode::MASK_UNSET_COLLISION_AVOIDANCE_OVERRIDE;      
+      _mode &= Mode::MASK_UNSET_COLLISION_AVOIDANCE_OVERRIDE;
+      _mode &= Mode::MASK_UNSET_KINEMATIC_MODE;      
       _mode |= Mode::COLLISION_AVOIDANCE_OVERRIDE_ENABLED;
       _mode |= Mode::FLEET;
+      _mode |= Mode::MECANUM_DRIVE;
     }
     // Collision Avoidance
     else if (request->mode.value & edu_robot::msg::Mode::COLLISION_AVOIDANCE_OVERRIDE_ENABLED) {
@@ -267,16 +272,14 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
     }    
     // Kinematic Mode Handling
     else if (request->mode.value & edu_robot::msg::Mode::SKID_DRIVE) {
+      switchKinematic(Mode::SKID_DRIVE);
       _mode &= Mode::MASK_UNSET_KINEMATIC_MODE;
       _mode |= Mode::SKID_DRIVE;
-      _kinematic_matrix = getKinematicMatrix(Mode::SKID_DRIVE);
-      _inverse_kinematic_matrix = _kinematic_matrix.completeOrthogonalDecomposition().pseudoInverse();
     }
     else if (request->mode.value & edu_robot::msg::Mode::MECANUM_DRIVE) {
+      switchKinematic(Mode::MECANUM_DRIVE);
       _mode &= Mode::MASK_UNSET_KINEMATIC_MODE;
       _mode |= Mode::MECANUM_DRIVE;
-      _kinematic_matrix = getKinematicMatrix(Mode::MECANUM_DRIVE);
-      _inverse_kinematic_matrix = _kinematic_matrix.completeOrthogonalDecomposition().pseudoInverse();      
     }
     else {
       RCLCPP_ERROR_STREAM(get_logger(), "Unsupported mode. Can't set new mode. Canceling.");
@@ -302,24 +305,24 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
   }
 }
 
-void Robot::callbackServiceGetKinematicDescription(
-  const std::shared_ptr<edu_robot::srv::GetKinematicDescription::Request> request,
-  std::shared_ptr<edu_robot::srv::GetKinematicDescription::Response> response)
-{
-  (void)request;
-  response->kinematic.k.cols = _kinematic_matrix.cols();
-  response->kinematic.k.rows = _kinematic_matrix.rows();
-  response->kinematic.k.data.resize(_kinematic_matrix.cols() * _kinematic_matrix.rows());
+// void Robot::callbackServiceGetKinematicDescription(
+//   const std::shared_ptr<edu_robot::srv::GetKinematicDescription::Request> request,
+//   std::shared_ptr<edu_robot::srv::GetKinematicDescription::Response> response)
+// {
+//   (void)request;
+//   response->kinematic.k.cols = _kinematic_matrix.cols();
+//   response->kinematic.k.rows = _kinematic_matrix.rows();
+//   response->kinematic.k.data.resize(_kinematic_matrix.cols() * _kinematic_matrix.rows());
 
-  for (Eigen::Index row = 0; row < _kinematic_matrix.rows(); ++row) {
-    for (Eigen::Index col = 0; col < _kinematic_matrix.cols(); ++col) {
-      response->kinematic.k.data[row * _kinematic_matrix.cols() + col] = _kinematic_matrix(row, col);
-    }
-  }
-  for (const auto& motor : _motor_controllers) {
-    response->kinematic.wheel_limits.push_back(motor.second->parameter().max_rpm);
-  }
-}
+//   for (Eigen::Index row = 0; row < _kinematic_matrix.rows(); ++row) {
+//     for (Eigen::Index col = 0; col < _kinematic_matrix.cols(); ++col) {
+//       response->kinematic.k.data[row * _kinematic_matrix.cols() + col] = _kinematic_matrix(row, col);
+//     }
+//   }
+//   for (const auto& motor : _motor_controllers) {
+//     response->kinematic.wheel_limits.push_back(motor.second->parameter().max_rpm);
+//   }
+// }
 
 void Robot::registerLighting(std::shared_ptr<Lighting> lighting)
 {
@@ -435,6 +438,29 @@ std::string Robot::getFrameIdPrefix() const
     frame_id_prefix.push_back('/');
   }
   return frame_id_prefix;
+}
+
+void Robot::switchKinematic(const Mode mode)
+{
+  _kinematic_matrix = getKinematicMatrix(mode);
+  _inverse_kinematic_matrix = _kinematic_matrix.completeOrthogonalDecomposition().pseudoInverse();
+
+  edu_robot::msg::RobotKinematicDescription msg;
+
+  msg.k.cols = _kinematic_matrix.cols();
+  msg.k.rows = _kinematic_matrix.rows();
+  msg.k.data.resize(_kinematic_matrix.cols() * _kinematic_matrix.rows());
+
+  for (Eigen::Index row = 0; row < _kinematic_matrix.rows(); ++row) {
+    for (Eigen::Index col = 0; col < _kinematic_matrix.cols(); ++col) {
+      msg.k.data[row * _kinematic_matrix.cols() + col] = _kinematic_matrix(row, col);
+    }
+  }
+  for (const auto& motor : _motor_controllers) {
+    msg.wheel_limits.push_back(motor.second->parameter().max_rpm);
+  }
+
+  _pub_kinematic_description->publish(msg);
 }
 
 } // end namespace robot

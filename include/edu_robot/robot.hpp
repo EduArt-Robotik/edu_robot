@@ -81,16 +81,16 @@ protected:
    */
   void callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode::Request> request,
                               std::shared_ptr<edu_robot::srv::SetMode::Response> response);
-  void callbackServiceGetKinematicDescription(
-    const std::shared_ptr<edu_robot::srv::GetKinematicDescription::Request> request,
-    std::shared_ptr<edu_robot::srv::GetKinematicDescription::Response> response);
+  // void callbackServiceGetKinematicDescription(
+  //   const std::shared_ptr<edu_robot::srv::GetKinematicDescription::Request> request,
+  //   std::shared_ptr<edu_robot::srv::GetKinematicDescription::Response> response);
   // Configuration Methods
   void registerLighting(std::shared_ptr<Lighting> lighting);
   void registerMotorController(std::shared_ptr<MotorController> motor_controller);
   void registerSensor(std::shared_ptr<Sensor> sensor);
   // Each robot must provide a kinematic matrix based on given mode.
   virtual Eigen::MatrixXf getKinematicMatrix(const Mode mode) const = 0;
-
+  void switchKinematic(const Mode mode);
   inline std::shared_ptr<tf2_ros::TransformBroadcaster> getTfBroadcaster() { return _tf_broadcaster; }
   std::string getFrameIdPrefix() const;
 
@@ -127,9 +127,10 @@ private:
   // ROS related members
   std::shared_ptr<rclcpp::Publisher<nav_msgs::msg::Odometry>> _pub_odometry;
   std::shared_ptr<rclcpp::Publisher<edu_robot::msg::RobotStatusReport>> _pub_status_report;
+  std::shared_ptr<rclcpp::Publisher<edu_robot::msg::RobotKinematicDescription>> _pub_kinematic_description;
 
   std::shared_ptr<rclcpp::Service<edu_robot::srv::SetMode>> _srv_set_mode;
-  std::shared_ptr<rclcpp::Service<edu_robot::srv::GetKinematicDescription>> _srv_get_kinematic_description;
+  // std::shared_ptr<rclcpp::Service<edu_robot::srv::GetKinematicDescription>> _srv_get_kinematic_description;
 
   std::shared_ptr<rclcpp::Subscription<geometry_msgs::msg::Twist>> _sub_twist;
   std::shared_ptr<rclcpp::Subscription<edu_robot::msg::SetLightingColor>> _sub_set_lighting_color;

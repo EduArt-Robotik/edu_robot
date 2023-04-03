@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.8)
 project(edu_robot)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)# -O2)
+  add_compile_options(-Wall -Wextra -Wpedantic -std=c++1z)# -O2)
 endif()
 
 ## Dependencies
@@ -48,7 +48,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   std_msgs
 )
 # Create a target that can be used by all buildiung targets when the custom message are required for them.
-# rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
+rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
 add_subdirectory(src/lib/robot)
 add_subdirectory(src/lib/processing_component)
@@ -61,7 +61,7 @@ add_subdirectory(src/node)
 ## Installing of Content
 install(
   DIRECTORY include/
-  DESTINATION include#/${PROJECT_NAME}
+  DESTINATION include/${PROJECT_NAME}
 )
 install(
   DIRECTORY
