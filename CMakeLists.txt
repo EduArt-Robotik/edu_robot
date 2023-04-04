@@ -61,7 +61,7 @@ add_subdirectory(src/node)
 ## Installing of Content
 install(
   DIRECTORY include/
-  DESTINATION include/${PROJECT_NAME}
+  DESTINATION include
 )
 install(
   DIRECTORY
@@ -77,7 +77,10 @@ install(
     ethernet-gateway-flex-bot
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin
+  # for humble...
+  # RUNTIME DESTINATION bin
+  # for galactic...
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
   INCLUDES DESTINATION include
 )
 install(
