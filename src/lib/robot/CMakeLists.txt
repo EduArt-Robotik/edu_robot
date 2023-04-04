@@ -10,7 +10,6 @@ add_library(eduart-robot
   imu_sensor.cpp
 )
 target_link_libraries(eduart-robot
-PUBLIC
   Eigen3::Eigen
   processing-component
   "${cpp_typesupport_target}"
@@ -22,7 +21,6 @@ target_include_directories(eduart-robot PUBLIC
 )
 ament_target_dependencies(
   eduart-robot
-PUBLIC  
   "rclcpp"
   "tf2"
   "tf2_ros"
