@@ -32,4 +32,4 @@ PUBLIC
   "geometry_msgs"
   "sensor_msgs"
 )
-# rosidl_target_interfaces(eduart-robot ${PROJECT_NAME} "rosidl_typesupport_cpp")
+rosidl_target_interfaces(eduart-robot ${PROJECT_NAME} "rosidl_typesupport_cpp")
