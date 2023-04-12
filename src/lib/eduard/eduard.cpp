@@ -50,8 +50,9 @@ static Eduard::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
   return parameter;
 }
 
-Eduard::Eduard(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface)
-  : robot::Robot(robot_name, std::move(hardware_interface))
+Eduard::Eduard(
+  const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface, const std::string& ns)
+  : robot::Robot(robot_name, std::move(hardware_interface), ns)
   , _parameter(get_robot_ros_parameter(*this))
 { }
 
@@ -110,7 +111,7 @@ void Eduard::initialize(eduart::robot::HardwareComponentFactory& factory)
       motor_controller_name[i],
       i,
       motor_controller_parameter,
-      motor_controller_joint_name[i],
+      motor_controller_joint_name[i], // \todo a prefix is needed here, too
       *this,
       factory.motorControllerHardware().at(motor_controller_name[i]),
       factory.motorSensorHardware().at(motor_controller_name[i])
@@ -134,7 +135,7 @@ void Eduard::initialize(eduart::robot::HardwareComponentFactory& factory)
   for (std::size_t i = 0; i < range_sensor_name.size(); ++i) {
     auto range_sensor = std::make_shared<robot::RangeSensor>(
       range_sensor_name[i],
-      /*get_effective_namespace() + "/" + */range_sensor_name[i],
+      getFrameIdPrefix() + range_sensor_name[i],
       Robot::_parameter.tf_base_frame,
       range_sensor_pose[i],
       range_sensor_parameter,
@@ -154,8 +155,8 @@ void Eduard::initialize(eduart::robot::HardwareComponentFactory& factory)
 
   auto imu_sensor = std::make_shared<robot::ImuSensor>(
     "imu",
-    /*get_effective_namespace() + "/*/"imu/base",
-    /*get_effective_namespace() + "/*/_parameter.tf_footprint_frame,
+    getFrameIdPrefix() + "imu/base",
+    getFrameIdPrefix() + _parameter.tf_footprint_frame,
     tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.0, 0.0, 0.1)),
     imu_parameter,
     getTfBroadcaster(),
@@ -168,8 +169,7 @@ void Eduard::initialize(eduart::robot::HardwareComponentFactory& factory)
   // Set Up Default Drive Kinematic. Needs to be done here, because method can't be called in constructor 
   // of robot base class.
   // \todo maybe introduce an initialize method that can be called after construction of robot class.
-  _kinematic_matrix = getKinematicMatrix(Mode::SKID_DRIVE);
-  _inverse_kinematic_matrix = _kinematic_matrix.completeOrthogonalDecomposition().pseudoInverse();  
+  switchKinematic(Mode::SKID_DRIVE);
 }
 
 Eduard::~Eduard()
@@ -197,7 +197,7 @@ Eigen::MatrixXf Eduard::getKinematicMatrix(const Mode mode) const
   else if (mode & Mode::MECANUM_DRIVE) {
     const float l_x = _parameter.mecanum.length.x;
     const float l_y = _parameter.mecanum.length.y;
-    const float wheel_radius = _parameter.mecanum.wheel_diameter;
+    const float wheel_radius = _parameter.mecanum.wheel_diameter * 0.5f;
 
     kinematic_matrix.resize(4, 3);
     kinematic_matrix <<  1.0f, -1.0f, (l_x + l_y) * 0.5f,

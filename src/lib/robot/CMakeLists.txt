@@ -10,7 +10,6 @@ add_library(eduart-robot
   imu_sensor.cpp
 )
 target_link_libraries(eduart-robot
-  # ${CPP_TYPESUPPORT_TARGET} needed for ROS distro humble and newer. TODO: handle this somehow!
   Eigen3::Eigen
   processing-component
   "${cpp_typesupport_target}"

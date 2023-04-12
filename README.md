@@ -53,7 +53,7 @@ To operate the Robot, the following buttons and axes of the controller are assig
 | [3]       | Triangle      | 0             | 0 or 1        | Light pattern: Operation
 | [4]       | L1            | 0             | 0 or 1        | Light pattern: Turning left
 | [5]       | R1            | 0             | 0 or 1        | Light pattern: Turning right
-| [6]       | L2            | 0             | 0 or 1        | not in use
+| [6]       | L2            | 0             | 0 or 1        | Enable Fleet Drive
 | [7]       | R2            | 0             | 0 or 1        | Override collision avoidance
 | [8]       | SHARE         | 0             | 0 or 1        | Disable driving
 | [9]       | OPTIONS       | 0             | 0 or 1        | Enable driving
@@ -131,7 +131,7 @@ docker image ls
 The docker container can easily started by the command:
 
 ```bash
-docker run --name eduard-ipc127e-0.1.1-beta --restart=always --privileged -v /dev:/dev --network host --group-add dialout eduard-ipc127e:0.1.1-beta
+docker run --name eduard-ipc127e-0.2.0 --env EDU_ROBOT_NAMESPACE=eduard/red --restart=always --privileged -v /dev:/dev --network host --pid=host --group-add dialout eduard-ipc127e:0.2.0
 ```
 
 With the flag "--restart=always" the container will come up after rebooting the system. If this is not wanted please remove this flag.

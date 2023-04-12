@@ -1,4 +1,4 @@
-/ethernet_gateway_flex_bot:
+/**:
   ros__parameters:
     collision_avoidance:
       distance_reduce_velocity: 0.40

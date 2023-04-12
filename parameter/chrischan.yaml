@@ -1,4 +1,4 @@
-/eduard_ipc:
+/**:
   ros__parameters:
     enable_collision_avoidance: false
     

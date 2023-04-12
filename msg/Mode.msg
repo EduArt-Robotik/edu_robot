@@ -4,8 +4,8 @@ uint8 value
 # driving mode
 uint8 INACTIVE=1
 uint8 REMOTE_CONTROLLED=2
-uint8 FLEET_MASTER=4
-uint8 FLEET_SLAVE=8
+uint8 FLEET=4
+# 8 is not used yet
 uint8 MASK_UNSET_DRIVING_MODE=240
 
 # kinematic mode

@@ -1,4 +1,5 @@
 #include "edu_robot/robot.hpp"
+#include "edu_robot/color.hpp"
 #include "edu_robot/hardware_error.hpp"
 #include "edu_robot/lighting.hpp"
 
@@ -49,8 +50,8 @@ static Robot::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
   return parameter;
 }
 
-Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface)
-  : rclcpp::Node(robot_name)
+Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface, const std::string& ns)
+  : rclcpp::Node(robot_name, ns)
   , _hardware_interface(std::move(hardware_interface))
   , _mode(Mode::UNCONFIGURED)
   , _tf_broadcaster(std::make_unique<tf2_ros::TransformBroadcaster>(*this))
@@ -65,11 +66,19 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterfa
     "status_report",
     rclcpp::QoS(2).best_effort().durability_volatile()
   );
+  _pub_kinematic_description = create_publisher<edu_robot::msg::RobotKinematicDescription>(
+    "robot_kinematic_description",
+    rclcpp::QoS(2).reliable().transient_local()
+  );
 
   _srv_set_mode = create_service<edu_robot::srv::SetMode>(
     "set_mode",
     std::bind(&Robot::callbackServiceSetMode, this, std::placeholders::_1, std::placeholders::_2)
   );
+  // _srv_get_kinematic_description = create_service<edu_robot::srv::GetKinematicDescription>(
+  //   "get_kinematic_description",
+  //   std::bind(&Robot::callbackServiceGetKinematicDescription, this, std::placeholders::_1, std::placeholders::_2)
+  // );
 
   _sub_twist = create_subscription<geometry_msgs::msg::Twist>(
     "cmd_vel",
@@ -217,23 +226,40 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
   // Kick Watch Dog
   // _timer_status_report->reset();
 
+  // \todo code below smells extremely! It seems a state machine with transitions would do a good job here.
   try {
     // Drive Mode Handling
     if (request->mode.value & edu_robot::msg::Mode::REMOTE_CONTROLLED) {
+      if (_mode & Mode::FLEET) {
+        remapTwistSubscription("cmd_vel");
+      }
       _hardware_interface->enable();
       _mode &= Mode::MASK_UNSET_DRIVING_MODE;
+      _mode &= Mode::MASK_UNSET_COLLISION_AVOIDANCE_OVERRIDE;      
       _mode |= Mode::REMOTE_CONTROLLED;
-      if (_detect_charging_component->isCharging() == false) {
-        setLightingForMode(_mode);
-      }
+      _mode |= Mode::COLLISION_AVOIDANCE_OVERRIDE_DISABLED;
     }
     else if (request->mode.value & edu_robot::msg::Mode::INACTIVE) {
+      if (_mode & Mode::FLEET) {
+        remapTwistSubscription("cmd_vel");
+      }      
       _hardware_interface->disable();
       _mode &= Mode::MASK_UNSET_DRIVING_MODE;
+      _mode &= Mode::MASK_UNSET_COLLISION_AVOIDANCE_OVERRIDE;      
       _mode |= Mode::INACTIVE;
-      if (_detect_charging_component->isCharging() == false) {
-        setLightingForMode(_mode);
-      }
+      _mode |= Mode::COLLISION_AVOIDANCE_OVERRIDE_DISABLED;
+    }
+    else if (request->mode.value & edu_robot::msg::Mode::FLEET) {
+      remapTwistSubscription("fleet/cmd_vel");
+      switchKinematic(Mode::MECANUM_DRIVE);
+      _hardware_interface->enable();
+
+      _mode &= Mode::MASK_UNSET_DRIVING_MODE;
+      _mode &= Mode::MASK_UNSET_COLLISION_AVOIDANCE_OVERRIDE;
+      _mode &= Mode::MASK_UNSET_KINEMATIC_MODE;      
+      _mode |= Mode::COLLISION_AVOIDANCE_OVERRIDE_ENABLED;
+      _mode |= Mode::FLEET;
+      _mode |= Mode::MECANUM_DRIVE;
     }
     // Collision Avoidance
     else if (request->mode.value & edu_robot::msg::Mode::COLLISION_AVOIDANCE_OVERRIDE_ENABLED) {
@@ -246,20 +272,23 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
     }    
     // Kinematic Mode Handling
     else if (request->mode.value & edu_robot::msg::Mode::SKID_DRIVE) {
+      switchKinematic(Mode::SKID_DRIVE);
       _mode &= Mode::MASK_UNSET_KINEMATIC_MODE;
       _mode |= Mode::SKID_DRIVE;
-      _kinematic_matrix = getKinematicMatrix(Mode::SKID_DRIVE);
-      _inverse_kinematic_matrix = _kinematic_matrix.completeOrthogonalDecomposition().pseudoInverse();
     }
     else if (request->mode.value & edu_robot::msg::Mode::MECANUM_DRIVE) {
+      switchKinematic(Mode::MECANUM_DRIVE);
       _mode &= Mode::MASK_UNSET_KINEMATIC_MODE;
       _mode |= Mode::MECANUM_DRIVE;
-      _kinematic_matrix = getKinematicMatrix(Mode::MECANUM_DRIVE);
-      _inverse_kinematic_matrix = _kinematic_matrix.completeOrthogonalDecomposition().pseudoInverse();      
     }
     else {
       RCLCPP_ERROR_STREAM(get_logger(), "Unsupported mode. Can't set new mode. Canceling.");
       return;
+    }
+
+    // Setting of Lighting Regarding set Mode
+    if (_detect_charging_component->isCharging() == false) {
+      setLightingForMode(_mode);
     }
 
     response->state.mode.value = static_cast<std::uint8_t>(_mode);
@@ -275,6 +304,25 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
     return;
   }
 }
+
+// void Robot::callbackServiceGetKinematicDescription(
+//   const std::shared_ptr<edu_robot::srv::GetKinematicDescription::Request> request,
+//   std::shared_ptr<edu_robot::srv::GetKinematicDescription::Response> response)
+// {
+//   (void)request;
+//   response->kinematic.k.cols = _kinematic_matrix.cols();
+//   response->kinematic.k.rows = _kinematic_matrix.rows();
+//   response->kinematic.k.data.resize(_kinematic_matrix.cols() * _kinematic_matrix.rows());
+
+//   for (Eigen::Index row = 0; row < _kinematic_matrix.rows(); ++row) {
+//     for (Eigen::Index col = 0; col < _kinematic_matrix.cols(); ++col) {
+//       response->kinematic.k.data[row * _kinematic_matrix.cols() + col] = _kinematic_matrix(row, col);
+//     }
+//   }
+//   for (const auto& motor : _motor_controllers) {
+//     response->kinematic.wheel_limits.push_back(motor.second->parameter().max_rpm);
+//   }
+// }
 
 void Robot::registerLighting(std::shared_ptr<Lighting> lighting)
 {
@@ -361,20 +409,58 @@ void Robot::setLightingForMode(const Mode mode)
   if (_detect_charging_component->isCharging()) {
     search->second->setColor(Color{34, 0, 0}, Lighting::Mode::ROTATION);
   }
-  else {
-    switch (mode) {
-      case Mode::INACTIVE:
-        search->second->setColor(Color{34, 0, 0}, Lighting::Mode::PULSATION);
-        break;
+  else if (mode & Mode::INACTIVE) {
+    search->second->setColor(Color{34, 0, 0}, Lighting::Mode::PULSATION);
+  }
+  else if (mode & Mode::REMOTE_CONTROLLED) {
+    search->second->setColor(Color{34, 34, 34}, Lighting::Mode::DIM);
+  }
+  else if (mode & Mode::FLEET) {
+    search->second->setColor(Color{25, 25, 25}, Lighting::Mode::FLASH);
+  }
+  // else do nothing
+}
 
-      case Mode::REMOTE_CONTROLLED:
-        search->second->setColor(Color{34, 34, 34}, Lighting::Mode::DIM);
-        break;
+void Robot::remapTwistSubscription(const std::string& new_topic_name)
+{
+  const auto qos = _sub_twist->get_actual_qos();
+  _sub_twist = create_subscription<geometry_msgs::msg::Twist>(
+    new_topic_name, qos, std::bind(&Robot::callbackVelocity, this, std::placeholders::_1)
+  );
+}
 
-      default:
-        break;
+std::string Robot::getFrameIdPrefix() const
+{
+  // remove slash at the beginning
+  std::string frame_id_prefix(get_effective_namespace().begin() + 1, get_effective_namespace().end());
+  // add slash at the end if it is missing
+  if (frame_id_prefix.back() != '/') {
+    frame_id_prefix.push_back('/');
+  }
+  return frame_id_prefix;
+}
+
+void Robot::switchKinematic(const Mode mode)
+{
+  _kinematic_matrix = getKinematicMatrix(mode);
+  _inverse_kinematic_matrix = _kinematic_matrix.completeOrthogonalDecomposition().pseudoInverse();
+
+  edu_robot::msg::RobotKinematicDescription msg;
+
+  msg.k.cols = _kinematic_matrix.cols();
+  msg.k.rows = _kinematic_matrix.rows();
+  msg.k.data.resize(_kinematic_matrix.cols() * _kinematic_matrix.rows());
+
+  for (Eigen::Index row = 0; row < _kinematic_matrix.rows(); ++row) {
+    for (Eigen::Index col = 0; col < _kinematic_matrix.cols(); ++col) {
+      msg.k.data[row * _kinematic_matrix.cols() + col] = _kinematic_matrix(row, col);
     }
   }
+  for (const auto& motor : _motor_controllers) {
+    msg.wheel_limits.push_back(motor.second->parameter().max_rpm);
+  }
+
+  _pub_kinematic_description->publish(msg);
 }
 
 } // end namespace robot

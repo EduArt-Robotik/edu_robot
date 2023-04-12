@@ -17,6 +17,7 @@
 #include "edu_robot/msg/set_lighting_color.hpp"
 #include "edu_robot/msg/robot_status_report.hpp"
 #include "edu_robot/srv/set_mode.hpp"
+#include "edu_robot/srv/get_kinematic_description.hpp"
 
 #include <Eigen/Core>
 
@@ -47,7 +48,7 @@ class Lighting;
 class Robot : public rclcpp::Node
 {
 protected:
-  Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface);
+  Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface, const std::string& ns = "");
 
 public:
   struct Parameter {
@@ -58,6 +59,7 @@ public:
 
   virtual ~Robot();
 
+protected:
   /**
    * \brief Callback used to process received twist messages by passing it to the hardware abstraction layer.
    *
@@ -79,16 +81,18 @@ public:
    */
   void callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode::Request> request,
                               std::shared_ptr<edu_robot::srv::SetMode::Response> response);
-
-protected:
+  // void callbackServiceGetKinematicDescription(
+  //   const std::shared_ptr<edu_robot::srv::GetKinematicDescription::Request> request,
+  //   std::shared_ptr<edu_robot::srv::GetKinematicDescription::Response> response);
   // Configuration Methods
   void registerLighting(std::shared_ptr<Lighting> lighting);
   void registerMotorController(std::shared_ptr<MotorController> motor_controller);
   void registerSensor(std::shared_ptr<Sensor> sensor);
   // Each robot must provide a kinematic matrix based on given mode.
   virtual Eigen::MatrixXf getKinematicMatrix(const Mode mode) const = 0;
-
+  void switchKinematic(const Mode mode);
   inline std::shared_ptr<tf2_ros::TransformBroadcaster> getTfBroadcaster() { return _tf_broadcaster; }
+  std::string getFrameIdPrefix() const;
 
   // Parameter
   Parameter _parameter;
@@ -108,17 +112,25 @@ protected:
   // Mode
   Mode _mode;
 
+  // Mounted components that are controlled by the hardware interface.
+  std::map<std::string, std::shared_ptr<Lighting>> _lightings;
+  std::map<std::uint8_t, std::shared_ptr<MotorController>> _motor_controllers;
+  std::map<std::string, std::shared_ptr<Sensor>> _sensors;
+
 private:
   void processStatusReport();
   void processTfPublishing();
   void processWatchDogBarking();
   void setLightingForMode(const Mode mode);
+  void remapTwistSubscription(const std::string& new_topic_name);
 
   // ROS related members
   std::shared_ptr<rclcpp::Publisher<nav_msgs::msg::Odometry>> _pub_odometry;
   std::shared_ptr<rclcpp::Publisher<edu_robot::msg::RobotStatusReport>> _pub_status_report;
+  std::shared_ptr<rclcpp::Publisher<edu_robot::msg::RobotKinematicDescription>> _pub_kinematic_description;
 
   std::shared_ptr<rclcpp::Service<edu_robot::srv::SetMode>> _srv_set_mode;
+  // std::shared_ptr<rclcpp::Service<edu_robot::srv::GetKinematicDescription>> _srv_get_kinematic_description;
 
   std::shared_ptr<rclcpp::Subscription<geometry_msgs::msg::Twist>> _sub_twist;
   std::shared_ptr<rclcpp::Subscription<edu_robot::msg::SetLightingColor>> _sub_set_lighting_color;
@@ -129,11 +141,6 @@ private:
   std::shared_ptr<rclcpp::TimerBase> _timer_status_report; 
   std::shared_ptr<rclcpp::TimerBase> _timer_tf_publishing;
   std::shared_ptr<rclcpp::TimerBase> _timer_watch_dog;
-
-  // Mounted components that are controlled by the hardware interface.
-  std::map<std::string, std::shared_ptr<Lighting>> _lightings;
-  std::map<std::uint8_t, std::shared_ptr<MotorController>> _motor_controllers;
-  std::map<std::string, std::shared_ptr<Sensor>> _sensors;
 };
 
 } // end namespace robot

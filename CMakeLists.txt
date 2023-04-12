@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.8)
 project(edu_robot)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)# -O2)
+  add_compile_options(-Wall -Wextra -Wpedantic -std=c++1z)# -O2)
 endif()
 
 ## Dependencies
@@ -39,8 +39,11 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/RobotState.msg"
   "msg/SetLightingColor.msg"
   "msg/RobotStatusReport.msg"
+  "msg/Matrix.msg"
+  "msg/RobotKinematicDescription.msg"
 # Services
   "srv/SetMode.srv"
+  "srv/GetKinematicDescription.srv"
   DEPENDENCIES
   std_msgs
 )
@@ -66,11 +69,33 @@ install(
     parameter
   DESTINATION share/${PROJECT_NAME}
 )
+
 install(
-  TARGETS iotbot-shield eduart-iotbot-shield eduart-robot-eduard eduart-robot processing-component eduart-ethernet-gateway ethernet-gateway ethernet-gateway-flex-bot eduart-robot-flex-bot
+  TARGETS
+    iotbot-shield
+    ethernet-gateway
+    ethernet-gateway-flex-bot
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  # for humble...
+  # RUNTIME DESTINATION bin
+  # for galactic...
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
+  INCLUDES DESTINATION include
+)
+install(
+  TARGETS
+    eduart-robot-flex-bot
+    eduart-iotbot-shield
+    eduart-robot-eduard
+    eduart-robot
+    processing-component
+    eduart-ethernet-gateway
   EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
-  RUNTIME DESTINATION lib/${PROJECT_NAME}
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
 )
 
 if(BUILD_TESTING)
@@ -85,4 +110,18 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
+ament_export_include_directories(
+  include
+)
+ament_export_libraries(
+  eduart-iotbot-shield
+  eduart-robot-eduard
+  eduart-robot
+  processing-component
+  eduart-ethernet-gateway
+  eduart-robot-flex-bot
+)
+ament_export_targets(
+  export_${PROJECT_NAME}
+)
 ament_package()

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "edu_robot/msg/detail/mode__struct.hpp"
 #include "edu_robot/msg/mode.hpp"
 #include <cstdint>
 
@@ -11,8 +10,7 @@ enum class Mode {
   UNCONFIGURED              = 0,
   INACTIVE                  = edu_robot::msg::Mode::INACTIVE,
   REMOTE_CONTROLLED         = edu_robot::msg::Mode::REMOTE_CONTROLLED,
-  FLEET_MASTER              = edu_robot::msg::Mode::FLEET_MASTER,
-  FLEET_SLAVE               = edu_robot::msg::Mode::FLEET_SLAVE,
+  FLEET                     = edu_robot::msg::Mode::FLEET,
   MASK_UNSET_DRIVING_MODE   = edu_robot::msg::Mode::MASK_UNSET_DRIVING_MODE,
 
   SKID_DRIVE                = edu_robot::msg::Mode::SKID_DRIVE,
