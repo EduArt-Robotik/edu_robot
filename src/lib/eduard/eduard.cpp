@@ -136,7 +136,7 @@ void Eduard::initialize(eduart::robot::HardwareComponentFactory& factory)
     auto range_sensor = std::make_shared<robot::RangeSensor>(
       range_sensor_name[i],
       getFrameIdPrefix() + range_sensor_name[i],
-      Robot::_parameter.tf_base_frame,
+      getFrameIdPrefix() + Robot::_parameter.tf_base_frame,
       range_sensor_pose[i],
       range_sensor_parameter,
       *this,
