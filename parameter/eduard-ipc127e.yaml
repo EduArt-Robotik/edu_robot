@@ -12,7 +12,6 @@
         roll: 0.0
         yaw: 0.0 
       raw_data_mode: false
-      tf_frame_rotated: base_link
 
     motor_a:
       closed_loop: true    

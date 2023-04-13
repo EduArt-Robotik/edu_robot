@@ -150,7 +150,7 @@ void Eduard::initialize(eduart::robot::HardwareComponentFactory& factory)
   // IMU Sensor
   ImuSensor::Parameter imu_parameter;
   imu_parameter.raw_data_mode = false;
-  imu_parameter.rotated_frame = Robot::_parameter.tf_base_frame;
+  imu_parameter.rotated_frame = getFrameIdPrefix() + Robot::_parameter.tf_base_frame;
   imu_parameter = ImuSensor::get_parameter("imu", imu_parameter, *this);
 
   auto imu_sensor = std::make_shared<robot::ImuSensor>(
