@@ -8,7 +8,6 @@
     imu:
       fusion_weight: 0.029999999329447746
       raw_data_mode: false
-      tf_frame_rotated: base_link
 
     motor_a:
       control_frequency: 16000
