@@ -19,6 +19,23 @@ namespace eduart {
 namespace robot {
 namespace ethernet {
 
+class SingleChannelMotorControllerHardware : public MotorController::ComponentInterface
+                                           , public EthernetGatewayTxRxDevice
+                                           , public MotorController::SensorInterface
+{
+public:
+  SingleChannelMotorControllerHardware(
+    const std::string& hardware_name_motor, const std::uint8_t can_id, std::shared_ptr<EthernetCommunicator> communicator);
+  ~SingleChannelMotorControllerHardware() override;
+
+  void processSetValue(const Rpm& rpm) override;
+  void initialize(const MotorController::Parameter& parameter) override;
+  void processRxData(const tcp::message::RxMessageDataBuffer& data) override;
+
+private:
+  std::uint8_t _can_id;
+};
+
 class DummyMotorControllerHardware : public MotorController::ComponentInterface
                                    , public MotorController::SensorInterface
 {
