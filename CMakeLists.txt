@@ -54,6 +54,7 @@ add_subdirectory(src/lib/robot)
 add_subdirectory(src/lib/processing_component)
 add_subdirectory(src/lib/eduard)
 add_subdirectory(src/lib/flex_bot)
+add_subdirectory(src/lib/ohmni_bot)
 add_subdirectory(src/lib/iotbot_shield)
 add_subdirectory(src/lib/ethernet_gateway)
 add_subdirectory(src/node)
@@ -75,6 +76,7 @@ install(
     iotbot-shield
     ethernet-gateway
     ethernet-gateway-flex-bot
+    ethernet-gateway-ohmni-bot
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   # for humble...
@@ -91,6 +93,7 @@ install(
     eduart-robot
     processing-component
     eduart-ethernet-gateway
+    ohmni-bot
   EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

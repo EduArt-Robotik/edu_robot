@@ -2,6 +2,7 @@
 #include "edu_robot/ethernet_gateway/ethernet_gateway_device.hpp"
 #include "edu_robot/ethernet_gateway/tcp/message_definition.hpp"
 #include "edu_robot/ethernet_gateway/tcp/protocol.hpp"
+#include "edu_robot/rotation_per_minute.hpp"
 
 #include <edu_robot/hardware_component_interface.hpp>
 #include <edu_robot/hardware_error.hpp>
@@ -127,7 +128,7 @@ void SingleChannelMotorControllerHardware::processSetValue(const Rpm& rpm)
   auto request = Request::make_request<tcp::message::SetMotorRpm>(
     _can_id,
     rpm,
-    rpm
+    Rpm(0.0)
   );
 
   auto future_response = _communicator->sendRequest(std::move(request));
@@ -137,8 +138,10 @@ void SingleChannelMotorControllerHardware::processSetValue(const Rpm& rpm)
   if (_callback_process_measurement == nullptr) {
     return;
   }
-
-  _callback_process_measurement(AcknowledgedMotorRpm::rpm0(got.response()));  
+  auto response = got.response();
+  // \todo process feedback
+  // _callback_process_measurement(AcknowledgedMotorRpm::rpm0(response));  
+  _callback_process_measurement(0.0);
 }
 
 

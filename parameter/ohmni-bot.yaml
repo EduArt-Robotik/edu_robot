@@ -1,0 +1,79 @@
+/**:
+  ros__parameters:
+    enable_collision_avoidance: true
+    tf_base_frame: base_link
+    tf_footprint_frame: base_footprint
+    use_sim_time: false
+
+    imu:
+      fusion_weight: 0.005
+      mounting_orientation:
+        pitch: 0.0
+        roll: 0.0
+        yaw: 0.0 
+      raw_data_mode: false
+
+    motor_a:
+      closed_loop: true    
+      control_frequency: 16000
+      encoder_inverted: false
+      encoder_ratio: 4096.0
+      gear_ratio: 14.0
+      max_rpm: 90.0
+      pid/kd: 0.0
+      pid/ki: 7.0
+      pid/kp: 0.5
+      weight_low_pass_encoder: 0.8
+      weight_low_pass_set_point: 0.8
+
+    motor_b:
+      closed_loop: true    
+      control_frequency: 16000
+      encoder_inverted: true      
+      encoder_ratio: 4096.0
+      gear_ratio: 14.0
+      max_rpm: 90.0
+      pid/kd: 0.0
+      pid/ki: 7.0
+      pid/kp: 0.5
+      weight_low_pass_encoder: 0.8
+      weight_low_pass_set_point: 0.8
+
+    motor_c:
+      closed_loop: true   
+      control_frequency: 16000
+      encoder_inverted: false
+      encoder_ratio: 4096.0
+      gear_ratio: 14.0
+      max_rpm: 90.0
+      pid/kd: 0.0
+      pid/ki: 7.0
+      pid/kp: 0.5
+      weight_low_pass_encoder: 0.8
+      weight_low_pass_set_point: 0.8
+
+    motor_d:
+      closed_loop: true   
+      control_frequency: 16000
+      encoder_inverted: false      
+      encoder_ratio: 4096.0
+      gear_ratio: 14.0
+      max_rpm: 90.0
+      pid/kd: 0.0
+      pid/ki: 7.0
+      pid/kp: 0.5
+      weight_low_pass_encoder: 0.8
+      weight_low_pass_set_point: 0.8
+
+    skid:
+      length:
+        x: 0.25
+        y: 0.32
+      wheel_diameter: 0.17
+
+    mecanum:
+      length:
+        x: 0.25
+        y: 0.36
+      wheel_diameter: 0.1
+      

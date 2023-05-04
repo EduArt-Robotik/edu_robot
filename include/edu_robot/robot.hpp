@@ -5,6 +5,7 @@
  */
 #pragma once
 
+#include "edu_robot/hardware_component_factory.hpp"
 #include "edu_robot/motor_controller.hpp"
 #include "edu_robot/robot_hardware_interface.hpp"
 #include "edu_robot/sensor.hpp"
@@ -58,6 +59,9 @@ public:
   };
 
   virtual ~Robot();
+
+  std::shared_ptr<RobotHardwareInterface> getHardwareInterface() { return _hardware_interface; }
+  virtual void initialize(eduart::robot::HardwareComponentFactory& factory) = 0;
 
 protected:
   /**
