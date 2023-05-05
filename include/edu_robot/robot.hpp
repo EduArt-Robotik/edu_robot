@@ -60,10 +60,13 @@ public:
 
   virtual ~Robot();
 
-  std::shared_ptr<RobotHardwareInterface> getHardwareInterface() { return _hardware_interface; }
-  virtual void initialize(eduart::robot::HardwareComponentFactory& factory) = 0;
-
 protected:
+  /**
+   * \brief Initializes this robot by using the provided hardware component factory. The factory has to provide the hardware realizations
+   *        needed by an specific robot.
+   * \param factory Hardware component factory that must provided hardware interfaces.
+   */
+  virtual void initialize(eduart::robot::HardwareComponentFactory& factory) = 0;
   /**
    * \brief Callback used to process received twist messages by passing it to the hardware abstraction layer.
    *

@@ -78,7 +78,7 @@ HardwareComponentFactory& HardwareComponentFactory::addSingleChannelMotorControl
   _motor_sensor_hardware[motor_name + "_c"] = motor_controller;
 
   motor_controller = std::make_shared<SingleChannelMotorControllerHardware>(
-    hardware_name + "_d", 2, _shield->getCommunicator()
+    hardware_name + "_d", 3, _shield->getCommunicator()
   );    
   _motor_controller_hardware[motor_name + "_d"] = motor_controller;
   _motor_sensor_hardware[motor_name + "_d"] = motor_controller;

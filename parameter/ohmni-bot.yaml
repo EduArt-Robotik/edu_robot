@@ -16,7 +16,7 @@
     motor_a:
       closed_loop: true    
       control_frequency: 16000
-      encoder_inverted: false
+      encoder_inverted: true
       encoder_ratio: 4096.0
       gear_ratio: 14.0
       max_rpm: 90.0
@@ -55,7 +55,7 @@
     motor_d:
       closed_loop: true   
       control_frequency: 16000
-      encoder_inverted: false      
+      encoder_inverted: true      
       encoder_ratio: 4096.0
       gear_ratio: 14.0
       max_rpm: 90.0
