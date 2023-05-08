@@ -56,6 +56,36 @@ HardwareComponentFactory& HardwareComponentFactory::addMotorController(
   return *this;
 }
 
+HardwareComponentFactory& HardwareComponentFactory::addSingleChannelMotorController(
+  const std::string& motor_name, const std::string& hardware_name)
+{
+  auto motor_controller = std::make_shared<SingleChannelMotorControllerHardware>(
+    hardware_name + "_a", 0, _shield->getCommunicator()
+  );
+  _motor_controller_hardware[motor_name + "_a"] = motor_controller;
+  _motor_sensor_hardware[motor_name + "_a"] = motor_controller;
+
+  motor_controller = std::make_shared<SingleChannelMotorControllerHardware>(
+    hardware_name + "_b", 1, _shield->getCommunicator()
+  );
+  _motor_controller_hardware[motor_name + "_b"] = motor_controller;
+  _motor_sensor_hardware[motor_name + "_b"] = motor_controller;
+
+  motor_controller = std::make_shared<SingleChannelMotorControllerHardware>(
+    hardware_name + "_c", 2, _shield->getCommunicator()
+  );
+  _motor_controller_hardware[motor_name + "_c"] = motor_controller;
+  _motor_sensor_hardware[motor_name + "_c"] = motor_controller;
+
+  motor_controller = std::make_shared<SingleChannelMotorControllerHardware>(
+    hardware_name + "_d", 3, _shield->getCommunicator()
+  );    
+  _motor_controller_hardware[motor_name + "_d"] = motor_controller;
+  _motor_sensor_hardware[motor_name + "_d"] = motor_controller;
+
+  return *this;
+}
+
 HardwareComponentFactory& HardwareComponentFactory::addRangeSensor(
   const std::string& sensor_name, const std::string& hardware_name, const std::uint8_t id, rclcpp::Node& ros_node)
 {
