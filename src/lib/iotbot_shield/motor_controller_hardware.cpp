@@ -65,10 +65,10 @@ void CompoundMotorControllerHardware::processRxData(const uart::message::RxMessa
 void CompoundMotorControllerHardware::processSetValue(const Rpm& rpm)
 {
   auto request = ShieldRequest::make_request<uart::message::SetRpm>(
-    _dummy_motor_controllers[0]->_current_set_value,
-    _dummy_motor_controllers[1]->_current_set_value,
-    _dummy_motor_controllers[2]->_current_set_value,
-    rpm
+    -_dummy_motor_controllers[0]->_current_set_value,
+    -_dummy_motor_controllers[1]->_current_set_value,
+    -_dummy_motor_controllers[2]->_current_set_value,
+    -rpm
   );
 
   auto future_response = _communicator->sendRequest(std::move(request));
