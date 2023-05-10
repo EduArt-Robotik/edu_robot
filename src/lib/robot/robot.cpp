@@ -173,10 +173,14 @@ void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> tw
     }
 
     const Eigen::Vector3f velocity_measured = _inverse_kinematic_matrix * radps_measured;
-    const auto odometry_msg = _odometry_component->processOdometryMessage(
-      getFrameIdPrefix() + _parameter.tf_base_frame, getFrameIdPrefix() + "odom", velocity_measured
-    );
-    _pub_odometry->publish(odometry_msg);
+
+    _odometry_component->process(velocity_measured);
+    _pub_odometry->publish(_odometry_component->getOdometryMessage(
+      getFrameIdPrefix() + _parameter.tf_base_frame, getFrameIdPrefix() + "odom"
+    ));
+    _tf_broadcaster->sendTransform(_odometry_component->getTfMessage(
+      getFrameIdPrefix() + _parameter.tf_base_frame, getFrameIdPrefix() + "odom"
+    ));
   }
   catch (HardwareError& ex) {
     RCLCPP_ERROR_STREAM(get_logger(), "Hardware error occurred while trying to set new values for motor controller."
