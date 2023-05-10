@@ -17,7 +17,7 @@ OdometryEstimator::OdometryEstimator(const Parameter parameter, rclcpp::Node& ro
 }
 
 nav_msgs::msg::Odometry OdometryEstimator::processOdometryMessage(
-    const std::string& robot_base_frame, const Eigen::Vector3f& measured_velocity)
+    const std::string& robot_base_frame, const std::string& odom_frame, const Eigen::Vector3f& measured_velocity)
 {
   // Estimate delta t
   const auto now = _clock->now();
@@ -37,7 +37,7 @@ nav_msgs::msg::Odometry OdometryEstimator::processOdometryMessage(
   nav_msgs::msg::Odometry odometry_msg;
 
   odometry_msg.header.stamp = _clock->now();
-  odometry_msg.header.frame_id = "odom";
+  odometry_msg.header.frame_id = odom_frame;
   odometry_msg.child_frame_id = robot_base_frame;
 
   // Twist Part

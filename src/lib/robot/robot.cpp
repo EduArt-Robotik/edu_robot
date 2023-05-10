@@ -174,7 +174,7 @@ void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> tw
 
     const Eigen::Vector3f velocity_measured = _inverse_kinematic_matrix * radps_measured;
     const auto odometry_msg = _odometry_component->processOdometryMessage(
-      _parameter.tf_base_frame, velocity_measured
+      getFrameIdPrefix() + _parameter.tf_base_frame, getFrameIdPrefix() + "odom", velocity_measured
     );
     _pub_odometry->publish(odometry_msg);
   }

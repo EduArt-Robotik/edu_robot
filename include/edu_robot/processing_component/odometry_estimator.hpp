@@ -27,7 +27,7 @@ public:
   ~OdometryEstimator() override = default;
 
   nav_msgs::msg::Odometry processOdometryMessage(
-    const std::string& robot_base_frame, const Eigen::Vector3f& measured_velocity);
+    const std::string& robot_base_frame, const std::string& odom_frame, const Eigen::Vector3f& measured_velocity);
 
 private:
   AnglePiToPi _orientation;
