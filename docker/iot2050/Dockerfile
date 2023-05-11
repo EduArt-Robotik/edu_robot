@@ -17,30 +17,39 @@ RUN add-apt-repository ppa:mraa/mraa \
 
 # install Joystick Driver for ROS2 foxy
 RUN sudo apt-get install -y \
-#    ros-$ROS_DISTRO-joy \
     ros-$ROS_DISTRO-rmw-fastrtps-cpp \
     ros-$ROS_DISTRO-fastrtps
 
+# write source commands to .bashrc -> no need to source afterwards
+RUN \
+########################################################
+# Add non root user for development.
+    useradd --create-home --shell /bin/bash $USER \
+    && echo "$USER ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
+    && /sbin/usermod -aG sudo $USER \
+########################################################
+# Add exports and sources to bash rc for easy handling.
+    && echo "export RMW_IMPLEMENTATION=rmw_fastrtps_cpp" >> /home/$USER/.bashrc \
+    # && echo "export FASTRTPS_DEFAULT_PROFILES_FILE=/home/$USER/fastrtps_profile.xml" >> /home/$USER/.bashrc \
+    && echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> /home/$USER/.bashrc \
+    && echo "source /home/$USER/eduart_ws/install/setup.bash" >> /home/$USER/.bashrc \
+########################################################
+# Clean up
+    && apt-get clean
+
 # set up iotbot workspace
-RUN mkdir -p /home/iotbot_ws/src/iotbot
+RUN mkdir -p /home/$USER/iotbot_ws/src/
 
-COPY ./edu_robot /home/iotbot_ws/src/edu_robot
-COPY ./edu_robot_control /home/iotbot_ws/src/edu_robot_control
-COPY ./joystick_drivers /home/iotbot_ws/src/joystick_drivers
+COPY ./edu_robot /home/$USER/iotbot_ws/src/edu_robot
+# COPY ./fastrtps_profile.xml /home/$USER
 
-WORKDIR /home/iotbot_ws
+WORKDIR /home/$USER/iotbot_ws
 
 # build EduArt packages nodes
 RUN export RMW_IMPLEMENTATION=rmw_fastrtps_cpp \
     && source /opt/ros/$ROS_DISTRO/setup.bash \
     && MAKEFLAGS="-j1" colcon build --symlink-install --executor sequential --event-handlers console_direct+ --cmake-args -DCMAKE_BUILD_TYPE=Release
 
-# write source commands to .bashrc -> no need to source afterwards
-RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc \
-    && echo "export RMW_IMPLEMENTATION=rmw_fastrtps_cpp" >> ~/.bashrc \
-    && echo "source /home/iotbot_ws/install/setup.bash" >> ~/.bashrc
-
 # launch control node and joy interpreter
 CMD source /home/iotbot_ws/install/setup.bash \
-    && (ros2 launch edu_robot_control robot_remote_control.launch.py \
-    & ros2 launch edu_robot eduard-iot2050.launch.py)
+    && ros2 launch edu_robot eduard-iot2050.launch.py

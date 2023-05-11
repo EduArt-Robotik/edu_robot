@@ -1,9 +1,13 @@
 /**:
   ros__parameters:
-    enable_collision_avoidance: true
     tf_base_frame: base_link
     tf_footprint_frame: base_footprint
     use_sim_time: false
+
+    collision_avoidance:
+      enable: true
+      distance_reduce_velocity: 0.6
+      distance_velocity_zero: 0.05
 
     imu:
       fusion_weight: 0.029999999329447746
