@@ -168,7 +168,6 @@ void Eduard::initialize(eduart::robot::HardwareComponentFactory& factory)
 
   // Set Up Default Drive Kinematic. Needs to be done here, because method can't be called in constructor 
   // of robot base class.
-  // \todo maybe introduce an initialize method that can be called after construction of robot class.
   switchKinematic(Mode::SKID_DRIVE);
 }
 

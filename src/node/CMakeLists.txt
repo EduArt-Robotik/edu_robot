@@ -34,3 +34,16 @@ ament_target_dependencies(ethernet-gateway-flex-bot
   "rclcpp"
 )
 # rosidl_target_interfaces(ethernet-gateway ${PROJECT_NAME} "rosidl_typesupport_cpp")
+
+### Ehternet Gateway Ohmni Bot
+add_executable(ethernet-gateway-ohmni-bot
+  ohmni_bot_node.cpp
+)
+target_link_libraries(ethernet-gateway-ohmni-bot
+  eduart-ethernet-gateway
+  ohmni-bot
+)
+ament_target_dependencies(ethernet-gateway-ohmni-bot
+  "rclcpp"
+)
+# rosidl_target_interfaces(ethernet-gateway ${PROJECT_NAME} "rosidl_typesupport_cpp")

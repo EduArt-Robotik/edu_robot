@@ -14,16 +14,9 @@
 
 namespace eduart {
 namespace robot {
-namespace eduard {
+namespace ohmni_bot {
 
-struct COLOR {
-  struct DEFAULT {
-    static constexpr Color HEAD = { 0xff, 0xff, 0xff };
-    static constexpr Color BACK = { 0xff, 0x00, 0x00 };
-  };
-};
-
-class Eduard : public robot::Robot
+class OhmniBot : public robot::Robot
 {
 public:
   struct Parameter {
@@ -35,28 +28,21 @@ public:
         float y = 0.32f;
       } length;
       float wheel_diameter = 0.17f;
-    } skid;
-    struct {
-      struct {
-        float x = 0.25f;
-        float y = 0.36f;
-      } length;
-      float wheel_diameter = 0.1f;
-    } mecanum;    
+    } mecanum;
   };
 
-  Eduard(
-    const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface, const std::string& ns = "");
-  ~Eduard() override;
+  OhmniBot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface);
+  ~OhmniBot() override;
+
+  void initialize(eduart::robot::HardwareComponentFactory& factory) override;
 
 protected:
   Eigen::MatrixXf getKinematicMatrix(const Mode mode) const override;
   // Needs to be called by derived classes.
-  void initialize(eduart::robot::HardwareComponentFactory& factory) override;
 
   Parameter _parameter;
 };
 
-} // end namespace eduard
+} // end namespace ohmni_bot
 } // end namespace robot
 } // end namespace eduart
