@@ -15,4 +15,5 @@ ament_target_dependencies(
   processing-component
   "rclcpp"
   "nav_msgs"
+  "tf2_geometry_msgs"
 )

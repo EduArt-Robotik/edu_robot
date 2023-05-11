@@ -1,8 +1,10 @@
-FROM ros:humble-ros-base-jammy
+FROM ros:galactic-ros-base-focal
 
 # using bash
 SHELL ["/bin/bash", "-c"]
-ENV ROS_DISTRO humble
+ENV ROS_DISTRO galactic
+ENV USER user
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN \
     apt-get update \
