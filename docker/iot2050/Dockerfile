@@ -9,13 +9,13 @@ ENV DEBIAN_FRONTEND=noninteractive
 # install mraa lib for UART communication in shield node
 RUN apt-get update \
     && apt-get install -y software-properties-common git build-essential swig3.0 python-dev nodejs-dev cmake libjson-c-dev \
-    git clone --branch v2.2.0 https://github.com/eclipse/mraa.git
-    cd mraa \
-    mkdir build \
-    cd build \
-    cmake .. \
-    make \
-    make install
+    && git clone --branch v2.2.0 https://github.com/eclipse/mraa.git \
+    && cd mraa \
+    && mkdir build \
+    && cd build \
+    && cmake .. \
+    && make \
+    && make install
 
 # install Joystick Driver for ROS2 foxy
 RUN sudo apt-get install -y \
