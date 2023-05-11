@@ -3,6 +3,8 @@ FROM ros:humble-ros-base-jammy
 # using bash
 SHELL ["/bin/bash", "-c"]
 ENV ROS_DISTRO humble
+ENV USER user
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN \
     apt-get update \
