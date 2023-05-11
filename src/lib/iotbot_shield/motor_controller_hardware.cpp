@@ -56,19 +56,19 @@ void CompoundMotorControllerHardware::processRxData(const uart::message::RxMessa
     return;
   }
   
-  _dummy_motor_controllers[0]->_callback_process_measurement(uart::message::ShieldResponse::rpm0(data));
-  _dummy_motor_controllers[1]->_callback_process_measurement(uart::message::ShieldResponse::rpm1(data));
-  _dummy_motor_controllers[2]->_callback_process_measurement(uart::message::ShieldResponse::rpm2(data));
-  _callback_process_measurement(uart::message::ShieldResponse::rpm3(data));
+  _dummy_motor_controllers[0]->_callback_process_measurement(-uart::message::ShieldResponse::rpm0(data));
+  _dummy_motor_controllers[1]->_callback_process_measurement(-uart::message::ShieldResponse::rpm1(data));
+  _dummy_motor_controllers[2]->_callback_process_measurement(-uart::message::ShieldResponse::rpm2(data));
+  _callback_process_measurement(-uart::message::ShieldResponse::rpm3(data));
 }
 
 void CompoundMotorControllerHardware::processSetValue(const Rpm& rpm)
 {
   auto request = ShieldRequest::make_request<uart::message::SetRpm>(
-    _dummy_motor_controllers[0]->_current_set_value,
-    _dummy_motor_controllers[1]->_current_set_value,
-    _dummy_motor_controllers[2]->_current_set_value,
-    rpm
+    -_dummy_motor_controllers[0]->_current_set_value,
+    -_dummy_motor_controllers[1]->_current_set_value,
+    -_dummy_motor_controllers[2]->_current_set_value,
+    -rpm
   );
 
   auto future_response = _communicator->sendRequest(std::move(request));

@@ -10,6 +10,7 @@
 #include <edu_robot/angle.hpp>
 
 #include <nav_msgs/msg/odometry.hpp>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <Eigen/Core>
 
 namespace eduart {
@@ -26,13 +27,17 @@ public:
   OdometryEstimator(const Parameter parameter, rclcpp::Node& ros_node);
   ~OdometryEstimator() override = default;
 
-  nav_msgs::msg::Odometry processOdometryMessage(
-    const std::string& robot_base_frame, const Eigen::Vector3f& measured_velocity);
+  void process(const Eigen::Vector3f& measured_velocity);
+  nav_msgs::msg::Odometry getOdometryMessage(const std::string& robot_base_frame, const std::string& odom_frame) const;
+  geometry_msgs::msg::TransformStamped getTfMessage(const std::string& robot_base_frame, const std::string& odom_frame) const;
 
 private:
-  AnglePiToPi _orientation;
-  float _position_x;
-  float _position_y;
+  AnglePiToPi _orientation = 0.0;
+  float _position_x = 0.0f;
+  float _position_y = 0.0f;
+  float _linear_velocity_x = 0.0f;
+  float _linear_velocity_y = 0.0f;
+  float _angular_velocity_z = 0.0f;
 };
 
 } // end namespace processing
