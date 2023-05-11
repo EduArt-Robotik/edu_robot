@@ -6,14 +6,16 @@ ENV ROS_DISTRO humble
 ENV USER user
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN \
-    apt-get update \
-    && apt-get install -y software-properties-common
-
 # install mraa lib for UART communication in shield node
-RUN add-apt-repository ppa:mraa/mraa \
-    && apt-get update \
-    && apt-get install -y libmraa2 libmraa-dev libmraa-java python-mraa python3-mraa mraa-tools
+RUN apt-get update \
+    && apt-get install -y software-properties-common git build-essential swig3.0 python-dev nodejs-dev cmake libjson-c-dev \
+    git clone --branch v2.2.0 https://github.com/eclipse/mraa.git
+    cd mraa \
+    mkdir build \
+    cd build \
+    cmake .. \
+    make \
+    make install
 
 # install Joystick Driver for ROS2 foxy
 RUN sudo apt-get install -y \
