@@ -9,7 +9,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 # install mraa lib for UART communication in shield node
 RUN apt-get update \
     && apt-get install -y software-properties-common git build-essential swig3.0 python2-dev python2 python-dev-is-python3 libnode-dev cmake libjson-c-dev \
-    && git clone --branch v2.2.0 https://github.com/eclipse/mraa.git \
+    # todo master brauch is not good, but the only one how compiles.
+    && git clone --branch master https://github.com/eclipse/mraa.git \
     && cd mraa \
     && mkdir build \
     && cd build \
