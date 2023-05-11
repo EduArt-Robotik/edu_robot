@@ -21,7 +21,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(Eigen3 REQUIRED NO_MODULE)
 
 # MRAA library
-if(EXISTS "/usr/include/mraa/common.hpp")
+if(EXISTS "/usr/local/include/mraa/common.hpp")
   message(STATUS "Found mraa installed at ${MRAA_INCLUDE_DIR}.")
   add_compile_definitions(_WITH_MRAA)
   set(HAVE_MRAA "TRUE")
