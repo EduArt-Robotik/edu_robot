@@ -111,7 +111,7 @@ void Eduard::initialize(eduart::robot::HardwareComponentFactory& factory)
       motor_controller_name[i],
       i,
       motor_controller_parameter,
-      motor_controller_joint_name[i], // \todo a prefix is needed here, too
+      getFrameIdPrefix() + motor_controller_joint_name[i],
       *this,
       factory.motorControllerHardware().at(motor_controller_name[i]),
       factory.motorSensorHardware().at(motor_controller_name[i])

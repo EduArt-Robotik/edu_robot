@@ -1,8 +1,8 @@
-FROM ros:galactic-ros-base-focal
+FROM ros:humble-ros-base-jammy
 
 # using bash
 SHELL ["/bin/bash", "-c"]
-ENV ROS_DISTRO galactic
+ENV ROS_DISTRO humble
 
 RUN \
     apt-get update \
@@ -15,7 +15,7 @@ RUN add-apt-repository ppa:mraa/mraa \
 
 # install Joystick Driver for ROS2 foxy
 RUN sudo apt-get install -y \
-    ros-$ROS_DISTRO-joy \
+#    ros-$ROS_DISTRO-joy \
     ros-$ROS_DISTRO-rmw-fastrtps-cpp \
     ros-$ROS_DISTRO-fastrtps
 
@@ -24,6 +24,7 @@ RUN mkdir -p /home/iotbot_ws/src/iotbot
 
 COPY ./edu_robot /home/iotbot_ws/src/edu_robot
 COPY ./edu_robot_control /home/iotbot_ws/src/edu_robot_control
+COPY ./joystick_drivers /home/iotbot_ws/src/joystick_drivers
 
 WORKDIR /home/iotbot_ws
 
