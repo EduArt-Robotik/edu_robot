@@ -49,10 +49,9 @@ COPY ./edu_robot /home/$USER/iotbot_ws/src/edu_robot
 WORKDIR /home/$USER/iotbot_ws
 
 # build EduArt packages nodes
-RUN export RMW_IMPLEMENTATION=rmw_fastrtps_cpp \
-    && source /opt/ros/$ROS_DISTRO/setup.bash \
+RUN source /home/$USER/.bashrc \
     && MAKEFLAGS="-j1" colcon build --symlink-install --executor sequential --event-handlers console_direct+ --cmake-args -DCMAKE_BUILD_TYPE=Release
 
 # launch control node and joy interpreter
-CMD source /home/iotbot_ws/install/setup.bash \
+CMD source /home/$USER/.bashrc \
     && ros2 launch edu_robot eduard-iot2050.launch.py
