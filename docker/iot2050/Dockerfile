@@ -35,7 +35,7 @@ RUN \
     && echo "export RMW_IMPLEMENTATION=rmw_fastrtps_cpp" >> /home/$USER/.bashrc \
     # && echo "export FASTRTPS_DEFAULT_PROFILES_FILE=/home/$USER/fastrtps_profile.xml" >> /home/$USER/.bashrc \
     && echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> /home/$USER/.bashrc \
-    && echo "source /home/$USER/eduart_ws/install/setup.bash" >> /home/$USER/.bashrc \
+    && echo "source /home/$USER/iotbot_ws/install/setup.bash" >> /home/$USER/.bashrc \
 ########################################################
 # Clean up
     && apt-get clean
@@ -49,7 +49,8 @@ COPY ./edu_robot /home/$USER/iotbot_ws/src/edu_robot
 WORKDIR /home/$USER/iotbot_ws
 
 # build EduArt packages nodes
-RUN source /home/$USER/.bashrc \
+RUN source /opt/ros/$ROS_DISTRO/setup.bash \
+    source /home/$USER/.bashrc \
     && MAKEFLAGS="-j1" colcon build --symlink-install --executor sequential --event-handlers console_direct+ --cmake-args -DCMAKE_BUILD_TYPE=Release
 
 # launch control node and joy interpreter
