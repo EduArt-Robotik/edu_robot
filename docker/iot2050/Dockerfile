@@ -16,7 +16,9 @@ RUN apt-get update \
     && cd build \
     && cmake .. \
     && make \
-    && make install
+    && make install \
+    # hack: was the fastest and most fluffy way
+    && cp /usr/local/lib/libmraa.so* /usr/lib
 
 # install Joystick Driver for ROS2 foxy
 RUN sudo apt-get install -y \
@@ -54,5 +56,7 @@ RUN source /opt/ros/$ROS_DISTRO/setup.bash \
     && MAKEFLAGS="-j1" colcon build --symlink-install --executor sequential --event-handlers console_direct+ --cmake-args -DCMAKE_BUILD_TYPE=Release
 
 # launch control node and joy interpreter
-CMD source /home/$USER/.bashrc \
+CMD export RMW_IMPLEMENTATION=rmw_fastrtps_cpp \
+    && source /opt/ros/$ROS_DISTRO/setup.bash \
+    && source /home/user/iotbot_ws/install/setup.bash \    
     && ros2 launch edu_robot eduard-iot2050.launch.py
