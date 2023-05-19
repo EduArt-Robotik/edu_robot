@@ -27,8 +27,6 @@ class FlexBot : public robot::Robot
 {
 public:
   struct Parameter {
-    std::string tf_footprint_frame = "base_footprint";
-
     struct {
       struct {
         float x = 0.25f;
