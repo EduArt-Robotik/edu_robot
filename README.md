@@ -94,10 +94,10 @@ docker image ls
 The docker container can easily started by the command:
 
 ```bash
-docker run --user user --name eduard-iotbot-0.2.0 --restart=always --privileged -v /dev:/dev --net=host --pid=host --ipc=host --group-add dialout eduard-iotbot:0.2.0
+docker run --user user --name eduard-iotbot-0.2.0 --restart=always --privileged -v /dev:/dev --net=host --pid=host --ipc=host --group-add dialout --env EDU_ROBOT_NAMESPACE=eduard/red eduard-iotbot:0.2.0
 ```
 
-With the flag "--restart=always" the container will come up after rebooting the system. If this is not wanted please remove this flag.
+With the flag "--restart=always" the container will come up after rebooting the system. If this is not wanted please remove this flag. The flag "-env EDU_ROBOT_NAMESPACE=" defines the used namespace by this robot. In this example "eduard/red" was used. Please update the namespace according your robot color.
 
 # Deploying on IPC127e
 
