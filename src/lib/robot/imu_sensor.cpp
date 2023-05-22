@@ -89,6 +89,9 @@ void ImuSensor::processMeasurementData(
 
   // TF
   geometry_msgs::msg::TransformStamped tf_msg;
+  const auto euler = orientation.toRotationMatrix().eulerAngles(0, 1, 2);
+  Eigen::Quaterniond without_yaw = Eigen::AngleAxisd(euler.x(), Eigen::Vector3d::UnitX())
+                                 * Eigen::AngleAxisd(euler.y(), Eigen::Vector3d::UnitY());
 
   tf_msg.header.frame_id = frameId();
   tf_msg.header.stamp    = imu_msg.header.stamp;
@@ -98,10 +101,10 @@ void ImuSensor::processMeasurementData(
   tf_msg.transform.translation.y = 0.0;
   tf_msg.transform.translation.z = 0.0;
 
-  tf_msg.transform.rotation.x = orientation.x();
-  tf_msg.transform.rotation.y = orientation.y();
-  tf_msg.transform.rotation.z = orientation.z();
-  tf_msg.transform.rotation.w = orientation.w();
+  tf_msg.transform.rotation.x = without_yaw.x();
+  tf_msg.transform.rotation.y = without_yaw.y();
+  tf_msg.transform.rotation.z = without_yaw.z();
+  tf_msg.transform.rotation.w = without_yaw.w();
 
   _tf_broadcaster->sendTransform(tf_msg);
 }

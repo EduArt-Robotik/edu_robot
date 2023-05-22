@@ -60,6 +60,7 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterfa
 {
   _parameter = get_robot_ros_parameter(*this);
 
+  // Publisher
   _pub_odometry = create_publisher<nav_msgs::msg::Odometry>(
     "odometry",
     rclcpp::QoS(2).reliable().durability_volatile()
@@ -73,15 +74,13 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterfa
     rclcpp::QoS(2).reliable().transient_local()
   );
 
+  // Services
   _srv_set_mode = create_service<edu_robot::srv::SetMode>(
     "set_mode",
     std::bind(&Robot::callbackServiceSetMode, this, std::placeholders::_1, std::placeholders::_2)
   );
-  // _srv_get_kinematic_description = create_service<edu_robot::srv::GetKinematicDescription>(
-  //   "get_kinematic_description",
-  //   std::bind(&Robot::callbackServiceGetKinematicDescription, this, std::placeholders::_1, std::placeholders::_2)
-  // );
 
+  // Subscriptions
   _sub_twist = create_subscription<geometry_msgs::msg::Twist>(
     "cmd_vel",
     rclcpp::QoS(2).best_effort().durability_volatile(),
@@ -93,6 +92,7 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterfa
     std::bind(&Robot::callbackSetLightingColor, this, std::placeholders::_1)
   );
 
+  // Timers
   _timer_status_report = create_wall_timer(100ms, std::bind(&Robot::processStatusReport, this));
   _timer_tf_publishing = create_wall_timer(100ms, std::bind(&Robot::processTfPublishing, this));
   _timer_watch_dog = create_wall_timer(500ms, std::bind(&Robot::processWatchDogBarking, this));
@@ -310,25 +310,6 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
     return;
   }
 }
-
-// void Robot::callbackServiceGetKinematicDescription(
-//   const std::shared_ptr<edu_robot::srv::GetKinematicDescription::Request> request,
-//   std::shared_ptr<edu_robot::srv::GetKinematicDescription::Response> response)
-// {
-//   (void)request;
-//   response->kinematic.k.cols = _kinematic_matrix.cols();
-//   response->kinematic.k.rows = _kinematic_matrix.rows();
-//   response->kinematic.k.data.resize(_kinematic_matrix.cols() * _kinematic_matrix.rows());
-
-//   for (Eigen::Index row = 0; row < _kinematic_matrix.rows(); ++row) {
-//     for (Eigen::Index col = 0; col < _kinematic_matrix.cols(); ++col) {
-//       response->kinematic.k.data[row * _kinematic_matrix.cols() + col] = _kinematic_matrix(row, col);
-//     }
-//   }
-//   for (const auto& motor : _motor_controllers) {
-//     response->kinematic.wheel_limits.push_back(motor.second->parameter().max_rpm);
-//   }
-// }
 
 void Robot::registerLighting(std::shared_ptr<Lighting> lighting)
 {

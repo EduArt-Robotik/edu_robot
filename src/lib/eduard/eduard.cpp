@@ -153,7 +153,7 @@ void Eduard::initialize(eduart::robot::HardwareComponentFactory& factory)
     "imu",
     getFrameIdPrefix() + "imu/base",
     getFrameIdPrefix() + Robot::_parameter.tf_footprint_frame,
-    tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.0, 0.0, 0.1)),
+    tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.0, 0.0, 0.04)),
     imu_parameter,
     getTfBroadcaster(),
     *this,
