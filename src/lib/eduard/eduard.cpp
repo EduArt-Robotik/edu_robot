@@ -26,8 +26,6 @@ static Eduard::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
   Eduard::Parameter parameter;
 
   // Declaring of Parameters
-  ros_node.declare_parameter<std::string>("tf_footprint_frame", parameter.tf_footprint_frame);
-
   ros_node.declare_parameter<float>("skid.length.x", parameter.skid.length.x);
   ros_node.declare_parameter<float>("skid.length.y", parameter.skid.length.y);
   ros_node.declare_parameter<float>("skid.wheel_diameter", parameter.skid.wheel_diameter);
@@ -37,8 +35,6 @@ static Eduard::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
   ros_node.declare_parameter<float>("mecanum.wheel_diameter", parameter.mecanum.wheel_diameter);
 
   // Reading Parameters
-  parameter.tf_footprint_frame = ros_node.get_parameter("tf_footprint_frame").as_string();
-
   parameter.skid.length.x = ros_node.get_parameter("skid.length.x").as_double();
   parameter.skid.length.y = ros_node.get_parameter("skid.length.y").as_double();
   parameter.skid.wheel_diameter = ros_node.get_parameter("skid.wheel_diameter").as_double();
@@ -156,8 +152,8 @@ void Eduard::initialize(eduart::robot::HardwareComponentFactory& factory)
   auto imu_sensor = std::make_shared<robot::ImuSensor>(
     "imu",
     getFrameIdPrefix() + "imu/base",
-    getFrameIdPrefix() + _parameter.tf_footprint_frame,
-    tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.0, 0.0, 0.1)),
+    getFrameIdPrefix() + Robot::_parameter.tf_footprint_frame,
+    tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.0, 0.0, 0.04)),
     imu_parameter,
     getTfBroadcaster(),
     *this,

@@ -54,7 +54,9 @@ protected:
 public:
   struct Parameter {
     std::string tf_base_frame = "base_link";
+    std::string tf_footprint_frame = "base_footprint";
     bool enable_collision_avoidance = true;
+    bool publish_tf_odom = true;
     processing::CollisionAvoidance::Parameter collision_avoidance;
   };
 

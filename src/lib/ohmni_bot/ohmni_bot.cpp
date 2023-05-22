@@ -25,15 +25,11 @@ static OhmniBot::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
   OhmniBot::Parameter parameter;
 
   // Declaring of Parameters
-  ros_node.declare_parameter<std::string>("tf_footprint_frame", parameter.tf_footprint_frame);
-
   ros_node.declare_parameter<float>("mecanum.length.x", parameter.mecanum.length.x);
   ros_node.declare_parameter<float>("mecanum.length.y", parameter.mecanum.length.y);
   ros_node.declare_parameter<float>("mecanum.wheel_diameter", parameter.mecanum.wheel_diameter);
 
   // Reading Parameters
-  parameter.tf_footprint_frame = ros_node.get_parameter("tf_footprint_frame").as_string();
-
   parameter.mecanum.length.x = ros_node.get_parameter("mecanum.length.x").as_double();
   parameter.mecanum.length.y = ros_node.get_parameter("mecanum.length.y").as_double();
   parameter.mecanum.wheel_diameter = ros_node.get_parameter("mecanum.wheel_diameter").as_double();
@@ -83,7 +79,7 @@ void OhmniBot::initialize(eduart::robot::HardwareComponentFactory& factory)
   auto imu_sensor = std::make_shared<robot::ImuSensor>(
     "imu",
     getFrameIdPrefix() + "imu/base",
-    getFrameIdPrefix() + _parameter.tf_footprint_frame,
+    getFrameIdPrefix() + Robot::_parameter.tf_footprint_frame,
     tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.0, 0.0, 0.1)),
     imu_parameter,
     getTfBroadcaster(),

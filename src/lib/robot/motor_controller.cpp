@@ -63,7 +63,7 @@ MotorController::MotorController(const std::string& name, const std::uint8_t id,
     std::bind(&MotorController::processMeasurementData, this, std::placeholders::_1)
   );
   _pub_joint_state = ros_node.create_publisher<sensor_msgs::msg::JointState>(
-    "joint_states",
+    "/joint_states",
     rclcpp::QoS(2).reliable().durability_volatile()
   );
 }

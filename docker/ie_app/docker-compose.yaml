@@ -1,0 +1,24 @@
+version: "2.4"
+
+services:
+    eduard-ipc127e:
+        build: ../ipc127e
+        image: eduard-ipc127e-ie-app
+        container_name: eduard-ipc127e-ie-app-0.2.0
+        restart: on-failure
+        privileged: true
+        ipc: host
+        pid: host
+        mem_limit: 300mb
+        networks:
+            - proxy-redirect
+        volumes:
+            - './publish/:/publish/'
+            - './cfg-data/:/cfg-data/'
+        devices:
+            - '/dev:/dev'
+
+networks:
+    proxy-redirect:
+        external:
+            name: proxy-redirect

@@ -18,6 +18,7 @@ ImuSensor::Parameter ImuSensor::get_parameter(
 
   ros_node.declare_parameter<bool>(
     sensor_prefix + ".raw_data_mode", default_parameter.raw_data_mode);
+  ros_node.declare_parameter<bool>(sensor_prefix + "publish_tf", default_parameter.publish_tf);
   ros_node.declare_parameter<float>(
     sensor_prefix + ".fusion_weight", default_parameter.fusion_weight);
   ros_node.declare_parameter<float>(
@@ -30,6 +31,7 @@ ImuSensor::Parameter ImuSensor::get_parameter(
     sensor_prefix + ".tf_frame_rotated", default_parameter.rotated_frame);
 
   parameter.raw_data_mode = ros_node.get_parameter(sensor_prefix + ".raw_data_mode").as_bool();
+  parameter.publish_tf = ros_node.get_parameter(sensor_prefix + "publish_tf").as_bool();
   parameter.fusion_weight = ros_node.get_parameter(sensor_prefix + ".fusion_weight").as_double();
   parameter.mount_orientation.roll = ros_node.get_parameter(
     sensor_prefix + ".mounting_orientation.roll").as_double();
@@ -98,10 +100,19 @@ void ImuSensor::processMeasurementData(
   tf_msg.transform.translation.y = 0.0;
   tf_msg.transform.translation.z = 0.0;
 
-  tf_msg.transform.rotation.x = orientation.x();
-  tf_msg.transform.rotation.y = orientation.y();
-  tf_msg.transform.rotation.z = orientation.z();
-  tf_msg.transform.rotation.w = orientation.w();
+  if (_parameter.publish_tf) {
+    tf_msg.transform.rotation.x = orientation.x();
+    tf_msg.transform.rotation.y = orientation.y();
+    tf_msg.transform.rotation.z = orientation.z();
+    tf_msg.transform.rotation.w = orientation.w();
+  }
+  else {
+    // publishing zero rotation to keep tf tree valid
+    tf_msg.transform.rotation.x = 0.0;
+    tf_msg.transform.rotation.y = 0.0;
+    tf_msg.transform.rotation.z = 0.0;
+    tf_msg.transform.rotation.w = 1.0;
+  }
 
   _tf_broadcaster->sendTransform(tf_msg);
 }
