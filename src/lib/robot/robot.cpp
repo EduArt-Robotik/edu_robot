@@ -38,6 +38,7 @@ static Robot::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
   // Declare Parameters
   ros_node.declare_parameter<std::string>("tf_base_frame", parameter.tf_base_frame);
   ros_node.declare_parameter<std::string>("tf_footprint_frame", parameter.tf_footprint_frame);
+  ros_node.declare_parameter<bool>("publish_tf_odom", parameter.publish_tf_odom);
   ros_node.declare_parameter<bool>("collision_avoidance.enable", parameter.enable_collision_avoidance);
   ros_node.declare_parameter<float>("collision_avoidance.distance_reduce_velocity", parameter.collision_avoidance.distance_reduce_velocity);
   ros_node.declare_parameter<float>("collision_avoidance.distance_velocity_zero", parameter.collision_avoidance.distance_velocity_zero);
@@ -45,6 +46,7 @@ static Robot::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
   // Get Parameter Values
   parameter.tf_base_frame = ros_node.get_parameter("tf_base_frame").as_string();
   parameter.tf_footprint_frame = ros_node.get_parameter("tf_footprint_frame").as_string();
+  parameter.publish_tf_odom = ros_node.get_parameter("publish_tf_odom").as_bool();
   parameter.enable_collision_avoidance = ros_node.get_parameter("collision_avoidance.enable").as_bool();
   parameter.collision_avoidance.distance_reduce_velocity = ros_node.get_parameter("collision_avoidance.distance_reduce_velocity").as_double();
   parameter.collision_avoidance.distance_velocity_zero = ros_node.get_parameter("collision_avoidance.distance_velocity_zero").as_double();
@@ -175,14 +177,16 @@ void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> tw
     }
 
     const Eigen::Vector3f velocity_measured = _inverse_kinematic_matrix * radps_measured;
-
     _odometry_component->process(velocity_measured);
     _pub_odometry->publish(_odometry_component->getOdometryMessage(
       getFrameIdPrefix() + _parameter.tf_footprint_frame, getFrameIdPrefix() + "odom"
     ));
-    _tf_broadcaster->sendTransform(_odometry_component->getTfMessage(
-      getFrameIdPrefix() + _parameter.tf_footprint_frame, getFrameIdPrefix() + "odom"
-    ));
+
+    if (_parameter.publish_tf_odom) {
+      _tf_broadcaster->sendTransform(_odometry_component->getTfMessage(
+        getFrameIdPrefix() + _parameter.tf_footprint_frame, getFrameIdPrefix() + "odom"
+      ));
+    }
   }
   catch (HardwareError& ex) {
     RCLCPP_ERROR_STREAM(get_logger(), "Hardware error occurred while trying to set new values for motor controller."
