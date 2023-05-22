@@ -71,10 +71,10 @@ void IotShield::processStatusReport()
   _report.voltage.mcu = uart::message::ShieldResponse::voltage(buffer);
   _report.current.mcu = uart::message::ShieldResponse::current(buffer);
   _report.rpm.resize(4u);
-  _report.rpm[0] = uart::message::ShieldResponse::rpm0(buffer);
-  _report.rpm[1] = uart::message::ShieldResponse::rpm1(buffer);
-  _report.rpm[2] = uart::message::ShieldResponse::rpm2(buffer);
-  _report.rpm[3] = uart::message::ShieldResponse::rpm3(buffer);
+  _report.rpm[0] = -uart::message::ShieldResponse::rpm0(buffer);
+  _report.rpm[1] = -uart::message::ShieldResponse::rpm1(buffer);
+  _report.rpm[2] = -uart::message::ShieldResponse::rpm2(buffer);
+  _report.rpm[3] = -uart::message::ShieldResponse::rpm3(buffer);
   
   _status_report_ready = true;
   sendInputValue(_report.voltage.mcu);

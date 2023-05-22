@@ -14,6 +14,9 @@ class Rpm
 {
 public:
   static constexpr Rpm fromRps(const float value) { return Rpm(value * 60.0f); }
+  static constexpr Rpm fromRadps(const float value) {
+    return Rpm::fromRps(value / (2.0f * M_PI));
+  }
 
   constexpr Rpm(const float rpm = 0.0f) : _value(rpm) { }
 

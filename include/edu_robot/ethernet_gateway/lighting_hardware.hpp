@@ -15,7 +15,7 @@ namespace ethernet {
 
 class EthernetCommunicator;
 
-class LightingHardware : public HardwareComponentInterface<Color, robot::Lighting::Mode>
+class LightingHardware : public Lighting::ComponentInterface
                        , public eduart::robot::ethernet::EthernetGatewayTxDevice
 {
 public:
@@ -23,6 +23,7 @@ public:
   ~LightingHardware() override;
 
   void processSetValue(const Color& color, const robot::Lighting::Mode& mode) override;
+  void initialize(const Lighting::Parameter& parameter) override;
 };
 
 } // end namespace ethernet

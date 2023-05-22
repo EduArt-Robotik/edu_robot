@@ -26,7 +26,7 @@ EthernetGatewayShield::EthernetGatewayShield(char const* const ip_address, const
 {
   auto request = Request::make_request<tcp::message::GetFirmwareVersion>();
   auto future_response = _communicator->sendRequest(std::move(request));
-  wait_for_future(future_response, 100ms);
+  wait_for_future(future_response, 200ms);
 
   auto got = future_response.get();
 
@@ -70,6 +70,7 @@ void EthernetGatewayShield::disable()
 
 RobotStatusReport EthernetGatewayShield::getStatusReport()
 {
+  // \todo implement status report
   return { };
 }
 

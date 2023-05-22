@@ -9,6 +9,7 @@
 #include "edu_robot/rotation_per_minute.hpp"
 #include "edu_robot/angle.hpp"
 
+#include <mutex>
 #include <rclcpp/node.hpp>
 #include <rclcpp/clock.hpp>
 #include <rclcpp/publisher.hpp>
@@ -29,6 +30,7 @@ namespace robot {
 class MotorController
 {
 public:
+
   struct Parameter
   {
     bool inverted = false;
@@ -38,6 +40,7 @@ public:
     float threshold_stall_check = 0.25f;
     std::uint32_t control_frequency = 16000;
     bool encoder_inverted = false;
+    bool closed_loop = true;
 
     float kp = 0.5f;
     float ki = 5.0f;
@@ -49,10 +52,13 @@ public:
     bool isValid() const { return true; } // \todo implement properly
   };
 
+  using ComponentInterface = HardwareComponentInterface<Parameter, Rpm>;
+  using SensorInterface = HardwareSensorInterface<Parameter, Rpm>;
+
   MotorController(const std::string& name, const std::uint8_t id, const Parameter& parameter,
                   const std::string& urdf_joint_name, rclcpp::Node& ros_node,
-                  std::shared_ptr<HardwareComponentInterface<Rpm>> hardware_component_interface,
-                  std::shared_ptr<HardwareSensorInterface<Rpm>> hardware_sensor_interface);
+                  std::shared_ptr<ComponentInterface> hardware_component_interface,
+                  std::shared_ptr<SensorInterface> hardware_sensor_interface);
   virtual ~MotorController();
 
   inline const std::string& name() const { return _name; }
@@ -61,15 +67,19 @@ public:
    * \brief Sets RPM of this motor. Positive RPM 
    */
   void setRpm(const Rpm rpm);
-  inline Rpm getMeasuredRpm() const { return _measured_rpm; }
+  inline Rpm getMeasuredRpm() const {
+    std::lock_guard guard(_mutex_access_data);
+    return _measured_rpm;
+  }
 
-  static MotorController::Parameter get_motor_controller_parameter(
-    const std::string& name, const MotorController::Parameter default_parameter, rclcpp::Node& ros_node);
+  static MotorController::Parameter get_parameter(
+    const std::string& name, const MotorController::Parameter& default_parameter, rclcpp::Node& ros_node);
+  const Parameter& parameter() const { return _parameter; }    
 
 private:
   void processMeasurementData(const Rpm measurement);
 
-  Parameter _parameter;
+  const Parameter _parameter;
   Rpm _set_rpm;
   Rpm _measured_rpm;
   std::string _name;
@@ -79,9 +89,10 @@ private:
   std::shared_ptr<rclcpp::Clock> _clock;
   rclcpp::Time _stamp_last_measurement;
   Angle0To2Pi _current_wheel_position = 0.0;
+  mutable std::mutex _mutex_access_data;
 
-  std::shared_ptr<HardwareComponentInterface<Rpm>> _hardware_component_interface;
-  std::shared_ptr<HardwareSensorInterface<Rpm>> _hardware_sensor_interface;
+  std::shared_ptr<ComponentInterface> _hardware_component_interface;
+  std::shared_ptr<SensorInterface> _hardware_sensor_interface;
 };
 
 } // end namespace robot

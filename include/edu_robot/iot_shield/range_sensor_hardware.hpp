@@ -16,21 +16,17 @@ namespace eduart {
 namespace robot {
 namespace iotbot {
 
-class RangeSensorHardware : public HardwareSensorInterface<float>
+class RangeSensorHardware : public RangeSensor::SensorInterface
                           , public IotShieldRxDevice
 {
 public:
-  struct Parameter {
-
-  };
-
-  RangeSensorHardware(const std::string& hardware_name, const std::uint8_t id, const Parameter& parameter);
+  RangeSensorHardware(const std::string& hardware_name, const std::uint8_t id);
   ~RangeSensorHardware() override = default;
 
   void processRxData(const uart::message::RxMessageDataBuffer& data) override;
+  void initialize(const RangeSensor::Parameter& parameter) override;
 
 private:
-  Parameter _parameter;
   std::uint8_t _id;
 };               
 

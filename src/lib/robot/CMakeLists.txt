@@ -1,5 +1,6 @@
 ## Build Library needed for ROS Nodes
 # Library Eduart Robot
+
 add_library(eduart-robot
   robot.cpp
   lighting.cpp
@@ -9,9 +10,9 @@ add_library(eduart-robot
   imu_sensor.cpp
 )
 target_link_libraries(eduart-robot
-  # ${CPP_TYPESUPPORT_TARGET} needed for ROS distro humble and newer. TODO: handle this somehow!
   Eigen3::Eigen
   processing-component
+  "${cpp_typesupport_target}"
 )
 target_compile_features(eduart-robot PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 target_include_directories(eduart-robot PUBLIC
@@ -29,4 +30,5 @@ ament_target_dependencies(
   "geometry_msgs"
   "sensor_msgs"
 )
-rosidl_target_interfaces(eduart-robot ${PROJECT_NAME} "rosidl_typesupport_cpp")
+# Below ROS humble this line is needed...
+# rosidl_target_interfaces(eduart-robot ${PROJECT_NAME} "rosidl_typesupport_cpp")

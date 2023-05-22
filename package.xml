@@ -2,10 +2,10 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>edu_robot</name>
-  <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <version>0.2.0</version>
+  <description>ROS2 Software for controlling Eduart robots.</description>
   <maintainer email="christian.wendt@eduart-robotik.com">user</maintainer>
-  <license>TODO: License declaration</license>
+  <license>BSD 3-Clause</license>
 
   <buildtool_depend>ament_cmake_ros</buildtool_depend>
 

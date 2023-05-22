@@ -7,7 +7,7 @@
 
 #include <edu_robot/robot.hpp>
 
-#include "edu_robot/eduard/eduard_hardware_component_factory.hpp"
+#include <edu_robot/hardware_component_factory.hpp>
 
 #include <memory>
 #include <string>
@@ -27,8 +27,6 @@ class Eduard : public robot::Robot
 {
 public:
   struct Parameter {
-    std::string tf_footprint_frame = "base_footprint";
-
     struct {
       struct {
         float x = 0.25f;
@@ -45,13 +43,14 @@ public:
     } mecanum;    
   };
 
-  Eduard(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface);
+  Eduard(
+    const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface, const std::string& ns = "");
   ~Eduard() override;
 
 protected:
   Eigen::MatrixXf getKinematicMatrix(const Mode mode) const override;
   // Needs to be called by derived classes.
-  void initialize(EduardHardwareComponentFactory& factory);
+  void initialize(eduart::robot::HardwareComponentFactory& factory) override;
 
   Parameter _parameter;
 };

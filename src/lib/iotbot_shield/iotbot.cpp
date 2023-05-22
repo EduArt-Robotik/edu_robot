@@ -22,7 +22,10 @@ namespace iotbot {
 using namespace std::chrono_literals;
 
 IotBot::IotBot()
-  : eduart::robot::eduard::Eduard("IotBot", std::make_unique<IotShield>("/dev/ttyS1"))
+  : eduart::robot::eduard::Eduard(
+      "eduard",
+      std::make_unique<IotShield>("/dev/ttyS1")
+    )
 {
   auto iot_shield = std::dynamic_pointer_cast<IotShield>(_hardware_interface);
   auto factory = IotBotHardwareComponentFactory(iot_shield);
@@ -35,18 +38,14 @@ IotBot::IotBot()
          .addLighting("back", "back_lighting")
          .addLighting("all", "all_lighting")
          // Motor Controller
-         .addMotorController("motor", "motor_hardware", robot::MotorController::Parameter{ })
+         .addMotorController("motor", "motor_hardware")
          // Range Sensor
-         .addRangeSensor("range/front/left", "range/front/left/hardware",
-                         0u, RangeSensorHardware::Parameter{ })
-         .addRangeSensor("range/front/right", "range/front/right/hardware",
-                         1u, RangeSensorHardware::Parameter{ })
-         .addRangeSensor("range/rear/left", "range/rear/left/hardware",
-                         2u, RangeSensorHardware::Parameter{ })
-         .addRangeSensor("range/rear/right", "range/rear/right/hardware",
-                         3u, RangeSensorHardware::Parameter{ })
+         .addRangeSensor("range/front/left", "range/front/left/hardware", 0u)
+         .addRangeSensor("range/front/right", "range/front/right/hardware", 1u)
+         .addRangeSensor("range/rear/left", "range/rear/left/hardware", 2u)
+         .addRangeSensor("range/rear/right", "range/rear/right/hardware", 3u)
          // IMU Sensor
-         .addImuSensor("imu", "imu_hardware", robot::ImuSensor::Parameter{ });
+         .addImuSensor("imu", "imu_hardware");
 
   initialize(factory);
   iot_shield->registerComponentInput(_detect_charging_component);

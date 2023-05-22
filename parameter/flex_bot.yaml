@@ -1,0 +1,105 @@
+/**:
+  ros__parameters:
+    collision_avoidance:
+      distance_reduce_velocity: 0.40
+      distance_velocity_zero: 0.05
+      enable: false
+    motor_a:
+      control_frequency: 16000
+      encoder_inverted: true
+      encoder_ratio: 64.0
+      gear_ratio: 100.0
+      inverted: false
+      max_rpm: 100.0
+      pid:
+        kd: 0.0
+        ki: 5.0
+        kp: 0.5
+      weight_low_pass_encoder: 0.3
+      weight_low_pass_set_point: 0.2
+    motor_b:
+      control_frequency: 16000
+      encoder_inverted: true
+      encoder_ratio: 64.0
+      gear_ratio: 100.0
+      inverted: false
+      max_rpm: 100.0
+      pid:
+        kd: 0.0
+        ki: 5.0
+        kp: 0.5
+      weight_low_pass_encoder: 0.3
+      weight_low_pass_set_point: 0.2
+    motor_c:
+      control_frequency: 16000
+      encoder_inverted: true
+      encoder_ratio: 64.0
+      gear_ratio: 100.0
+      inverted: false
+      max_rpm: 100.0
+      pid:
+        kd: 0.0
+        ki: 5.0
+        kp: 0.5
+      weight_low_pass_encoder: 0.3
+      weight_low_pass_set_point: 0.2
+    motor_d:
+      control_frequency: 16000
+      encoder_inverted: true
+      encoder_ratio: 64.0
+      gear_ratio: 100.0
+      inverted: false
+      max_rpm: 100.0
+      pid:
+        kd: 0.0
+        ki: 5.0
+        kp: 0.5
+      weight_low_pass_encoder: 0.3
+      weight_low_pass_set_point: 0.2
+    motor_e:
+      control_frequency: 16000
+      encoder_inverted: true
+      encoder_ratio: 64.0
+      gear_ratio: 100.0
+      inverted: false
+      max_rpm: 100.0
+      pid:
+        kd: 0.0
+        ki: 5.0
+        kp: 0.5
+      weight_low_pass_encoder: 0.3
+      weight_low_pass_set_point: 0.2
+    motor_f:
+      control_frequency: 16000
+      encoder_inverted: true
+      encoder_ratio: 64.0
+      gear_ratio: 100.0
+      inverted: false
+      max_rpm: 100.0
+      pid:
+        kd: 0.0
+        ki: 5.0
+        kp: 0.5
+      weight_low_pass_encoder: 0.3
+      weight_low_pass_set_point: 0.2
+    qos_overrides:
+      /parameter_events:
+        publisher:
+          depth: 1000
+          durability: volatile
+          history: keep_last
+          reliability: reliable
+      /tf:
+        publisher:
+          depth: 100
+          durability: volatile
+          history: keep_last
+          reliability: reliable
+    skid:
+      length:
+        x: 0.25
+        y: 0.3199999928474426
+      wheel_diameter: 0.17000000178813934
+    tf_base_frame: base_link
+    tf_footprint_frame: base_footprint
+    use_sim_time: false

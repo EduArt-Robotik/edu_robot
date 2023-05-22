@@ -7,13 +7,14 @@
 
 #include <functional>
 #include <memory>
+#include <rclcpp/node.hpp>
 
 namespace eduart {
 namespace robot {
 namespace ethernet {
 
-HardwareComponentFactory&
-HardwareComponentFactory::addLighting(const std::string& lighting_name, const std::string& hardware_name)
+HardwareComponentFactory& HardwareComponentFactory::addLighting(
+  const std::string& lighting_name, const std::string& hardware_name)
 {
   _lighting_hardware[lighting_name] = std::make_unique<ethernet::LightingHardware>(
     hardware_name, _shield->getCommunicator()
@@ -22,13 +23,11 @@ HardwareComponentFactory::addLighting(const std::string& lighting_name, const st
   return *this;
 } 
 
-HardwareComponentFactory&
-HardwareComponentFactory::addMotorController(
-  const std::string& motor_name, const std::string& hardware_name,
-  const eduart::robot::MotorController::Parameter& parameter)
+HardwareComponentFactory& HardwareComponentFactory::addMotorController(
+  const std::string& motor_name, const std::string& hardware_name)
 {
   auto compound_motor = std::make_shared<CompoundMotorControllerHardware>(
-    hardware_name + "_a", hardware_name + "_b", parameter, 0, _shield->getCommunicator()
+    hardware_name + "_a", hardware_name + "_b", 0, _shield->getCommunicator()
   );
 
   _motor_controller_hardware[motor_name + "_a"] = compound_motor->dummyMotorController();
@@ -37,33 +36,72 @@ HardwareComponentFactory::addMotorController(
   _motor_sensor_hardware[motor_name + "_b"] = compound_motor;
 
   compound_motor = std::make_shared<CompoundMotorControllerHardware>(
-    hardware_name + "_c", hardware_name + "_d", parameter, 1, _shield->getCommunicator()
+    hardware_name + "_c", hardware_name + "_d", 1, _shield->getCommunicator()
   );  
   _motor_controller_hardware[motor_name + "_c"] = compound_motor->dummyMotorController();
   _motor_controller_hardware[motor_name + "_d"] = compound_motor;
   _motor_sensor_hardware[motor_name + "_c"] = compound_motor->dummyMotorController();
   _motor_sensor_hardware[motor_name + "_d"] = compound_motor;
 
+  compound_motor = std::make_shared<CompoundMotorControllerHardware>(
+    hardware_name + "_e", hardware_name + "_f", 2, _shield->getCommunicator()
+  );  
+  _motor_controller_hardware[motor_name + "_e"] = compound_motor->dummyMotorController();
+  _motor_controller_hardware[motor_name + "_f"] = compound_motor;
+  _motor_sensor_hardware[motor_name + "_e"] = compound_motor->dummyMotorController();
+  _motor_sensor_hardware[motor_name + "_f"] = compound_motor;
+
   // _shield->registerIotShieldRxDevice(compound_motor);
 
   return *this;
 }
 
-HardwareComponentFactory&
-HardwareComponentFactory::addRangeSensor(const std::string& sensor_name, const std::string& hardware_name,
-                                               const std::uint8_t id, const RangeSensorHardware::Parameter& parameter)
+HardwareComponentFactory& HardwareComponentFactory::addSingleChannelMotorController(
+  const std::string& motor_name, const std::string& hardware_name)
 {
-  auto range_sensor_hardware = std::make_shared<RangeSensorHardware>(hardware_name, id, parameter);
+  auto motor_controller = std::make_shared<SingleChannelMotorControllerHardware>(
+    hardware_name + "_a", 0, _shield->getCommunicator()
+  );
+  _motor_controller_hardware[motor_name + "_a"] = motor_controller;
+  _motor_sensor_hardware[motor_name + "_a"] = motor_controller;
+
+  motor_controller = std::make_shared<SingleChannelMotorControllerHardware>(
+    hardware_name + "_b", 1, _shield->getCommunicator()
+  );
+  _motor_controller_hardware[motor_name + "_b"] = motor_controller;
+  _motor_sensor_hardware[motor_name + "_b"] = motor_controller;
+
+  motor_controller = std::make_shared<SingleChannelMotorControllerHardware>(
+    hardware_name + "_c", 2, _shield->getCommunicator()
+  );
+  _motor_controller_hardware[motor_name + "_c"] = motor_controller;
+  _motor_sensor_hardware[motor_name + "_c"] = motor_controller;
+
+  motor_controller = std::make_shared<SingleChannelMotorControllerHardware>(
+    hardware_name + "_d", 3, _shield->getCommunicator()
+  );    
+  _motor_controller_hardware[motor_name + "_d"] = motor_controller;
+  _motor_sensor_hardware[motor_name + "_d"] = motor_controller;
+
+  return *this;
+}
+
+HardwareComponentFactory& HardwareComponentFactory::addRangeSensor(
+  const std::string& sensor_name, const std::string& hardware_name, const std::uint8_t id, rclcpp::Node& ros_node)
+{
+  auto range_sensor_hardware = std::make_shared<RangeSensorHardware>(
+    hardware_name, id, ros_node, _shield->getCommunicator());
   // _shield->registerIotShieldRxDevice(range_sensor_hardware);
   _range_sensor_hardware[sensor_name] = range_sensor_hardware;
   return *this;
 }                                               
   
-HardwareComponentFactory&
-HardwareComponentFactory::addImuSensor(const std::string& sensor_name, const std::string& hardware_name,
-                                             const robot::ImuSensor::Parameter parameter)
+HardwareComponentFactory& HardwareComponentFactory::addImuSensor(
+  const std::string& sensor_name, const std::string& hardware_name, rclcpp::Node& ros_node)
 {
-  auto imu_hardware = std::make_shared<ImuSensorHardware>(hardware_name, parameter, _shield->getCommunicator());
+  auto imu_hardware = std::make_shared<ImuSensorHardware>(
+    hardware_name, ros_node, _shield->getCommunicator()
+  );
   // _shield->registerIotShieldRxDevice(imu_hardware);
   _imu_sensor_hardware[sensor_name] = imu_hardware;
   return *this;

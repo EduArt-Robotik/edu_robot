@@ -11,11 +11,9 @@ namespace eduart {
 namespace robot {
 namespace iotbot {
 
-RangeSensorHardware::RangeSensorHardware(const std::string& hardware_name, const std::uint8_t id, 
-                                         const Parameter& parameter)
+RangeSensorHardware::RangeSensorHardware(const std::string& hardware_name, const std::uint8_t id)
   : IotShieldDevice(hardware_name)
   , IotShieldRxDevice(hardware_name)
-  , _parameter(parameter)
   , _id(id)
 {
 
@@ -47,6 +45,11 @@ void RangeSensorHardware::processRxData(const uart::message::RxMessageDataBuffer
   default:
     throw std::runtime_error("Invalid id! Iot Shield can have ids 0 .. 3 only.");
   }
+}
+
+void RangeSensorHardware::initialize(const RangeSensor::Parameter& parameter)
+{
+  (void)parameter;
 }
 
 } // end namespace iotbot

@@ -6,28 +6,33 @@
 #pragma once
 
 #include <functional>
+#include <type_traits>
 
 namespace eduart {
 namespace robot {
 
-template <typename... DataType>
+template <typename Parameter, typename... Data>
 class HardwareComponentInterface
 {
 public:
   virtual ~HardwareComponentInterface() = default;
 
-  virtual void processSetValue(const DataType&... values) = 0;
+  virtual void processSetValue(const Data&... values) = 0;
+  virtual void initialize(const Parameter& parameter) = 0;
 };
 
-template <typename DataType>
+template <typename Parameter, typename... Data>
 class HardwareSensorInterface
 {
 public:
-  using ProcessMeasurementCallback = std::function<void(const DataType&)>;
+  using ProcessMeasurementCallback = std::function<void(const Data&...)>;
 
+  virtual ~HardwareSensorInterface() = default;
   void registerCallbackProcessMeasurementData(ProcessMeasurementCallback callback) {
     _callback_process_measurement = callback;
   }
+
+  virtual void initialize(const Parameter& parameter) = 0;
 
 protected:
   ProcessMeasurementCallback _callback_process_measurement;

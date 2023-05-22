@@ -8,7 +8,7 @@
 #include "edu_robot/iot_shield/iot_shield.hpp"
 #include "edu_robot/iot_shield/range_sensor_hardware.hpp"
 
-#include <edu_robot/eduard/eduard_hardware_component_factory.hpp>
+#include <edu_robot/hardware_component_factory.hpp>
 
 #include <map>
 #include <memory>
@@ -18,19 +18,17 @@ namespace eduart {
 namespace robot {
 namespace iotbot {
 
-class IotBotHardwareComponentFactory : public eduard::EduardHardwareComponentFactory
+class IotBotHardwareComponentFactory : public eduart::robot::HardwareComponentFactory
 {
 public:
   IotBotHardwareComponentFactory(std::shared_ptr<IotShield> shield) : _shield(shield) { }
   ~IotBotHardwareComponentFactory() override = default;
 
   IotBotHardwareComponentFactory& addLighting(const std::string& lighting_name, const std::string& hardware_name);
-  IotBotHardwareComponentFactory& addMotorController(const std::string& motor_name, const std::string& hardware_name,
-                                                     const eduart::robot::MotorController::Parameter& parameter);
-  IotBotHardwareComponentFactory& addRangeSensor(const std::string& sensor_name, const std::string& hardware_name,
-                                                 const std::uint8_t id, const RangeSensorHardware::Parameter& parameter);
-  IotBotHardwareComponentFactory& addImuSensor(const std::string& sensor_name, const std::string& hardware_name,
-                                               const robot::ImuSensor::Parameter parameter);
+  IotBotHardwareComponentFactory& addMotorController(const std::string& motor_name, const std::string& hardware_name);
+  IotBotHardwareComponentFactory& addRangeSensor(
+    const std::string& sensor_name, const std::string& hardware_name, const std::uint8_t id);
+  IotBotHardwareComponentFactory& addImuSensor(const std::string& sensor_name, const std::string& hardware_name);
 
 private:
   std::shared_ptr<IotShield> _shield;

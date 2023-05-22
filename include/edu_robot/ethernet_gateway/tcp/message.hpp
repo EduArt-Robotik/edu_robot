@@ -74,12 +74,12 @@ struct DataField {
       return data[0];
     }
     else if constexpr (size() == sizeof(std::uint16_t)) {
-      const std::uint16_t host_order = ::ntohs(data);
+      const std::uint16_t host_order = ::ntohs(*reinterpret_cast<const std::uint16_t*>(data));
       const void* data_address = static_cast<const void*>(&host_order);
       return *static_cast<const DataType*>(data_address);      
     }
     else if constexpr (size() == sizeof(std::uint32_t)) {
-      const std::uint32_t host_order = ::ntohl(data);
+      const std::uint32_t host_order = ::ntohl(*reinterpret_cast<const std::uint32_t*>(data));
       const void* data_address = static_cast<const void*>(&host_order);
       return *static_cast<const DataType*>(data_address);       
     }
@@ -171,6 +171,22 @@ inline constexpr auto make_message_search_pattern(const Byte sequence_number, co
   return search_pattern;
 }
 
+template <std::size_t... Indices, class... Elements>
+inline constexpr auto make_message_search_pattern(const std::tuple<Elements...>)
+{
+  constexpr std::size_t bytes = (std::tuple_element<Indices, std::tuple<Elements...>>::type::size() + ...);
+  std::array<Byte, bytes> search_pattern = { 0 };
+  auto it_search_pattern = search_pattern.begin();
+
+  ([&]{
+    const auto element_pattern = std::tuple_element<Indices, std::tuple<Elements...>>::type::makeSearchPattern();
+    std::copy(element_pattern.begin(), element_pattern.end(), it_search_pattern);
+    it_search_pattern += element_pattern.size();      
+  }(), ...);
+
+  return search_pattern;
+}
+
 } // end namespace impl
 
 // Specializations of Message Elements
@@ -245,10 +261,27 @@ public:
   }
   template <std::size_t Index>
   inline constexpr static auto deserialize(const RxMessageDataBuffer& rx_buffer) {
-    return MessageType::template deserialize<Index + 1>(rx_buffer);
+    return MessageType::template deserialize<Index + 3>(rx_buffer); // \todo clarify if + 3 is a bug
   }
 };
 
+template <class MeasurementId, class ...Elements>
+struct MeasurementFrame : public Message<element::StartByte, MeasurementId, Elements..., element::StopByte>
+{
+protected:
+  using MessageType = Message<element::StartByte, MeasurementId, Elements..., element::StopByte>;
+
+public:
+  using MessageType::size;
+
+  inline constexpr static auto makeSearchPattern() {
+    return element::impl::make_message_search_pattern<0, 1>(MessageType{});
+  }
+  template <std::size_t Index>
+  inline constexpr static auto deserialize(const RxMessageDataBuffer& rx_buffer) {
+    return MessageType::template deserialize<Index + 2>(rx_buffer);
+  }
+};
 
 } // end namespace message
 } // end namespace tcp
