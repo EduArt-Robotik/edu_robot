@@ -1,11 +1,42 @@
 # edu_robot
 
-Welcome to the alpha of EduArt ROS2 robot control software. In first place it provides a ROS2 node for controlling and monitoring the EduArt robots, at the moment Eduard as offroad (skid drive) is supported only. Mecanum kinematic will be supported soon. In future also a ROS2 Gazebo plugin is provided for an easy SIL test environment.
+Welcome to the EduArt ROS2 robot control software. In first place it provides a ROS2 node for controlling and monitoring the EduArt robots, most likely the robot Eduard in different hardware realizations like the IoT Bot or IPC Bot. There is also a [digital twin](https://github.com/EduArt-Robotik/edu_simulation) in the making, which is not yet feature complete but already the basic interface implements.
+
+This packages also designed to used in a robot fleet setup. Basically it is able to handle multiple robot instances at the same time using namespaces.
 
 > **_NOTE:_** For further help please visit our [Forum](https://forum.eduart-robotik.com) or write a e-mail at info@eduart-robotik.com.
 
 
-# Eduard's ROS Interfaces
+# EduArt's Robot ROS Interfaces
+
+A basic interface to the EduArt robots was defined. This interfaces are valid for all our robots. Following inputs are required for an operating robot:
+
+
+![EduArt's Robot Interfaces](documentation/image/eduart-robot-interfaces.png)
+
+## Topics
+
+| Description                     | Topic                    | Type  | Message Type |
+|---------------------------------|--------------------------|-----------|---------------------------|
+| Velocity Input                  | /eduard/cmd_vel            | Input | sensor_msgs/msg/Twist                |
+| Set Lighting Color/Mode         | /eduard/set_lighting_color | Input | edu_robot/msg/SetLightingColor       |
+| TF | /tf | Output | |
+| Measured Odometry | /eduard/odom | Output | nav_msgs/Odometry |
+| Robot Status Report            | /eduard/status_report | Output | edu_robot/msg/RobotStatusReport      |
+
+Note: "/eduard" in topic name is the default namespace if no other was defined. This namespace can be freely defined. Please take into account that the topic name changes according to the namespace.
+
+## Services
+
+| Description                     | Service                  | Message type                         |
+|---------------------------------|--------------------------|--------------------------------------|
+| Set Mode Service (used for Enable robot) | /eduard/set_mode       | edu_robot/srv/SetMode                |
+
+Note: "/eduard" in service name is the default namespace if no other was defined. This namespace can be freely defined. Please take into account that the service name changes according to the namespace.
+
+
+
+# EudArt's Robot Eduard ROS Interface
 
 Eduard's control node provides following interfaces via ROS topics and services:
 
@@ -23,9 +54,7 @@ Eduard's control node provides following interfaces via ROS topics and services:
 | Join States of the Wheels       | /joint_states            | sensor_msgs/msg/JointState           |
 
 
-| Description                     | Service                  | Message type                         |
-|---------------------------------|--------------------------|--------------------------------------|
-| Set Mode Service (used for Enable robot) | /set_mode       | edu_robot/srv/SetMode                |
+
 
 
 # Controlling the Robot
