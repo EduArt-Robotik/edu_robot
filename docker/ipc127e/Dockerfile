@@ -48,6 +48,6 @@ RUN export RMW_IMPLEMENTATION=rmw_fastrtps_cpp \
 
 # launch control node and joy interpreter
 CMD export RMW_IMPLEMENTATION=rmw_fastrtps_cpp \
-    && export FASTRTPS_DEFAULT_PROFILES_FILE=/home/ipcbot_ws/fastrtps_profile.xml \
-    && source /home/ipcbot_ws/install/setup.bash \
+    && export FASTRTPS_DEFAULT_PROFILES_FILE=/home/user/ipcbot_ws/fastrtps_profile.xml \
+    && source /home/user/ipcbot_ws/install/setup.bash \
     && ros2 launch edu_robot eduard-ipc127e.launch.py

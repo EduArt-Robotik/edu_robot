@@ -10,6 +10,8 @@ services:
         ipc: host
         pid: host
         mem_limit: 300mb
+        environment:
+            - EDU_ROBOT_NAMESPACE=eduard/red
         networks:
             - proxy-redirect
         volumes:
@@ -17,8 +19,10 @@ services:
             - './cfg-data/:/cfg-data/'
         devices:
             - '/dev:/dev'
+        ports:
+            - "1234:1234/udp"
+            - "7650:65535/udp"
 
 networks:
     proxy-redirect:
-        external:
-            name: proxy-redirect
+        external: true
