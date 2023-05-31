@@ -1,18 +1,35 @@
-FROM ros:humble-ros-base-jammy
+FROM ubuntu:jammy
 
 # using bash
 SHELL ["/bin/bash", "-c"]
+ENV UBUNTU_DISTRO jammy
 ENV ROS_DISTRO humble
 ENV USER user
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN \
     apt-get update \
-    && apt-get install -y software-properties-common
-
-# install Joystick Driver for ROS2
-RUN apt-get update \
-    && sudo apt-get install -y \
+    && apt-get install -q -y --no-install-recommends \
+    apt-utils \
+    software-properties-common \
+    nano \
+    curl \
+    gnupg \
+    git \
+    build-essential \
+    sudo \
+########################################################
+# Install ROS
+## Get package archive key and ROS source list entry.
+    && curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg \
+    && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $UBUNTU_DISTRO main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null \
+    && apt-get update \
+########################################################
+# Install ROS packages
+    && apt-get install -q -y --no-install-recommends \
+    ros-$ROS_DISTRO-ros-base \
+    python3-colcon-common-extensions \
+    software-properties-common \
     ros-$ROS_DISTRO-rmw-fastrtps-cpp \
     ros-$ROS_DISTRO-fastrtps
 

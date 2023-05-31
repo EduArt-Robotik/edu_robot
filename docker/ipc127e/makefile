@@ -11,5 +11,4 @@ all: download-sources build-docker
 
 clean:
 	rm -rf edu_robot
-	rm -rf edu_robot_control
-	rm -rf joystick_drivers
+
