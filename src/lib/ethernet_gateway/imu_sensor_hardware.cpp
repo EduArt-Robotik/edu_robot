@@ -61,12 +61,17 @@ void ImuSensorHardware::initialize(const ImuSensor::Parameter& parameter)
 
 void ImuSensorHardware::processMeasurement()
 {
-  // Get measurement data from ethernet gateway and parse it to processing pipeline.
-  auto request = Request::make_request<GetImuMeasurement>();
-  auto future_response = _communicator->sendRequest(std::move(request));
-  wait_for_future(future_response, 100ms);
+  try {
+    // Get measurement data from ethernet gateway and parse it to processing pipeline.
+    auto request = Request::make_request<GetImuMeasurement>();
+    auto future_response = _communicator->sendRequest(std::move(request));
+    wait_for_future(future_response, 100ms);
 
-  processRxData(future_response.get().response());
+    processRxData(future_response.get().response());
+  }
+  catch (...) {
+    // \todo handle error case!
+  }
 }
 
 } // end namespace ethernet

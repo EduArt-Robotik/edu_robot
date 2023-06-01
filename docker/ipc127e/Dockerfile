@@ -34,7 +34,7 @@ RUN \
     ros-$ROS_DISTRO-fastrtps
 
 # set up iotbot workspace
-RUN mkdir -p /home/$USER/ipcbot_ws/src/iotbot
+RUN mkdir -p /home/$USER/ipcbot_ws/src
 
 COPY ./edu_robot /home/$USER/ipcbot_ws/src/edu_robot
 COPY ./fastrtps_profile.xml /home/$USER/ipcbot_ws

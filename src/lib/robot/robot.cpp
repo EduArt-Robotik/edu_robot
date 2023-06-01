@@ -379,13 +379,23 @@ void Robot::processWatchDogBarking()
   // HACK: only used for indication of charging at the moment
   // _mode = Mode::INACTIVE;
   // setLightingForMode(_mode);
-  static bool last_state = _detect_charging_component->isCharging();
+  try {
+    static bool last_state = false;
 
-  if (last_state == false && _detect_charging_component->isCharging() == true) {
-    setLightingForMode(Mode::INACTIVE);
+    if (last_state == false && _detect_charging_component->isCharging() == true) {
+      setLightingForMode(Mode::INACTIVE);
+    }
+
+    last_state = _detect_charging_component->isCharging();
   }
-
-  last_state = _detect_charging_component->isCharging();
+  catch (HardwareError& ex) {
+    RCLCPP_ERROR_STREAM(get_logger(), "Hardware error occurred while trying to process timercallback. what() = " << ex.what());                                      
+    return;
+  }
+  catch (std::exception& ex) {
+    RCLCPP_ERROR_STREAM(get_logger(), "Error occurred while trying to process timercallback. what() = " << ex.what());
+    return;
+  }  
 }
 
 void Robot::setLightingForMode(const Mode mode)
