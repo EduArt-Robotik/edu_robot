@@ -5,7 +5,7 @@
             <transport_id>EduartUDPTransport</transport_id>
             <type>UDPv4</type>
             <interfaceWhiteList>
-                <address>enp2s0</address>
+                <address>eno2</address>
             </interfaceWhiteList>
         </transport_descriptor>
     </transport_descriptors>

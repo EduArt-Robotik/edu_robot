@@ -44,12 +44,17 @@ void RangeSensorHardware::initialize(const RangeSensor::Parameter& parameter)
 
 void RangeSensorHardware::processMeasurement()
 {
-  // Get measurement data from ethernet gateway and parse it to processing pipeline.
-  auto request = Request::make_request<GetDistanceMeasurement>(_id);
-  auto future_response = _communicator->sendRequest(std::move(request));
-  wait_for_future(future_response, 100ms);
+  try {
+    // Get measurement data from ethernet gateway and parse it to processing pipeline.
+    auto request = Request::make_request<GetDistanceMeasurement>(_id);
+    auto future_response = _communicator->sendRequest(std::move(request));
+    wait_for_future(future_response, 100ms);
 
-  processRxData(future_response.get().response());  
+    processRxData(future_response.get().response());  
+  }
+  catch (...) {
+    // \todo handle error case!
+  }
 }
 
 } // end namespace ethernet
