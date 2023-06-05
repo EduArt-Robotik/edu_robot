@@ -3,8 +3,8 @@ version: "2.4"
 services:
     eduard-ipc127e:
         build: ../ipc127e
-        image: eduard-ipc127e-ie-app:0.2.0
-        container_name: eduard-ipc127e-ie-app-0.2.0
+        image: eduard-ipc127e-ie-app:0.2.1
+        container_name: eduard-ipc127e-ie-app-0.2.1
         restart: on-failure
         privileged: true
         ipc: host
@@ -21,7 +21,6 @@ services:
             - '/dev:/dev'
         ports:
             - "1234:1234/udp"
-#            - "7650:65535/udp"
 
 networks:
     proxy-redirect:
