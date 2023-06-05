@@ -73,7 +73,7 @@ Eduard is our main robot system. It consists from of four wheels, four lightings
 
 # Controlling the Robot
 
-With the package [edu_robot_control](https://github.com/EduArt-Robotik/edu_robot_control) the EduArt's robots can be controlled remotely. Please visit this page for future information. The basic information about how to set up the joystick is also listed below.
+With the package [edu_robot_control](https://github.com/EduArt-Robotik/edu_robot_control) the EduArt's robots can be controlled remotely. Please visit this page for future information. The basic information about how to set up the joystick is also listed below. Note: the package "edu_robot_control" needs to be deployed extra. It is not included in the "edu_robot" deployment.
 
 A controller can be requested to connect by pressing a specific button once. For the recommended controllers, it is the symbol between the axes. To operate the Robot, the following buttons and axes of the controller are assigned as follows:
 
@@ -190,7 +190,7 @@ docker rm <container id>
 
 ## Deploying on IoT2050
 
-| WARNING: the current deployment requires an ascii joystick device. This is disabled in the current kernel available on the Siemens webpage. Please either use an joystick ROS node without that requirement or use an kernel with "CONFIG_INPUT_JOYDEV" enabled. We will provide an downloadable image soon including installed EduArt software. If you need this image now, please contact [Christian Wendt](mailto:chrisitan.wendt@eduart-robotik.com).|
+| WARNING: the current deployment requires an ascii joystick device, because the SDL library used by the ROS joy node makes trouble in ROS humble. The ascii joystick device is disabled in the current kernel available on the Siemens webpage. Please either use an joystick ROS node without that requirement or use an kernel with "CONFIG_INPUT_JOYDEV" enabled. We will provide an downloadable image soon including installed EduArt software. If you need this image now, please contact [Christian Wendt](mailto:chrisitan.wendt@eduart-robotik.com).|
 | --- |
 
 This section describes how the software is deployed on an IoT2050 in a Docker environment. First clone the repository on the robot by executing this command:
