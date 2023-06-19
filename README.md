@@ -193,6 +193,19 @@ docker rm <container id>
 | WARNING: the current deployment requires an ascii joystick device, because the SDL library used by the ROS joy node makes trouble in ROS humble. The ascii joystick device is disabled in the current kernel available on the Siemens webpage. Please either use an joystick ROS node without that requirement or use an kernel with "CONFIG_INPUT_JOYDEV" enabled. We will provide an downloadable image soon including installed EduArt software. If you need this image now, please contact [Christian Wendt](mailto:chrisitan.wendt@eduart-robotik.com).|
 | --- |
 
+
+### Use Prebuilt Docker Images
+
+The easiest way, and one that is usually quite sufficient, is to use a prebuilt Docker image. All released versions of edu_robot software are usually available. The following command deploys and starts the image. Note: please make sure that the robot has interconnection.
+
+```bash
+docker run --user user --name eduard-iotbot-0.2.1 --restart=always --privileged -v /dev:/dev --net=host --pid=host --ipc=host --group-add dialout --env EDU_ROBOT_NAMESPACE=eduard/red eduartrobotik/eduard-iotbot:0.2.1
+```
+
+With the flag "--restart=always" the container will come up after rebooting the system. If this is not wanted please remove this flag. The flag "-env EDU_ROBOT_NAMESPACE=" defines the used namespace by this robot. In this example "eduard/red" was used. Please update the namespace according your robot color.
+
+### Building from Source
+
 This section describes how the software is deployed on an IoT2050 in a Docker environment. First clone the repository on the robot by executing this command:
 
 ```bash
