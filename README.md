@@ -204,6 +204,8 @@ docker run --user user --name eduard-iotbot-0.2.1 --restart=always --privileged 
 
 With the flag "--restart=always" the container will come up after rebooting the system. If this is not wanted please remove this flag. The flag "-env EDU_ROBOT_NAMESPACE=" defines the used namespace by this robot. In this example "eduard/red" was used. Please update the namespace according your robot color.
 
+### Building from Source
+
 This section describes how the software is deployed on an IoT2050 in a Docker environment. First clone the repository on the robot by executing this command:
 
 ```bash
