@@ -204,8 +204,6 @@ docker run --user user --name eduard-iotbot-0.2.1 --restart=always --privileged 
 
 With the flag "--restart=always" the container will come up after rebooting the system. If this is not wanted please remove this flag. The flag "-env EDU_ROBOT_NAMESPACE=" defines the used namespace by this robot. In this example "eduard/red" was used. Please update the namespace according your robot color.
 
-### Building from Source
-
 This section describes how the software is deployed on an IoT2050 in a Docker environment. First clone the repository on the robot by executing this command:
 
 ```bash
@@ -242,6 +240,15 @@ docker run --user user --name eduard-iotbot-0.2.1 --restart=always --privileged 
 With the flag "--restart=always" the container will come up after rebooting the system. If this is not wanted please remove this flag. The flag "-env EDU_ROBOT_NAMESPACE=" defines the used namespace by this robot. In this example "eduard/red" was used. Please update the namespace according your robot color.
 
 ## Deploying on IPC127e
+### Use Prebuilt Docker Images
+
+The easiest way, and one that is usually quite sufficient, is to use a prebuilt Docker image. All released versions of edu_robot software are usually available. The following command deploys and starts the image. Note: please make sure that the robot has interconnection.
+
+docker run --user user --name eduard-ipc127e-0.2.1 --env EDU_ROBOT_NAMESPACE=eduard/red --restart=always --privileged -v /dev:/dev --net=host --pid=host --ipc=host eduartrobotik/eduard-ipc127e:0.2.1
+
+With the flag "--restart=always" the container will come up after rebooting the system. If this is not wanted please remove this flag. The flag "-env EDU_ROBOT_NAMESPACE=" defines the used namespace by this robot. In this example "eduard/red" was used. Please update the namespace according your robot color.
+
+### Building from Source
 
 This section describes how the software is deployed on an IPC127e in a Docker environment. First clone the repository on the robot by executing this command:
 
