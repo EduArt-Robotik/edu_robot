@@ -33,14 +33,6 @@ RUN \
     ros-$ROS_DISTRO-rmw-fastrtps-cpp \
     ros-$ROS_DISTRO-fastrtps
 
-# set up iotbot workspace
-RUN mkdir -p /home/$USER/ipcbot_ws/src
-
-COPY ./edu_robot /home/$USER/ipcbot_ws/src/edu_robot
-COPY ./fastrtps_profile.xml /home/$USER/ipcbot_ws
-
-WORKDIR /home/$USER/ipcbot_ws
-
 # write source commands to .bashrc -> no need to source afterwards
 RUN \
 ########################################################
@@ -57,6 +49,17 @@ RUN \
 ########################################################
 # Clean up
     && apt-get clean
+
+# work with user user
+USER $USER
+
+# set up iotbot workspace
+RUN mkdir -p /home/$USER/ipcbot_ws/src
+
+COPY ./edu_robot /home/$USER/ipcbot_ws/src/edu_robot
+COPY ./fastrtps_profile.xml /home/$USER/ipcbot_ws
+
+WORKDIR /home/$USER/ipcbot_ws
 
 # build EduArt packages nodes
 RUN export RMW_IMPLEMENTATION=rmw_fastrtps_cpp \
