@@ -42,6 +42,9 @@ RUN \
 # Clean up
     && apt-get clean
 
+# work with user user
+USER $USER
+
 # set up iotbot workspace
 RUN mkdir -p /home/$USER/iotbot_ws/src/
 
