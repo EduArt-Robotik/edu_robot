@@ -23,7 +23,8 @@ RUN apt-get update \
 # install Joystick Driver for ROS2 foxy
 RUN sudo apt-get install -y \
     ros-$ROS_DISTRO-rmw-fastrtps-cpp \
-    ros-$ROS_DISTRO-fastrtps
+    ros-$ROS_DISTRO-fastrtps \
+    ros-$ROS_DISTRO-joy
 
 # write source commands to .bashrc -> no need to source afterwards
 RUN \
@@ -48,9 +49,7 @@ USER $USER
 # set up iotbot workspace
 RUN mkdir -p /home/$USER/iotbot_ws/src/
 
-
 COPY ./edu_robot /home/$USER/iotbot_ws/src/edu_robot
-COPY ./edu_robot_control /home/$USER/iotbot_ws/src/edu_robot_control
 # COPY ./fastrtps_profile.xml /home/$USER
 
 WORKDIR /home/$USER/iotbot_ws
