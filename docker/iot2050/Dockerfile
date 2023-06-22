@@ -48,7 +48,9 @@ USER $USER
 # set up iotbot workspace
 RUN mkdir -p /home/$USER/iotbot_ws/src/
 
+
 COPY ./edu_robot /home/$USER/iotbot_ws/src/edu_robot
+COPY ./edu_robot_control /home/$USER/iotbot_ws/src/edu_robot_control
 # COPY ./fastrtps_profile.xml /home/$USER
 
 WORKDIR /home/$USER/iotbot_ws
