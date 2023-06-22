@@ -190,9 +190,28 @@ docker rm <container id>
 
 ## Deploying on IoT2050
 
-| WARNING: the current deployment requires an ascii joystick device, because the SDL library used by the ROS joy node makes trouble in ROS humble. The ascii joystick device is disabled in the current kernel available on the Siemens webpage. Please either use an joystick ROS node without that requirement or use an kernel with "CONFIG_INPUT_JOYDEV" enabled. We will provide an downloadable image soon including installed EduArt software. If you need this image now, please contact [Christian Wendt](mailto:chrisitan.wendt@eduart-robotik.com).|
-| --- |
+### Disable Docker Ip Table Rules
 
+Somehow in some conditions multiple docker container can't communicate on the same machine with each other. We found out, it helps to disable the Docker ip table rules (on the robot it is not really a security issue). We recommend to disable it by following:
+
+```bash
+sudo mkdir /etc/systemd/system/docker.service.d
+sudo nano /etc/systemd/system/docker.service.d/noiptables.conf
+```
+
+After the last command the "noiptables.conf" is opened. Please put following line in it:
+
+```bash
+[Service]
+ExecStart=
+ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock --iptables=false
+```
+
+Then restart the robot by the command:
+
+```bash
+sudo reboot
+```
 
 ### Use Prebuilt Docker Images
 
@@ -203,6 +222,8 @@ docker run --user user --name eduard-iotbot-0.2.1 --restart=always --privileged 
 ```
 
 With the flag "--restart=always" the container will come up after rebooting the system. If this is not wanted please remove this flag. The flag "-env EDU_ROBOT_NAMESPACE=" defines the used namespace by this robot. In this example "eduard/red" was used. Please update the namespace according your robot color.
+
+### Building from Source 
 
 This section describes how the software is deployed on an IoT2050 in a Docker environment. First clone the repository on the robot by executing this command:
 
