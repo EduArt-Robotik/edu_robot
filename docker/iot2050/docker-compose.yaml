@@ -30,6 +30,8 @@ services:
         networks:
             - multi-robot
             - robot-eduard
+        devices:
+            - '/dev:/dev'
 
 networks:
     multi-robot:
