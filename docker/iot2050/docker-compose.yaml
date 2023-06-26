@@ -1,0 +1,39 @@
+version: "2.4"
+
+services:
+    eduard-ipc127e:
+        image: eduartrobotik/eduard-iotbot:0.2.1
+        container_name: eduard-iotbot-0.2.1
+        restart: always
+        privileged: true
+        ipc: host
+        pid: host
+        mem_limit: 300mb
+        environment:
+            - EDU_ROBOT_NAMESPACE=eduard/red
+        networks:
+            - multi-robot
+            - robot-eduard
+        devices:
+            - '/dev:/dev'
+
+    eduard-robot-control:
+        image: eduartrobotik/eduard-robot-control:0.2.1
+        container_name: eduard-robot-control-0.2.1
+        restart: always
+        privileged: true
+        ipc: host
+        pid: host
+        mem_limit: 300mb
+        environment:
+            - EDU_ROBOT_NAMESPACE=eduard/red
+        networks:
+            - multi-robot
+            - robot-eduard
+
+networks:
+    multi-robot:
+        name: "multi-robot"
+        external: true
+    robot-eduard:
+        name: "robot-eduard"
