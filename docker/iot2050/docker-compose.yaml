@@ -35,6 +35,8 @@ services:
 #            - robot-eduard
         devices:
             - '/dev:/dev'
+        volumes:
+            - '/dev:/dev'
 
 networks:
     multi-robot:
