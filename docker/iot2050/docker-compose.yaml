@@ -17,10 +17,12 @@ services:
 #            - robot-eduard
         devices:
             - '/dev:/dev'
+        group_add:
+            - dialout
 
     eduard-robot-control:
-        image: eduartrobotik/eduard-robot-control:0.2.1
-        container_name: eduard-robot-control-0.2.1
+        image: eduartrobotik/eduard-robot-control-iotbot:0.2.0
+        container_name: eduard-robot-control-iotbot-0.2.0
         user: root
         restart: always
         privileged: true
