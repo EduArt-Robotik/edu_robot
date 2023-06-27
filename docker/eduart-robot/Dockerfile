@@ -1,0 +1,31 @@
+FROM eduartrobotik/eduart-ros-base:humble
+
+ENV USER user
+ENV DEBIAN_FRONTEND=noninteractive
+
+# install mraa lib for UART communication in shield node
+USER root
+RUN apt-get update \
+    && apt-get install -y software-properties-common git build-essential swig3.0 python2-dev python2 python-dev-is-python3 libnode-dev cmake libjson-c-dev \
+    # todo master brauch is not good, but the only one how compiles.
+    && git clone --branch master https://github.com/eclipse/mraa.git \
+    && cd mraa \
+    && mkdir build \
+    && cd build \
+    && cmake .. \
+    && make \
+    && make install \
+    # hack: was the fastest and most fluffy way
+    && cp /usr/local/lib/libmraa.so* /usr/lib
+
+USER $USER
+
+# set up iotbot workspace
+RUN mkdir -p /home/$USER/iotbot_ws/src/
+COPY ./edu_robot /home/$USER/iotbot_ws/src/edu_robot
+WORKDIR /home/$USER/iotbot_ws
+
+# build EduArt packages nodes
+RUN source /opt/ros/$ROS_DISTRO/setup.bash \
+    && source /home/$USER/.bashrc \
+    && colcon build --symlink-install --executor sequential --event-handlers console_direct+ --cmake-args -DCMAKE_BUILD_TYPE=Release
