@@ -1,4 +1,3 @@
-current_dir = $(shell pwd)
 image_name = eduart-robot:0.2.1
 
 download-sources:
