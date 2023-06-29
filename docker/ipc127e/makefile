@@ -1,13 +1,11 @@
-current_dir = $(shell pwd)
-
-download-sources:
-	git clone --branch 0.2.1 https://github.com/EduArt-Robotik/edu_robot.git
+image_name = eduard-ipc127e:0.2.1
 
 build-docker:
-	docker build -t eduard-ipc127e:0.2.1 .
+	docker build -t $(image_name) .
+
+upload-docker:
+	docker tag $(image_name) eduartrobotik/$(image_name)
+	docker push eduartrobotik/$(image_name)
 
 all: download-sources build-docker
-	echo "build edu_robot and edu_robot_control into a docker image"
-
-clean:
-	rm -rf edu_robot
+	$(info Creating Eduard IoT2050 Docker image "$(image_name)".)
