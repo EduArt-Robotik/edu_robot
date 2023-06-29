@@ -1,4 +1,4 @@
-image_name = eduard-iotbot:0.2.1
+image_name = eduard-iotbot:0.2.1-legacy
 
 build-docker:
 	docker build -t $(image_name) .
