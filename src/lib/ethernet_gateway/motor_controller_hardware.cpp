@@ -135,13 +135,13 @@ void SingleChannelMotorControllerHardware::processSetValue(const Rpm& rpm)
   wait_for_future(future_response, 200ms);
   auto got = future_response.get();
 
+  // process feedback
   if (_callback_process_measurement == nullptr) {
     return;
   }
+
   auto response = got.response();
-  // \todo process feedback
-  // _callback_process_measurement(AcknowledgedMotorRpm::rpm0(response));  
-  _callback_process_measurement(0.0);
+  _callback_process_measurement(AcknowledgedMotorRpm::rpm0(response));  
 }
 
 
