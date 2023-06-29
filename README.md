@@ -216,7 +216,7 @@ Inside the docker compose file a namespace is defined. This namespace can freely
 On the first generation of Eduard IoTBots it could happen that the docker container are not able to communicate between each other. This leads to a non working robot (at least the controlling by game pad doesn't work properly). For this case a special docker image is provided. This could be used by following command.
 
 ```bash
-docker run --user user --name eduard-iotbot-0.2.1-legacy --restart=always --privileged -v /dev:/dev --net=host --pid=host --ipc=host --group-add dialout --env EDU_ROBOT_NAMESPACE=eduard/red eduartrobotik/eduard-iotbot:0.2.1-legacy
+docker run --user root --name eduard-iotbot-0.2.1-legacy --restart=always --privileged -v /dev:/dev --net=host --pid=host --ipc=host --group-add dialout --env EDU_ROBOT_NAMESPACE=eduard/red eduartrobotik/eduard-iotbot:0.2.1-legacy
 ```
 
 With the flag "--restart=always" the container will come up after rebooting the system. If this is not wanted please remove this flag. The flag "-env EDU_ROBOT_NAMESPACE=" defines the used namespace by this robot. In this example "eduard/red" was used. Please update the namespace according your robot color.
