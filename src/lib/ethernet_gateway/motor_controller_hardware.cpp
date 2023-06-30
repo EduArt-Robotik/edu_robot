@@ -41,8 +41,12 @@ void SingleChannelMotorControllerHardware::processRxData(const tcp::message::RxM
   if (_callback_process_measurement == nullptr || tcp::message::RpmMeasurement::canId(data) != _can_id) {
     return;
   }
-  
-  _callback_process_measurement(tcp::message::RpmMeasurement::rpm0(data));
+
+  // \todo this processing is not ready on gateway side  
+  // _callback_process_measurement(
+  //   tcp::message::RpmMeasurement::rpm0(data),
+  //   tcp::message::AcknowledgedMotorRpm::enabled(data)
+  // );
 }
 
 void SingleChannelMotorControllerHardware::initialize(const MotorController::Parameter& parameter)
@@ -109,18 +113,6 @@ void SingleChannelMotorControllerHardware::initialize(const MotorController::Par
       throw std::runtime_error("Request \"Set Pid Controller Parameter\" was not acknowledged.");
     }
   }
-  // Enable RPM Measurement Feedback
-  // Note: disabled for the moment.
-  // {
-  //   auto request = Request::make_request<SetMotorMeasurement>(true);
-  //   auto future_response = _communicator->sendRequest(std::move(request));
-  //   wait_for_future(future_response, 200ms);
-
-  //   auto got = future_response.get();
-  //   if (Acknowledgement<PROTOCOL::COMMAND::SET::MOTOR_MEASUREMENT>::wasAcknowledged(got.response()) == false) {
-  //     throw std::runtime_error("Request \"Set Motor RPM Measurement\" was not acknowledged.");
-  //   }
-  // }  
 }
 
 void SingleChannelMotorControllerHardware::processSetValue(const Rpm& rpm)
@@ -141,7 +133,9 @@ void SingleChannelMotorControllerHardware::processSetValue(const Rpm& rpm)
   }
 
   auto response = got.response();
-  _callback_process_measurement(AcknowledgedMotorRpm::rpm0(response));  
+  _callback_process_measurement(
+    AcknowledgedMotorRpm::rpm0(response), AcknowledgedMotorRpm::enabled(response)
+  );  
 }
 
 
@@ -188,8 +182,9 @@ void CompoundMotorControllerHardware::processRxData(const tcp::message::RxMessag
     return;
   }
   
-  _dummy_motor_controller->_callback_process_measurement(tcp::message::RpmMeasurement::rpm0(data));
-  _callback_process_measurement(tcp::message::RpmMeasurement::rpm1(data));
+  // \todo this processing is not ready on gateway side  
+  // _dummy_motor_controller->_callback_process_measurement(tcp::message::RpmMeasurement::rpm0(data));
+  // _callback_process_measurement(tcp::message::RpmMeasurement::rpm1(data));
 }
 
 void CompoundMotorControllerHardware::initialize(const MotorController::Parameter& parameter)
@@ -286,8 +281,12 @@ void CompoundMotorControllerHardware::processSetValue(const Rpm& rpm)
     return;
   }
 
-  _dummy_motor_controller->_callback_process_measurement(AcknowledgedMotorRpm::rpm0(got.response()));
-  _callback_process_measurement(AcknowledgedMotorRpm::rpm1(got.response()));  
+  _dummy_motor_controller->_callback_process_measurement(
+    AcknowledgedMotorRpm::rpm0(got.response()), AcknowledgedMotorRpm::enabled(got.response())
+  );
+  _callback_process_measurement(
+    AcknowledgedMotorRpm::rpm1(got.response()), AcknowledgedMotorRpm::enabled(got.response())
+  );
 }
 
 } // end namespace iotbot
