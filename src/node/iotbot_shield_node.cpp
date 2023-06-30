@@ -27,7 +27,6 @@ public:
   {
     auto iot_shield = std::dynamic_pointer_cast<IotShield>(_hardware_interface);
     auto factory = IotBotHardwareComponentFactory(iot_shield);
-    _timer_process_status_report = create_wall_timer(100ms, [iot_shield]{ iot_shield->processStatusReport(); });
 
             // Lightings
     factory.addLighting("head", "head_lighting")
@@ -48,9 +47,6 @@ public:
     initialize(factory);
     iot_shield->registerComponentInput(_detect_charging_component);
   }
-
-private:
-  std::shared_ptr<rclcpp::TimerBase> _timer_process_status_report;
 };
 
 int main(int argc, char** argv)

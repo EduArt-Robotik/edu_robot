@@ -134,6 +134,26 @@ struct AcknowledgedDistanceMeasurement : MessageFrame<element::Response<PROTOCOL
   }
 };
 
+struct AcknowledgedStatus : MessageFrame<element::Response<PROTOCOL::COMMAND::GET::STATUS>,
+                                         element::Float, // temperature
+                                         element::Float, // voltage
+                                         element::Float, // current
+                                         element::Uint8> // status emergency button
+{
+  inline constexpr static float temperature(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<0>(rx_buffer);
+  }
+  inline constexpr static float voltage(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<1>(rx_buffer);
+  }
+  inline constexpr static float current(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<2>(rx_buffer);
+  }
+  inline constexpr static bool statusEmergencyButton(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<3>(rx_buffer);
+  }
+};     
+
 // Measurements
 struct RpmMeasurement : public MeasurementFrame<element::Command<PROTOCOL::MEASUREMENT::MOTOR_CONTROLLER_RPM>,
                                                 element::Uint8,
