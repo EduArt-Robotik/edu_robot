@@ -2,13 +2,11 @@
 add_library(eduart-ethernet-gateway
   ethernet_communicator.cpp
   ethernet_gateway_shield.cpp
-  ethernet_gateway_bot.cpp
   hardware_component_factory.cpp
   imu_sensor_hardware.cpp
   lighting_hardware.cpp
   motor_controller_hardware.cpp
   range_sensor_hardware.cpp
-  ethernet_gateway_flex_bot.cpp
 )
 
 target_link_libraries(eduart-ethernet-gateway
