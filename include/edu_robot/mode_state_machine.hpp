@@ -17,6 +17,8 @@ namespace mode {
 // transitions can be enabled.
 template <RobotMode From, RobotMode To> struct can_switch_to_mode { static constexpr bool value = false; };
 
+template <> struct can_switch_to_mode<RobotMode::UNCONFIGURED, RobotMode::INACTIVE>      { static constexpr bool value = true; };
+
 template <> struct can_switch_to_mode<RobotMode::INACTIVE, RobotMode::REMOTE_CONTROLLED> { static constexpr bool value = true; };
 template <> struct can_switch_to_mode<RobotMode::INACTIVE, RobotMode::FLEET>             { static constexpr bool value = true; };
 template <> struct can_switch_to_mode<RobotMode::INACTIVE, RobotMode::CHARGING>          { static constexpr bool value = true; };
@@ -56,21 +58,51 @@ class ModeStateMachine
   static constexpr std::size_t num_modes = sizeof...(Modes);
 
 public:
-  using ActivationOperation = std::function<void()>;
+  using ActivationOperation   = std::function<void()>;
+  using DeactivationOperation = std::function<void()>;
 
-  inline void switchToMode(const Mode mode) {
-    ((_current_mode == Modes ? performSwitchingMode<Modes>(mode), true : false) || ...);
+  void setModeActivationOperation(const RobotMode mode, const ActivationOperation& operation) {
+    _activation_operation[mode] = operation;
   }
-  void setModeActivationOperation(const Mode mode, ActivationOperation& operation);
+  void setModeDeactivationOperation(const RobotMode mode, const DeactivationOperation& operation) {
+    _deactivation_operation[mode] = operation;
+  }
+
+  void switchToMode(const RobotMode mode) {
+    // Performing Mode Switch
+    const auto current_robot_mode = _current_mode.robot_mode;
+    if (((_current_mode.robot_mode == Modes ? performSwitchingMode<Modes>(_current_mode) : false) || ...) == false) {
+      throw std::runtime_error("Mode State Machine: can't do transition.");
+    }
+
+    // Calling Deactivation Operation if exists.
+    const auto search_deactivation = _deactivation_operation.find(current_robot_mode);
+    search_deactivation != _deactivation_operation.end() ? search_deactivation->second() : (void)mode;
+
+    // Calling Activation Operation if exists.
+    const auto search_activation = _activation_operation.find(mode);
+    search_activation != _activation_operation.end() ? search_activation->second() : (void)mode;
+  }
+  inline Mode mode() const { return _current_mode; }
+  inline void enableFeature(const FeatureMode feature) {
+    _current_mode.feature_mode |= feature;
+  }
+  inline void disableFeature(const FeatureMode feature) {
+    _current_mode.feature_mode &= static_cast<FeatureMode>(~static_cast<std::uint8_t>(feature));
+  }
+  inline void setDriveKinematic(const DriveKinematic kinematic) {
+    _current_mode.drive_kinematic = kinematic;
+  }
 
 private:
   template <RobotMode From>
-  inline void performSwitchingMode(RobotMode& mode) const {
-    (((mode == Modes) && mode::can_switch_to_mode<From, Modes>::value ? mode::switch_mode<From, Modes>::perform(mode), true : false) || ...);
+  inline bool performSwitchingMode(Mode& mode) const {
+    return (((mode.robot_mode == Modes) && mode::can_switch_to_mode<From, Modes>::value ? mode::switch_mode<From, Modes>::perform(mode), true : false) || ...);
   }
 
-  RobotMode _current_mode;
-  std::map<Mode, ActivationOperation> _activation_operation;
+  Mode _current_mode;
+  std::map<RobotMode, ActivationOperation> _activation_operation;
+  std::map<RobotMode, DeactivationOperation> _deactivation_operation;
 };
 
 } // end namespace robot

@@ -10,6 +10,7 @@
 #include "edu_robot/robot_hardware_interface.hpp"
 #include "edu_robot/sensor.hpp"
 #include "edu_robot/mode.hpp"
+#include "edu_robot/mode_state_machine.hpp"
 #include "edu_robot/processing_component/collison_avoidance.hpp"
 #include "edu_robot/processing_component/processing_detect_charging.hpp"
 #include "edu_robot/processing_component/odometry_estimator.hpp"
@@ -98,8 +99,8 @@ protected:
   void registerMotorController(std::shared_ptr<MotorController> motor_controller);
   void registerSensor(std::shared_ptr<Sensor> sensor);
   // Each robot must provide a kinematic matrix based on given mode.
-  virtual Eigen::MatrixXf getKinematicMatrix(const Mode mode) const = 0;
-  void switchKinematic(const Mode mode);
+  virtual Eigen::MatrixXf getKinematicMatrix(const DriveKinematic kinematic) const = 0;
+  void switchKinematic(const DriveKinematic kinematic);
   inline std::shared_ptr<tf2_ros::TransformBroadcaster> getTfBroadcaster() { return _tf_broadcaster; }
   std::string getFrameIdPrefix() const;
 
@@ -119,7 +120,8 @@ protected:
   std::shared_ptr<processing::OdometryEstimator> _odometry_component;
 
   // Mode
-  Mode _mode;
+  ModeStateMachine<RobotMode::INACTIVE, RobotMode::REMOTE_CONTROLLED, RobotMode::FLEET, RobotMode::CHARGING>
+    _mode_state_machine;
 
   // Mounted components that are controlled by the hardware interface.
   std::map<std::string, std::shared_ptr<Lighting>> _lightings;
@@ -130,8 +132,9 @@ private:
   void processStatusReport();
   void processTfPublishing();
   void processWatchDogBarking();
-  void setLightingForMode(const Mode mode);
+  void setLightingForMode(const RobotMode mode);
   void remapTwistSubscription(const std::string& new_topic_name);
+  void configureStateMachine();
 
   // ROS related members
   std::shared_ptr<rclcpp::Publisher<nav_msgs::msg::Odometry>> _pub_odometry;

@@ -34,7 +34,7 @@ struct Mode {
   // The drive kinematic used by the robot for driving. Only one kinematic can be active.
   DriveKinematic drive_kinematic = DriveKinematic::SKID_DRIVE; 
   // Represents robot features like collision avoidance. The features can be combined.
-  FeatureMode feature_mode; 
+  FeatureMode feature_mode = FeatureMode::NONE; 
 };
 
 inline FeatureMode& operator|=(FeatureMode& lhs, const FeatureMode rhs)

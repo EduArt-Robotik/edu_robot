@@ -92,7 +92,7 @@ void FlexBot::initialize(eduart::robot::HardwareComponentFactory& factory)
   // Set Up Default Drive Kinematic. Needs to be done here, because method can't be called in constructor 
   // of robot base class.
   // \todo maybe introduce an initialize method that can be called after construction of robot class.
-  _kinematic_matrix = getKinematicMatrix(Mode::SKID_DRIVE);
+  _kinematic_matrix = getKinematicMatrix(DriveKinematic::SKID_DRIVE);
   _inverse_kinematic_matrix = _kinematic_matrix.completeOrthogonalDecomposition().pseudoInverse(); 
 }
 
@@ -101,11 +101,11 @@ FlexBot::~FlexBot()
 
 }
 
-Eigen::MatrixXf FlexBot::getKinematicMatrix(const Mode mode) const
+Eigen::MatrixXf FlexBot::getKinematicMatrix(const DriveKinematic kinematic) const
 {
   Eigen::MatrixXf kinematic_matrix;
 
-  if (mode & Mode::SKID_DRIVE) {
+  if (kinematic == DriveKinematic::SKID_DRIVE) {
     const float l_x = _parameter.skid.length.x;
     const float l_y = _parameter.skid.length.y;
     const float wheel_diameter = _parameter.skid.wheel_diameter;
