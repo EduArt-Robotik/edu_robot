@@ -120,7 +120,7 @@ protected:
   std::shared_ptr<processing::OdometryEstimator> _odometry_component;
 
   // Mode
-  ModeStateMachine<RobotMode::INACTIVE, RobotMode::REMOTE_CONTROLLED, RobotMode::FLEET, RobotMode::CHARGING>
+  ModeStateMachine<RobotMode::UNCONFIGURED, RobotMode::INACTIVE, RobotMode::REMOTE_CONTROLLED, RobotMode::FLEET, RobotMode::CHARGING>
     _mode_state_machine;
 
   // Mounted components that are controlled by the hardware interface.

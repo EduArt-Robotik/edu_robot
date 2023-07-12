@@ -33,6 +33,16 @@ template <> struct can_switch_to_mode<RobotMode::FLEET, RobotMode::CHARGING>    
 
 template <> struct can_switch_to_mode<RobotMode::CHARGING, RobotMode::INACTIVE>          { static constexpr bool value = true; };
 
+// Defines which feature is needed for robot mode.
+template <RobotMode Mode, FeatureMode Feature> struct does_need_feature { static constexpr bool value = false; };
+
+template <> struct does_need_feature<RobotMode::FLEET, FeatureMode::COLLISION_AVOIDANCE_OVERRIDE> { static constexpr bool value = true; };
+
+// Defines drive kinematic can be combined with robot mode.
+template <RobotMode Mode, DriveKinematic Kinematic> struct can_combined_with_kinematic { static constexpr bool value = true; };
+
+template <> struct can_combined_with_kinematic<RobotMode::FLEET, DriveKinematic::SKID_DRIVE> { static constexpr bool value = false; };
+
 // Defines the operation that should be performed on a mode change. By default nothing will be done. Just the new mode will be assigned.
 template <RobotMode From, RobotMode To> struct switch_mode {
   inline static void perform(Mode& mode) { mode.robot_mode = To; }
@@ -43,6 +53,13 @@ template <RobotMode From> struct switch_mode<From, RobotMode::FLEET> {
     mode.drive_kinematic = DriveKinematic::MECANUM_DRIVE;
     mode.feature_mode |= FeatureMode::COLLISION_AVOIDANCE_OVERRIDE;
     mode.robot_mode = RobotMode::FLEET;
+  }
+};
+
+template <RobotMode From> struct switch_mode<From, RobotMode::REMOTE_CONTROLLED> {
+  inline static void perform(Mode& mode) {
+    mode.feature_mode &= static_cast<FeatureMode>(~static_cast<std::uint8_t>(FeatureMode::COLLISION_AVOIDANCE_OVERRIDE));    
+    mode.robot_mode = RobotMode::REMOTE_CONTROLLED;
   }
 };
 
@@ -71,7 +88,8 @@ public:
   void switchToMode(const RobotMode mode) {
     // Performing Mode Switch
     const auto current_robot_mode = _current_mode.robot_mode;
-    if (((_current_mode.robot_mode == Modes ? performSwitchingMode<Modes>(_current_mode) : false) || ...) == false) {
+
+    if (((_current_mode.robot_mode == Modes ? performSwitchingMode<Modes>(_current_mode, mode) : false) || ...) == false) {
       throw std::runtime_error("Mode State Machine: can't do transition.");
     }
 
@@ -88,19 +106,43 @@ public:
     _current_mode.feature_mode |= feature;
   }
   inline void disableFeature(const FeatureMode feature) {
+    if (((_current_mode.robot_mode == Modes ? canFeatureBeDisabled<Modes>(feature) : false) || ...) == false) {
+      throw std::runtime_error("Can't disable feature.");
+    }
     _current_mode.feature_mode &= static_cast<FeatureMode>(~static_cast<std::uint8_t>(feature));
   }
   inline void setDriveKinematic(const DriveKinematic kinematic) {
+    if (((_current_mode.robot_mode == Modes ? canUseKinematic<Modes>(kinematic) : false) || ...) == false) {
+      throw std::runtime_error("Can't use kinematic.");
+    }
     _current_mode.drive_kinematic = kinematic;
   }
 
 private:
   template <RobotMode From>
-  inline bool performSwitchingMode(Mode& mode) const {
-    return (((mode.robot_mode == Modes) && mode::can_switch_to_mode<From, Modes>::value ? mode::switch_mode<From, Modes>::perform(mode), true : false) || ...);
+  inline bool performSwitchingMode(Mode& mode, const RobotMode& target_mode) const {
+    return (((target_mode == Modes) && mode::can_switch_to_mode<From, Modes>::value ? mode::switch_mode<From, Modes>::perform(mode), true : false) || ...);
+  }
+  template <RobotMode Mode, FeatureMode... Features>
+  inline bool canFeatureBeDisabledHelper(const FeatureMode feature) const {
+    return ((feature == Features ? mode::does_need_feature<Mode, Features>::value == false : false) || ...);
+  }
+  template <RobotMode Mode>
+  inline bool canFeatureBeDisabled(const FeatureMode feature) const {
+    // \todo find a better way to integrate all features here.
+    return canFeatureBeDisabledHelper<Mode, FeatureMode::COLLISION_AVOIDANCE, FeatureMode::COLLISION_AVOIDANCE_OVERRIDE>(feature);
+  }
+  template <RobotMode Mode, DriveKinematic... Kinematics>
+  inline bool canUseKinematicHelper(const DriveKinematic kinematic) const {
+    return ((kinematic == Kinematics ? mode::can_combined_with_kinematic<Mode, Kinematics>::value : false) || ...);
+  }
+  template <RobotMode Mode>
+  inline bool canUseKinematic(const DriveKinematic kinematic) const {
+    // \todo find a better way to integrate all kinematics here.
+    return canUseKinematicHelper<Mode, DriveKinematic::SKID_DRIVE, DriveKinematic::MECANUM_DRIVE>(kinematic);
   }
 
-  Mode _current_mode;
+  Mode _current_mode; // \todo find a way to initialize the mode with first given mode.
   std::map<RobotMode, ActivationOperation> _activation_operation;
   std::map<RobotMode, DeactivationOperation> _deactivation_operation;
 };

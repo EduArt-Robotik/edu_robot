@@ -240,9 +240,6 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
   // Kick Watch Dog
   // _timer_status_report->reset();
 
-
-
-  // \todo code below smells extremely! It seems a state machine with transitions would do a good job here.
   try {
     // Robot Mode Request Handling
     if (request->mode.mode != edu_robot::msg::Mode::UNKNOWN) {
@@ -257,70 +254,9 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
     if (request->mode.feature_mode != edu_robot::msg::Mode::NONE) {
       _mode_state_machine.enableFeature(static_cast<FeatureMode>(request->mode.feature_mode));
     }
-
-    // Drive Mode Handling
-    // if (request->mode.value & edu_robot::msg::Mode::REMOTE_CONTROLLED) {
-      // if (_mode & Mode::FLEET) {
-      //   remapTwistSubscription("cmd_vel");
-      // }
-      // _hardware_interface->enable();
-
-      // _mode &= Mode::MASK_UNSET_DRIVING_MODE;
-      // _mode &= Mode::MASK_UNSET_COLLISION_AVOIDANCE_OVERRIDE;      
-      // _mode |= Mode::REMOTE_CONTROLLED;
-      // _mode |= Mode::COLLISION_AVOIDANCE_OVERRIDE_DISABLED;
-    // }
-    // else if (request->mode.value & edu_robot::msg::Mode::INACTIVE) {
-    //   if (_mode & Mode::FLEET) {
-    //     remapTwistSubscription("cmd_vel");
-    //   }      
-    //   _hardware_interface->disable();
-    //   _mode &= Mode::MASK_UNSET_DRIVING_MODE;
-    //   _mode &= Mode::MASK_UNSET_COLLISION_AVOIDANCE_OVERRIDE;      
-    //   _mode |= Mode::INACTIVE;
-    //   _mode |= Mode::COLLISION_AVOIDANCE_OVERRIDE_DISABLED;
-    // }
-    // else if (request->mode.value & edu_robot::msg::Mode::FLEET) {
-    //   remapTwistSubscription("fleet/cmd_vel");
-    //   switchKinematic(Mode::MECANUM_DRIVE);
-    //   _hardware_interface->enable();
-
-    //   _mode &= Mode::MASK_UNSET_DRIVING_MODE;
-    //   _mode &= Mode::MASK_UNSET_COLLISION_AVOIDANCE_OVERRIDE;
-    //   _mode &= Mode::MASK_UNSET_KINEMATIC_MODE;      
-    //   _mode |= Mode::COLLISION_AVOIDANCE_OVERRIDE_ENABLED;
-    //   _mode |= Mode::FLEET;
-    //   _mode |= Mode::MECANUM_DRIVE;
-    // }
-    // // Collision Avoidance
-    // else if (request->mode.value & edu_robot::msg::Mode::COLLISION_AVOIDANCE_OVERRIDE_ENABLED) {
-    //   _mode &= Mode::MASK_UNSET_COLLISION_AVOIDANCE_OVERRIDE;
-    //   _mode |= Mode::COLLISION_AVOIDANCE_OVERRIDE_ENABLED;
-    // }
-    // else if (request->mode.value & edu_robot::msg::Mode::COLLISION_AVOIDANCE_OVERRIDE_DISABLED) {
-    //   _mode &= Mode::MASK_UNSET_COLLISION_AVOIDANCE_OVERRIDE;
-    //   _mode |= Mode::COLLISION_AVOIDANCE_OVERRIDE_DISABLED;
-    // }    
-    // // Kinematic Mode Handling
-    // else if (request->mode.value & edu_robot::msg::Mode::SKID_DRIVE) {
-    //   switchKinematic(Mode::SKID_DRIVE);
-    //   _mode &= Mode::MASK_UNSET_KINEMATIC_MODE;
-    //   _mode |= Mode::SKID_DRIVE;
-    // }
-    // else if (request->mode.value & edu_robot::msg::Mode::MECANUM_DRIVE) {
-    //   switchKinematic(Mode::MECANUM_DRIVE);
-    //   _mode &= Mode::MASK_UNSET_KINEMATIC_MODE;
-    //   _mode |= Mode::MECANUM_DRIVE;
-    // }
-    // else {
-    //   RCLCPP_ERROR_STREAM(get_logger(), "Unsupported mode. Can't set new mode. Canceling.");
-    //   return;
-    // }
-
-    // Setting of Lighting Regarding set Mode
-    // if (_detect_charging_component->isCharging() == false) {
-    //   setLightingForMode(_mode);
-    // }
+    if (request->disable_feature != edu_robot::msg::Mode::NONE) {
+      _mode_state_machine.disableFeature(static_cast<FeatureMode>(request->disable_feature));
+    }
 
     response->state.info_message = "OK";
     response->state.state.value = response->state.state.OK;
