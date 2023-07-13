@@ -3,8 +3,8 @@ version: "2.4"
 services:
     eduard-ipc127e:
         build: ../ipc127e
-        image: eduard-ipc127e-ie-app:0.2.1
-        container_name: eduard-ipc127e-ie-app-0.2.1
+        image: eduard-ipc127e-ie-app:0.3.0
+        container_name: eduard-ipc127e-ie-app-0.3.0
         restart: on-failure
         privileged: true
         ipc: host
