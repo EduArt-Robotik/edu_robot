@@ -23,12 +23,8 @@ public:
   virtual void disable() = 0;
   virtual RobotStatusReport getStatusReport() = 0;
 
-  bool isStatusReportReady() const { return _status_report_ready; }
-  void clearStatusReport() { _status_report_ready = false; _report = RobotStatusReport(); }
-
 protected:
   RobotStatusReport _report;
-  bool _status_report_ready = false;
 };
 
 } // end namespace eduart

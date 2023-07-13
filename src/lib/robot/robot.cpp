@@ -319,13 +319,8 @@ void Robot::registerSensor(std::shared_ptr<Sensor> sensor)
 void Robot::processStatusReport()
 {
   try {
-    if (false == _hardware_interface->isStatusReportReady()) {
-      return;
-    }
-
     auto report = _hardware_interface->getStatusReport();
     _pub_status_report->publish(toRos(report));
-    _hardware_interface->clearStatusReport();
   }
   catch (HardwareError& ex) {
     RCLCPP_ERROR_STREAM(get_logger(), "Hardware error occurred while getting status report. what() = " << ex.what());                                      
