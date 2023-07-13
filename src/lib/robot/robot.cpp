@@ -352,6 +352,9 @@ void Robot::processWatchDogBarking()
     if (last_state == false && _detect_charging_component->isCharging() == true) {
       _mode_state_machine.switchToMode(RobotMode::CHARGING);
     }
+    else if (last_state == true && _detect_charging_component->isCharging() == false) {
+      _mode_state_machine.switchToMode(RobotMode::INACTIVE);
+    }
 
     last_state = _detect_charging_component->isCharging();
   }
