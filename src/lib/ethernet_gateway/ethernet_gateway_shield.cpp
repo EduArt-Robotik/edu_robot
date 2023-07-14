@@ -86,7 +86,7 @@ RobotStatusReport EthernetGatewayShield::getStatusReport()
 {
   auto request = Request::make_request<tcp::message::GetStatus>();
   auto future_response = _communicator->sendRequest(std::move(request));
-  wait_for_future(future_response, 100ms);
+  wait_for_future(future_response, 200ms);
 
   auto got = future_response.get();
   RobotStatusReport report;
@@ -95,6 +95,8 @@ RobotStatusReport EthernetGatewayShield::getStatusReport()
   report.voltage.mcu = AcknowledgedStatus::voltage(got.response());
   report.current.mcu = AcknowledgedStatus::current(got.response());
   report.status_emergency_stop = AcknowledgedStatus::statusEmergencyButton(got.response());  
+
+  sendInputValue(report.voltage.mcu);
 
   return report;
 }
