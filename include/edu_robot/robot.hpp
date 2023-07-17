@@ -12,7 +12,7 @@
 #include "edu_robot/mode.hpp"
 #include "edu_robot/mode_state_machine.hpp"
 
-#include "edu_robot/event/event_manager.hpp"
+#include "edu_robot/action/action_manager.hpp"
 
 #include "edu_robot/processing_component/collison_avoidance.hpp"
 #include "edu_robot/processing_component/processing_detect_charging.hpp"
@@ -122,7 +122,7 @@ protected:
   std::shared_ptr<processing::OdometryEstimator> _odometry_component;
 
   // Event
-  std::shared_ptr<event::EventManager> _event_manager;
+  std::shared_ptr<action::ActionManager> _action_manager;
 
   // Mode
   ModeStateMachine<RobotMode::UNCONFIGURED, RobotMode::INACTIVE, RobotMode::REMOTE_CONTROLLED, RobotMode::FLEET, RobotMode::CHARGING>

@@ -5,31 +5,31 @@
  */
 #pragma once
 
-#include "edu_robot/event/event.hpp"
+#include "edu_robot/action/action.hpp"
 
 #include <memory>
 #include <list>
 
 namespace eduart {
 namespace robot {
-namespace event {
+namespace action {
 
-class EventManager
+class ActionManager
 {
 public:
-  EventManager() = default;
+  ActionManager() = default;
 
   /**
-   * \brief This method needs be called for managing all registered events.
+   * \brief This method needs be called for managing all registered actions.
    */
   void process();
 
-  void addEvent(std::shared_ptr<Event> event);
+  void addAction(std::shared_ptr<Action> action);
 
 private:
-  std::list<std::shared_ptr<Event>> _events;
+  std::list<std::shared_ptr<Action>> _actions;
 };
 
-} // end namespace event
+} // end namespace action
 } // end namespace eduart
 } // end namespace robot

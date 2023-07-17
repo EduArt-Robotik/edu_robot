@@ -1,6 +1,5 @@
 #include "edu_robot/robot.hpp"
 #include "edu_robot/color.hpp"
-#include "edu_robot/event/event_manager.hpp"
 #include "edu_robot/hardware_error.hpp"
 #include "edu_robot/lighting.hpp"
 
@@ -98,7 +97,7 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterfa
   _mode_state_machine.switchToMode(RobotMode::INACTIVE);
 
   // Initialize Event Managing
-  _event_manager = std::make_shared<event::EventManager>();
+  _action_manager = std::make_shared<action::ActionManager>();
 
   // Timers
   _timer_status_report = create_wall_timer(100ms, std::bind(&Robot::processStatusReport, this));
@@ -250,6 +249,7 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
     }
     // Drive Kinematic Request Handling
     if (request->mode.drive_kinematic != edu_robot::msg::Mode::UNKNOWN) {
+      // \todo BUG! if kinematic is not allowed by state machine it could be changed anyway.
       switchKinematic(static_cast<DriveKinematic>(request->mode.drive_kinematic));
       _mode_state_machine.setDriveKinematic(static_cast<DriveKinematic>(request->mode.drive_kinematic));
     }
@@ -351,7 +351,7 @@ void Robot::processWatchDogBarking()
   // setLightingForMode(_mode);
   try {
     // Handling of events. Events can result in Actions.
-    _event_manager->process();
+    _action_manager->process();
 
     // Charging Detection
     static bool last_state = false;

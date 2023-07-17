@@ -13,21 +13,21 @@
 
 namespace eduart {
 namespace robot {
-namespace event {
+namespace action {
 
-class Event
+class Action
 {
 public:
-  virtual ~Event() = default;
+  virtual ~Action() = default;
 
   virtual bool isReady() const = 0;
   virtual void process() = 0;
 };
 
-class ProcessInFutureEvent : public Event
+class FutureAction : public Action
 {
 public:
-  ProcessInFutureEvent(std::shared_ptr<rclcpp::Clock> clock, rclcpp::Duration process_in)
+  FutureAction(std::shared_ptr<rclcpp::Clock> clock, rclcpp::Duration process_in)
     : _clock(clock)
     , _process_at(clock->now() + process_in)  
   { }
@@ -41,6 +41,6 @@ private:
   rclcpp::Time _process_at;
 };
 
-} // end namespace event
+} // end namespace action
 } // end namespace eduart
 } // end namespace robot

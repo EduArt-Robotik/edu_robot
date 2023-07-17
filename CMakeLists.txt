@@ -50,7 +50,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 # Create a target that can be used by all buildiung targets when the custom message are required for them.
 rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
-add_subdirectory(src/lib/event)
+add_subdirectory(src/lib/action)
 add_subdirectory(src/lib/robot)
 add_subdirectory(src/lib/processing_component)
 add_subdirectory(src/lib/eduard)
@@ -95,7 +95,7 @@ install(
     processing-component
     eduart-ethernet-gateway
     ohmni-bot
-    eduart-event
+    eduart-action
   EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
