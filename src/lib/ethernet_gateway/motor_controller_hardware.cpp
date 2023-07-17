@@ -1,8 +1,10 @@
 #include "edu_robot/ethernet_gateway/motor_controller_hardware.hpp"
+#include "edu_robot/component_error.hpp"
 #include "edu_robot/ethernet_gateway/ethernet_gateway_device.hpp"
 #include "edu_robot/ethernet_gateway/tcp/message_definition.hpp"
 #include "edu_robot/ethernet_gateway/tcp/protocol.hpp"
 #include "edu_robot/rotation_per_minute.hpp"
+#include "edu_robot/state.hpp"
 
 #include <edu_robot/hardware_component_interface.hpp>
 #include <edu_robot/hardware_error.hpp>
@@ -72,7 +74,7 @@ void SingleChannelMotorControllerHardware::initialize(const MotorController::Par
 
     auto got = future_response.get();
     if (Acknowledgement<PROTOCOL::COMMAND::SET::MOTOR_CONTROLLER_PARAMETER>::wasAcknowledged(got.response()) == false) {
-      throw std::runtime_error("Request \"Set Motor Controller Parameter\" was not acknowledged.");
+      throw ComponentError(State::MOTOR_ERROR, "Request \"Set Motor Controller Parameter\" was not acknowledged.");
     }
   }
   // Encoder Parameter
@@ -89,7 +91,7 @@ void SingleChannelMotorControllerHardware::initialize(const MotorController::Par
 
     auto got = future_response.get();
     if (Acknowledgement<PROTOCOL::COMMAND::SET::ENCODER_PARAMETER>::wasAcknowledged(got.response()) == false) {
-      throw std::runtime_error("Request \"Set Encoder Parameter\" was not acknowledged.");
+      throw ComponentError(State::MOTOR_ERROR, "Request \"Set Encoder Parameter\" was not acknowledged.");
     }
   }
   // Pid Controller
@@ -110,7 +112,7 @@ void SingleChannelMotorControllerHardware::initialize(const MotorController::Par
 
     auto got = future_response.get();
     if (Acknowledgement<PROTOCOL::COMMAND::SET::PID_CONTROLLER_PARAMETER>::wasAcknowledged(got.response()) == false) {
-      throw std::runtime_error("Request \"Set Pid Controller Parameter\" was not acknowledged.");
+      throw ComponentError(State::MOTOR_ERROR, "Request \"Set Pid Controller Parameter\" was not acknowledged.");
     }
   }
 }
@@ -210,7 +212,7 @@ void CompoundMotorControllerHardware::initialize(const MotorController::Paramete
 
     auto got = future_response.get();
     if (Acknowledgement<PROTOCOL::COMMAND::SET::MOTOR_CONTROLLER_PARAMETER>::wasAcknowledged(got.response()) == false) {
-      throw std::runtime_error("Request \"Set Motor Controller Parameter\" was not acknowledged.");
+      throw ComponentError(State::MOTOR_ERROR, "Request \"Set Motor Controller Parameter\" was not acknowledged.");
     }
   }
   // Encoder Parameter
@@ -227,7 +229,7 @@ void CompoundMotorControllerHardware::initialize(const MotorController::Paramete
 
     auto got = future_response.get();
     if (Acknowledgement<PROTOCOL::COMMAND::SET::ENCODER_PARAMETER>::wasAcknowledged(got.response()) == false) {
-      throw std::runtime_error("Request \"Set Encoder Parameter\" was not acknowledged.");
+      throw ComponentError(State::MOTOR_ERROR, "Request \"Set Encoder Parameter\" was not acknowledged.");
     }
   }
   // Pid Controller
@@ -248,7 +250,7 @@ void CompoundMotorControllerHardware::initialize(const MotorController::Paramete
 
     auto got = future_response.get();
     if (Acknowledgement<PROTOCOL::COMMAND::SET::PID_CONTROLLER_PARAMETER>::wasAcknowledged(got.response()) == false) {
-      throw std::runtime_error("Request \"Set Pid Controller Parameter\" was not acknowledged.");
+      throw ComponentError(State::MOTOR_ERROR, "Request \"Set Pid Controller Parameter\" was not acknowledged.");
     }
   }
   // Enable RPM Measurement Feedback
@@ -260,7 +262,7 @@ void CompoundMotorControllerHardware::initialize(const MotorController::Paramete
 
   //   auto got = future_response.get();
   //   if (Acknowledgement<PROTOCOL::COMMAND::SET::MOTOR_MEASUREMENT>::wasAcknowledged(got.response()) == false) {
-  //     throw std::runtime_error("Request \"Set Motor RPM Measurement\" was not acknowledged.");
+  //     throw ComponentError("Request \"Set Motor RPM Measurement\" was not acknowledged.");
   //   }
   // }  
 }

@@ -62,7 +62,7 @@ void EthernetGatewayShield::enable()
 {
   auto request = Request::make_request<tcp::message::SetMotorEnabled>();
   auto future_response = _communicator->sendRequest(std::move(request));
-  wait_for_future(future_response, 100ms);
+  wait_for_future(future_response, 200ms);
 
   auto got = future_response.get();
   if (Acknowledgement<PROTOCOL::COMMAND::SET::MOTOR_ENABLE>::wasAcknowledged(got.response()) == false) {
@@ -74,7 +74,7 @@ void EthernetGatewayShield::disable()
 {
   auto request = Request::make_request<tcp::message::SetMotorDisabled>();
   auto future_response = _communicator->sendRequest(std::move(request));
-  wait_for_future(future_response, 100ms);
+  wait_for_future(future_response, 200ms);
 
   auto got = future_response.get();
   if (Acknowledgement<PROTOCOL::COMMAND::SET::MOTOR_DISABLE>::wasAcknowledged(got.response()) == false) {

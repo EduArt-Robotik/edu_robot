@@ -1,5 +1,6 @@
 #include "edu_robot/robot.hpp"
 #include "edu_robot/color.hpp"
+#include "edu_robot/event/event_manager.hpp"
 #include "edu_robot/hardware_error.hpp"
 #include "edu_robot/lighting.hpp"
 
@@ -12,7 +13,6 @@
 #include "edu_robot/processing_component/processing_detect_charging.hpp"
 
 #include <Eigen/Dense>
-#include <Eigen/QR>
 
 #include <nav_msgs/msg/detail/odometry__struct.hpp>
 #include <rclcpp/logging.hpp>
@@ -96,6 +96,9 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterfa
   // Initialize State Machine, switch from unconfigured to inactive.
   configureStateMachine();
   _mode_state_machine.switchToMode(RobotMode::INACTIVE);
+
+  // Initialize Event Managing
+  _event_manager = std::make_shared<event::EventManager>();
 
   // Timers
   _timer_status_report = create_wall_timer(100ms, std::bind(&Robot::processStatusReport, this));
@@ -347,6 +350,10 @@ void Robot::processWatchDogBarking()
   // _mode = Mode::INACTIVE;
   // setLightingForMode(_mode);
   try {
+    // Handling of events. Events can result in Actions.
+    _event_manager->process();
+
+    // Charging Detection
     static bool last_state = false;
 
     if (last_state == false && _detect_charging_component->isCharging() == true) {

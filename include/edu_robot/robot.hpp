@@ -11,6 +11,9 @@
 #include "edu_robot/sensor.hpp"
 #include "edu_robot/mode.hpp"
 #include "edu_robot/mode_state_machine.hpp"
+
+#include "edu_robot/event/event_manager.hpp"
+
 #include "edu_robot/processing_component/collison_avoidance.hpp"
 #include "edu_robot/processing_component/processing_detect_charging.hpp"
 #include "edu_robot/processing_component/odometry_estimator.hpp"
@@ -23,7 +26,6 @@
 
 #include <Eigen/Core>
 
-#include <Eigen/src/Core/Matrix.h>
 #include <rclcpp/node.hpp>
 #include <rclcpp/publisher.hpp>
 #include <rclcpp/service.hpp>
@@ -119,6 +121,9 @@ protected:
   std::shared_ptr<processing::DetectCharging> _detect_charging_component;
   std::shared_ptr<processing::OdometryEstimator> _odometry_component;
 
+  // Event
+  std::shared_ptr<event::EventManager> _event_manager;
+
   // Mode
   ModeStateMachine<RobotMode::UNCONFIGURED, RobotMode::INACTIVE, RobotMode::REMOTE_CONTROLLED, RobotMode::FLEET, RobotMode::CHARGING>
     _mode_state_machine;
@@ -142,7 +147,6 @@ private:
   std::shared_ptr<rclcpp::Publisher<edu_robot::msg::RobotKinematicDescription>> _pub_kinematic_description;
 
   std::shared_ptr<rclcpp::Service<edu_robot::srv::SetMode>> _srv_set_mode;
-  // std::shared_ptr<rclcpp::Service<edu_robot::srv::GetKinematicDescription>> _srv_get_kinematic_description;
 
   std::shared_ptr<rclcpp::Subscription<geometry_msgs::msg::Twist>> _sub_twist;
   std::shared_ptr<rclcpp::Subscription<edu_robot::msg::SetLightingColor>> _sub_set_lighting_color;
