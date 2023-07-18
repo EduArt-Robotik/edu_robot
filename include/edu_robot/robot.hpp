@@ -124,9 +124,8 @@ protected:
   // Event
   std::shared_ptr<action::ActionManager> _action_manager;
 
-  // Mode
-  ModeStateMachine<RobotMode::UNCONFIGURED, RobotMode::INACTIVE, RobotMode::REMOTE_CONTROLLED, RobotMode::FLEET, RobotMode::CHARGING>
-    _mode_state_machine;
+  // Mode  
+  StateMachine _mode_state_machine;
 
   // Mounted components that are controlled by the hardware interface.
   std::map<std::string, std::shared_ptr<Lighting>> _lightings;
@@ -149,6 +148,7 @@ private:
   std::shared_ptr<rclcpp::Service<edu_robot::srv::SetMode>> _srv_set_mode;
 
   std::shared_ptr<rclcpp::Subscription<geometry_msgs::msg::Twist>> _sub_twist;
+  rclcpp::Time _last_twist_received;
   std::shared_ptr<rclcpp::Subscription<edu_robot::msg::SetLightingColor>> _sub_set_lighting_color;
 
   std::shared_ptr<tf2_ros::TransformBroadcaster> _tf_broadcaster;

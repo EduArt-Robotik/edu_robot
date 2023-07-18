@@ -11,10 +11,13 @@ void ActionManager::addAction(std::shared_ptr<Action> action)
 
 void ActionManager::process()
 {
-  for (auto action = _actions.begin(); action != _actions.end(); ++action) {
+  for (auto action = _actions.begin(); action != _actions.end();) {
     if ((*action)->isReady()) {
       (*action)->process();
-      _actions.erase(action);
+      (*action)->keepAlive() ? ++action : action = _actions.erase(action);
+    }
+    else {
+      ++action;
     }
   }
 }

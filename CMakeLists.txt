@@ -125,6 +125,7 @@ ament_export_libraries(
   processing-component
   eduart-ethernet-gateway
   eduart-robot-flex-bot
+  eduart-action
 )
 ament_export_targets(
   export_${PROJECT_NAME}

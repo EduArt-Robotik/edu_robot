@@ -147,5 +147,7 @@ private:
   std::map<RobotMode, DeactivationOperation> _deactivation_operation;
 };
 
+using StateMachine = ModeStateMachine<RobotMode::UNCONFIGURED, RobotMode::INACTIVE, RobotMode::REMOTE_CONTROLLED, RobotMode::FLEET, RobotMode::CHARGING>;
+
 } // end namespace robot
 } // end namespace eduart

@@ -22,6 +22,10 @@ public:
 
   virtual bool isReady() const = 0;
   virtual void process() = 0;
+  inline bool keepAlive() const { return _keep_alive; }
+
+protected:
+  bool _keep_alive = false;
 };
 
 class FutureAction : public Action

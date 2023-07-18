@@ -2,18 +2,18 @@
 #include "edu_robot/color.hpp"
 #include "edu_robot/hardware_error.hpp"
 #include "edu_robot/lighting.hpp"
-
 #include "edu_robot/mode.hpp"
-#include "edu_robot/msg/detail/mode__struct.hpp"
+
 #include "edu_robot/msg_conversion.hpp"
-#include "edu_robot/msg/detail/robot_status_report__struct.hpp"
+
+#include "edu_robot/action/motor_action.hpp"
+
 #include "edu_robot/processing_component/collison_avoidance.hpp"
 #include "edu_robot/processing_component/odometry_estimator.hpp"
 #include "edu_robot/processing_component/processing_detect_charging.hpp"
 
 #include <Eigen/Dense>
 
-#include <nav_msgs/msg/detail/odometry__struct.hpp>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/qos.hpp>
@@ -56,6 +56,7 @@ static Robot::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
 Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface, const std::string& ns)
   : rclcpp::Node(robot_name, ns)
   , _hardware_interface(std::move(hardware_interface))
+  , _last_twist_received(get_clock()->now())
   , _tf_broadcaster(std::make_unique<tf2_ros::TransformBroadcaster>(*this))
 {
   _parameter = get_robot_ros_parameter(*this);
@@ -100,7 +101,7 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterfa
   _action_manager = std::make_shared<action::ActionManager>();
 
   // Timers
-  _timer_status_report = create_wall_timer(100ms, std::bind(&Robot::processStatusReport, this));
+  _timer_status_report = create_wall_timer(500ms, std::bind(&Robot::processStatusReport, this));
   _timer_tf_publishing = create_wall_timer(100ms, std::bind(&Robot::processTfPublishing, this));
   _timer_watch_dog = create_wall_timer(500ms, std::bind(&Robot::processWatchDogBarking, this));
 
@@ -130,6 +131,7 @@ Robot::~Robot()
 
 void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> twist_msg)
 {
+  _last_twist_received = get_clock()->now();
   // Kick Watch Dog
   // _timer_status_report->reset();
 
@@ -322,7 +324,7 @@ void Robot::registerSensor(std::shared_ptr<Sensor> sensor)
 void Robot::processStatusReport()
 {
   try {
-    auto report = _hardware_interface->getStatusReport();
+    const auto report = _hardware_interface->getStatusReport();
     _pub_status_report->publish(toRos(report));
   }
   catch (HardwareError& ex) {
@@ -346,11 +348,15 @@ void Robot::processTfPublishing()
 
 void Robot::processWatchDogBarking()
 {
-  // HACK: only used for indication of charging at the moment
+  // HACK: is used to check conditions of the robot
   // _mode = Mode::INACTIVE;
   // setLightingForMode(_mode);
   try {
-    // Handling of events. Events can result in Actions.
+    // Check if timeout occurred.
+    if ((get_clock()->now() - _last_twist_received).seconds() > 1.0) {
+      _mode_state_machine.switchToMode(RobotMode::INACTIVE);
+    }
+    // Handling of actions.
     _action_manager->process();
 
     // Charging Detection
@@ -421,6 +427,9 @@ void Robot::configureStateMachine()
   _mode_state_machine.setModeActivationOperation(RobotMode::REMOTE_CONTROLLED, [this](){
     _hardware_interface->enable();
     setLightingForMode(RobotMode::REMOTE_CONTROLLED);
+    _action_manager->addAction(std::make_shared<action::CheckIfMotorIsEnabled>(
+      get_clock(), 500ms, _motor_controllers, _mode_state_machine
+    ));
   });
 
   // Inactive Mode
@@ -435,6 +444,9 @@ void Robot::configureStateMachine()
     switchKinematic(DriveKinematic::MECANUM_DRIVE);
     _hardware_interface->enable();
     setLightingForMode(RobotMode::FLEET);
+    _action_manager->addAction(std::make_shared<action::CheckIfMotorIsEnabled>(
+      get_clock(), 500ms, _motor_controllers, _mode_state_machine
+    ));
   });
   _mode_state_machine.setModeDeactivationOperation(RobotMode::FLEET, [this](){
     remapTwistSubscription("cmd_vel");
