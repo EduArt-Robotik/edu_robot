@@ -3,7 +3,7 @@ version: "3.0"
 services:
     eduard-ipc127e:
         image: eduartrobotik/eduard-ipc127e:0.3.0
-        container_name: eduard-iotbot-0.3.0
+        container_name: eduard-ipcbot-0.3.0
         user: user
         restart: always
         privileged: true
@@ -21,7 +21,7 @@ services:
 
     eduard-robot-control:
         image: eduartrobotik/eduard-robot-control-ipcbot:0.3.0
-        container_name: eduard-robot-control-iotbot-0.3.0
+        container_name: eduard-robot-control-ipcbot-0.3.0
         user: user
         restart: always
         privileged: true
