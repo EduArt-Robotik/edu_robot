@@ -367,6 +367,7 @@ void Robot::processWatchDogBarking()
     }
     // Check if timeout occurred.
     else if ((_mode_state_machine.mode().robot_mode != RobotMode::CHARGING) &&
+             (_mode_state_machine.mode().robot_mode != RobotMode::INACTIVE) &&
              (get_clock()->now() - _last_twist_received).seconds() > 1.0) {
       _mode_state_machine.switchToMode(RobotMode::INACTIVE);
     }
@@ -395,7 +396,7 @@ void Robot::setLightingForMode(const RobotMode mode)
   switch (mode) {
     case RobotMode::UNCONFIGURED:
     case RobotMode::INACTIVE:
-      search->second->setColor(Color{10, 10, 10}, Lighting::Mode::DIM);
+      search->second->setColor(Color{10, 10, 10}, Lighting::Mode::RUNNING);
       break;
 
     case RobotMode::REMOTE_CONTROLLED:
@@ -407,7 +408,7 @@ void Robot::setLightingForMode(const RobotMode mode)
       break;
 
     case RobotMode::CHARGING:
-      search->second->setColor(Color{0, 34, 0}, Lighting::Mode::ROTATION);
+      search->second->setColor(Color{0, 25, 0}, Lighting::Mode::FLASH);
       break;
     
     default:

@@ -26,6 +26,7 @@ template <> struct can_switch_to_mode<RobotMode::INACTIVE, RobotMode::CHARGING> 
 template <> struct can_switch_to_mode<RobotMode::REMOTE_CONTROLLED, RobotMode::INACTIVE> { static constexpr bool value = true; };
 template <> struct can_switch_to_mode<RobotMode::REMOTE_CONTROLLED, RobotMode::FLEET>    { static constexpr bool value = true; };
 template <> struct can_switch_to_mode<RobotMode::REMOTE_CONTROLLED, RobotMode::CHARGING> { static constexpr bool value = true; };
+template <> struct can_switch_to_mode<RobotMode::REMOTE_CONTROLLED, RobotMode::REMOTE_CONTROLLED> { static constexpr bool value = true; };
 
 template <> struct can_switch_to_mode<RobotMode::FLEET, RobotMode::INACTIVE>             { static constexpr bool value = true; };
 template <> struct can_switch_to_mode<RobotMode::FLEET, RobotMode::REMOTE_CONTROLLED>    { static constexpr bool value = true; };
