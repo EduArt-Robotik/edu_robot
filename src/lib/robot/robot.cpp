@@ -394,7 +394,7 @@ void Robot::setLightingForMode(const RobotMode mode)
   switch (mode) {
     case RobotMode::UNCONFIGURED:
     case RobotMode::INACTIVE:
-      search->second->setColor(Color{34, 0, 0}, Lighting::Mode::PULSATION);
+      search->second->setColor(Color{10, 10, 10}, Lighting::Mode::DIM);
       break;
 
     case RobotMode::REMOTE_CONTROLLED:
@@ -406,7 +406,7 @@ void Robot::setLightingForMode(const RobotMode mode)
       break;
 
     case RobotMode::CHARGING:
-      search->second->setColor(Color{34, 0, 0}, Lighting::Mode::ROTATION);
+      search->second->setColor(Color{0, 34, 0}, Lighting::Mode::ROTATION);
       break;
     
     default:

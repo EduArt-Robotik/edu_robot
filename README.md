@@ -68,7 +68,15 @@ Eduard is our main robot system. It consists from of four wheels, four lightings
 
 
 
+# Lighting Codes
 
+| Mode | Color | Description |
+|------|-------|-------------|
+|UNCONFIGURED| white (pulsation) | During boot up. |
+|INACTIVE| white (dim) | Motors are disabled, no error state present. First state after reboot. |
+|REMOTE_CONTROLLED| white (dim) | Motors are enabled, robot is ready for driving remote controlled. |
+|FLEET| white (flashing) | Robot is in fleet mode and enabled. |
+|CHARGING| green (pulsation) | |
 
 
 # Controlling the Robot
