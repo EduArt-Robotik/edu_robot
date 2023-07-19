@@ -352,20 +352,21 @@ void Robot::processWatchDogBarking()
   // _mode = Mode::INACTIVE;
   // setLightingForMode(_mode);
   try {
-    // Check if timeout occurred.
-    if ((get_clock()->now() - _last_twist_received).seconds() > 1.0) {
-      _mode_state_machine.switchToMode(RobotMode::INACTIVE);
-    }
     // Handling of actions.
     _action_manager->process();
 
     // Charging Detection
     static bool last_state = false;
 
+    // The order of the if else statements reflect the priority of these modes!
     if (last_state == false && _detect_charging_component->isCharging() == true) {
       _mode_state_machine.switchToMode(RobotMode::CHARGING);
     }
     else if (last_state == true && _detect_charging_component->isCharging() == false) {
+      _mode_state_machine.switchToMode(RobotMode::INACTIVE);
+    }
+    // Check if timeout occurred.
+    else if ((get_clock()->now() - _last_twist_received).seconds() > 1.0) {
       _mode_state_machine.switchToMode(RobotMode::INACTIVE);
     }
 
