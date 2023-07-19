@@ -366,7 +366,8 @@ void Robot::processWatchDogBarking()
       _mode_state_machine.switchToMode(RobotMode::INACTIVE);
     }
     // Check if timeout occurred.
-    else if ((get_clock()->now() - _last_twist_received).seconds() > 1.0) {
+    else if ((_mode_state_machine.mode().robot_mode != RobotMode::CHARGING) &&
+             (get_clock()->now() - _last_twist_received).seconds() > 1.0) {
       _mode_state_machine.switchToMode(RobotMode::INACTIVE);
     }
 
