@@ -10,6 +10,10 @@
 #include "edu_robot/robot_hardware_interface.hpp"
 #include "edu_robot/sensor.hpp"
 #include "edu_robot/mode.hpp"
+#include "edu_robot/mode_state_machine.hpp"
+
+#include "edu_robot/action/action_manager.hpp"
+
 #include "edu_robot/processing_component/collison_avoidance.hpp"
 #include "edu_robot/processing_component/processing_detect_charging.hpp"
 #include "edu_robot/processing_component/odometry_estimator.hpp"
@@ -22,7 +26,6 @@
 
 #include <Eigen/Core>
 
-#include <Eigen/src/Core/Matrix.h>
 #include <rclcpp/node.hpp>
 #include <rclcpp/publisher.hpp>
 #include <rclcpp/service.hpp>
@@ -98,8 +101,8 @@ protected:
   void registerMotorController(std::shared_ptr<MotorController> motor_controller);
   void registerSensor(std::shared_ptr<Sensor> sensor);
   // Each robot must provide a kinematic matrix based on given mode.
-  virtual Eigen::MatrixXf getKinematicMatrix(const Mode mode) const = 0;
-  void switchKinematic(const Mode mode);
+  virtual Eigen::MatrixXf getKinematicMatrix(const DriveKinematic kinematic) const = 0;
+  void switchKinematic(const DriveKinematic kinematic);
   inline std::shared_ptr<tf2_ros::TransformBroadcaster> getTfBroadcaster() { return _tf_broadcaster; }
   std::string getFrameIdPrefix() const;
 
@@ -118,8 +121,11 @@ protected:
   std::shared_ptr<processing::DetectCharging> _detect_charging_component;
   std::shared_ptr<processing::OdometryEstimator> _odometry_component;
 
-  // Mode
-  Mode _mode;
+  // Event
+  std::shared_ptr<action::ActionManager> _action_manager;
+
+  // Mode  
+  StateMachine _mode_state_machine;
 
   // Mounted components that are controlled by the hardware interface.
   std::map<std::string, std::shared_ptr<Lighting>> _lightings;
@@ -130,8 +136,9 @@ private:
   void processStatusReport();
   void processTfPublishing();
   void processWatchDogBarking();
-  void setLightingForMode(const Mode mode);
+  void setLightingForMode(const RobotMode mode);
   void remapTwistSubscription(const std::string& new_topic_name);
+  void configureStateMachine();
 
   // ROS related members
   std::shared_ptr<rclcpp::Publisher<nav_msgs::msg::Odometry>> _pub_odometry;
@@ -139,9 +146,9 @@ private:
   std::shared_ptr<rclcpp::Publisher<edu_robot::msg::RobotKinematicDescription>> _pub_kinematic_description;
 
   std::shared_ptr<rclcpp::Service<edu_robot::srv::SetMode>> _srv_set_mode;
-  // std::shared_ptr<rclcpp::Service<edu_robot::srv::GetKinematicDescription>> _srv_get_kinematic_description;
 
   std::shared_ptr<rclcpp::Subscription<geometry_msgs::msg::Twist>> _sub_twist;
+  rclcpp::Time _last_twist_received;
   std::shared_ptr<rclcpp::Subscription<edu_robot::msg::SetLightingColor>> _sub_set_lighting_color;
 
   std::shared_ptr<tf2_ros::TransformBroadcaster> _tf_broadcaster;

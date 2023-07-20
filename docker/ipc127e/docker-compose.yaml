@@ -1,10 +1,10 @@
 version: "3.0"
 
 services:
-    eduard-iot2050:
-        image: eduartrobotik/eduard-iotbot:0.3.0
-        container_name: eduard-iotbot-0.3.0
-        user: root
+    eduard-ipc127e:
+        image: eduartrobotik/eduard-ipc127e:0.3.0
+        container_name: eduard-ipcbot-0.3.0
+        user: user
         restart: always
         privileged: true
         ipc: host
@@ -18,13 +18,11 @@ services:
 #            - robot-eduard
         devices:
             - '/dev:/dev'
-        group_add:
-            - dialout
 
     eduard-robot-control:
-        image: eduartrobotik/eduard-robot-control-iotbot:0.3.0
-        container_name: eduard-robot-control-iotbot-0.3.0
-        user: root
+        image: eduartrobotik/eduard-robot-control-ipcbot:0.3.0
+        container_name: eduard-robot-control-ipcbot-0.3.0
+        user: user
         restart: always
         privileged: true
         ipc: host

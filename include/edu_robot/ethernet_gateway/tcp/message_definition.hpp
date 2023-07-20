@@ -90,14 +90,19 @@ struct Acknowledgement : public MessageFrame<element::Response<TcpCommand>, elem
 };
 
 struct AcknowledgedMotorRpm : public MessageFrame<element::Response<PROTOCOL::COMMAND::SET::MOTOR_RPM>,
-                                                  element::Float,
-                                                  element::Float> {
+                                                  element::Float, // Motor 0 Current RPM
+                                                  element::Float, // Motor 1 Current RPM
+                                                  element::Uint8> // Motor Enabled Flag
+{
   inline static constexpr Rpm rpm0(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<0>(rx_buffer);
   }
   inline static constexpr Rpm rpm1(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<1>(rx_buffer);
-  }  
+  }
+  inline static constexpr bool enabled(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<2>(rx_buffer);
+  }
 };
 
 struct AcknowledgedImuMeasurement : MessageFrame<element::Response<PROTOCOL::COMMAND::GET::IMU_MEASUREMENT>,
@@ -128,6 +133,26 @@ struct AcknowledgedDistanceMeasurement : MessageFrame<element::Response<PROTOCOL
     return deserialize<0>(rx_buffer);
   }
 };
+
+struct AcknowledgedStatus : MessageFrame<element::Response<PROTOCOL::COMMAND::GET::STATUS>,
+                                         element::Float, // temperature
+                                         element::Float, // voltage
+                                         element::Float, // current
+                                         element::Uint8> // status emergency button
+{
+  inline constexpr static float temperature(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<0>(rx_buffer);
+  }
+  inline constexpr static float voltage(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<1>(rx_buffer);
+  }
+  inline constexpr static float current(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<2>(rx_buffer);
+  }
+  inline constexpr static bool statusEmergencyButton(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<3>(rx_buffer);
+  }
+};     
 
 // Measurements
 struct RpmMeasurement : public MeasurementFrame<element::Command<PROTOCOL::MEASUREMENT::MOTOR_CONTROLLER_RPM>,

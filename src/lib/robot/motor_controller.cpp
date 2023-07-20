@@ -60,7 +60,7 @@ MotorController::MotorController(const std::string& name, const std::uint8_t id,
   , _hardware_sensor_interface(hardware_sensor_interface)
 {
   _hardware_sensor_interface->registerCallbackProcessMeasurementData(
-    std::bind(&MotorController::processMeasurementData, this, std::placeholders::_1)
+    std::bind(&MotorController::processMeasurementData, this, std::placeholders::_1, std::placeholders::_2)
   );
   _pub_joint_state = ros_node.create_publisher<sensor_msgs::msg::JointState>(
     "/joint_states",
@@ -79,11 +79,12 @@ void MotorController::setRpm(const Rpm rpm)
   _set_rpm = rpm;
 }
 
-void MotorController::processMeasurementData(const Rpm rpm)
+void MotorController::processMeasurementData(const Rpm rpm, const bool enabled_flag)
 {
   {
     std::lock_guard guard(_mutex_access_data);
     _measured_rpm = rpm;
+    _enabled = enabled_flag;
   }
 
   // \todo Check if calculation is correct! At the moment used for visualization only, so no need for accurate calc...

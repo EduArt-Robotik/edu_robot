@@ -48,7 +48,7 @@ public:
   ~Eduard() override;
 
 protected:
-  Eigen::MatrixXf getKinematicMatrix(const Mode mode) const override;
+  Eigen::MatrixXf getKinematicMatrix(const DriveKinematic kinematic) const override;
   // Needs to be called by derived classes.
   void initialize(eduart::robot::HardwareComponentFactory& factory) override;
 

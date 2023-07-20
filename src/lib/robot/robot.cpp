@@ -2,19 +2,18 @@
 #include "edu_robot/color.hpp"
 #include "edu_robot/hardware_error.hpp"
 #include "edu_robot/lighting.hpp"
-
 #include "edu_robot/mode.hpp"
-#include "edu_robot/msg/detail/mode__struct.hpp"
+
 #include "edu_robot/msg_conversion.hpp"
-#include "edu_robot/msg/detail/robot_status_report__struct.hpp"
+
+#include "edu_robot/action/motor_action.hpp"
+
 #include "edu_robot/processing_component/collison_avoidance.hpp"
 #include "edu_robot/processing_component/odometry_estimator.hpp"
 #include "edu_robot/processing_component/processing_detect_charging.hpp"
 
 #include <Eigen/Dense>
-#include <Eigen/QR>
 
-#include <nav_msgs/msg/detail/odometry__struct.hpp>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/qos.hpp>
@@ -57,7 +56,7 @@ static Robot::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
 Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface, const std::string& ns)
   : rclcpp::Node(robot_name, ns)
   , _hardware_interface(std::move(hardware_interface))
-  , _mode(Mode::UNCONFIGURED)
+  , _last_twist_received(get_clock()->now())
   , _tf_broadcaster(std::make_unique<tf2_ros::TransformBroadcaster>(*this))
 {
   _parameter = get_robot_ros_parameter(*this);
@@ -94,8 +93,15 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterfa
     std::bind(&Robot::callbackSetLightingColor, this, std::placeholders::_1)
   );
 
+  // Initialize State Machine, switch from unconfigured to inactive.
+  configureStateMachine();
+  _mode_state_machine.switchToMode(RobotMode::INACTIVE);
+
+  // Initialize Event Managing
+  _action_manager = std::make_shared<action::ActionManager>();
+
   // Timers
-  _timer_status_report = create_wall_timer(100ms, std::bind(&Robot::processStatusReport, this));
+  _timer_status_report = create_wall_timer(500ms, std::bind(&Robot::processStatusReport, this));
   _timer_tf_publishing = create_wall_timer(100ms, std::bind(&Robot::processTfPublishing, this));
   _timer_watch_dog = create_wall_timer(500ms, std::bind(&Robot::processWatchDogBarking, this));
 
@@ -125,6 +131,7 @@ Robot::~Robot()
 
 void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> twist_msg)
 {
+  _last_twist_received = get_clock()->now();
   // Kick Watch Dog
   // _timer_status_report->reset();
 
@@ -133,7 +140,8 @@ void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> tw
     Eigen::Vector3f velocity_cmd(twist_msg->linear.x, twist_msg->linear.y, twist_msg->angular.z);
 
     // Reduce the velocity if collision avoidance was enabled.
-    if (_parameter.enable_collision_avoidance && (_mode & Mode::COLLISION_AVOIDANCE_OVERRIDE_ENABLED) == false) {
+    if (_parameter.enable_collision_avoidance
+        && (_mode_state_machine.mode().feature_mode & FeatureMode::COLLISION_AVOIDANCE_OVERRIDE) == false) {
       // \todo Move lines blew in collision avoidance processing component.
       if (velocity_cmd.x() > 0.0) {
         // Driving Forward
@@ -236,83 +244,42 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
   // Kick Watch Dog
   // _timer_status_report->reset();
 
-  // \todo code below smells extremely! It seems a state machine with transitions would do a good job here.
   try {
-    // Drive Mode Handling
-    if (request->mode.value & edu_robot::msg::Mode::REMOTE_CONTROLLED) {
-      if (_mode & Mode::FLEET) {
-        remapTwistSubscription("cmd_vel");
-      }
-      _hardware_interface->enable();
-      _mode &= Mode::MASK_UNSET_DRIVING_MODE;
-      _mode &= Mode::MASK_UNSET_COLLISION_AVOIDANCE_OVERRIDE;      
-      _mode |= Mode::REMOTE_CONTROLLED;
-      _mode |= Mode::COLLISION_AVOIDANCE_OVERRIDE_DISABLED;
+    // Robot Mode Request Handling
+    if (request->mode.mode != edu_robot::msg::Mode::UNKNOWN) {
+      _mode_state_machine.switchToMode(static_cast<RobotMode>(request->mode.mode));
     }
-    else if (request->mode.value & edu_robot::msg::Mode::INACTIVE) {
-      if (_mode & Mode::FLEET) {
-        remapTwistSubscription("cmd_vel");
-      }      
-      _hardware_interface->disable();
-      _mode &= Mode::MASK_UNSET_DRIVING_MODE;
-      _mode &= Mode::MASK_UNSET_COLLISION_AVOIDANCE_OVERRIDE;      
-      _mode |= Mode::INACTIVE;
-      _mode |= Mode::COLLISION_AVOIDANCE_OVERRIDE_DISABLED;
+    // Drive Kinematic Request Handling
+    if (request->mode.drive_kinematic != edu_robot::msg::Mode::UNKNOWN) {
+      // \todo BUG! if kinematic is not allowed by state machine it could be changed anyway.
+      switchKinematic(static_cast<DriveKinematic>(request->mode.drive_kinematic));
+      _mode_state_machine.setDriveKinematic(static_cast<DriveKinematic>(request->mode.drive_kinematic));
     }
-    else if (request->mode.value & edu_robot::msg::Mode::FLEET) {
-      remapTwistSubscription("fleet/cmd_vel");
-      switchKinematic(Mode::MECANUM_DRIVE);
-      _hardware_interface->enable();
-
-      _mode &= Mode::MASK_UNSET_DRIVING_MODE;
-      _mode &= Mode::MASK_UNSET_COLLISION_AVOIDANCE_OVERRIDE;
-      _mode &= Mode::MASK_UNSET_KINEMATIC_MODE;      
-      _mode |= Mode::COLLISION_AVOIDANCE_OVERRIDE_ENABLED;
-      _mode |= Mode::FLEET;
-      _mode |= Mode::MECANUM_DRIVE;
+    // Feature Request Handling
+    if (request->mode.feature_mode != edu_robot::msg::Mode::NONE) {
+      _mode_state_machine.enableFeature(static_cast<FeatureMode>(request->mode.feature_mode));
     }
-    // Collision Avoidance
-    else if (request->mode.value & edu_robot::msg::Mode::COLLISION_AVOIDANCE_OVERRIDE_ENABLED) {
-      _mode &= Mode::MASK_UNSET_COLLISION_AVOIDANCE_OVERRIDE;
-      _mode |= Mode::COLLISION_AVOIDANCE_OVERRIDE_ENABLED;
-    }
-    else if (request->mode.value & edu_robot::msg::Mode::COLLISION_AVOIDANCE_OVERRIDE_DISABLED) {
-      _mode &= Mode::MASK_UNSET_COLLISION_AVOIDANCE_OVERRIDE;
-      _mode |= Mode::COLLISION_AVOIDANCE_OVERRIDE_DISABLED;
-    }    
-    // Kinematic Mode Handling
-    else if (request->mode.value & edu_robot::msg::Mode::SKID_DRIVE) {
-      switchKinematic(Mode::SKID_DRIVE);
-      _mode &= Mode::MASK_UNSET_KINEMATIC_MODE;
-      _mode |= Mode::SKID_DRIVE;
-    }
-    else if (request->mode.value & edu_robot::msg::Mode::MECANUM_DRIVE) {
-      switchKinematic(Mode::MECANUM_DRIVE);
-      _mode &= Mode::MASK_UNSET_KINEMATIC_MODE;
-      _mode |= Mode::MECANUM_DRIVE;
-    }
-    else {
-      RCLCPP_ERROR_STREAM(get_logger(), "Unsupported mode. Can't set new mode. Canceling.");
-      return;
+    if (request->disable_feature != edu_robot::msg::Mode::NONE) {
+      _mode_state_machine.disableFeature(static_cast<FeatureMode>(request->disable_feature));
     }
 
-    // Setting of Lighting Regarding set Mode
-    if (_detect_charging_component->isCharging() == false) {
-      setLightingForMode(_mode);
-    }
-
-    response->state.mode.value = static_cast<std::uint8_t>(_mode);
     response->state.info_message = "OK";
     response->state.state.value = response->state.state.OK;
   }
   catch (HardwareError& ex) {
-    RCLCPP_ERROR_STREAM(get_logger(), "Hardware error occurred while trying to set new mode. what() = " << ex.what());                                      
-    return;
+    RCLCPP_ERROR_STREAM(get_logger(), "Hardware error occurred while trying to set new mode. what() = " << ex.what());
+    response->state.info_message = "REJECTED";
+    response->state.state.value = response->state.state.OK;        
   }
   catch (std::exception& ex) {
     RCLCPP_ERROR_STREAM(get_logger(), "Error occurred while trying to set new mode. what() = " << ex.what());
-    return;
+    response->state.info_message = "REJECTED";
+    response->state.state.value = response->state.state.OK;      
   }
+
+  response->state.mode.mode = static_cast<std::uint8_t>(_mode_state_machine.mode().robot_mode);
+  response->state.mode.drive_kinematic = static_cast<std::uint8_t>(_mode_state_machine.mode().drive_kinematic);
+  response->state.mode.feature_mode = static_cast<std::uint8_t>(_mode_state_machine.mode().feature_mode);  
 }
 
 void Robot::registerLighting(std::shared_ptr<Lighting> lighting)
@@ -356,13 +323,18 @@ void Robot::registerSensor(std::shared_ptr<Sensor> sensor)
 
 void Robot::processStatusReport()
 {
-  if (false == _hardware_interface->isStatusReportReady()) {
+  try {
+    const auto report = _hardware_interface->getStatusReport();
+    _pub_status_report->publish(toRos(report));
+  }
+  catch (HardwareError& ex) {
+    RCLCPP_ERROR_STREAM(get_logger(), "Hardware error occurred while getting status report. what() = " << ex.what());                                      
     return;
   }
-
-  auto report = _hardware_interface->getStatusReport();
-  _pub_status_report->publish(toRos(report));
-  _hardware_interface->clearStatusReport();
+  catch (std::exception& ex) {
+    RCLCPP_ERROR_STREAM(get_logger(), "Hardware error occurred while getting status report. what() = " << ex.what());
+    return;
+  }
 }
 
 void Robot::processTfPublishing()
@@ -376,14 +348,28 @@ void Robot::processTfPublishing()
 
 void Robot::processWatchDogBarking()
 {
-  // HACK: only used for indication of charging at the moment
+  // HACK: is used to check conditions of the robot
   // _mode = Mode::INACTIVE;
   // setLightingForMode(_mode);
   try {
+    // Handling of actions.
+    _action_manager->process();
+
+    // Charging Detection
     static bool last_state = false;
 
+    // The order of the if else statements reflect the priority of these modes!
     if (last_state == false && _detect_charging_component->isCharging() == true) {
-      setLightingForMode(Mode::INACTIVE);
+      _mode_state_machine.switchToMode(RobotMode::CHARGING);
+    }
+    else if (last_state == true && _detect_charging_component->isCharging() == false) {
+      _mode_state_machine.switchToMode(RobotMode::INACTIVE);
+    }
+    // Check if timeout occurred.
+    else if ((_mode_state_machine.mode().robot_mode != RobotMode::CHARGING) &&
+             (_mode_state_machine.mode().robot_mode != RobotMode::INACTIVE) &&
+             (get_clock()->now() - _last_twist_received).seconds() > 1.0) {
+      _mode_state_machine.switchToMode(RobotMode::INACTIVE);
     }
 
     last_state = _detect_charging_component->isCharging();
@@ -398,7 +384,7 @@ void Robot::processWatchDogBarking()
   }  
 }
 
-void Robot::setLightingForMode(const Mode mode)
+void Robot::setLightingForMode(const RobotMode mode)
 {
   auto search = _lightings.find("all");
 
@@ -407,19 +393,27 @@ void Robot::setLightingForMode(const Mode mode)
     return;
   }
 
-  if (_detect_charging_component->isCharging()) {
-    search->second->setColor(Color{34, 0, 0}, Lighting::Mode::ROTATION);
+  switch (mode) {
+    case RobotMode::UNCONFIGURED:
+    case RobotMode::INACTIVE:
+      search->second->setColor(Color{10, 10, 10}, Lighting::Mode::RUNNING);
+      break;
+
+    case RobotMode::REMOTE_CONTROLLED:
+      search->second->setColor(Color{34, 34, 34}, Lighting::Mode::DIM);
+      break;
+
+    case RobotMode::FLEET:
+      search->second->setColor(Color{25, 25, 25}, Lighting::Mode::FLASH);
+      break;
+
+    case RobotMode::CHARGING:
+      search->second->setColor(Color{0, 25, 0}, Lighting::Mode::FLASH);
+      break;
+    
+    default:
+      break;
   }
-  else if (mode & Mode::INACTIVE) {
-    search->second->setColor(Color{34, 0, 0}, Lighting::Mode::PULSATION);
-  }
-  else if (mode & Mode::REMOTE_CONTROLLED) {
-    search->second->setColor(Color{34, 34, 34}, Lighting::Mode::DIM);
-  }
-  else if (mode & Mode::FLEET) {
-    search->second->setColor(Color{25, 25, 25}, Lighting::Mode::FLASH);
-  }
-  // else do nothing
 }
 
 void Robot::remapTwistSubscription(const std::string& new_topic_name)
@@ -428,6 +422,44 @@ void Robot::remapTwistSubscription(const std::string& new_topic_name)
   _sub_twist = create_subscription<geometry_msgs::msg::Twist>(
     new_topic_name, qos, std::bind(&Robot::callbackVelocity, this, std::placeholders::_1)
   );
+}
+
+void Robot::configureStateMachine()
+{
+  // Remote Control Mode
+  _mode_state_machine.setModeActivationOperation(RobotMode::REMOTE_CONTROLLED, [this](){
+    _hardware_interface->enable();
+    setLightingForMode(RobotMode::REMOTE_CONTROLLED);
+    _action_manager->addAction(std::make_shared<action::CheckIfMotorIsEnabled>(
+      get_clock(), 500ms, _motor_controllers, _mode_state_machine
+    ));
+  });
+
+  // Inactive Mode
+  _mode_state_machine.setModeActivationOperation(RobotMode::INACTIVE, [this](){
+    _hardware_interface->disable();
+    setLightingForMode(RobotMode::INACTIVE);
+  });
+
+  // Fleet Mode
+  _mode_state_machine.setModeActivationOperation(RobotMode::FLEET, [this](){
+    remapTwistSubscription("fleet/cmd_vel");
+    switchKinematic(DriveKinematic::MECANUM_DRIVE);
+    _hardware_interface->enable();
+    setLightingForMode(RobotMode::FLEET);
+    _action_manager->addAction(std::make_shared<action::CheckIfMotorIsEnabled>(
+      get_clock(), 500ms, _motor_controllers, _mode_state_machine
+    ));
+  });
+  _mode_state_machine.setModeDeactivationOperation(RobotMode::FLEET, [this](){
+    remapTwistSubscription("cmd_vel");
+  });
+
+  // Charging Mode
+  _mode_state_machine.setModeActivationOperation(RobotMode::CHARGING, [this](){
+    _hardware_interface->disable();
+    setLightingForMode(RobotMode::CHARGING);
+  });
 }
 
 std::string Robot::getFrameIdPrefix() const
@@ -441,9 +473,9 @@ std::string Robot::getFrameIdPrefix() const
   return frame_id_prefix;
 }
 
-void Robot::switchKinematic(const Mode mode)
+void Robot::switchKinematic(const DriveKinematic kinematic)
 {
-  _kinematic_matrix = getKinematicMatrix(mode);
+  _kinematic_matrix = getKinematicMatrix(kinematic);
   _inverse_kinematic_matrix = _kinematic_matrix.completeOrthogonalDecomposition().pseudoInverse();
 
   edu_robot::msg::RobotKinematicDescription msg;
