@@ -60,13 +60,15 @@ EthernetGatewayShield::~EthernetGatewayShield()
 
 void EthernetGatewayShield::enable()
 {
-  auto request = Request::make_request<tcp::message::SetMotorEnabled>();
-  auto future_response = _communicator->sendRequest(std::move(request));
-  wait_for_future(future_response, 200ms);
+  for (std::size_t i = 0; i < 2; ++i) {
+    auto request = Request::make_request<tcp::message::SetMotorEnabled>();
+    auto future_response = _communicator->sendRequest(std::move(request));
+    wait_for_future(future_response, 200ms);
 
-  auto got = future_response.get();
-  if (Acknowledgement<PROTOCOL::COMMAND::SET::MOTOR_ENABLE>::wasAcknowledged(got.response()) == false) {
-    throw std::runtime_error("Request \"Set Motor Enabled\" was not acknowledged.");
+    auto got = future_response.get();
+    if (Acknowledgement<PROTOCOL::COMMAND::SET::MOTOR_ENABLE>::wasAcknowledged(got.response()) == false) {
+      throw std::runtime_error("Request \"Set Motor Enabled\" was not acknowledged.");
+    }
   }
 }
 
