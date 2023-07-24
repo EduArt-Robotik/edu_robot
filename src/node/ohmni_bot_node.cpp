@@ -27,6 +27,7 @@ public:
            .addImuSensor("imu", "imu_hardware", *this);
 
     initialize(factory);
+    _mode_state_machine.switchToMode(eduart::robot::RobotMode::INACTIVE);
   }
 };
 

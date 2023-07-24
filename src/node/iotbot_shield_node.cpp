@@ -46,6 +46,7 @@ public:
 
     initialize(factory);
     iot_shield->registerComponentInput(_detect_charging_component);
+    _mode_state_machine.switchToMode(eduart::robot::RobotMode::INACTIVE);    
   }
 };
 

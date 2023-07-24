@@ -95,7 +95,6 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterfa
 
   // Initialize State Machine, switch from unconfigured to inactive.
   configureStateMachine();
-  _mode_state_machine.switchToMode(RobotMode::INACTIVE);
 
   // Initialize Event Managing
   _action_manager = std::make_shared<action::ActionManager>();
