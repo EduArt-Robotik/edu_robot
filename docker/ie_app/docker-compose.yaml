@@ -2,8 +2,8 @@ version: "2.4"
 
 services:
     eduard-ipc127e:
-        build: ../ipc127e
-        image: eduard-ipc127e-ie-app:0.3.0
+        # build: ../ipc127e
+        image: eduartrobotik/eduard-ipc127e:0.3.0
         container_name: eduard-ipc127e-ie-app-0.3.0
         restart: on-failure
         privileged: true
@@ -17,8 +17,8 @@ services:
         volumes:
             - './publish/:/publish/'
             - './cfg-data/:/cfg-data/'
-        devices:
-            - '/dev:/dev'
+        # devices:
+        #     - '/dev:/dev'
         ports:
             - "1234:1234/udp"
 

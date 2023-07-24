@@ -41,9 +41,9 @@ services:
         volumes:
             - '/dev:/dev'
 
-networks:
-    multi-robot:
-        name: "multi-robot"
-        external: true
-    robot-eduard:
-        name: "robot-eduard"
+# networks:
+#     multi-robot:
+#         name: "multi-robot"
+#         external: true
+#     robot-eduard:
+#         name: "robot-eduard"
