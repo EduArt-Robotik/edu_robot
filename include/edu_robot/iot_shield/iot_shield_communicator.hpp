@@ -94,6 +94,7 @@ public:
   void registerProcessReceivedBytes(std::function<void(const uart::message::RxMessageDataBuffer&)> callback);
   std::future<ShieldRequest> sendRequest(ShieldRequest request);
   uart::message::RxMessageDataBuffer getRxBuffer();
+  std::chrono::time_point<std::chrono::system_clock> getStampRxBuffer();
 
 private:
   void processSending(const std::chrono::milliseconds wait_time_after_sending);
@@ -130,6 +131,7 @@ private:
   std::thread _uart_receiving_thread;
   std::queue<uart::message::RxMessageDataBuffer> _rx_buffer_queue;
   uart::message::RxMessageDataBuffer _rx_buffer_copy;
+  std::chrono::time_point<std::chrono::system_clock> _stamp_rx_buffer_copy;
   std::atomic_bool _new_received_data;
 
   std::list<ShieldRequest> _open_response_tasks;
