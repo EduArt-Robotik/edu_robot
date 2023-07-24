@@ -45,6 +45,7 @@ public:
 
     initialize(factory);
     shield->registerComponentInput(_detect_charging_component);
+    _mode_state_machine.switchToMode(eduart::robot::RobotMode::INACTIVE);
   }
 };
 
