@@ -218,11 +218,33 @@ void Robot::callbackSetMotorRpm(std::shared_ptr<const std_msgs::msg::Float32Mult
   }
 
   try {
+    // Trigger timeout detection.
     _last_twist_received = get_clock()->now();
 
+    // Setting RPM motor input values.
     for (std::size_t i = 0; i < rpm_msg->data.size(); ++i) {
       _motor_controllers[i]->setRpm(rpm_msg->data[i]);
     }
+
+    // Calculating Odometry and Publishing it
+    // \todo code duplication!
+    Eigen::VectorXf radps_measured(_motor_controllers.size());
+
+    for (std::size_t i = 0; i < _motor_controllers.size(); ++i) {
+      radps_measured(i) = _motor_controllers[i]->getMeasuredRpm().radps();
+    }
+
+    const Eigen::Vector3f velocity_measured = _inverse_kinematic_matrix * radps_measured;
+    _odometry_component->process(velocity_measured);
+    _pub_odometry->publish(_odometry_component->getOdometryMessage(
+      getFrameIdPrefix() + _parameter.tf_footprint_frame, getFrameIdPrefix() + "odom"
+    ));
+
+    if (_parameter.publish_tf_odom) {
+      _tf_broadcaster->sendTransform(_odometry_component->getTfMessage(
+        getFrameIdPrefix() + _parameter.tf_footprint_frame, getFrameIdPrefix() + "odom"
+      ));
+    }    
   }
   catch (HardwareError& ex) {
     RCLCPP_ERROR_STREAM(get_logger(), "Hardware error occurred while trying to set new values for motor controller."
