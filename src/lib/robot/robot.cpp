@@ -87,6 +87,11 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterfa
     rclcpp::QoS(2).best_effort().durability_volatile(),
     std::bind(&Robot::callbackVelocity, this, std::placeholders::_1)
   );
+  _sub_set_rpm = create_subscription<std_msgs::msg::Float32MultiArray>(
+    "set_motor_rpm",
+    rclcpp::QoS(2).best_effort().durability_volatile(),
+    std::bind(&Robot::callbackSetMotorRpm, this, std::placeholders::_1)
+  );
   _sub_set_lighting_color = create_subscription<edu_robot::msg::SetLightingColor>(
     "set_lighting_color",
     rclcpp::QoS(2).best_effort(),
@@ -203,6 +208,30 @@ void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> tw
     RCLCPP_ERROR_STREAM(get_logger(), "Error occurred while trying to set new values for motor controller."
                                       << " what() = " << ex.what());     
   }
+}
+
+void Robot::callbackSetMotorRpm(std::shared_ptr<const std_msgs::msg::Float32MultiArray> rpm_msg)
+{
+  if (static_cast<int>(rpm_msg->data.size()) != _kinematic_matrix.rows()) {
+    RCLCPP_ERROR_STREAM(get_logger(), "Dimension of received RPM message do not fit to provided kinematic matrix.");    
+    return;
+  }
+
+  try {
+    _last_twist_received = get_clock()->now();
+
+    for (std::size_t i = 0; i < rpm_msg->data.size(); ++i) {
+      _motor_controllers[i]->setRpm(rpm_msg->data[i]);
+    }
+  }
+  catch (HardwareError& ex) {
+    RCLCPP_ERROR_STREAM(get_logger(), "Hardware error occurred while trying to set new values for motor controller."
+                                      << " what() = " << ex.what());                                      
+  }
+  catch (std::exception& ex) {
+    RCLCPP_ERROR_STREAM(get_logger(), "Error occurred while trying to set new values for motor controller."
+                                      << " what() = " << ex.what());     
+  }  
 }
 
 void Robot::callbackSetLightingColor(std::shared_ptr<const edu_robot::msg::SetLightingColor> msg)

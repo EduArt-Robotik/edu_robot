@@ -33,6 +33,7 @@
 #include <rclcpp/timer.hpp>
 #include <tf2_ros/transform_broadcaster.h>
 
+#include <std_msgs/msg/float32_multi_array.hpp>
 #include <geometry_msgs/msg/twist.hpp>
 #include <nav_msgs/msg/odometry.hpp>
 
@@ -78,6 +79,13 @@ protected:
    * \param twist_msg Received twist message.
    */
   void callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> twist_msg);
+  /**
+   * \brief Callback used to set directly the motor input RPM value. The array length of the message must fit to
+   *        provided kinematic matrix size (rows == array length).
+   *
+   * \param rpm_msg Received rpm message.
+   */
+  void callbackSetMotorRpm(std::shared_ptr<const std_msgs::msg::Float32MultiArray> rpm_msg);
   /**
    * \brief Callback used to set the color and brightness of connected lightings.
    *
@@ -148,6 +156,7 @@ private:
   std::shared_ptr<rclcpp::Service<edu_robot::srv::SetMode>> _srv_set_mode;
 
   std::shared_ptr<rclcpp::Subscription<geometry_msgs::msg::Twist>> _sub_twist;
+  std::shared_ptr<rclcpp::Subscription<std_msgs::msg::Float32MultiArray>> _sub_set_rpm;
   rclcpp::Time _last_twist_received;
   std::shared_ptr<rclcpp::Subscription<edu_robot::msg::SetLightingColor>> _sub_set_lighting_color;
 
