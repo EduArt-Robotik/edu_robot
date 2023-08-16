@@ -5,23 +5,27 @@ services:
         # build: ../ipc127e
         image: eduartrobotik/eduard-ipc127e:0.3.0
         container_name: eduard-ipc127e-ie-app-0.3.0
+        # debugging command for level 2 network access.
+        # command: bash -c "sudo apt-get update && sudo apt-get install -y iproute2 net-tools && ip addr && printenv && source /home/user/ros/install/setup.bash && ros2 topic list && ros2 daemon start && sudo netstat -gn && ros2 launch edu_robot eduard-ipc127e.launch.py"
         restart: on-failure
         privileged: true
         ipc: host
         pid: host
         mem_limit: 300mb
         environment:
-            - EDU_ROBOT_NAMESPACE=eduard/red
+            - EDU_ROBOT_NAMESPACE=eduard
         networks:
             - proxy-redirect
+            # - zzz_layer2_net1
         volumes:
             - './publish/:/publish/'
             - './cfg-data/:/cfg-data/'
-        # devices:
-        #     - '/dev:/dev'
         ports:
             - "1234:1234/udp"
 
 networks:
     proxy-redirect:
         external: true
+    # zzz_layer2_net1:
+    #     name: zzz_layer2_net1
+    #     external: true
