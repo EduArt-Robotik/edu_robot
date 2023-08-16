@@ -1,7 +1,7 @@
 <CycloneDDS>
    <Domain>
      <General>
-        <NetworkInterfaceAddress>lo,eno1</NetworkInterfaceAddress>
+        <NetworkInterfaceAddress>eno2</NetworkInterfaceAddress>
     </General>
    </Domain>
 </CycloneDDS>
