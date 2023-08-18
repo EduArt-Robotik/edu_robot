@@ -4,6 +4,7 @@ ENV USER user
 ENV DEBIAN_FRONTEND=noninteractive
 
 COPY ./ipc_cyclone_dds_profile.xml /home/$USER/
+COPY ./ie_app_cyclone_dds_profile.xml /home/$USER/
 
 ENV CYCLONEDDS_URI=/home/$USER/ipc_cyclone_dds_profile.xml
 
