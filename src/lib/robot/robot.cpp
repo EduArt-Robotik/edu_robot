@@ -453,7 +453,7 @@ void Robot::setLightingForMode(const RobotMode mode)
       search->second->setColor(Color{34, 34, 34}, Lighting::Mode::DIM);
       break;
 
-    case RobotMode::FLEET:
+    case RobotMode::AUTONOMOUS:
       search->second->setColor(Color{25, 25, 25}, Lighting::Mode::FLASH);
       break;
 
@@ -491,17 +491,17 @@ void Robot::configureStateMachine()
     setLightingForMode(RobotMode::INACTIVE);
   });
 
-  // Fleet Mode
-  _mode_state_machine.setModeActivationOperation(RobotMode::FLEET, [this](){
-    remapTwistSubscription("fleet/cmd_vel");
+  // Autonomous Mode
+  _mode_state_machine.setModeActivationOperation(RobotMode::AUTONOMOUS, [this](){
+    remapTwistSubscription("autonomous/cmd_vel");
     switchKinematic(DriveKinematic::MECANUM_DRIVE);
     _hardware_interface->enable();
-    setLightingForMode(RobotMode::FLEET);
+    setLightingForMode(RobotMode::AUTONOMOUS);
     _action_manager->addAction(std::make_shared<action::CheckIfMotorIsEnabled>(
       get_clock(), 500ms, _motor_controllers, _mode_state_machine
     ));
   });
-  _mode_state_machine.setModeDeactivationOperation(RobotMode::FLEET, [this](){
+  _mode_state_machine.setModeDeactivationOperation(RobotMode::AUTONOMOUS, [this](){
     remapTwistSubscription("cmd_vel");
   });
 
