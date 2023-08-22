@@ -147,23 +147,6 @@ $ scan on
 
 The connection process so far should look like this. Your joystick is now recognised as a wireless controller. Copy the MAC address of the device for the rest of the procedure.
 
-```console
-root@iot2050-debian:~# bluetoothctl
-Agent registered
-[bluetooth] # agent on
-Agent is already registered
-[bluetooth] # power on
-Changing the power on succeeded
-[bluetooth] # discoverable on
-Changing discoverable on succeeded
-[CHG] Controller XX:XX:XX:XX:XX:XX Discoverable: yes
-[bluetooth] # pairable on
-Discovery started
-[CHG] Controller XX:XX:XX:XX:XX:XX Discovering:yes
-[NEW] Device XX:XX:XX:XX:XX:XX Wireless Controller
-[bluetooth] # 
-```
-
 Connect the controller using the following commands and its MAC address. If needed, press the PlayStation button again when the light signals stop flashing.
 
 ```console
@@ -219,100 +202,41 @@ docker compose up
 
 Inside the docker compose file a namespace is defined. This namespace can freely be modified. We recommend to reflect the robot color with this namespace. But in general do it like you want.
 
-### Legacy Deployment
-
-On the first generation of Eduard IoTBots it could happen that the docker container are not able to communicate between each other. This leads to a non working robot (at least the controlling by game pad doesn't work properly). For this case a special docker image is provided. This could be used by following command.
+For removing the docker container execute the command:
 
 ```bash
-docker run --user root --name eduard-iotbot-0.2.1-legacy --restart=always --privileged -v /dev:/dev --net=host --pid=host --ipc=host --group-add dialout --env EDU_ROBOT_NAMESPACE=eduard/red eduartrobotik/eduard-iotbot:0.2.1-legacy
+docker compose down
 ```
 
-With the flag "--restart=always" the container will come up after rebooting the system. If this is not wanted please remove this flag. The flag "-env EDU_ROBOT_NAMESPACE=" defines the used namespace by this robot. In this example "eduard/red" was used. Please update the namespace according your robot color.
-
-### Building from Source 
-
-This section describes how the software is deployed on an IoT2050 in a Docker environment. First clone the repository on the robot by executing this command:
-
-```bash
-git clone https://github.com/EduArt-Robotik/edu_robot.git
-```
-
-Then navigate into the docker folder in the cloned repository:
-
-```bash
-cd edu_robot/docker/iot2050
-```
-
-Using make the Docker image can be build:
-
-```bash
-make all
-make clean
-```
-
-Note: this could take some while, ~30min.
-
-After executing these command a new Docker image with the name "eduard-iotbot:0.2.1" should be created. It can be checked by following command:
-
-```bash
-docker image ls
-```
-
-The docker container can easily started by the command:
-
-```bash
-docker run --user user --name eduard-iotbot-0.2.1 --restart=always --privileged -v /dev:/dev --net=host --pid=host --ipc=host --group-add dialout --env EDU_ROBOT_NAMESPACE=eduard/red eduard-iotbot:0.2.1
-```
-
-With the flag "--restart=always" the container will come up after rebooting the system. If this is not wanted please remove this flag. The flag "-env EDU_ROBOT_NAMESPACE=" defines the used namespace by this robot. In this example "eduard/red" was used. Please update the namespace according your robot color.
+at the location of the docker compose file.
 
 ## Deploying on IPC127e
 ### Use Prebuilt Docker Images
 
-The easiest way, and one that is usually quite sufficient, is to use a prebuilt Docker image. All released versions of edu_robot software are usually available. The following command deploys and starts the image. Note: please make sure that the robot has interconnection.
+The easiest way, and one that is usually quite sufficient, is to use a prebuilt Docker image. All released versions of edu_robot software are usually available. 
 
-```bash
-docker run --user user --name eduard-ipc127e-0.2.1 --env EDU_ROBOT_NAMESPACE=eduard/red --restart=always --privileged -v /dev:/dev --net=host --pid=host --ipc=host eduartrobotik/eduard-ipc127e:0.2.1
-```
-
-With the flag "--restart=always" the container will come up after rebooting the system. If this is not wanted please remove this flag. The flag "-env EDU_ROBOT_NAMESPACE=" defines the used namespace by this robot. In this example "eduard/red" was used. Please update the namespace according your robot color.
-
-### Building from Source
-
-This section describes how the software is deployed on an IPC127e in a Docker environment. First clone the repository on the robot by executing this command:
+We provide a docker compose file for the IPC127e. Either [download the file](docker/ipc127e/docker-compose.yaml) on IPC127e or clone the repository and navigate to the file:
 
 ```bash
 git clone https://github.com/EduArt-Robotik/edu_robot.git
+cd edu_robot_control/docker/ipc127e
 ```
 
-Then navigate into the docker folder in the cloned repository:
+Then execute following command inside the folder where the ["docker-compose.yaml"](docker/ipc127e/docker-compose.yaml) is located:
 
 ```bash
-cd edu_robot/docker/ipc127e
+docker compose up
 ```
 
-Using make the Docker image can be build:
+Inside the docker compose file a namespace is defined. This namespace can freely be modified. We recommend to reflect the robot color with this namespace. But in general do it like you want.
+
+For removing the docker container execute the command:
 
 ```bash
-make all
-make clean
+docker compose down
 ```
 
-Note: this could take some while, ~8min.
-
-After executing these command a new Docker image with the name "eduard-ipc127e:0.2.1" should be created. It can be checked by following command:
-
-```bash
-docker image ls
-```
-
-The docker container can easily started by the command:
-
-```bash
-docker run --name eduard-ipc127e-0.2.1 --env EDU_ROBOT_NAMESPACE=eduard/red --restart=always --privileged -v /dev:/dev --network host --pid=host --ipc=host eduard-ipc127e:0.2.1
-```
-
-With the flag "--restart=always" the container will come up after rebooting the system. If this is not wanted please remove this flag.
+at the location of the docker compose file.
 
 # Monitoring Eduard using RViz
 
