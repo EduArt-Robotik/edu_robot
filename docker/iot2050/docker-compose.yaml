@@ -2,8 +2,8 @@ version: "3.0"
 
 services:
     eduard-iot2050:
-        image: eduartrobotik/eduard-iotbot:0.3.0
-        container_name: eduard-iotbot-0.3.0
+        image: eduartrobotik/eduard-iotbot:0.3.1
+        container_name: eduard-iotbot-0.3.1
         user: root
         restart: always
         privileged: true
@@ -22,8 +22,8 @@ services:
             - dialout
 
     eduard-robot-control:
-        image: eduartrobotik/eduard-robot-control-iotbot:0.3.0
-        container_name: eduard-robot-control-iotbot-0.3.0
+        image: eduartrobotik/eduard-robot-control-iotbot:0.3.1
+        container_name: eduard-robot-control-iotbot-0.3.1
         user: root
         restart: always
         privileged: true
