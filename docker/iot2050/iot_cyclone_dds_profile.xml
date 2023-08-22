@@ -1,0 +1,7 @@
+<CycloneDDS>
+   <Domain>
+     <General>
+        <NetworkInterfaceAddress>eno2</NetworkInterfaceAddress>
+    </General>
+   </Domain>
+</CycloneDDS>

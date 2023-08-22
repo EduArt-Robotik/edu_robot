@@ -1,14 +1,16 @@
-FROM eduartrobotik/eduart-robot:0.2.1
+FROM eduartrobotik/eduart-robot:0.3.0
 
 ENV USER user
 ENV DEBIAN_FRONTEND=noninteractive
 
-# add fastrtps profile
-# todo: check if it is still needed!
-COPY ./fastrtps_profile.xml /home/$USER/ipcbot_ws
+COPY ./ipc_cyclone_dds_profile.xml /home/$USER/
+COPY ./ie_app_cyclone_dds_profile.xml /home/$USER/
+
+ENV CYCLONEDDS_URI=/home/$USER/ipc_cyclone_dds_profile.xml
 
 # launch control node and joy interpreter
-CMD export RMW_IMPLEMENTATION=rmw_fastrtps_cpp \
-    && export FASTRTPS_DEFAULT_PROFILES_FILE=/home/user/ipcbot_ws/fastrtps_profile.xml \
-    && source /home/user/ipcbot_ws/install/setup.bash \
+CMD echo "launching eduard ipc127e robot control software" \
+    # && export RMW_IMPLEMENTATION=rmw_fastrtps_cpp \
+    # && export FASTRTPS_DEFAULT_PROFILES_FILE=/home/user/ros/fastrtps_profile.xml \
+    && source /home/user/ros/install/setup.bash \
     && ros2 launch edu_robot eduard-ipc127e.launch.py

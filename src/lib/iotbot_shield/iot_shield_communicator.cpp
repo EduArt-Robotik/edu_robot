@@ -98,6 +98,12 @@ uart::message::RxMessageDataBuffer IotShieldCommunicator::getRxBuffer()
   return _rx_buffer_copy;
 }
 
+std::chrono::time_point<std::chrono::system_clock> IotShieldCommunicator::getStampRxBuffer()
+{
+  std::lock_guard guard(_mutex_received_data_copy);
+  return _stamp_rx_buffer_copy;  
+}
+
 template <typename Left, typename Right>
 static bool is_same(const Left& lhs, const Right& rhs) {
   if (lhs.size() > rhs.size()) {
@@ -173,6 +179,7 @@ void IotShieldCommunicator::processing()
           // Make received data available for polling.
           std::lock_guard guard(_mutex_received_data_copy);
           _rx_buffer_copy = rx_buffer;
+          _stamp_rx_buffer_copy = std::chrono::system_clock::now();
         }
 
         for (auto it =_open_request.begin(); it != _open_request.end();) {

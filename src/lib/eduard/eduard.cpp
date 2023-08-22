@@ -164,7 +164,7 @@ void Eduard::initialize(eduart::robot::HardwareComponentFactory& factory)
 
   // Set Up Default Drive Kinematic. Needs to be done here, because method can't be called in constructor 
   // of robot base class.
-  switchKinematic(Mode::SKID_DRIVE);
+  switchKinematic(DriveKinematic::SKID_DRIVE);
 }
 
 Eduard::~Eduard()
@@ -172,11 +172,11 @@ Eduard::~Eduard()
 
 }
 
-Eigen::MatrixXf Eduard::getKinematicMatrix(const Mode mode) const
+Eigen::MatrixXf Eduard::getKinematicMatrix(const DriveKinematic kinematic) const
 {
   Eigen::MatrixXf kinematic_matrix;
 
-  if (mode & Mode::SKID_DRIVE) {
+  if (kinematic == DriveKinematic::SKID_DRIVE) {
     const float l_x = _parameter.skid.length.x;
     const float l_y = _parameter.skid.length.y;
     const float wheel_radius = _parameter.skid.wheel_diameter * 0.5f;
@@ -189,7 +189,7 @@ Eigen::MatrixXf Eduard::getKinematicMatrix(const Mode mode) const
                         -1.0f, 0.0f, l_squared / (2.0f * l_y);
     kinematic_matrix *= 1.0f / wheel_radius;
   }
-  else if (mode & Mode::MECANUM_DRIVE) {
+  else if (kinematic == DriveKinematic::MECANUM_DRIVE) {
     const float l_x = _parameter.mecanum.length.x;
     const float l_y = _parameter.mecanum.length.y;
     const float wheel_radius = _parameter.mecanum.wheel_diameter * 0.5f;

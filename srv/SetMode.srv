@@ -1,5 +1,6 @@
 # request
 edu_robot/Mode mode
+uint8 disable_feature # TODO: this is somehow not consistent. Make it better!
 ---
 # response
 edu_robot/RobotState state # TODO: maybe this is not the best response type

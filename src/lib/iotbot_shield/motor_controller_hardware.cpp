@@ -56,10 +56,10 @@ void CompoundMotorControllerHardware::processRxData(const uart::message::RxMessa
     return;
   }
   
-  _dummy_motor_controllers[0]->_callback_process_measurement(-uart::message::ShieldResponse::rpm0(data));
-  _dummy_motor_controllers[1]->_callback_process_measurement(-uart::message::ShieldResponse::rpm1(data));
-  _dummy_motor_controllers[2]->_callback_process_measurement(-uart::message::ShieldResponse::rpm2(data));
-  _callback_process_measurement(-uart::message::ShieldResponse::rpm3(data));
+  _dummy_motor_controllers[0]->_callback_process_measurement(-uart::message::ShieldResponse::rpm0(data), true);
+  _dummy_motor_controllers[1]->_callback_process_measurement(-uart::message::ShieldResponse::rpm1(data), true);
+  _dummy_motor_controllers[2]->_callback_process_measurement(-uart::message::ShieldResponse::rpm2(data), true);
+  _callback_process_measurement(-uart::message::ShieldResponse::rpm3(data), true);
 }
 
 void CompoundMotorControllerHardware::processSetValue(const Rpm& rpm)

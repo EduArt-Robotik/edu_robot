@@ -3,7 +3,6 @@ add_library(eduart-iotbot-shield
   iot_shield.cpp
   iot_shield_communicator.cpp
   lighting_hardware.cpp
-  iotbot.cpp
   motor_controller_hardware.cpp
   range_sensor_hardware.cpp
   imu_sensor_hardware.cpp

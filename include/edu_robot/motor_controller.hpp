@@ -53,7 +53,7 @@ public:
   };
 
   using ComponentInterface = HardwareComponentInterface<Parameter, Rpm>;
-  using SensorInterface = HardwareSensorInterface<Parameter, Rpm>;
+  using SensorInterface = HardwareSensorInterface<Parameter, Rpm, bool>;
 
   MotorController(const std::string& name, const std::uint8_t id, const Parameter& parameter,
                   const std::string& urdf_joint_name, rclcpp::Node& ros_node,
@@ -71,17 +71,22 @@ public:
     std::lock_guard guard(_mutex_access_data);
     return _measured_rpm;
   }
+  inline bool isEnabled() const {
+    std::lock_guard guard(_mutex_access_data);
+    return _enabled;    
+  }
 
   static MotorController::Parameter get_parameter(
     const std::string& name, const MotorController::Parameter& default_parameter, rclcpp::Node& ros_node);
-  const Parameter& parameter() const { return _parameter; }    
+  const Parameter& parameter() const { return _parameter; }
 
 private:
-  void processMeasurementData(const Rpm measurement);
+  void processMeasurementData(const Rpm measurement, const bool enabled_flag);
 
   const Parameter _parameter;
   Rpm _set_rpm;
   Rpm _measured_rpm;
+  bool _enabled = false;
   std::string _name;
   std::uint8_t _id;
   std::string _urdf_joint_name;

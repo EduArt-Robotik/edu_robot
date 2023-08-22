@@ -1,4 +1,4 @@
-FROM eduartrobotik/eduart-ros-base:humble
+FROM eduartrobotik/eduart-ros-base:humble-1.1.0
 
 ENV USER user
 ENV DEBIAN_FRONTEND=noninteractive
@@ -20,10 +20,10 @@ RUN apt-get update \
 
 USER $USER
 
-# set up iotbot workspace
-RUN mkdir -p /home/$USER/iotbot_ws/src/
-COPY ./edu_robot /home/$USER/iotbot_ws/src/edu_robot
-WORKDIR /home/$USER/iotbot_ws
+# set up ros workspace
+RUN mkdir -p /home/$USER/ros/src/
+COPY ./edu_robot /home/$USER/ros/src/edu_robot
+WORKDIR /home/$USER/ros
 
 # build EduArt packages nodes
 RUN source /opt/ros/$ROS_DISTRO/setup.bash \

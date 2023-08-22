@@ -28,6 +28,7 @@ struct RobotStatusReport
   } current;
 
   std::vector<Rpm> rpm;
+  bool status_emergency_stop = false;
 };
 
 } // end namespace eduart

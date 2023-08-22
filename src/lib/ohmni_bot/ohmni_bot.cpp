@@ -91,7 +91,7 @@ void OhmniBot::initialize(eduart::robot::HardwareComponentFactory& factory)
 
   // Set Up Default Drive Kinematic. Needs to be done here, because method can't be called in constructor 
   // of robot base class.
-  switchKinematic(Mode::MECANUM_DRIVE);
+  switchKinematic(DriveKinematic::MECANUM_DRIVE);
 }
 
 OhmniBot::~OhmniBot()
@@ -99,11 +99,11 @@ OhmniBot::~OhmniBot()
 
 }
 
-Eigen::MatrixXf OhmniBot::getKinematicMatrix(const Mode mode) const
+Eigen::MatrixXf OhmniBot::getKinematicMatrix(const DriveKinematic kinematic) const
 {
   Eigen::MatrixXf kinematic_matrix;
 
-  if (mode & Mode::MECANUM_DRIVE) {
+  if (kinematic == DriveKinematic::MECANUM_DRIVE) {
     const float l_x = _parameter.mecanum.length.x;
     const float l_y = _parameter.mecanum.length.y;
     const float wheel_radius = _parameter.mecanum.wheel_diameter * 0.5f;

@@ -52,6 +52,7 @@ void IotShield::disable()
 
 RobotStatusReport IotShield::getStatusReport()
 {
+  processStatusReport();
   return _report;
 }
 
@@ -66,6 +67,17 @@ void IotShield::registerIotShieldRxDevice(std::shared_ptr<IotShieldRxDevice> dev
 
 void IotShield::processStatusReport()
 {
+  const bool need_to_update = 
+    std::chrono::duration_cast<std::chrono::milliseconds>(
+      std::chrono::system_clock::now() - _communicator->getStampRxBuffer()) > 1500ms; // \todo make configurable!
+
+  if (need_to_update) {
+    auto request = ShieldRequest::make_request<uart::message::SetRpm>(0.0f, 0.0f, 0.0f, 0.0f);
+    auto future_response = _communicator->sendRequest(std::move(request));
+    wait_for_future(future_response, 100ms);
+    future_response.get();    
+  }
+
   const auto buffer = _communicator->getRxBuffer();
   _report.temperature = uart::message::ShieldResponse::temperature(buffer);
   _report.voltage.mcu = uart::message::ShieldResponse::voltage(buffer);
@@ -76,7 +88,6 @@ void IotShield::processStatusReport()
   _report.rpm[2] = -uart::message::ShieldResponse::rpm2(buffer);
   _report.rpm[3] = -uart::message::ShieldResponse::rpm3(buffer);
   
-  _status_report_ready = true;
   sendInputValue(_report.voltage.mcu);
 
   for (auto& device : _rx_devices) {
