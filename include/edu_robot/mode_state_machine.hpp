@@ -20,40 +20,40 @@ template <RobotMode From, RobotMode To> struct can_switch_to_mode { static const
 template <> struct can_switch_to_mode<RobotMode::UNCONFIGURED, RobotMode::INACTIVE>      { static constexpr bool value = true; };
 
 template <> struct can_switch_to_mode<RobotMode::INACTIVE, RobotMode::REMOTE_CONTROLLED> { static constexpr bool value = true; };
-template <> struct can_switch_to_mode<RobotMode::INACTIVE, RobotMode::FLEET>             { static constexpr bool value = true; };
+template <> struct can_switch_to_mode<RobotMode::INACTIVE, RobotMode::AUTONOMOUS>        { static constexpr bool value = true; };
 template <> struct can_switch_to_mode<RobotMode::INACTIVE, RobotMode::CHARGING>          { static constexpr bool value = true; };
 
-template <> struct can_switch_to_mode<RobotMode::REMOTE_CONTROLLED, RobotMode::INACTIVE> { static constexpr bool value = true; };
-template <> struct can_switch_to_mode<RobotMode::REMOTE_CONTROLLED, RobotMode::FLEET>    { static constexpr bool value = true; };
-template <> struct can_switch_to_mode<RobotMode::REMOTE_CONTROLLED, RobotMode::CHARGING> { static constexpr bool value = true; };
+template <> struct can_switch_to_mode<RobotMode::REMOTE_CONTROLLED, RobotMode::INACTIVE>          { static constexpr bool value = true; };
+template <> struct can_switch_to_mode<RobotMode::REMOTE_CONTROLLED, RobotMode::AUTONOMOUS>        { static constexpr bool value = true; };
+template <> struct can_switch_to_mode<RobotMode::REMOTE_CONTROLLED, RobotMode::CHARGING>          { static constexpr bool value = true; };
 template <> struct can_switch_to_mode<RobotMode::REMOTE_CONTROLLED, RobotMode::REMOTE_CONTROLLED> { static constexpr bool value = true; };
 
-template <> struct can_switch_to_mode<RobotMode::FLEET, RobotMode::INACTIVE>             { static constexpr bool value = true; };
-template <> struct can_switch_to_mode<RobotMode::FLEET, RobotMode::REMOTE_CONTROLLED>    { static constexpr bool value = true; };
-template <> struct can_switch_to_mode<RobotMode::FLEET, RobotMode::CHARGING>             { static constexpr bool value = true; };
+template <> struct can_switch_to_mode<RobotMode::AUTONOMOUS, RobotMode::INACTIVE>          { static constexpr bool value = true; };
+template <> struct can_switch_to_mode<RobotMode::AUTONOMOUS, RobotMode::REMOTE_CONTROLLED> { static constexpr bool value = true; };
+template <> struct can_switch_to_mode<RobotMode::AUTONOMOUS, RobotMode::CHARGING>          { static constexpr bool value = true; };
 
-template <> struct can_switch_to_mode<RobotMode::CHARGING, RobotMode::INACTIVE>          { static constexpr bool value = true; };
+template <> struct can_switch_to_mode<RobotMode::CHARGING, RobotMode::INACTIVE> { static constexpr bool value = true; };
 
 // Defines which feature is needed for robot mode.
 template <RobotMode Mode, FeatureMode Feature> struct does_need_feature { static constexpr bool value = false; };
 
-template <> struct does_need_feature<RobotMode::FLEET, FeatureMode::COLLISION_AVOIDANCE_OVERRIDE> { static constexpr bool value = true; };
+template <> struct does_need_feature<RobotMode::AUTONOMOUS, FeatureMode::COLLISION_AVOIDANCE_OVERRIDE> { static constexpr bool value = true; };
 
 // Defines drive kinematic can be combined with robot mode.
 template <RobotMode Mode, DriveKinematic Kinematic> struct can_combined_with_kinematic { static constexpr bool value = true; };
 
-template <> struct can_combined_with_kinematic<RobotMode::FLEET, DriveKinematic::SKID_DRIVE> { static constexpr bool value = false; };
+template <> struct can_combined_with_kinematic<RobotMode::AUTONOMOUS, DriveKinematic::SKID_DRIVE> { static constexpr bool value = false; };
 
 // Defines the operation that should be performed on a mode change. By default nothing will be done. Just the new mode will be assigned.
 template <RobotMode From, RobotMode To> struct switch_mode {
   inline static void perform(Mode& mode) { mode.robot_mode = To; }
 };
 
-template <RobotMode From> struct switch_mode<From, RobotMode::FLEET> {
+template <RobotMode From> struct switch_mode<From, RobotMode::AUTONOMOUS> {
   inline static void perform(Mode& mode) {
     mode.drive_kinematic = DriveKinematic::MECANUM_DRIVE;
     mode.feature_mode |= FeatureMode::COLLISION_AVOIDANCE_OVERRIDE;
-    mode.robot_mode = RobotMode::FLEET;
+    mode.robot_mode = RobotMode::AUTONOMOUS;
   }
 };
 
@@ -148,7 +148,7 @@ private:
   std::map<RobotMode, DeactivationOperation> _deactivation_operation;
 };
 
-using StateMachine = ModeStateMachine<RobotMode::UNCONFIGURED, RobotMode::INACTIVE, RobotMode::REMOTE_CONTROLLED, RobotMode::FLEET, RobotMode::CHARGING>;
+using StateMachine = ModeStateMachine<RobotMode::UNCONFIGURED, RobotMode::INACTIVE, RobotMode::REMOTE_CONTROLLED, RobotMode::AUTONOMOUS, RobotMode::CHARGING>;
 
 } // end namespace robot
 } // end namespace eduart

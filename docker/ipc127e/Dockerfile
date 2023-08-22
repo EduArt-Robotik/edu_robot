@@ -1,4 +1,4 @@
-FROM eduartrobotik/eduart-robot:0.3.0
+FROM eduartrobotik/eduart-robot:0.3.1
 
 ENV USER user
 ENV DEBIAN_FRONTEND=noninteractive

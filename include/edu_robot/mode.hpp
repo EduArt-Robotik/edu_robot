@@ -11,7 +11,7 @@ enum class RobotMode {
   UNCONFIGURED              = 0,
   INACTIVE                  = edu_robot::msg::Mode::INACTIVE,
   REMOTE_CONTROLLED         = edu_robot::msg::Mode::REMOTE_CONTROLLED,
-  FLEET                     = edu_robot::msg::Mode::FLEET,
+  AUTONOMOUS                = edu_robot::msg::Mode::AUTONOMOUS,
   CHARGING                  = edu_robot::msg::Mode::CHARGING,
   // MASK_UNSET_DRIVING_MODE   = edu_robot::msg::Mode::MASK_UNSET_DRIVING_MODE,
 };

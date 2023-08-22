@@ -7,7 +7,7 @@ uint8 feature_mode
 uint8 UNKNOWN=0 # this entry is valid for driving mode and drive kinematic
 uint8 INACTIVE=1
 uint8 REMOTE_CONTROLLED=2
-uint8 FLEET=4
+uint8 AUTONOMOUS=4
 uint8 CHARGING=8
 
 # kinematic mode
