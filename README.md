@@ -43,7 +43,7 @@ The minium input the robots require are the velocity command and the service "se
 |------|-------------|
 | INACTIVE | The robot is inactive. All drives are disabled. The velocity commands have no effect. |
 | REMOTE_CONTROLLED | The robot is active. All drives are enabled. The robot processes the velocity commands. |
-| FLEET | The robot is active. The mecanum drive kinematic is used. The robot only processes velocity commands from the fleet controller (different topic is used). |
+| AUTONOMOUS | The robot is active. The mecanum drive kinematic is used. The robot will subscribe to the topic "autonomous/cmd_vel". |
 | SKID_DRIVE | Uses the kinematic of an skid drive. Note: only available if the robot supports it. |
 | MECANUM_DRIVE | Uses the kinematic of an mecanum drive. Note: only available if the robot supports it. |
 | COLLISION_AVOIDANCE_OVERRIDE_ENABLED | If the robots accepts it the integrated collision avoidance will be overridden. |
@@ -75,7 +75,7 @@ Eduard is our main robot system. It consists from of four wheels, four lightings
 |UNCONFIGURED| white (pulsation) | During boot up. |
 |INACTIVE| white (dim) | Motors are disabled, no error state present. First state after reboot. |
 |REMOTE_CONTROLLED| white (dim) | Motors are enabled, robot is ready for driving remote controlled. |
-|FLEET| white (flashing) | Robot is in fleet mode and enabled. |
+|AUTONOMOUS| white (flashing) | Robot is in fleet mode and enabled. |
 |CHARGING| green (pulsation) | |
 
 
