@@ -43,7 +43,7 @@ The minium input the robots require are the velocity command and the service "se
 |------|-------------|
 | INACTIVE | The robot is inactive. All drives are disabled. The velocity commands have no effect. |
 | REMOTE_CONTROLLED | The robot is active. All drives are enabled. The robot processes the velocity commands. |
-| FLEET | The robot is active. The mecanum drive kinematic is used. The robot only processes velocity commands from the fleet controller (different topic is used). |
+| AUTONOMOUS | The robot is active. The mecanum drive kinematic is used. The robot will subscribe to the topic "autonomous/cmd_vel". |
 | SKID_DRIVE | Uses the kinematic of an skid drive. Note: only available if the robot supports it. |
 | MECANUM_DRIVE | Uses the kinematic of an mecanum drive. Note: only available if the robot supports it. |
 | COLLISION_AVOIDANCE_OVERRIDE_ENABLED | If the robots accepts it the integrated collision avoidance will be overridden. |
@@ -75,9 +75,89 @@ Eduard is our main robot system. It consists from of four wheels, four lightings
 |UNCONFIGURED| white (pulsation) | During boot up. |
 |INACTIVE| white (dim) | Motors are disabled, no error state present. First state after reboot. |
 |REMOTE_CONTROLLED| white (dim) | Motors are enabled, robot is ready for driving remote controlled. |
-|FLEET| white (flashing) | Robot is in fleet mode and enabled. |
+|AUTONOMOUS| white (flashing) | Robot is in fleet mode and enabled. |
 |CHARGING| green (pulsation) | |
 
+
+# Deploying
+
+A Docker container is used to run this software on our robots. Normally, all our robots are shipped with a Docker container registered to start after a reboot. If you want to deploy a newer version, or whatever the reason, make sure to remove the previously deployed container. To check which containers are running, use the following command:
+
+```bash
+docker container ls 
+```
+A typically print out looks like:
+
+```bash
+CONTAINER ID   IMAGE                      COMMAND                  CREATED      STATUS          PORTS     NAMES
+46c8590424c0   eduard-iotbot:0.2.1-beta   "/ros_entrypoint.sh …"   6 days ago   Up 21 minutes             eduard-iotbot-0.2.1-beta
+```
+
+To stop and remove the container, use the following command with the container ID displayed by the above command:
+
+```bash
+docker stop <container id>
+docker rm <container id>
+```
+
+## Deploying on IoT2050
+
+### Use Prebuilt Docker Images
+
+The easiest way, and one that is usually quite sufficient, is to use a prebuilt Docker image. All released versions of edu_robot software are usually available. 
+
+The following command deploys and starts the image. Note: please make sure that the robot has internet connection. It is considered that the official ["Example Image V1.3.1"](https://support.industry.siemens.com/cs/document/109741799/downloads-f%C3%BCr-simatic-iot20x0?dti=0&lc=de-DE) provided by Siemens will be used for the IoT2050. If this is not the case it cloud lead in a misinterpretation of the game pad.
+
+We provide a docker compose file for the IoT2050. Either [download the file](docker/iot2050/docker-compose.yaml) on IoT2050 or clone the repository and navigate to the file:
+
+```bash
+git clone https://github.com/EduArt-Robotik/edu_robot.git
+cd edu_robot_control/docker/iot2050
+```
+
+Then execute following command inside the folder where the ["docker-compose.yaml"](docker/iot2050/docker-compose.yaml) is located:
+
+```bash
+docker compose up
+```
+
+Inside the docker compose file a namespace is defined. This namespace can freely be modified. We recommend to reflect the robot color with this namespace. But in general do it like you want.
+
+For removing the docker container execute the command:
+
+```bash
+docker compose down
+```
+
+at the location of the docker compose file.
+
+## Deploying on IPC127e
+### Use Prebuilt Docker Images
+
+The easiest way, and one that is usually quite sufficient, is to use a prebuilt Docker image. All released versions of edu_robot software are usually available. 
+
+We provide a docker compose file for the IPC127e. Either [download the file](docker/ipc127e/docker-compose.yaml) on IPC127e or clone the repository and navigate to the file:
+
+```bash
+git clone https://github.com/EduArt-Robotik/edu_robot.git
+cd edu_robot_control/docker/ipc127e
+```
+
+Then execute following command inside the folder where the ["docker-compose.yaml"](docker/ipc127e/docker-compose.yaml) is located:
+
+```bash
+docker compose up
+```
+
+Inside the docker compose file a namespace is defined. This namespace can freely be modified. We recommend to reflect the robot color with this namespace. But in general do it like you want.
+
+For removing the docker container execute the command:
+
+```bash
+docker compose down
+```
+
+at the location of the docker compose file.
 
 # Controlling the Robot
 
@@ -147,23 +227,6 @@ $ scan on
 
 The connection process so far should look like this. Your joystick is now recognised as a wireless controller. Copy the MAC address of the device for the rest of the procedure.
 
-```console
-root@iot2050-debian:~# bluetoothctl
-Agent registered
-[bluetooth] # agent on
-Agent is already registered
-[bluetooth] # power on
-Changing the power on succeeded
-[bluetooth] # discoverable on
-Changing discoverable on succeeded
-[CHG] Controller XX:XX:XX:XX:XX:XX Discoverable: yes
-[bluetooth] # pairable on
-Discovery started
-[CHG] Controller XX:XX:XX:XX:XX:XX Discovering:yes
-[NEW] Device XX:XX:XX:XX:XX:XX Wireless Controller
-[bluetooth] # 
-```
-
 Connect the controller using the following commands and its MAC address. If needed, press the PlayStation button again when the light signals stop flashing.
 
 ```console
@@ -174,145 +237,6 @@ $ exit
 ```
 
 NOTE: These steps are only required once at the very beginning. From now on, when the PS button is pressed, the joystick should automatically connect to the IOT2050 once it has successfully booted up. These operations are only then necessary again if the controller has been connected to another device in the meantime.
-
-# Deploying
-
-A Docker container is used to run this software on our robots. Normally, all our robots are shipped with a Docker container registered to start after a reboot. If you want to deploy a newer version, or whatever the reason, make sure to remove the previously deployed container. To check which containers are running, use the following command:
-
-```bash
-docker container ls 
-```
-A typically print out looks like:
-
-```bash
-CONTAINER ID   IMAGE                      COMMAND                  CREATED      STATUS          PORTS     NAMES
-46c8590424c0   eduard-iotbot:0.2.1-beta   "/ros_entrypoint.sh …"   6 days ago   Up 21 minutes             eduard-iotbot-0.2.1-beta
-```
-
-To stop and remove the container, use the following command with the container ID displayed by the above command:
-
-```bash
-docker stop <container id>
-docker rm <container id>
-```
-
-## Deploying on IoT2050
-
-### Use Prebuilt Docker Images
-
-The easiest way, and one that is usually quite sufficient, is to use a prebuilt Docker image. All released versions of edu_robot software are usually available. 
-
-The following command deploys and starts the image. Note: please make sure that the robot has internet connection. It is considered that the official ["Example Image V1.3.1"](https://support.industry.siemens.com/cs/document/109741799/downloads-f%C3%BCr-simatic-iot20x0?dti=0&lc=de-DE) provided by Siemens will be used for the IoT2050. If this is not the case it cloud lead in a misinterpretation of the game pad.
-
-We provide a docker compose file for the IoT2050. Either [download the file](docker/iot2050/docker-compose.yaml) on IoT2050 or clone the repository and navigate to the file:
-
-```bash
-git clone https://github.com/EduArt-Robotik/edu_robot.git
-cd edu_robot_control/docker/iot2050
-```
-
-Then execute following command inside the folder where the ["docker-compose.yaml"](docker/iot2050/docker-compose.yaml) is located:
-
-```bash
-docker compose up
-```
-
-Inside the docker compose file a namespace is defined. This namespace can freely be modified. We recommend to reflect the robot color with this namespace. But in general do it like you want.
-
-### Legacy Deployment
-
-On the first generation of Eduard IoTBots it could happen that the docker container are not able to communicate between each other. This leads to a non working robot (at least the controlling by game pad doesn't work properly). For this case a special docker image is provided. This could be used by following command.
-
-```bash
-docker run --user root --name eduard-iotbot-0.2.1-legacy --restart=always --privileged -v /dev:/dev --net=host --pid=host --ipc=host --group-add dialout --env EDU_ROBOT_NAMESPACE=eduard/red eduartrobotik/eduard-iotbot:0.2.1-legacy
-```
-
-With the flag "--restart=always" the container will come up after rebooting the system. If this is not wanted please remove this flag. The flag "-env EDU_ROBOT_NAMESPACE=" defines the used namespace by this robot. In this example "eduard/red" was used. Please update the namespace according your robot color.
-
-### Building from Source 
-
-This section describes how the software is deployed on an IoT2050 in a Docker environment. First clone the repository on the robot by executing this command:
-
-```bash
-git clone https://github.com/EduArt-Robotik/edu_robot.git
-```
-
-Then navigate into the docker folder in the cloned repository:
-
-```bash
-cd edu_robot/docker/iot2050
-```
-
-Using make the Docker image can be build:
-
-```bash
-make all
-make clean
-```
-
-Note: this could take some while, ~30min.
-
-After executing these command a new Docker image with the name "eduard-iotbot:0.2.1" should be created. It can be checked by following command:
-
-```bash
-docker image ls
-```
-
-The docker container can easily started by the command:
-
-```bash
-docker run --user user --name eduard-iotbot-0.2.1 --restart=always --privileged -v /dev:/dev --net=host --pid=host --ipc=host --group-add dialout --env EDU_ROBOT_NAMESPACE=eduard/red eduard-iotbot:0.2.1
-```
-
-With the flag "--restart=always" the container will come up after rebooting the system. If this is not wanted please remove this flag. The flag "-env EDU_ROBOT_NAMESPACE=" defines the used namespace by this robot. In this example "eduard/red" was used. Please update the namespace according your robot color.
-
-## Deploying on IPC127e
-### Use Prebuilt Docker Images
-
-The easiest way, and one that is usually quite sufficient, is to use a prebuilt Docker image. All released versions of edu_robot software are usually available. The following command deploys and starts the image. Note: please make sure that the robot has interconnection.
-
-```bash
-docker run --user user --name eduard-ipc127e-0.2.1 --env EDU_ROBOT_NAMESPACE=eduard/red --restart=always --privileged -v /dev:/dev --net=host --pid=host --ipc=host eduartrobotik/eduard-ipc127e:0.2.1
-```
-
-With the flag "--restart=always" the container will come up after rebooting the system. If this is not wanted please remove this flag. The flag "-env EDU_ROBOT_NAMESPACE=" defines the used namespace by this robot. In this example "eduard/red" was used. Please update the namespace according your robot color.
-
-### Building from Source
-
-This section describes how the software is deployed on an IPC127e in a Docker environment. First clone the repository on the robot by executing this command:
-
-```bash
-git clone https://github.com/EduArt-Robotik/edu_robot.git
-```
-
-Then navigate into the docker folder in the cloned repository:
-
-```bash
-cd edu_robot/docker/ipc127e
-```
-
-Using make the Docker image can be build:
-
-```bash
-make all
-make clean
-```
-
-Note: this could take some while, ~8min.
-
-After executing these command a new Docker image with the name "eduard-ipc127e:0.2.1" should be created. It can be checked by following command:
-
-```bash
-docker image ls
-```
-
-The docker container can easily started by the command:
-
-```bash
-docker run --name eduard-ipc127e-0.2.1 --env EDU_ROBOT_NAMESPACE=eduard/red --restart=always --privileged -v /dev:/dev --network host --pid=host --ipc=host eduard-ipc127e:0.2.1
-```
-
-With the flag "--restart=always" the container will come up after rebooting the system. If this is not wanted please remove this flag.
 
 # Monitoring Eduard using RViz
 
