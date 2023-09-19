@@ -14,4 +14,4 @@ RUN sudo chmod a+x /home/$USER/entrypoint
 ENTRYPOINT [ "/home/user/entrypoint" ]
 
 # launch control node and joy interpreter
-CMD [ "ros2", "launch", "edu_robot eduard-ipc127e.launch.py" ]
+CMD [ "ros2", "launch", "edu_robot", "eduard-ipc127e.launch.py" ]
