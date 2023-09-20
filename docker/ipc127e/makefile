@@ -1,4 +1,4 @@
-image_name = eduard-ipc127e:0.3.0
+image_name = eduard-ipc127e:0.3.1
 
 build-docker:
 	docker build -t $(image_name) .

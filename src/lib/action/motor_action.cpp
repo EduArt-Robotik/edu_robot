@@ -21,7 +21,7 @@ CheckIfMotorIsEnabled::CheckIfMotorIsEnabled(
 void CheckIfMotorIsEnabled::process()
 {
   // Action only processable when robot is in state remote controlled or in state fleet.
-  if (_state_machine.mode().robot_mode != RobotMode::REMOTE_CONTROLLED && _state_machine.mode().robot_mode != RobotMode::FLEET) {
+  if (_state_machine.mode().robot_mode != RobotMode::REMOTE_CONTROLLED && _state_machine.mode().robot_mode != RobotMode::AUTONOMOUS) {
     // Cancel Processing
     _keep_alive = false;
     return;

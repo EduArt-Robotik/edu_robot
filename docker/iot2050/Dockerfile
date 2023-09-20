@@ -1,15 +1,16 @@
-FROM eduartrobotik/eduart-robot:0.3.0
+FROM eduartrobotik/eduart-robot:0.3.1
 
 ENV USER user
 ENV DEBIAN_FRONTEND=noninteractive
 
+# in case cyclone is used this profile is needed
 COPY ./iot_cyclone_dds_profile.xml /home/$USER/
-
 ENV CYCLONEDDS_URI=/home/$USER/iot_cyclone_dds_profile.xml
 
+# add entry point
+COPY --chown=$USER ./entrypoint /home/$USER/
+RUN sudo chmod a+x /home/$USER/entrypoint
+ENTRYPOINT [ "/home/user/entrypoint" ]
+
 # launch control node and joy interpreter
-CMD echo "launching eduard iot2050 robot control software" \
-    # && export RMW_IMPLEMENTATION=rmw_fastrtps_cpp \
-    && source /opt/ros/$ROS_DISTRO/setup.bash \
-    && source /home/user/ros/install/setup.bash \    
-    && ros2 launch edu_robot eduard-iot2050.launch.py
+CMD [ "ros2", "launch", "edu_robot", "eduard-iot2050.launch.py" ]
