@@ -61,6 +61,13 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterfa
 {
   _parameter = get_robot_ros_parameter(*this);
 
+  // Diagnostic
+  _diagnostic_updater = std::make_shared<diagnostic_updater::Updater>(
+      get_node_base_interface(), get_node_clock_interface(), get_node_logging_interface(), get_node_parameters_interface(),
+      get_node_timers_interface(), get_node_topics_interface(), 1.0
+  );
+
+
   // Publisher
   _pub_odometry = create_publisher<nav_msgs::msg::Odometry>(
     "odometry",
@@ -369,6 +376,7 @@ void Robot::registerSensor(std::shared_ptr<Sensor> sensor)
   }
 
   _sensors[sensor->name()] = sensor;
+  _diagnostic_updater->add(sensor->name(), sensor.get(), &Sensor::processDiagnostics);
 }
 
 void Robot::processStatusReport()

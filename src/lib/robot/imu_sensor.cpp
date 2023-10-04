@@ -117,5 +117,14 @@ void ImuSensor::processMeasurementData(
   _tf_broadcaster->sendTransform(tf_msg);
 }
 
+Diagnostic ImuSensor::processDiagnosticsImpl()
+{
+  Diagnostic diagnostic;
+
+  diagnostic.add("dummy", "wummy", Diagnostic::Level::WARN);
+
+  return diagnostic;
+}
+
 } // end namespace eduart
 } // end namespace robot

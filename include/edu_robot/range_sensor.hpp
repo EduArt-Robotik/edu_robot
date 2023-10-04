@@ -52,6 +52,8 @@ protected:
   void processMeasurementData(const float measurement);
 
 private:
+  Diagnostic processDiagnosticsImpl() override;
+
   const Parameter _parameter;
   std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::Range>> _publisher;
   std::shared_ptr<rclcpp::Clock> _clock;

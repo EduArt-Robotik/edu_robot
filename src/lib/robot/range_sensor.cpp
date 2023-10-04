@@ -62,5 +62,14 @@ void RangeSensor::processMeasurementData(const float measurement)
   sendInputValue(measurement);
 }
 
+Diagnostic RangeSensor::processDiagnosticsImpl()
+{
+  Diagnostic diagnostic;
+
+  diagnostic.add("dummy", "wummy", Diagnostic::Level::WARN);
+
+  return diagnostic;
+}
+
 } // end namespace eduart
 } // end namespace robot

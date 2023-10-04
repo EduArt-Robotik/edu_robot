@@ -30,6 +30,7 @@ ament_target_dependencies(
   "std_msgs"
   "geometry_msgs"
   "sensor_msgs"
+  "diagnostic_updater"
 )
 # Below ROS humble this line is needed...
 # rosidl_target_interfaces(eduart-robot ${PROJECT_NAME} "rosidl_typesupport_cpp")

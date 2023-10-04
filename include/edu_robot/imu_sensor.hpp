@@ -53,6 +53,8 @@ protected:
     const Eigen::Vector3d& linear_acceleration);
 
 private:
+  Diagnostic processDiagnosticsImpl() override;
+
   const Parameter _parameter;
   std::shared_ptr<tf2_ros::TransformBroadcaster> _tf_broadcaster;
   std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::Imu>> _pub_imu_message;

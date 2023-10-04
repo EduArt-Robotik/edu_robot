@@ -1,0 +1,10 @@
+/**:
+  ros__parameters:
+    topology:
+      type: 'diagnostic_aggregator/AnalyzerGroup'
+      path: Eduard
+      analyzers:
+        imu:
+          type: diagnostic_aggregator/GenericAnalyzer
+          path: IMU
+          contains: [ '/imu' ]
