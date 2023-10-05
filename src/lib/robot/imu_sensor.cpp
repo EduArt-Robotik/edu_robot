@@ -117,11 +117,11 @@ void ImuSensor::processMeasurementData(
   _tf_broadcaster->sendTransform(tf_msg);
 }
 
-Diagnostic ImuSensor::processDiagnosticsImpl()
+diagnostic::Diagnostic ImuSensor::processDiagnosticsImpl()
 {
-  Diagnostic diagnostic;
+  diagnostic::Diagnostic diagnostic;
 
-  diagnostic.add("dummy", "wummy", Diagnostic::Level::WARN);
+  diagnostic.add("dummy", "wummy", diagnostic::Diagnostic::Level::WARN);
 
   return diagnostic;
 }

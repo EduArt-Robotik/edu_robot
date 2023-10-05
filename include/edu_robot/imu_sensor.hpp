@@ -53,7 +53,7 @@ protected:
     const Eigen::Vector3d& linear_acceleration);
 
 private:
-  Diagnostic processDiagnosticsImpl() override;
+  diagnostic::Diagnostic processDiagnosticsImpl() override;
 
   const Parameter _parameter;
   std::shared_ptr<tf2_ros::TransformBroadcaster> _tf_broadcaster;

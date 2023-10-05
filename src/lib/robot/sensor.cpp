@@ -28,7 +28,7 @@ geometry_msgs::msg::TransformStamped Sensor::getTransformMsg(const rclcpp::Time 
 void Sensor::processDiagnostics(diagnostic_updater::DiagnosticStatusWrapper& diagnostic)
 {
   // process sensor specific diagnostics in derived class
-  const Diagnostic sensor_diagnostic = processDiagnosticsImpl();
+  const diagnostic::Diagnostic sensor_diagnostic = processDiagnosticsImpl();
 
   // convert diagnostic in ROS diagnostic message
   diagnostic.summary(convert(sensor_diagnostic.level()), name());

@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "edu_robot/diagnostic.hpp"
+#include <edu_robot/diagnostic/diagnostic.hpp>
 
 #include <rclcpp/time.hpp>
 #include <tf2/LinearMath/Transform.h>
@@ -26,7 +26,7 @@ protected:
   Sensor(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
          const tf2::Transform sensor_transform);
 
-  virtual Diagnostic processDiagnosticsImpl() = 0;
+  virtual diagnostic::Diagnostic processDiagnosticsImpl() = 0;
 
 public:
   Sensor(const Sensor&) = delete;

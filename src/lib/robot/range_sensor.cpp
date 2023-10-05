@@ -11,7 +11,6 @@
 namespace eduart {
 namespace robot {
 
-
 static RangeSensor::Parameter get_range_sensor_parameter(
   const std::string& name, const RangeSensor::Parameter& default_parameter, rclcpp::Node& ros_node)
 {
@@ -62,11 +61,11 @@ void RangeSensor::processMeasurementData(const float measurement)
   sendInputValue(measurement);
 }
 
-Diagnostic RangeSensor::processDiagnosticsImpl()
+diagnostic::Diagnostic RangeSensor::processDiagnosticsImpl()
 {
-  Diagnostic diagnostic;
+  diagnostic::Diagnostic diagnostic;
 
-  diagnostic.add("dummy", "wummy", Diagnostic::Level::WARN);
+  diagnostic.add("dummy", "wummy", diagnostic::Diagnostic::Level::WARN);
 
   return diagnostic;
 }
