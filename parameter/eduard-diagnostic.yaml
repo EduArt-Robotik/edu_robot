@@ -11,4 +11,8 @@
         range_sensor_front_left:
           type: diagnostic_aggregator/GenericAnalyzer
           path: sensor
-          contains: [ 'range' ]          
+          contains: [ 'range' ]
+        motors:
+          type: diagnostic_aggregator/GenericAnalyzer
+          path: motor
+          contains: [ 'motor' ]           

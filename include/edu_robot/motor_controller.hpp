@@ -9,6 +9,11 @@
 #include "edu_robot/rotation_per_minute.hpp"
 #include "edu_robot/angle.hpp"
 
+#include <edu_robot/action/motor_action.hpp>
+
+#include <edu_robot/diagnostic/diagnostic_component.hpp>
+#include <edu_robot/diagnostic/standard_deviation.hpp>
+
 #include <mutex>
 #include <rclcpp/node.hpp>
 #include <rclcpp/clock.hpp>
@@ -27,9 +32,10 @@ namespace robot {
  * \brief Represents a hardware motor controller, but without concrete realization.
  *        This class needs to be realized by a specific hardware layer.
  */
-class MotorController
+class MotorController : public diagnostic::DiagnosticComponent
 {
 public:
+  friend class action::CheckIfMotorIsEnabled;
 
   struct Parameter
   {
@@ -82,6 +88,7 @@ public:
 
 private:
   void processMeasurementData(const Rpm measurement, const bool enabled_flag);
+  diagnostic::Diagnostic processDiagnosticsImpl() override;
 
   const Parameter _parameter;
   Rpm _set_rpm;
@@ -98,6 +105,11 @@ private:
 
   std::shared_ptr<ComponentInterface> _hardware_component_interface;
   std::shared_ptr<SensorInterface> _hardware_sensor_interface;
+
+  // diagnostic
+  rclcpp::Time _last_processing;
+  std::shared_ptr<diagnostic::StandardDeviation<std::uint64_t>> _processing_dt_statistic;
+  std::atomic_bool _lost_enable = false;
 };
 
 } // end namespace robot

@@ -14,4 +14,6 @@ ament_target_dependencies(
   eduart-action
   "rclcpp"
   "sensor_msgs"
+  "diagnostic_msgs"
+  "diagnostic_updater"  
 )

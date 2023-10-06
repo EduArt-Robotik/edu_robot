@@ -58,6 +58,8 @@ MotorController::MotorController(const std::string& name, const std::uint8_t id,
   , _current_wheel_position(0.0)
   , _hardware_component_interface(hardware_component_interface)
   , _hardware_sensor_interface(hardware_sensor_interface)
+  , _last_processing(_clock->now())
+  , _processing_dt_statistic(std::make_shared<diagnostic::StandardDeviation<std::uint64_t>>(20))  
 {
   _hardware_sensor_interface->registerCallbackProcessMeasurementData(
     std::bind(&MotorController::processMeasurementData, this, std::placeholders::_1, std::placeholders::_2)
@@ -75,6 +77,13 @@ MotorController::~MotorController()
 
 void MotorController::setRpm(const Rpm rpm)
 {
+  // Do statistics for diagnostic
+  const auto now = _clock->now();
+  const std::uint64_t dt = (now - _last_processing).nanoseconds();
+  _processing_dt_statistic->update(dt);
+  _last_processing = now;
+
+  // set rpm
   _hardware_component_interface->processSetValue(rpm);
   _set_rpm = rpm;
 }
@@ -85,6 +94,10 @@ void MotorController::processMeasurementData(const Rpm rpm, const bool enabled_f
     std::lock_guard guard(_mutex_access_data);
     _measured_rpm = rpm;
     _enabled = enabled_flag;
+
+    if (_enabled == true) {
+      _lost_enable = false;
+    }
   }
 
   // \todo Check if calculation is correct! At the moment used for visualization only, so no need for accurate calc...
@@ -108,6 +121,33 @@ void MotorController::processMeasurementData(const Rpm rpm, const bool enabled_f
   joint_state_msg.position.push_back(_current_wheel_position);
 
   _pub_joint_state->publish(joint_state_msg);
+}
+
+diagnostic::Diagnostic MotorController::processDiagnosticsImpl()
+{
+  using diagnostic::Diagnostic;
+
+  diagnostic::Diagnostic diagnostic;
+  auto level = Diagnostic::Level::OK;
+
+  // mean set rpm
+  /// estimate diagnostic level: expect max 1s
+  _processing_dt_statistic->mean() >= 1000000000 ? level = Diagnostic::Level::ERROR : level = Diagnostic::Level::OK;
+  const std::string message_processing_dt = std::to_string(_processing_dt_statistic->mean() / 1000000) + " ms";
+  diagnostic.add("set rpm dt", message_processing_dt, level);
+
+  // std deviation of set rpm
+  /// estimate diagnostic level: expect max 20ms
+  _processing_dt_statistic->stdDeviation() >= 20000000 ? level = Diagnostic::Level::WARN : level = Diagnostic::Level::OK;
+  const std::string message_std_dev_dt = std::to_string(_processing_dt_statistic->stdDeviation() / 1000000) + " ms";
+  diagnostic.add("set rpm std dev", message_std_dev_dt, level);
+
+  // lost enable
+  diagnostic.add(
+    "lost enable", _lost_enable, _lost_enable ? Diagnostic::Level::ERROR : Diagnostic::Level::OK
+  );
+
+  return diagnostic;
 }
 
 } // end namespace robot

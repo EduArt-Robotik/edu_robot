@@ -365,6 +365,11 @@ void Robot::registerMotorController(std::shared_ptr<MotorController> motor_contr
   }
 
   _motor_controllers[motor_controller->id()] = motor_controller;
+  _diagnostic_updater->add(
+    motor_controller->name(),
+    std::static_pointer_cast<diagnostic::DiagnosticComponent>(motor_controller).get(),
+    &diagnostic::DiagnosticComponent::processDiagnostics
+  );
 }
 
 void Robot::registerSensor(std::shared_ptr<Sensor> sensor)
