@@ -39,6 +39,8 @@ RangeSensor::RangeSensor(const std::string& name, const std::string& frame_id, c
   , _publisher(ros_node.create_publisher<sensor_msgs::msg::Range>(name + "/range", rclcpp::SensorDataQoS()))
   , _clock(ros_node.get_clock())
   , _hardware_interface(std::move(hardware_interface))
+  , _last_processing(_clock->now())
+  , _processing_dt_statistic(std::make_shared<diagnostic::StandardDeviation<std::uint64_t>>(20))  
 {
   _hardware_interface->registerCallbackProcessMeasurementData(
     std::bind(&RangeSensor::processMeasurementData, this, std::placeholders::_1)
@@ -47,6 +49,13 @@ RangeSensor::RangeSensor(const std::string& name, const std::string& frame_id, c
 
 void RangeSensor::processMeasurementData(const float measurement)
 {
+  // Do statistics for diagnostic
+  const auto now = _clock->now();
+  const std::uint64_t dt = (now - _last_processing).nanoseconds();
+  _processing_dt_statistic->update(dt);
+  _last_processing = now;
+
+  // Process Sensor Measurement
   sensor_msgs::msg::Range msg;
 
   msg.header.frame_id = frameId();
@@ -63,9 +72,22 @@ void RangeSensor::processMeasurementData(const float measurement)
 
 diagnostic::Diagnostic RangeSensor::processDiagnosticsImpl()
 {
-  diagnostic::Diagnostic diagnostic;
+  using diagnostic::Diagnostic;
 
-  diagnostic.add("dummy", "wummy", diagnostic::Diagnostic::Level::WARN);
+  diagnostic::Diagnostic diagnostic;
+  auto level = Diagnostic::Level::OK;
+
+  // mean of processing dt
+  /// estimate diagnostic level: expect max 100ms
+  _processing_dt_statistic->mean() >= 1000000000 ? level = Diagnostic::Level::ERROR : level = Diagnostic::Level::OK;
+  const std::string message_processing_dt = std::to_string(_processing_dt_statistic->mean() / 1000000) + " ms";
+  diagnostic.add("processing dt", message_processing_dt, level);
+
+  // std deviation of processing dt
+  /// estimate diagnostic level: expect max 20ms
+  _processing_dt_statistic->stdDeviation() >= 20000000 ? level = Diagnostic::Level::WARN : level = Diagnostic::Level::OK;
+  const std::string message_std_dev_dt = std::to_string(_processing_dt_statistic->stdDeviation() / 1000000) + " ms";
+  diagnostic.add("processing dt std dev", message_std_dev_dt, level);
 
   return diagnostic;
 }

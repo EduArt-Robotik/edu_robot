@@ -7,6 +7,7 @@
 
 #include "edu_robot/hardware_component_interface.hpp"
 #include "edu_robot/sensor.hpp"
+#include "edu_robot/diagnostic/standard_deviation.hpp"
 
 #include <Eigen/Dense>
 
@@ -60,6 +61,10 @@ private:
   std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::Imu>> _pub_imu_message;
   std::shared_ptr<rclcpp::Clock> _clock;
   std::shared_ptr<SensorInterface> _hardware_interface;
+
+  // diagnostic
+  rclcpp::Time _last_processing;
+  std::shared_ptr<diagnostic::StandardDeviation<std::uint64_t>> _processing_dt_statistic;
 };
 
 } // end namespace eduart

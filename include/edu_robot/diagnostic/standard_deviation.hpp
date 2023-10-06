@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include <queue>
+#include <deque>
 #include <numeric>
 #include <cmath>
 
@@ -23,11 +23,11 @@ public:
 
   void update(const Type value)
   {
-    _data.push(value);
+    _data.push_back(value);
 
     // maintain the queue size
-    while (_data.size() >= _queue_size) {
-      _data.pop();
+    while (_data.size() > _queue_size) {
+      _data.pop_front();
     }
 
     _mean = std::accumulate(_data.begin(), _data.end(), static_cast<Type>(0)) / static_cast<Type>(_data.size());
@@ -47,7 +47,7 @@ public:
 
 private:
   std::size_t _queue_size;
-  std::queue<Type> _data;
+  std::deque<Type> _data;
   Type _mean = static_cast<Type>(0);
   Type _variance = static_cast<Type>(0);
   Type _std_deviation = static_cast<Type>(0);

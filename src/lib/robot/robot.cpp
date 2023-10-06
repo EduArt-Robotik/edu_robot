@@ -66,7 +66,7 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterfa
       get_node_base_interface(), get_node_clock_interface(), get_node_logging_interface(), get_node_parameters_interface(),
       get_node_timers_interface(), get_node_topics_interface(), 1.0
   );
-
+  _diagnostic_updater->setHardwareID(robot_name);
 
   // Publisher
   _pub_odometry = create_publisher<nav_msgs::msg::Odometry>(
