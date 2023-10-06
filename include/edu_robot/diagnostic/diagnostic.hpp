@@ -140,7 +140,6 @@ inline std::remove_const_t<decltype(diagnostic_msgs::msg::DiagnosticStatus::OK)>
   }
 }
 
-
 } // end namespace diagnostic
 } // end namespace robot
 } // end namespace eduart

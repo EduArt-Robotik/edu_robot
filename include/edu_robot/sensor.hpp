@@ -5,12 +5,11 @@
  */
 #pragma once
 
-#include <edu_robot/diagnostic/diagnostic.hpp>
+#include <edu_robot/diagnostic/diagnostic_component.hpp>
 
 #include <rclcpp/time.hpp>
 #include <tf2/LinearMath/Transform.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#include <diagnostic_updater/diagnostic_updater.hpp>
 
 #include <string>
 
@@ -20,13 +19,11 @@ namespace robot {
 /**
  * \brief Base class of each sensor. Provides general sensor configuration for example used for tf publishing.
  */
-class Sensor
+class Sensor : public diagnostic::DiagnosticComponent
 {
 protected:
   Sensor(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
          const tf2::Transform sensor_transform);
-
-  virtual diagnostic::Diagnostic processDiagnosticsImpl() = 0;
 
 public:
   Sensor(const Sensor&) = delete;
@@ -36,8 +33,6 @@ public:
   inline const std::string& frameId() const { return _frame_id; }
   
   geometry_msgs::msg::TransformStamped getTransformMsg(const rclcpp::Time stamp) const;
-
-  void processDiagnostics(diagnostic_updater::DiagnosticStatusWrapper& diagnostics);
 
 private:
   std::string _name;

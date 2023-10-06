@@ -52,6 +52,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
 add_subdirectory(src/lib/action)
+add_subdirectory(src/lib/diagnostic)
 add_subdirectory(src/lib/robot)
 add_subdirectory(src/lib/processing_component)
 add_subdirectory(src/lib/eduard)
@@ -97,6 +98,7 @@ install(
     eduart-ethernet-gateway
     ohmni-bot
     eduart-action
+    eduart-diagnostic
   EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

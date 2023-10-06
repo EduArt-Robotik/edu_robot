@@ -13,6 +13,7 @@ target_link_libraries(eduart-robot
   Eigen3::Eigen
   processing-component
   eduart-action
+  eduart-diagnostic
   "${cpp_typesupport_target}"
 )
 target_compile_features(eduart-robot PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17

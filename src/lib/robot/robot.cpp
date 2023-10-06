@@ -12,6 +12,8 @@
 #include "edu_robot/processing_component/odometry_estimator.hpp"
 #include "edu_robot/processing_component/processing_detect_charging.hpp"
 
+#include <edu_robot/diagnostic/diagnostic_component.hpp>
+
 #include <Eigen/Dense>
 
 #include <rclcpp/logging.hpp>
@@ -376,7 +378,11 @@ void Robot::registerSensor(std::shared_ptr<Sensor> sensor)
   }
 
   _sensors[sensor->name()] = sensor;
-  _diagnostic_updater->add(sensor->name(), sensor.get(), &Sensor::processDiagnostics);
+  _diagnostic_updater->add(
+    sensor->name(),
+    std::static_pointer_cast<diagnostic::DiagnosticComponent>(sensor).get(),
+    &diagnostic::DiagnosticComponent::processDiagnostics
+  );
 }
 
 void Robot::processStatusReport()
