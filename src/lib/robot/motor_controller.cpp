@@ -59,7 +59,9 @@ MotorController::MotorController(const std::string& name, const std::uint8_t id,
   , _hardware_component_interface(hardware_component_interface)
   , _hardware_sensor_interface(hardware_sensor_interface)
   , _last_processing(_clock->now())
-  , _processing_dt_statistic(std::make_shared<diagnostic::StandardDeviation<std::uint64_t>>(20))  
+  , _processing_dt_statistic(std::make_shared<diagnostic::StandardDeviationDiagnostic<std::uint64_t, std::greater<std::uint64_t>>>(
+      "processing dt", 20, 200000000, 1000000000, 30000000, 100000000)
+    )    
 {
   _hardware_sensor_interface->registerCallbackProcessMeasurementData(
     std::bind(&MotorController::processMeasurementData, this, std::placeholders::_1, std::placeholders::_2)
@@ -125,26 +127,13 @@ void MotorController::processMeasurementData(const Rpm rpm, const bool enabled_f
 
 diagnostic::Diagnostic MotorController::processDiagnosticsImpl()
 {
-  using diagnostic::Diagnostic;
-
   diagnostic::Diagnostic diagnostic;
-  auto level = Diagnostic::Level::OK;
 
-  // mean set rpm
-  /// estimate diagnostic level: expect max 1s
-  _processing_dt_statistic->mean() >= 1000000000 ? level = Diagnostic::Level::ERROR : level = Diagnostic::Level::OK;
-  const std::string message_processing_dt = std::to_string(_processing_dt_statistic->mean() / 1000000) + " ms";
-  diagnostic.add("set rpm dt", message_processing_dt, level);
-
-  // std deviation of set rpm
-  /// estimate diagnostic level: expect max 20ms
-  _processing_dt_statistic->stdDeviation() >= 20000000 ? level = Diagnostic::Level::WARN : level = Diagnostic::Level::OK;
-  const std::string message_std_dev_dt = std::to_string(_processing_dt_statistic->stdDeviation() / 1000000) + " ms";
-  diagnostic.add("set rpm std dev", message_std_dev_dt, level);
+  diagnostic.add(*_processing_dt_statistic);
 
   // lost enable
   diagnostic.add(
-    "lost enable", _lost_enable, _lost_enable ? Diagnostic::Level::ERROR : Diagnostic::Level::OK
+    "lost enable", _lost_enable, _lost_enable ? diagnostic::Level::ERROR : diagnostic::Level::OK
   );
 
   return diagnostic;

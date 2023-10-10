@@ -38,6 +38,8 @@ public:
   void processStatusReport();
 
 private:
+  diagnostic::Diagnostic processDiagnosticsImpl() override;
+
   std::shared_ptr<IotShieldCommunicator> _communicator;
   uart::message::TxMessageDataBuffer _tx_buffer;
   std::vector<std::shared_ptr<IotShieldRxDevice>> _rx_devices;

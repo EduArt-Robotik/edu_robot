@@ -108,7 +108,7 @@ private:
 
   // diagnostic
   rclcpp::Time _last_processing;
-  std::shared_ptr<diagnostic::StandardDeviation<std::uint64_t>> _processing_dt_statistic;
+  std::shared_ptr<diagnostic::StandardDeviationDiagnostic<std::uint64_t, std::greater<std::uint64_t>>> _processing_dt_statistic;
   std::atomic_bool _lost_enable = false;
 };
 

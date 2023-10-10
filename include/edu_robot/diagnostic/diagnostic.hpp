@@ -5,7 +5,8 @@
  */
 #pragma once
 
-#include <diagnostic_msgs/msg/diagnostic_status.hpp>
+#include "edu_robot/diagnostic/diagnostic_level.hpp"
+#include "edu_robot/diagnostic/diagnostic_check.hpp"
 
 #include <map>
 #include <string>
@@ -18,12 +19,6 @@ namespace diagnostic {
 class Diagnostic
 {
 public:
-  enum class Level {
-    OK = 1,
-    WARN,
-    ERROR, // needs to be the highest value
-  };
-
   template <typename Value>
   void add(const std::string& key, const Value& value, const Level level)
   {
@@ -38,9 +33,18 @@ public:
       _level = level;
     }
   }
+  
+  void add(const DiagnosticCheckList& check)
+  {
+    check.addToLevelList(_diagnostic_level);
+    check.addToEntryList(_diagnostic_entry);
+  }
 
-  inline const std::map<std::string, std::string>& entries() const { return _diagnostic_entry; }
+  inline const DiagnosticCheckList::EntryList& entries() const { return _diagnostic_entry; }
   inline Level level() const { return _level; }
+  /**
+   * \brief Generates an diagnostic summery string. All warning and errors will be included into this stirng.
+   */
   std::string summery() const
   {
     std::string result;
@@ -105,8 +109,8 @@ public:
 
 private:
   Level _level = Level::OK;
-  std::map<std::string, std::string> _diagnostic_entry;
-  std::map<std::string, Level> _diagnostic_level;
+  DiagnosticCheckList::EntryList _diagnostic_entry;
+  DiagnosticCheckList::LevelList _diagnostic_level;
 };
 
 template <>
@@ -119,24 +123,6 @@ inline void Diagnostic::add<std::string>(const std::string& key, const std::stri
   // take level only if new level is higher
   if (level > _level) {
     _level = level;
-  }
-}
-
-inline std::remove_const_t<decltype(diagnostic_msgs::msg::DiagnosticStatus::OK)> convert(
-  const Diagnostic::Level level)
-{
-  switch (level) {
-    case Diagnostic::Level::OK:
-      return diagnostic_msgs::msg::DiagnosticStatus::OK;
-
-    case Diagnostic::Level::WARN:
-      return diagnostic_msgs::msg::DiagnosticStatus::WARN;
-
-    case Diagnostic::Level::ERROR:
-      return diagnostic_msgs::msg::DiagnosticStatus::ERROR;
-
-    default:
-      return diagnostic_msgs::msg::DiagnosticStatus::ERROR;
   }
 }
 

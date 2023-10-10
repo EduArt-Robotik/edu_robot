@@ -5,6 +5,9 @@
  */
 #pragma once
 
+#include "edu_robot/diagnostic/diagnostic_check.hpp"
+#include "edu_robot/diagnostic/mean.hpp"
+
 #include <deque>
 #include <numeric>
 #include <cmath>
@@ -14,43 +17,66 @@ namespace robot {
 namespace diagnostic {
 
 template <typename Type>
-class StandardDeviation
+class StandardDeviation : public Mean<Type>
 {
 public:
   StandardDeviation(const std::size_t queue_size)
-    : _queue_size(queue_size)
+    : Mean<Type>(queue_size)
   { }
 
   void update(const Type value)
   {
-    _data.push_back(value);
+    Mean<Type>::update(value);
 
-    // maintain the queue size
-    while (_data.size() > _queue_size) {
-      _data.pop_front();
-    }
-
-    _mean = std::accumulate(_data.begin(), _data.end(), static_cast<Type>(0)) / static_cast<Type>(_data.size());
     _variance = static_cast<Type>(0);
 
-    for (const auto value : _data) {
-      _variance += (value - _mean) * (value - _mean);
+    for (const auto value : Mean<Type>::_data) {
+      _variance += (value - Mean<Type>::_mean) * (value - Mean<Type>::_mean);
     }
 
-    _variance /= static_cast<Type>(_data.size());
+    _variance /= static_cast<Type>(Mean<Type>::_data.size());
     _std_deviation = std::sqrt(_variance);
   }
 
-  inline Type mean() const { return _mean; }
   inline Type variance() const { return _variance; }
   inline Type stdDeviation() const { return _std_deviation; }
 
 private:
-  std::size_t _queue_size;
-  std::deque<Type> _data;
-  Type _mean = static_cast<Type>(0);
   Type _variance = static_cast<Type>(0);
   Type _std_deviation = static_cast<Type>(0);
+};
+
+template <typename Type, class Checker>
+class StandardDeviationDiagnostic : public StandardDeviation<Type>
+                                  , public DiagnosticCheckList
+{
+public:
+  StandardDeviationDiagnostic(
+    const std::string& name, const std::size_t queue_size, const Type level_warning_mean, const Type level_error_mean,
+    const Type level_warning_std_dev, const Type level_error_std_dev)
+  : StandardDeviation<Type>(queue_size)
+  , _checker_mean(name, level_warning_mean, level_error_mean)
+  , _checker_std_deviation(name + " std dev", level_warning_std_dev, level_error_std_dev)
+  { }
+
+  void addToLevelList(LevelList& list) const override
+  {
+    list.emplace(_checker_mean.name(), _checker_mean.estimateLevel(StandardDeviation<Type>::mean()));
+    list.emplace(
+      _checker_std_deviation.name(),
+      _checker_std_deviation.estimateLevel(StandardDeviation<Type>::stdDeviation())
+    );
+  }
+  void addToEntryList(EntryList& list) const override
+  {
+    list.emplace(_checker_mean.name(), std::to_string(StandardDeviation<Type>::mean()));
+    list.emplace(_checker_std_deviation.name(), std::to_string(StandardDeviation<Type>::stdDeviation()));
+  }
+
+private:
+  std::string _name;
+  DiagnosticCheck<Type, Checker> _checker_mean;
+  DiagnosticCheck<Type, Checker> _checker_std_deviation;
 };
 
 } // end namespace diagnostic

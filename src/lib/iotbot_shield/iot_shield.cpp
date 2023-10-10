@@ -95,6 +95,13 @@ void IotShield::processStatusReport()
   }
 }
 
+diagnostic::Diagnostic IotShield::processDiagnosticsImpl()
+{
+  diagnostic::Diagnostic diagnostic;
+
+  return diagnostic;
+}
+
 } // end namespace iotbot
 } // end namespace eduart
 } // end namespace robot

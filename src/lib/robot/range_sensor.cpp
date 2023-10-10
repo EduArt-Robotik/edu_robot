@@ -40,7 +40,9 @@ RangeSensor::RangeSensor(const std::string& name, const std::string& frame_id, c
   , _clock(ros_node.get_clock())
   , _hardware_interface(std::move(hardware_interface))
   , _last_processing(_clock->now())
-  , _processing_dt_statistic(std::make_shared<diagnostic::StandardDeviation<std::uint64_t>>(20))  
+  , _processing_dt_statistic(std::make_shared<diagnostic::StandardDeviationDiagnostic<std::uint64_t, std::greater<std::uint64_t>>>(
+      "processing dt", 20, 300000000, 1000000000, 50000000, 100000000)
+    )  
 {
   _hardware_interface->registerCallbackProcessMeasurementData(
     std::bind(&RangeSensor::processMeasurementData, this, std::placeholders::_1)
@@ -72,22 +74,9 @@ void RangeSensor::processMeasurementData(const float measurement)
 
 diagnostic::Diagnostic RangeSensor::processDiagnosticsImpl()
 {
-  using diagnostic::Diagnostic;
-
   diagnostic::Diagnostic diagnostic;
-  auto level = Diagnostic::Level::OK;
 
-  // mean of processing dt
-  /// estimate diagnostic level: expect max 100ms
-  _processing_dt_statistic->mean() >= 1000000000 ? level = Diagnostic::Level::ERROR : level = Diagnostic::Level::OK;
-  const std::string message_processing_dt = std::to_string(_processing_dt_statistic->mean() / 1000000) + " ms";
-  diagnostic.add("processing dt", message_processing_dt, level);
-
-  // std deviation of processing dt
-  /// estimate diagnostic level: expect max 20ms
-  _processing_dt_statistic->stdDeviation() >= 20000000 ? level = Diagnostic::Level::WARN : level = Diagnostic::Level::OK;
-  const std::string message_std_dev_dt = std::to_string(_processing_dt_statistic->stdDeviation() / 1000000) + " ms";
-  diagnostic.add("processing dt std dev", message_std_dev_dt, level);
+  diagnostic.add(*_processing_dt_statistic);
 
   return diagnostic;
 }
