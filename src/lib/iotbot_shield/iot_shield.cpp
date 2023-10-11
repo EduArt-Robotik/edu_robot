@@ -68,7 +68,7 @@ void IotShield::disable()
 
 RobotStatusReport IotShield::getStatusReport()
 {
-  processStatusReport();
+  // processStatusReport();
   return _report;
 }
 
@@ -83,6 +83,7 @@ void IotShield::registerIotShieldRxDevice(std::shared_ptr<IotShieldRxDevice> dev
 
 void IotShield::processStatusReport()
 {
+  std::cout << __PRETTY_FUNCTION__ << std::endl;
   // Do Status Report
   const bool need_to_update = 
     std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -94,6 +95,13 @@ void IotShield::processStatusReport()
     wait_for_future(future_response, 100ms);
     future_response.get();    
   }
+
+  if (_communicator->isRxBufferNew() == false) {
+    std::cout << "no new rx buffer available" << std::endl;
+    return;
+  }
+
+  std::cout << "new rx buffer available" << std::endl;
 
   const auto buffer = _communicator->getRxBuffer();
   _report.temperature = uart::message::ShieldResponse::temperature(buffer);
@@ -121,9 +129,11 @@ void IotShield::processStatusReport()
 void IotShield::rxDataProcessing()
 {
   if (_communicator->isRxBufferNew() == false) {
+    std::cout << "no new rx buffer available" << std::endl;
     return;
   }
 
+  std::cout << "new rx buffer available" << std::endl;
   const auto buffer = _communicator->getRxBuffer();
 
   for (auto& device : _rx_devices) {
