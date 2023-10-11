@@ -44,4 +44,3 @@ def generate_launch_description():
       eduard_ipc,
       aggregator
     ])
-    

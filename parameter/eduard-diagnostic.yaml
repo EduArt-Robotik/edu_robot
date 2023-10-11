@@ -1,6 +1,6 @@
 /**:
   ros__parameters:
-    topology:
+    robot_eduard:
       type: 'diagnostic_aggregator/AnalyzerGroup'
       path: eduard
       analyzers:

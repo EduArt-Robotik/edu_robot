@@ -27,7 +27,7 @@ class EthernetGatewayShield : public RobotHardwareInterface
                             , public processing::ProcessingComponentOutput<float>
 {
 public:
-  EthernetGatewayShield(char const* const ip_address, const std::uint16_t port, rclcpp::Node& ros_node);
+  EthernetGatewayShield(char const* const ip_address, const std::uint16_t port);
   ~EthernetGatewayShield() override;
   void enable() override;
   void disable() override;

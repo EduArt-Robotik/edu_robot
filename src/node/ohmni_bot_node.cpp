@@ -18,7 +18,7 @@ public:
     : eduart::robot::ohmni_bot::OhmniBot(
         "ohmni_bot",
         std::make_unique<eduart::robot::ethernet::EthernetGatewayShield>(
-          "192.168.2.20", 1234, *this
+          "192.168.2.20", 1234
         )
       )
   {

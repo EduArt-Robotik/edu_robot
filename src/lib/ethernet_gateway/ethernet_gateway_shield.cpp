@@ -21,10 +21,11 @@ using tcp::message::SetMotorControllerParameter;
 using tcp::message::SetPidControllerParameter;
 using tcp::message::AcknowledgedStatus;
 
-EthernetGatewayShield::EthernetGatewayShield(char const* const ip_address, const std::uint16_t port, rclcpp::Node& ros_node)
+EthernetGatewayShield::EthernetGatewayShield(char const* const ip_address, const std::uint16_t port)
   : processing::ProcessingComponentOutput<float>("ethernet_gateway_shield")
   , _communicator(std::make_shared<EthernetCommunicator>(ip_address, port))
-  , _clock(ros_node.get_clock())
+  // , _clock(ros_node.get_clock())
+  , _clock(std::make_shared<rclcpp::Clock>())
   , _diagnostic{
       std::make_shared<diagnostic::MeanDiagnostic<float, std::greater<float>>>("voltage", 10, 18.0f, 18.7f),
       std::make_shared<diagnostic::MeanDiagnostic<float, std::greater<float>>>("current", 10, 1.5f, 2.0f),

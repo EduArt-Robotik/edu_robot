@@ -42,7 +42,7 @@ RangeSensor::RangeSensor(const std::string& name, const std::string& frame_id, c
   , _last_processing(_clock->now())
   , _processing_dt_statistic(std::make_shared<diagnostic::StandardDeviationDiagnostic<std::uint64_t, std::greater<std::uint64_t>>>(
       "processing dt", 20, 300000000, 1000000000, 50000000, 100000000)
-    )  
+    )
 {
   _hardware_interface->registerCallbackProcessMeasurementData(
     std::bind(&RangeSensor::processMeasurementData, this, std::placeholders::_1)

@@ -21,7 +21,8 @@ def generate_launch_description():
         package='diagnostic_aggregator',
         executable='aggregator_node',
         output='screen',
-        parameters=[analyzer_parameter_file])
+        parameters=[analyzer_parameter_file]
+    )
     
     return LaunchDescription([
         aggregator
