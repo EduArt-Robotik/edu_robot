@@ -52,11 +52,11 @@ class StandardDeviationDiagnostic : public StandardDeviation<Type>
 {
 public:
   StandardDeviationDiagnostic(
-    const std::string& name, const std::size_t queue_size, const Type level_warning_mean, const Type level_error_mean,
-    const Type level_warning_std_dev, const Type level_error_std_dev)
+    const std::string& name, const std::string& unit, const std::size_t queue_size, const Type level_warning_mean,
+    const Type level_error_mean, const Type level_warning_std_dev, const Type level_error_std_dev)
   : StandardDeviation<Type>(queue_size)
-  , _checker_mean(name, level_warning_mean, level_error_mean)
-  , _checker_std_deviation(name + " std dev", level_warning_std_dev, level_error_std_dev)
+  , _checker_mean(name + " (" + unit + ")", level_warning_mean, level_error_mean)
+  , _checker_std_deviation(name + " (" + unit + ") std dev", level_warning_std_dev, level_error_std_dev)
   { }
 
   void addToLevelList(LevelList& list) const override

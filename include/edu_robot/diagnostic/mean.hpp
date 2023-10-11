@@ -48,9 +48,10 @@ class MeanDiagnostic : public Mean<Type>
 {
 public:
   MeanDiagnostic(
-    const std::string& name, const std::size_t queue_size, const Type level_warning_mean, const Type level_error_mean)
+    const std::string& name, const std::string& unit, const std::size_t queue_size, const Type level_warning_mean,
+    const Type level_error_mean)
   : Mean<Type>(queue_size)
-  , _checker_mean(name, level_warning_mean, level_error_mean)
+  , _checker_mean(name + " (" + unit + ")", level_warning_mean, level_error_mean)
   { }
 
   void addToLevelList(LevelList& list) const override

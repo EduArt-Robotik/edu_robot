@@ -21,6 +21,22 @@ IotShield::IotShield(char const* const device_name)
   : processing::ProcessingComponentOutput<float>("iot_shield")
   ,_communicator(std::make_shared<IotShieldCommunicator>(device_name)) 
 {
+  // Configuring Diagnostic
+  _clock = std::make_shared<rclcpp::Clock>();
+  _diagnostic.voltage = std::make_shared<diagnostic::MeanDiagnostic<float, std::greater<float>>>(
+    "voltage", "V", 10, 18.0f, 18.7f
+  );
+  _diagnostic.current = std::make_shared<diagnostic::MeanDiagnostic<float, std::greater<float>>>(
+    "current", "A", 10, 1.5f, 2.0f
+  );
+  _diagnostic.temperature = std::make_shared<diagnostic::MeanDiagnostic<float, std::greater<float>>>(
+    "temperature", "°C", 10, 55.0f, 65.0f
+  );
+  _diagnostic.processing_dt = std::make_shared<diagnostic::StandardDeviationDiagnostic<std::uint64_t, std::greater<std::uint64_t>>>(
+    "processing dt", "ms", 10, 700, 1000, 50, 100
+  );
+  _diagnostic.last_processing = _clock->now();
+
   // set UART timeout
   auto request = ShieldRequest::make_request<uart::message::SetValueF<UART::COMMAND::SET::UART_TIMEOUT>>(
     1.0f, 0);
@@ -67,6 +83,7 @@ void IotShield::registerIotShieldRxDevice(std::shared_ptr<IotShieldRxDevice> dev
 
 void IotShield::processStatusReport()
 {
+  // Do Status Report
   const bool need_to_update = 
     std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::system_clock::now() - _communicator->getStampRxBuffer()) > 1500ms; // \todo make configurable!
@@ -93,11 +110,26 @@ void IotShield::processStatusReport()
   for (auto& device : _rx_devices) {
     device->processRxData(buffer);
   }
+
+  // Do Diagnostics
+  const auto now = _clock->now();
+  const std::uint64_t dt = (now - _diagnostic.last_processing).nanoseconds();
+  _diagnostic.processing_dt->update(dt / 1000000);
+  _diagnostic.last_processing = now;
+
+  _diagnostic.voltage->update(_report.voltage.mcu);
+  _diagnostic.current->update(_report.current.mcu);
+  _diagnostic.temperature->update(_report.temperature);
 }
 
 diagnostic::Diagnostic IotShield::processDiagnosticsImpl()
 {
   diagnostic::Diagnostic diagnostic;
+
+  diagnostic.add(*_diagnostic.voltage);
+  diagnostic.add(*_diagnostic.current);
+  diagnostic.add(*_diagnostic.temperature);
+  diagnostic.add(*_diagnostic.processing_dt);
 
   return diagnostic;
 }

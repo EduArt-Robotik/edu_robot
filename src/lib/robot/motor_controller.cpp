@@ -60,7 +60,7 @@ MotorController::MotorController(const std::string& name, const std::uint8_t id,
   , _hardware_sensor_interface(hardware_sensor_interface)
   , _last_processing(_clock->now())
   , _processing_dt_statistic(std::make_shared<diagnostic::StandardDeviationDiagnostic<std::uint64_t, std::greater<std::uint64_t>>>(
-      "processing dt", 20, 200000000, 1000000000, 30000000, 100000000)
+      "processing dt", "ms", 20, 200, 1000, 30, 100)
     )    
 {
   _hardware_sensor_interface->registerCallbackProcessMeasurementData(
@@ -82,7 +82,7 @@ void MotorController::setRpm(const Rpm rpm)
   // Do statistics for diagnostic
   const auto now = _clock->now();
   const std::uint64_t dt = (now - _last_processing).nanoseconds();
-  _processing_dt_statistic->update(dt);
+  _processing_dt_statistic->update(dt / 1000000);
   _last_processing = now;
 
   // set rpm

@@ -11,7 +11,10 @@
 
 #include <edu_robot/robot_hardware_interface.hpp>
 #include <edu_robot/robot_status_report.hpp>
+
 #include <edu_robot/processing_component/processing_component.hpp>
+
+#include <edu_robot/diagnostic/standard_deviation.hpp>
 
 #include <memory>
 #include <vector>
@@ -43,6 +46,16 @@ private:
   std::shared_ptr<IotShieldCommunicator> _communicator;
   uart::message::TxMessageDataBuffer _tx_buffer;
   std::vector<std::shared_ptr<IotShieldRxDevice>> _rx_devices;
+  std::shared_ptr<rclcpp::Clock> _clock;
+
+  // diagnostics
+  struct {
+    std::shared_ptr<diagnostic::MeanDiagnostic<float, std::greater<float>>> voltage;
+    std::shared_ptr<diagnostic::MeanDiagnostic<float, std::greater<float>>> current;
+    std::shared_ptr<diagnostic::MeanDiagnostic<float, std::greater<float>>> temperature;
+    std::shared_ptr<diagnostic::StandardDeviationDiagnostic<std::uint64_t, std::greater<std::uint64_t>>> processing_dt;
+    rclcpp::Time last_processing;
+  } _diagnostic;  
 };
 
 } // end namespace iotbot

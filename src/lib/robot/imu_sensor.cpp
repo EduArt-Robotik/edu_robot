@@ -56,7 +56,7 @@ ImuSensor::ImuSensor(const std::string& name, const std::string& frame_id, const
   , _hardware_interface(std::move(hardware_interface))
   , _last_processing(_clock->now())
   , _processing_dt_statistic(std::make_shared<diagnostic::StandardDeviationDiagnostic<std::uint64_t, std::greater<std::uint64_t>>>(
-      "processing dt", 20, 250000000, 350000000, 50000000, 100000000)
+      "processing dt", "ms", 20, 250, 350, 50, 100)
     )
 {
   _hardware_interface->registerCallbackProcessMeasurementData(std::bind(
@@ -74,7 +74,7 @@ void ImuSensor::processMeasurementData(
   // Do statistics for diagnostic
   const auto now = _clock->now();
   const std::uint64_t dt = (now - _last_processing).nanoseconds();
-  _processing_dt_statistic->update(dt);
+  _processing_dt_statistic->update(dt / 1000000);
   _last_processing = now;
 
   // Sensor Message
