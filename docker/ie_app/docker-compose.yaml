@@ -3,8 +3,8 @@ version: "2.4"
 services:
     eduard-ipc127e:
         # build: ../ipc127e
-        image: eduartrobotik/eduard-ipc127e:0.3.1
-        container_name: eduard-ipc127e-ie-app-0.3.1
+        image: eduartrobotik/eduard-ipc127e:0.3.2
+        container_name: eduard-ipc127e-ie-app-0.3.2
         # command for launching node using cyclone middleware
         # command: bash -c "source /home/user/ros/install/setup.bash && export CYCLONEDDS_URI=/home/user/ie_app_cyclone_dds_profile.xml && ros2 launch edu_robot eduard-ipc127e.launch.py"
         # debugging command for level 2 network access.
