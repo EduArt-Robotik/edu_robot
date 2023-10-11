@@ -46,7 +46,10 @@ public:
 
     initialize(factory);
     iot_shield->registerComponentInput(_detect_charging_component);
-    _mode_state_machine.switchToMode(eduart::robot::RobotMode::INACTIVE);    
+    _mode_state_machine.switchToMode(eduart::robot::RobotMode::INACTIVE);
+
+    // HACK! Timer should be in class IoTShield.
+    create_wall_timer(20ms, std::bind(&IotShield::rxDataProcessing, iot_shield.get()));
   }
 };
 

@@ -27,8 +27,8 @@ EthernetGatewayShield::EthernetGatewayShield(char const* const ip_address, const
 {
   // Configuring Diagnostic
   _clock = std::make_shared<rclcpp::Clock>();
-  _diagnostic.voltage = std::make_shared<diagnostic::MeanDiagnostic<float, std::greater<float>>>(
-    "voltage", "V", 10, 18.0f, 18.7f
+  _diagnostic.voltage = std::make_shared<diagnostic::MeanDiagnostic<float, std::less<float>>>(
+    "voltage", "V", 10, 18.7f, 18.0f
   );
   _diagnostic.current = std::make_shared<diagnostic::MeanDiagnostic<float, std::greater<float>>>(
     "current", "A", 10, 1.5f, 2.0f

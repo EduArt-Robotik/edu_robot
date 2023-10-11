@@ -1,4 +1,4 @@
-FROM eduartrobotik/eduart-ros-base:humble-1.2.0
+FROM eduartrobotik/eduart-ros-base:humble-1.2.1
 
 ENV USER user
 ENV DEBIAN_FRONTEND=noninteractive

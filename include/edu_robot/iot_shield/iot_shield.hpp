@@ -39,6 +39,7 @@ public:
   std::shared_ptr<IotShieldCommunicator> getCommunicator() { return _communicator; }
   void registerIotShieldRxDevice(std::shared_ptr<IotShieldRxDevice> device);
   void processStatusReport();
+  void rxDataProcessing();
 
 private:
   diagnostic::Diagnostic processDiagnosticsImpl() override;
@@ -47,10 +48,11 @@ private:
   uart::message::TxMessageDataBuffer _tx_buffer;
   std::vector<std::shared_ptr<IotShieldRxDevice>> _rx_devices;
   std::shared_ptr<rclcpp::Clock> _clock;
+  std::shared_ptr<rclcpp::TimerBase> _timer_rx_buffer_processing;
 
   // diagnostics
   struct {
-    std::shared_ptr<diagnostic::MeanDiagnostic<float, std::greater<float>>> voltage;
+    std::shared_ptr<diagnostic::MeanDiagnostic<float, std::less<float>>> voltage;
     std::shared_ptr<diagnostic::MeanDiagnostic<float, std::greater<float>>> current;
     std::shared_ptr<diagnostic::MeanDiagnostic<float, std::greater<float>>> temperature;
     std::shared_ptr<diagnostic::StandardDeviationDiagnostic<std::uint64_t, std::greater<std::uint64_t>>> processing_dt;

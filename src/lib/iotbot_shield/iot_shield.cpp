@@ -19,12 +19,12 @@ using namespace std::chrono_literals;
 
 IotShield::IotShield(char const* const device_name)
   : processing::ProcessingComponentOutput<float>("iot_shield")
-  ,_communicator(std::make_shared<IotShieldCommunicator>(device_name)) 
+  , _communicator(std::make_shared<IotShieldCommunicator>(device_name)) 
 {
   // Configuring Diagnostic
   _clock = std::make_shared<rclcpp::Clock>();
-  _diagnostic.voltage = std::make_shared<diagnostic::MeanDiagnostic<float, std::greater<float>>>(
-    "voltage", "V", 10, 18.0f, 18.7f
+  _diagnostic.voltage = std::make_shared<diagnostic::MeanDiagnostic<float, std::less<float>>>(
+    "voltage", "V", 10, 18.7f, 18.0f
   );
   _diagnostic.current = std::make_shared<diagnostic::MeanDiagnostic<float, std::greater<float>>>(
     "current", "A", 10, 1.5f, 2.0f
@@ -107,10 +107,6 @@ void IotShield::processStatusReport()
   
   sendInputValue(_report.voltage.mcu);
 
-  for (auto& device : _rx_devices) {
-    device->processRxData(buffer);
-  }
-
   // Do Diagnostics
   const auto now = _clock->now();
   const std::uint64_t dt = (now - _diagnostic.last_processing).nanoseconds();
@@ -120,6 +116,19 @@ void IotShield::processStatusReport()
   _diagnostic.voltage->update(_report.voltage.mcu);
   _diagnostic.current->update(_report.current.mcu);
   _diagnostic.temperature->update(_report.temperature);
+}
+
+void IotShield::rxDataProcessing()
+{
+  if (_communicator->isRxBufferNew() == false) {
+    return;
+  }
+
+  const auto buffer = _communicator->getRxBuffer();
+
+  for (auto& device : _rx_devices) {
+    device->processRxData(buffer);
+  }
 }
 
 diagnostic::Diagnostic IotShield::processDiagnosticsImpl()

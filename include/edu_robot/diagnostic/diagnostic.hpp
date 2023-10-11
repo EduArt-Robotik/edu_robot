@@ -38,6 +38,12 @@ public:
   {
     check.addToLevelList(_diagnostic_level);
     check.addToEntryList(_diagnostic_entry);
+
+    for (const auto& level : _diagnostic_level) {
+      if (level.second > _level) {
+        _level = level.second;
+      }
+    }
   }
 
   inline const DiagnosticCheckList::EntryList& entries() const { return _diagnostic_entry; }

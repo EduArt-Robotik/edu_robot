@@ -43,7 +43,7 @@ private:
 
   // diagnostics
   struct {
-    std::shared_ptr<diagnostic::MeanDiagnostic<float, std::greater<float>>> voltage;
+    std::shared_ptr<diagnostic::MeanDiagnostic<float, std::less<float>>> voltage;
     std::shared_ptr<diagnostic::MeanDiagnostic<float, std::greater<float>>> current;
     std::shared_ptr<diagnostic::MeanDiagnostic<float, std::greater<float>>> temperature;
     std::shared_ptr<diagnostic::StandardDeviationDiagnostic<std::uint64_t, std::greater<std::uint64_t>>> processing_dt;

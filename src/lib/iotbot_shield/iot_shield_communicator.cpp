@@ -95,6 +95,7 @@ uart::message::RxMessageDataBuffer IotShieldCommunicator::getRxBuffer()
 {
   // Make received data available for polling.
   std::lock_guard guard(_mutex_received_data_copy);
+  _new_rx_buffer = false;
   return _rx_buffer_copy;
 }
 
@@ -179,6 +180,7 @@ void IotShieldCommunicator::processing()
           // Make received data available for polling.
           std::lock_guard guard(_mutex_received_data_copy);
           _rx_buffer_copy = rx_buffer;
+          _new_rx_buffer = true;
           _stamp_rx_buffer_copy = std::chrono::system_clock::now();
         }
 
