@@ -49,8 +49,13 @@ public:
     _mode_state_machine.switchToMode(eduart::robot::RobotMode::INACTIVE);
 
     // HACK! Timer should be in class IoTShield.
-    create_wall_timer(20ms, std::bind(&IotShield::processStatusReport, iot_shield.get()));
+    _timer_process_status_report = create_wall_timer(
+      20ms, std::bind(&IotShield::processStatusReport, iot_shield.get())
+    );
   }
+
+private:
+  std::shared_ptr<rclcpp::TimerBase> _timer_process_status_report;
 };
 
 int main(int argc, char** argv)

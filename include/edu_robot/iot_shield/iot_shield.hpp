@@ -48,7 +48,6 @@ private:
   uart::message::TxMessageDataBuffer _tx_buffer;
   std::vector<std::shared_ptr<IotShieldRxDevice>> _rx_devices;
   std::shared_ptr<rclcpp::Clock> _clock;
-  std::shared_ptr<rclcpp::TimerBase> _timer_rx_buffer_processing;
 
   // diagnostics
   struct {
