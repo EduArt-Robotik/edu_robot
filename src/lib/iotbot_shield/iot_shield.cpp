@@ -83,7 +83,6 @@ void IotShield::registerIotShieldRxDevice(std::shared_ptr<IotShieldRxDevice> dev
 
 void IotShield::processStatusReport()
 {
-  std::cout << __PRETTY_FUNCTION__ << std::endl;
   // Do Status Report
   const bool need_to_update = 
     std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -97,11 +96,8 @@ void IotShield::processStatusReport()
   }
 
   if (_communicator->isRxBufferNew() == false) {
-    std::cout << "no new rx buffer available" << std::endl;
     return;
   }
-
-  std::cout << "new rx buffer available" << std::endl;
 
   const auto buffer = _communicator->getRxBuffer();
   _report.temperature = uart::message::ShieldResponse::temperature(buffer);
@@ -115,6 +111,10 @@ void IotShield::processStatusReport()
   
   sendInputValue(_report.voltage.mcu);
 
+  for (auto& device : _rx_devices) {
+    device->processRxData(buffer);
+  }
+
   // Do Diagnostics
   const auto now = _clock->now();
   const std::uint64_t dt = (now - _diagnostic.last_processing).nanoseconds();
@@ -124,21 +124,6 @@ void IotShield::processStatusReport()
   _diagnostic.voltage->update(_report.voltage.mcu);
   _diagnostic.current->update(_report.current.mcu);
   _diagnostic.temperature->update(_report.temperature);
-}
-
-void IotShield::rxDataProcessing()
-{
-  if (_communicator->isRxBufferNew() == false) {
-    std::cout << "no new rx buffer available" << std::endl;
-    return;
-  }
-
-  std::cout << "new rx buffer available" << std::endl;
-  const auto buffer = _communicator->getRxBuffer();
-
-  for (auto& device : _rx_devices) {
-    device->processRxData(buffer);
-  }
 }
 
 diagnostic::Diagnostic IotShield::processDiagnosticsImpl()

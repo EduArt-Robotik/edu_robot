@@ -39,7 +39,6 @@ public:
   std::shared_ptr<IotShieldCommunicator> getCommunicator() { return _communicator; }
   void registerIotShieldRxDevice(std::shared_ptr<IotShieldRxDevice> device);
   void processStatusReport();
-  void rxDataProcessing();
 
 private:
   diagnostic::Diagnostic processDiagnosticsImpl() override;
