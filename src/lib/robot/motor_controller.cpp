@@ -81,7 +81,7 @@ void MotorController::setRpm(const Rpm rpm)
 {
   // Do statistics for diagnostic
   const auto now = _clock->now();
-  const std::uint64_t dt = (now - _last_processing).nanoseconds();
+  const auto dt = (now - _last_processing).nanoseconds();
   _processing_dt_statistic->update(dt / 1000000);
   _last_processing = now;
 
@@ -130,7 +130,7 @@ diagnostic::Diagnostic MotorController::processDiagnosticsImpl()
   diagnostic::Diagnostic diagnostic;
 
   // processing dt
-  if ((_clock->now() - _last_processing).nanoseconds() > _processing_dt_statistic->checkerMean().levelError()) {
+  if ((_clock->now() - _last_processing).nanoseconds() / 1000000 > _processing_dt_statistic->checkerMean().levelError()) {
     diagnostic.add("set rpm", "timeout", diagnostic::Level::ERROR);
   }
   else {

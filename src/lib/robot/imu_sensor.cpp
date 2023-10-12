@@ -131,7 +131,7 @@ diagnostic::Diagnostic ImuSensor::processDiagnosticsImpl()
   diagnostic::Diagnostic diagnostic;
 
   // processing dt
-  if ((_clock->now() - _last_processing).nanoseconds() > _processing_dt_statistic->checkerMean().levelError()) {
+  if ((_clock->now() - _last_processing).nanoseconds() / 1000000 > _processing_dt_statistic->checkerMean().levelError()) {
     diagnostic.add("processing dt", "timeout", diagnostic::Level::ERROR);
   }
   else {
