@@ -62,6 +62,7 @@ public:
   {
     list.emplace(_checker_mean.name(), std::to_string(Mean<Type>::mean()));
   }
+  const DiagnosticCheck<Type, Checker>& checkerMean() { return _checker_mean; }
 
 private:
   DiagnosticCheck<Type, Checker> _checker_mean;

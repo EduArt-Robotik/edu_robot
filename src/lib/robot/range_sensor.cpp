@@ -40,7 +40,7 @@ RangeSensor::RangeSensor(const std::string& name, const std::string& frame_id, c
   , _clock(ros_node.get_clock())
   , _hardware_interface(std::move(hardware_interface))
   , _last_processing(_clock->now())
-  , _processing_dt_statistic(std::make_shared<diagnostic::StandardDeviationDiagnostic<std::uint64_t, std::greater<std::uint64_t>>>(
+  , _processing_dt_statistic(std::make_shared<diagnostic::StandardDeviationDiagnostic<std::int64_t, std::greater<std::int64_t>>>(
       "processing dt", "ms", 20, 300, 1000, 50, 100)
     )
 {
@@ -76,7 +76,13 @@ diagnostic::Diagnostic RangeSensor::processDiagnosticsImpl()
 {
   diagnostic::Diagnostic diagnostic;
 
-  diagnostic.add(*_processing_dt_statistic);
+  // processing dt
+  if ((_clock->now() - _last_processing).nanoseconds() > _processing_dt_statistic->checkerMean().levelError()) {
+    diagnostic.add("processing dt", "timeout", diagnostic::Level::ERROR);
+  }
+  else {
+    diagnostic.add(*_processing_dt_statistic);
+  }
 
   return diagnostic;
 }

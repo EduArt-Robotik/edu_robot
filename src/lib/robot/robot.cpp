@@ -70,7 +70,7 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterfa
   );
   _diagnostic_updater->setHardwareID(robot_name);
   _diagnostic_updater->add(
-    "hardware",
+    "power_management",
     std::static_pointer_cast<diagnostic::DiagnosticComponent>(_hardware_interface).get(),
     &diagnostic::DiagnosticComponent::processDiagnostics
   );

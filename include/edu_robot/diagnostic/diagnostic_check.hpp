@@ -42,6 +42,8 @@ public:
   }
 
   inline const std::string& name() const { return _name; }
+  inline Type levelWarning() const { return _level_warning; }
+  inline Type levelError() const { return _level_error; }
 
 private:
   std::string _name;

@@ -72,6 +72,7 @@ public:
     list.emplace(_checker_mean.name(), std::to_string(StandardDeviation<Type>::mean()));
     list.emplace(_checker_std_deviation.name(), std::to_string(StandardDeviation<Type>::stdDeviation()));
   }
+  const DiagnosticCheck<Type, Checker>& checkerMean() { return _checker_mean; }  
 
 private:
   std::string _name;

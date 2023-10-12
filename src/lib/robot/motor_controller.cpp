@@ -59,8 +59,8 @@ MotorController::MotorController(const std::string& name, const std::uint8_t id,
   , _hardware_component_interface(hardware_component_interface)
   , _hardware_sensor_interface(hardware_sensor_interface)
   , _last_processing(_clock->now())
-  , _processing_dt_statistic(std::make_shared<diagnostic::StandardDeviationDiagnostic<std::uint64_t, std::greater<std::uint64_t>>>(
-      "processing dt", "ms", 20, 200, 1000, 30, 100)
+  , _processing_dt_statistic(std::make_shared<diagnostic::StandardDeviationDiagnostic<std::int64_t, std::greater<std::int64_t>>>(
+      "set rpm dt", "ms", 20, 200, 1000, 30, 100)
     )    
 {
   _hardware_sensor_interface->registerCallbackProcessMeasurementData(
@@ -129,7 +129,13 @@ diagnostic::Diagnostic MotorController::processDiagnosticsImpl()
 {
   diagnostic::Diagnostic diagnostic;
 
-  diagnostic.add(*_processing_dt_statistic);
+  // processing dt
+  if ((_clock->now() - _last_processing).nanoseconds() > _processing_dt_statistic->checkerMean().levelError()) {
+    diagnostic.add("set rpm", "timeout", diagnostic::Level::ERROR);
+  }
+  else {
+    diagnostic.add(*_processing_dt_statistic);
+  }
 
   // lost enable
   diagnostic.add(

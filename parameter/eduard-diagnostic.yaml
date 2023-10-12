@@ -16,3 +16,8 @@
           type: diagnostic_aggregator/GenericAnalyzer
           path: motor
           contains: [ 'motor' ]           
+        power_management:
+          type: diagnostic_aggregator/GenericAnalyzer
+          path: power_management
+          contains: [ 'power_management' ]
+          
