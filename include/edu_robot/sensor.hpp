@@ -5,6 +5,8 @@
  */
 #pragma once
 
+#include <edu_robot/diagnostic/diagnostic_component.hpp>
+
 #include <rclcpp/time.hpp>
 #include <tf2/LinearMath/Transform.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
@@ -17,7 +19,7 @@ namespace robot {
 /**
  * \brief Base class of each sensor. Provides general sensor configuration for example used for tf publishing.
  */
-class Sensor
+class Sensor : public diagnostic::DiagnosticComponent
 {
 protected:
   Sensor(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,

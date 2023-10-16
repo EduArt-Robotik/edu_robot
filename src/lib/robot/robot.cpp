@@ -12,6 +12,8 @@
 #include "edu_robot/processing_component/odometry_estimator.hpp"
 #include "edu_robot/processing_component/processing_detect_charging.hpp"
 
+#include <edu_robot/diagnostic/diagnostic_component.hpp>
+
 #include <Eigen/Dense>
 
 #include <rclcpp/logging.hpp>
@@ -60,6 +62,18 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterfa
   , _tf_broadcaster(std::make_unique<tf2_ros::TransformBroadcaster>(*this))
 {
   _parameter = get_robot_ros_parameter(*this);
+
+  // Diagnostic
+  _diagnostic_updater = std::make_shared<diagnostic_updater::Updater>(
+      get_node_base_interface(), get_node_clock_interface(), get_node_logging_interface(), get_node_parameters_interface(),
+      get_node_timers_interface(), get_node_topics_interface(), 1.0
+  );
+  _diagnostic_updater->setHardwareID(robot_name);
+  _diagnostic_updater->add(
+    "power_management",
+    std::static_pointer_cast<diagnostic::DiagnosticComponent>(_hardware_interface).get(),
+    &diagnostic::DiagnosticComponent::processDiagnostics
+  );
 
   // Publisher
   _pub_odometry = create_publisher<nav_msgs::msg::Odometry>(
@@ -356,6 +370,11 @@ void Robot::registerMotorController(std::shared_ptr<MotorController> motor_contr
   }
 
   _motor_controllers[motor_controller->id()] = motor_controller;
+  _diagnostic_updater->add(
+    motor_controller->name(),
+    std::static_pointer_cast<diagnostic::DiagnosticComponent>(motor_controller).get(),
+    &diagnostic::DiagnosticComponent::processDiagnostics
+  );
 }
 
 void Robot::registerSensor(std::shared_ptr<Sensor> sensor)
@@ -369,6 +388,11 @@ void Robot::registerSensor(std::shared_ptr<Sensor> sensor)
   }
 
   _sensors[sensor->name()] = sensor;
+  _diagnostic_updater->add(
+    sensor->name(),
+    std::static_pointer_cast<diagnostic::DiagnosticComponent>(sensor).get(),
+    &diagnostic::DiagnosticComponent::processDiagnostics
+  );
 }
 
 void Robot::processStatusReport()

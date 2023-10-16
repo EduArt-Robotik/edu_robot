@@ -11,7 +11,6 @@
 namespace eduart {
 namespace robot {
 
-
 static RangeSensor::Parameter get_range_sensor_parameter(
   const std::string& name, const RangeSensor::Parameter& default_parameter, rclcpp::Node& ros_node)
 {
@@ -40,6 +39,10 @@ RangeSensor::RangeSensor(const std::string& name, const std::string& frame_id, c
   , _publisher(ros_node.create_publisher<sensor_msgs::msg::Range>(name + "/range", rclcpp::SensorDataQoS()))
   , _clock(ros_node.get_clock())
   , _hardware_interface(std::move(hardware_interface))
+  , _last_processing(_clock->now())
+  , _processing_dt_statistic(std::make_shared<diagnostic::StandardDeviationDiagnostic<std::int64_t, std::greater<std::int64_t>>>(
+      "processing dt", "ms", 20, 300, 1000, 50, 100)
+    )
 {
   _hardware_interface->registerCallbackProcessMeasurementData(
     std::bind(&RangeSensor::processMeasurementData, this, std::placeholders::_1)
@@ -48,6 +51,13 @@ RangeSensor::RangeSensor(const std::string& name, const std::string& frame_id, c
 
 void RangeSensor::processMeasurementData(const float measurement)
 {
+  // Do statistics for diagnostic
+  const auto now = _clock->now();
+  const std::uint64_t dt = (now - _last_processing).nanoseconds();
+  _processing_dt_statistic->update(dt / 1000000);
+  _last_processing = now;
+
+  // Process Sensor Measurement
   sensor_msgs::msg::Range msg;
 
   msg.header.frame_id = frameId();
@@ -60,6 +70,21 @@ void RangeSensor::processMeasurementData(const float measurement)
 
   _publisher->publish(msg);
   sendInputValue(measurement);
+}
+
+diagnostic::Diagnostic RangeSensor::processDiagnosticsImpl()
+{
+  diagnostic::Diagnostic diagnostic;
+
+  // processing dt
+  if ((_clock->now() - _last_processing).nanoseconds() / 1000000 > _processing_dt_statistic->checkerMean().levelError()) {
+    diagnostic.add("processing dt", "timeout", diagnostic::Level::ERROR);
+  }
+  else {
+    diagnostic.add(*_processing_dt_statistic);
+  }
+
+  return diagnostic;
 }
 
 } // end namespace eduart

@@ -1,0 +1,23 @@
+/**:
+  ros__parameters:
+    robot_eduard:
+      type: 'diagnostic_aggregator/AnalyzerGroup'
+      path: eduard
+      analyzers:
+        imu:
+          type: diagnostic_aggregator/GenericAnalyzer
+          path: sensor
+          contains: [ 'imu' ]
+        range_sensor_front_left:
+          type: diagnostic_aggregator/GenericAnalyzer
+          path: sensor
+          contains: [ 'range' ]
+        motors:
+          type: diagnostic_aggregator/GenericAnalyzer
+          path: motor
+          contains: [ 'motor' ]           
+        power_management:
+          type: diagnostic_aggregator/GenericAnalyzer
+          path: power_management
+          contains: [ 'power_management' ]
+          
