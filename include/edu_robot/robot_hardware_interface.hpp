@@ -9,12 +9,14 @@
 #include "edu_robot/lighting.hpp"
 #include "edu_robot/robot_status_report.hpp"
 
+#include <edu_robot/diagnostic/diagnostic_component.hpp>
+
 #include <vector>
 
 namespace eduart {
 namespace robot {
 
-class RobotHardwareInterface
+class RobotHardwareInterface : public diagnostic::DiagnosticComponent
 {
 public:
   virtual ~RobotHardwareInterface() = default;

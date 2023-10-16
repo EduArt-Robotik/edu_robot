@@ -54,6 +54,10 @@ ImuSensor::ImuSensor(const std::string& name, const std::string& frame_id, const
   , _pub_imu_message(ros_node.create_publisher<sensor_msgs::msg::Imu>("imu", rclcpp::SensorDataQoS()))
   , _clock(ros_node.get_clock())
   , _hardware_interface(std::move(hardware_interface))
+  , _last_processing(_clock->now())
+  , _processing_dt_statistic(std::make_shared<diagnostic::StandardDeviationDiagnostic<std::int64_t, std::greater<std::int64_t>>>(
+      "processing dt", "ms", 20, 250, 350, 50, 100)
+    )
 {
   _hardware_interface->registerCallbackProcessMeasurementData(std::bind(
     &ImuSensor::processMeasurementData,
@@ -67,6 +71,12 @@ ImuSensor::ImuSensor(const std::string& name, const std::string& frame_id, const
 void ImuSensor::processMeasurementData(
   const Eigen::Quaterniond& orientation, const Eigen::Vector3d& angular_velocity, const Eigen::Vector3d& linear_acceleration)
 {
+  // Do statistics for diagnostic
+  const auto now = _clock->now();
+  const std::uint64_t dt = (now - _last_processing).nanoseconds();
+  _processing_dt_statistic->update(dt / 1000000);
+  _last_processing = now;
+
   // Sensor Message
   sensor_msgs::msg::Imu imu_msg;
 
@@ -87,7 +97,6 @@ void ImuSensor::processMeasurementData(
   imu_msg.linear_acceleration.z = linear_acceleration.z();
 
   _pub_imu_message->publish(imu_msg);
-
 
   // TF
   geometry_msgs::msg::TransformStamped tf_msg;
@@ -115,6 +124,21 @@ void ImuSensor::processMeasurementData(
   }
 
   _tf_broadcaster->sendTransform(tf_msg);
+}
+
+diagnostic::Diagnostic ImuSensor::processDiagnosticsImpl()
+{
+  diagnostic::Diagnostic diagnostic;
+
+  // processing dt
+  if ((_clock->now() - _last_processing).nanoseconds() / 1000000 > _processing_dt_statistic->checkerMean().levelError()) {
+    diagnostic.add("processing dt", "timeout", diagnostic::Level::ERROR);
+  }
+  else {
+    diagnostic.add(*_processing_dt_statistic);
+  }
+
+  return diagnostic;
 }
 
 } // end namespace eduart

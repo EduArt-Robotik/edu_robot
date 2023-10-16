@@ -238,7 +238,9 @@ $ exit
 
 NOTE: These steps are only required once at the very beginning. From now on, when the PS button is pressed, the joystick should automatically connect to the IOT2050 once it has successfully booted up. These operations are only then necessary again if the controller has been connected to another device in the meantime.
 
-# Monitoring Eduard using RViz
+# Monitoring Eduard using ROS Tools
+
+## RViz2
 
 With the package [edu_robot_control](https://github.com/EduArt-Robotik/edu_robot_control) the EduArt's robots can be monitored using the tool RViz2 coming with ROS2.
 
@@ -246,7 +248,7 @@ For visualization of Eduard's sensors and actors a RViz setup is provided includ
 
 The best way to monitor Eduard's states is using RViz. In the package "edu_robot_control" a launch file is provided including a RViz configuration that allows an easy and fast start. Two ways are supported.
 
-## Native ROS2 Installation
+### Native ROS2 Installation
 
 If ROS is natively installed the "edu_robot_control" package can be installed into an ROS workspace. As first step clone the package into the workspace by:
 
@@ -272,7 +274,7 @@ If RViz comes up properly it will be shown following:
 
 ![Eduard visualized using RViz](documentation/image/eduard-monitoring-using-rviz.png)
 
-## Installed into a Docker Container
+### Installed into a Docker Container
 
 Another way is to build a Docker image using the provided docker file. First navigate into the correct folder:
 
@@ -292,3 +294,21 @@ After the Docker image was built it can be started using following command:
 ```bash
 docker run --rm --user=user --net=host --pid=host --env=DISPLAY --volume=/tmp/.X11-unix:/tmp/.X11-unix:rw eduard-robot-monitoring:0.2.0
 ```
+
+## rqt robot monitor
+
+The Eduard control software provides a diagnostic aggregation. With this, the status of major components can be displayed, as well as live characteristics of these.
+
+With the standard tool **rqt_robot_monitor** this diagnostic aggregation can be displayed. The application can be started by:
+
+```bash
+ros2 run rqt_robot_monitor rqt_robot_monitor
+```
+
+Following window will open. Errors and warnings will be shown on the both top lists. By double click on an entry a more detailed windows will open.
+
+![error-case](documentation/image/diagnostic-error-case-2.png)
+
+ If you want to see the **OK** states, too, then press on the check box **Alternative view** on the top left corner.
+
+ ![good-case](documentation/image/diagnostic-good-case.png)

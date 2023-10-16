@@ -58,6 +58,10 @@ MotorController::MotorController(const std::string& name, const std::uint8_t id,
   , _current_wheel_position(0.0)
   , _hardware_component_interface(hardware_component_interface)
   , _hardware_sensor_interface(hardware_sensor_interface)
+  , _last_processing(_clock->now())
+  , _processing_dt_statistic(std::make_shared<diagnostic::StandardDeviationDiagnostic<std::int64_t, std::greater<std::int64_t>>>(
+      "set rpm dt", "ms", 20, 200, 1000, 30, 100)
+    )    
 {
   _hardware_sensor_interface->registerCallbackProcessMeasurementData(
     std::bind(&MotorController::processMeasurementData, this, std::placeholders::_1, std::placeholders::_2)
@@ -75,6 +79,13 @@ MotorController::~MotorController()
 
 void MotorController::setRpm(const Rpm rpm)
 {
+  // Do statistics for diagnostic
+  const auto now = _clock->now();
+  const auto dt = (now - _last_processing).nanoseconds();
+  _processing_dt_statistic->update(dt / 1000000);
+  _last_processing = now;
+
+  // set rpm
   _hardware_component_interface->processSetValue(rpm);
   _set_rpm = rpm;
 }
@@ -85,6 +96,10 @@ void MotorController::processMeasurementData(const Rpm rpm, const bool enabled_f
     std::lock_guard guard(_mutex_access_data);
     _measured_rpm = rpm;
     _enabled = enabled_flag;
+
+    if (_enabled == true) {
+      _lost_enable = false;
+    }
   }
 
   // \todo Check if calculation is correct! At the moment used for visualization only, so no need for accurate calc...
@@ -108,6 +123,26 @@ void MotorController::processMeasurementData(const Rpm rpm, const bool enabled_f
   joint_state_msg.position.push_back(_current_wheel_position);
 
   _pub_joint_state->publish(joint_state_msg);
+}
+
+diagnostic::Diagnostic MotorController::processDiagnosticsImpl()
+{
+  diagnostic::Diagnostic diagnostic;
+
+  // processing dt
+  if ((_clock->now() - _last_processing).nanoseconds() / 1000000 > _processing_dt_statistic->checkerMean().levelError()) {
+    diagnostic.add("set rpm", "timeout", diagnostic::Level::ERROR);
+  }
+  else {
+    diagnostic.add(*_processing_dt_statistic);
+  }
+
+  // lost enable
+  diagnostic.add(
+    "lost enable", _lost_enable, _lost_enable ? diagnostic::Level::ERROR : diagnostic::Level::OK
+  );
+
+  return diagnostic;
 }
 
 } // end namespace robot

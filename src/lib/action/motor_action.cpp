@@ -3,6 +3,7 @@
 
 #include "edu_robot/mode.hpp"
 
+#include <edu_robot/motor_controller.hpp>
 
 namespace eduart {
 namespace robot {
@@ -30,6 +31,7 @@ void CheckIfMotorIsEnabled::process()
   for (const auto& motor : _motor_controller) {
     // If one motor in not enabled than switch to state inactive.
     if (motor.second->isEnabled() == false) {
+      motor.second->_lost_enable = true;
       _state_machine.switchToMode(RobotMode::INACTIVE);
       _keep_alive = false;
       return;
