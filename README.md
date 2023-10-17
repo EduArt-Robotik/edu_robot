@@ -261,39 +261,44 @@ Please make sure the package will be cloned into the "src" folder in the workspa
 After the package was cloned it needs to be installed via:
 
 ```bash
-colcon build --packages-select edu_robot_control 
+colcon build --packages-select edu_robot_control --symlink-install
 ```
 
 Now RViz with the correct configuration can be launched by:
 
 ```bash
-ros2 launch edu_robot_control eduard-monitor.launch.py
+ros2 launch edu_robot_control eduard_monitor.launch.py
 ```
 
 If RViz comes up properly it will be shown following:
 
-![Eduard visualized using RViz](documentation/image/eduard-monitoring-using-rviz.png)
+![Eduard visualized using RViz](documentation/image/eduard-red-rviz.png)
 
-### Installed into a Docker Container
+#### Important: Setting Correct Namespace
 
-Another way is to build a Docker image using the provided docker file. First navigate into the correct folder:
+Each Eduard robot comes with a preset namespace, e.g. to reflect the robot's color. This allows that multiple robots are connected to the same network (with same DOMAIN_ID). However this makes it necessary to deal with the namespace, too, when the robot's data shall be received. For example when displaying data using RViz2.
 
-```bash
-cd edu_robot/docker/host
-```
-
-Next step is to build the Docker image by executing following command:
+The namespace can be set by using an environment variable. Either set it via the system or define it in front of the ros command:
 
 ```bash
-make all
-make clean
+EDU_ROBOT_NAMESPACE=eduard/red ros2 launch edu_robot_control eduard_monitor.launch.py
 ```
 
-After the Docker image was built it can be started using following command:
+This this case it was set to **eduard/red**. Please replace the color accordingly to your robot. RViz will respect the color and will coloring the robot model. At the moment three colors are available:
+
+![eduard-red](documentation/image/eduard-red.png)![eduard-green](documentation/image/eduard-green.png)![eduard-blue](documentation/image/eduard-blue.png)
+
+#### Select Wheel Type
+
+Eduard comes with two types of wheel. If wanted it can be selected in RViz for a correct visualization by setting a environment variable in front of the ros command:
 
 ```bash
-docker run --rm --user=user --net=host --pid=host --env=DISPLAY --volume=/tmp/.X11-unix:/tmp/.X11-unix:rw eduard-robot-monitoring:0.2.0
+EDU_ROBOT_WHEEL_TYPE=offroad ros2 launch edu_robot_control eduard_monitor.launch.py
 ```
+
+The following two wheel types are available: mecanum and offroad
+
+![eduard-mecanum](documentation/image/eduard-red-mecanum.png)![eduard-offroad](documentation/image/eduard-red-offroad.png)
 
 ## rqt robot monitor
 
