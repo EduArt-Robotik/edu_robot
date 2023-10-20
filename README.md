@@ -278,6 +278,8 @@ If RViz comes up properly it will be shown following:
 
 Each Eduard robot comes with a preset namespace, e.g. to reflect the robot's color. This allows that multiple robots are connected to the same network (with same DOMAIN_ID). However this makes it necessary to deal with the namespace, too, when the robot's data shall be received. For example when displaying data using RViz2.
 
+> Note: when a namespace is used the **Fixed Frame** has to be reselected, otherwise the robot is not displayed correctly.
+
 The namespace can be set by using an environment variable. Either set it via the system or define it in front of the ros command:
 
 ```bash

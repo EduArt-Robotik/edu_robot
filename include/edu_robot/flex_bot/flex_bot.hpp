@@ -27,13 +27,15 @@ class FlexBot : public robot::Robot
 {
 public:
   struct Parameter {
-    struct {
+    struct Axis {
       struct {
-        float x = 0.25f;
+        float x = 0.0f;
         float y = 0.32f;
       } length;
       float wheel_diameter = 0.17f;
-    } skid;
+    };
+
+    std::vector<Axis> axis;
   };
 
   FlexBot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface);
