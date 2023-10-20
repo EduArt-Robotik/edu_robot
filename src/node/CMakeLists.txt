@@ -17,20 +17,23 @@ add_executable(ethernet-gateway
 )
 target_link_libraries(ethernet-gateway
   eduart-ethernet-gateway
+  eduart-robot-eduard
 )
 ament_target_dependencies(ethernet-gateway
   "rclcpp"
 )
 # rosidl_target_interfaces(ethernet-gateway ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
-### Ehternet Gateway Flex Bot
-add_executable(ethernet-gateway-flex-bot
-  ethernet_gateway_flex_bot_node.cpp
+### Ehternet Gateway Universal Bot
+add_executable(ethernet-gateway-universal-bot
+  ethernet_gateway_universal_bot_node.cpp
 )
-target_link_libraries(ethernet-gateway-flex-bot
+target_link_libraries(ethernet-gateway-universal-bot
   eduart-ethernet-gateway
+  eduart-robot-universal-bot
+  eduart-robot-eduard
 )
-ament_target_dependencies(ethernet-gateway-flex-bot
+ament_target_dependencies(ethernet-gateway-universal-bot
   "rclcpp"
 )
 # rosidl_target_interfaces(ethernet-gateway ${PROJECT_NAME} "rosidl_typesupport_cpp")

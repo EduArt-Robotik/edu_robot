@@ -14,7 +14,7 @@
 
 namespace eduart {
 namespace robot {
-namespace flex_bot {
+namespace universal_bot {
 
 struct COLOR {
   struct DEFAULT {
@@ -23,7 +23,7 @@ struct COLOR {
   };
 };
 
-class FlexBot : public robot::Robot
+class UniversalBot : public robot::Robot
 {
 public:
   struct Parameter {
@@ -38,8 +38,8 @@ public:
     std::vector<Axis> axis;
   };
 
-  FlexBot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface);
-  ~FlexBot() override;
+  UniversalBot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface);
+  ~UniversalBot() override;
 
 protected:
   Eigen::MatrixXf getKinematicMatrix(const DriveKinematic kinematic) const override;
@@ -49,6 +49,6 @@ protected:
   Parameter _parameter;
 };
 
-} // end namespace flex_bot
+} // end namespace universal_bot
 } // end namespace robot
 } // end namespace eduart

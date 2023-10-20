@@ -1,4 +1,4 @@
-#include <edu_robot/flex_bot/flex_bot.hpp>
+#include <edu_robot/universal_bot/universal_bot.hpp>
 #include <edu_robot/hardware_component_factory.hpp>
 
 #include <edu_robot/hardware_component_interface.hpp>
@@ -18,11 +18,11 @@
 
 namespace eduart {
 namespace robot {
-namespace flex_bot {
+namespace universal_bot {
 
-static FlexBot::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
+static UniversalBot::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
 {
-  FlexBot::Parameter parameter;
+  UniversalBot::Parameter parameter;
 
   // Requesting Number of Axes
   ros_node.declare_parameter<int>("number_of_axes", 0);
@@ -43,12 +43,12 @@ static FlexBot::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
   return parameter;
 }
 
-FlexBot::FlexBot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface)
+UniversalBot::UniversalBot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface)
   : robot::Robot(robot_name, std::move(hardware_interface))
   , _parameter(get_robot_ros_parameter(*this))
 { }
 
-void FlexBot::initialize(eduart::robot::HardwareComponentFactory& factory)
+void UniversalBot::initialize(eduart::robot::HardwareComponentFactory& factory)
 {
   // Motor Controllers
   constexpr robot::MotorController::Parameter motor_controller_default_parameter{ };
@@ -102,12 +102,12 @@ void FlexBot::initialize(eduart::robot::HardwareComponentFactory& factory)
   _inverse_kinematic_matrix = _kinematic_matrix.completeOrthogonalDecomposition().pseudoInverse(); 
 }
 
-FlexBot::~FlexBot()
+UniversalBot::~UniversalBot()
 {
 
 }
 
-Eigen::MatrixXf FlexBot::getKinematicMatrix(const DriveKinematic kinematic) const
+Eigen::MatrixXf UniversalBot::getKinematicMatrix(const DriveKinematic kinematic) const
 {
   Eigen::MatrixXf kinematic_matrix;
 
@@ -131,6 +131,6 @@ Eigen::MatrixXf FlexBot::getKinematicMatrix(const DriveKinematic kinematic) cons
   return kinematic_matrix;
 }
 
-} // end namespace flex_bot
+} // end namespace universal_bot
 } // end namespace robot
 } // end namespace eduart

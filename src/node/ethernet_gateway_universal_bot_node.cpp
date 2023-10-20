@@ -3,7 +3,7 @@
  *
  * Author: Christian Wendt (christian.wendt@eduart-robotik.com)
  */
-#include <edu_robot/flex_bot/flex_bot.hpp>
+#include <edu_robot/universal_bot/universal_bot.hpp>
 
 #include <edu_robot/ethernet_gateway/ethernet_gateway_shield.hpp>
 #include <edu_robot/ethernet_gateway/hardware_component_factory.hpp>
@@ -14,12 +14,12 @@
 using eduart::robot::ethernet::EthernetGatewayShield;
 using eduart::robot::ethernet::HardwareComponentFactory;
 
-class EthernetGatewayFlexBot : public eduart::robot::flex_bot::FlexBot
+class EthernetGatewayUniversalBot : public eduart::robot::universal_bot::UniversalBot
 {
 public:
-  EthernetGatewayFlexBot()
-    : eduart::robot::flex_bot::FlexBot(
-        "flex_bot",
+  EthernetGatewayUniversalBot()
+    : eduart::robot::universal_bot::UniversalBot(
+        "universal_bot",
         std::make_unique<EthernetGatewayShield>("192.168.1.20", 1234)
       )
   {
@@ -56,7 +56,7 @@ public:
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<EthernetGatewayFlexBot>());
+  rclcpp::spin(std::make_shared<EthernetGatewayUniversalBot>());
   rclcpp::shutdown();
 
   return 0;
