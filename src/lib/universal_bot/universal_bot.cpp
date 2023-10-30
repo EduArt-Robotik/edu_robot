@@ -30,14 +30,15 @@ static UniversalBot::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
 
   for (std::size_t i = 0; i < parameter.axis.size(); ++i) {
     // Declaring of Parameters
-    ros_node.declare_parameter<float>("skid.length.x", parameter.axis[i].length.x);
-    ros_node.declare_parameter<float>("skid.length.y", parameter.axis[i].length.y);
-    ros_node.declare_parameter<float>("skid.wheel_diameter", parameter.axis[i].wheel_diameter);
+    const std::string prefix = std::string("axis_") + std::to_string(i + 1);
+    ros_node.declare_parameter<float>(prefix + ".skid.length.x", parameter.axis[i].length.x);
+    ros_node.declare_parameter<float>(prefix + ".skid.length.y", parameter.axis[i].length.y);
+    ros_node.declare_parameter<float>(prefix + ".skid.wheel_diameter", parameter.axis[i].wheel_diameter);
 
     // Reading Parameters
-    parameter.axis[i].length.x = ros_node.get_parameter("skid.length.x").as_double();
-    parameter.axis[i].length.y = ros_node.get_parameter("skid.length.y").as_double();
-    parameter.axis[i].wheel_diameter = ros_node.get_parameter("skid.wheel_diameter").as_double();
+    parameter.axis[i].length.x = ros_node.get_parameter(prefix + ".skid.length.x").as_double();
+    parameter.axis[i].length.y = ros_node.get_parameter(prefix + ".skid.length.y").as_double();
+    parameter.axis[i].wheel_diameter = ros_node.get_parameter(prefix + ".skid.wheel_diameter").as_double();
   }
 
   return parameter;
@@ -53,13 +54,13 @@ void UniversalBot::initialize(eduart::robot::HardwareComponentFactory& factory)
   // Motor Controllers
   constexpr robot::MotorController::Parameter motor_controller_default_parameter{ };
   constexpr std::array<const char*, 8> motor_controller_name = {
-    "motor_1", "motor_2", "motor_3", "motor_4", "motor_5", "motor_6", "motor_7", "motor_8"};
+    "motor_a", "motor_b", "motor_c", "motor_d", "motor_e", "motor_f", "motor_g", "motor_h"};
   // \todo fix the wrong order of joints!
   constexpr std::array<const char*, 8> motor_controller_joint_name = {
     "base_to_motor_1", "base_to_motor_2", "base_to_motor_3", "base_to_motor_4",
     "base_to_motor_5", "base_to_motor_6", "base_to_motor_7", "base_to_motor_8"};
 
-  for (std::size_t i = 0; i < _parameter.axis.size(); ++i) {
+  for (std::size_t i = 0; i < _parameter.axis.size() * 2; ++i) {
     const auto motor_controller_parameter = robot::MotorController::get_parameter(
       motor_controller_name[i], motor_controller_default_parameter, *this
     );
@@ -99,7 +100,7 @@ void UniversalBot::initialize(eduart::robot::HardwareComponentFactory& factory)
   // of robot base class.
   // \todo maybe introduce an initialize method that can be called after construction of robot class.
   _kinematic_matrix = getKinematicMatrix(DriveKinematic::SKID_DRIVE);
-  _inverse_kinematic_matrix = _kinematic_matrix.completeOrthogonalDecomposition().pseudoInverse(); 
+  _inverse_kinematic_matrix = _kinematic_matrix.completeOrthogonalDecomposition().pseudoInverse();
 }
 
 UniversalBot::~UniversalBot()
@@ -112,7 +113,7 @@ Eigen::MatrixXf UniversalBot::getKinematicMatrix(const DriveKinematic kinematic)
   Eigen::MatrixXf kinematic_matrix;
 
   if (kinematic == DriveKinematic::SKID_DRIVE) {
-    kinematic_matrix.resize(_parameter.axis.size(), 3);
+    kinematic_matrix.resize(_parameter.axis.size() * 2, 3);
 
     for (std::size_t axis = 0; axis < _parameter.axis.size(); ++axis) {
       const float l_x = _parameter.axis[axis].length.x;

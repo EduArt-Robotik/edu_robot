@@ -192,7 +192,8 @@ void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> tw
       );
     }
     for (Eigen::Index i = 0; i < radps.size(); ++i) {
-      _motor_controllers[i]->setRpm(Rpm::fromRadps(radps(i)) * reduce_factor);
+      const std::size_t index = _motor_controllers[i]->parameter().index == 0 ? i : _motor_controllers[i]->parameter().index - 1;
+      _motor_controllers[i]->setRpm(Rpm::fromRadps(radps(index)) * reduce_factor);
     }
 
     // Calculating Odometry and Publishing it

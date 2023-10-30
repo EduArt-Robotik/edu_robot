@@ -20,7 +20,7 @@ public:
   EthernetGatewayUniversalBot()
     : eduart::robot::universal_bot::UniversalBot(
         "universal_bot",
-        std::make_unique<EthernetGatewayShield>("192.168.1.20", 1234)
+        std::make_unique<EthernetGatewayShield>("192.168.2.20", 1234)
       )
   {
     auto shield = std::dynamic_pointer_cast<EthernetGatewayShield>(_hardware_interface);
