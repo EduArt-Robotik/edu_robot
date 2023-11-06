@@ -35,7 +35,8 @@ using SetMotorControllerParameter = MessageFrame<element::Command<PROTOCOL::COMM
                                                  element::Float,   // Max RPM
                                                  element::Float,   // Threshold Time Stalled Detection
                                                  element::Float,   // Input Filter Weight
-                                                 element::Uint32>; // Frequency
+                                                 element::Uint32,  // Frequency
+                                                 element::Uint16>; // Timeout (ms)
 
 using SetEncoderParameter = MessageFrame<element::Command<PROTOCOL::COMMAND::SET::ENCODER_PARAMETER>,
                                                           element::Uint8,  // Motor ID

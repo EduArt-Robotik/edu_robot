@@ -21,6 +21,7 @@ MotorController::Parameter MotorController::get_parameter(
   ros_node.declare_parameter<float>(prefix + ".encoder_ratio", default_parameter.encoder_ratio);
   ros_node.declare_parameter<float>(prefix + ".max_rpm", default_parameter.max_rpm);
   ros_node.declare_parameter<int>(prefix + ".control_frequency", default_parameter.control_frequency);
+  ros_node.declare_parameter<int>(prefix + ".timeout_ms", default_parameter.timeout_ms);
   ros_node.declare_parameter<float>(prefix + ".pid.kp", default_parameter.kp);
   ros_node.declare_parameter<float>(prefix + ".pid.ki", default_parameter.ki);
   ros_node.declare_parameter<float>(prefix + ".pid.kd", default_parameter.kd);
@@ -35,6 +36,7 @@ MotorController::Parameter MotorController::get_parameter(
   parameter.encoder_ratio = ros_node.get_parameter(prefix + ".encoder_ratio").as_double();
   parameter.max_rpm = ros_node.get_parameter(prefix + ".max_rpm").as_double();
   parameter.control_frequency = ros_node.get_parameter(prefix + ".control_frequency").as_int();
+  parameter.timeout_ms = ros_node.get_parameter(prefix + ".timeout_ms").as_int();
   parameter.kp = ros_node.get_parameter(prefix + ".pid.kp").as_double();
   parameter.ki = ros_node.get_parameter(prefix + ".pid.ki").as_double();
   parameter.kd = ros_node.get_parameter(prefix + ".pid.kd").as_double();

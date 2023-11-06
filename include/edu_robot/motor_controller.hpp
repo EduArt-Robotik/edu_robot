@@ -49,6 +49,7 @@ public:
     bool encoder_inverted = false;
     bool closed_loop = true;
     std::size_t index = 0;
+    std::uint32_t timeout_ms = 1000;
 
     float kp = 0.5f;
     float ki = 5.0f;
