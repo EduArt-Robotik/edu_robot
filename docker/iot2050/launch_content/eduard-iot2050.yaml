@@ -1,0 +1,74 @@
+/**:
+  ros__parameters:
+# General Parameters
+    tf_base_frame: base_link
+    tf_footprint_frame: base_footprint
+    use_sim_time: false
+
+# Collision Avoidance
+    collision_avoidance:
+      enable: true
+      distance_reduce_velocity: 0.6
+      distance_velocity_zero: 0.05
+
+# IMU Sensor
+    imu:
+      fusion_weight: 0.029999999329447746
+      raw_data_mode: false
+
+# Motor Controller
+    motor_a:
+      control_frequency: 16000
+      timeout_ms: 500
+      encoder_inverted: true
+      encoder_ratio: 2048.0
+      gear_ratio: 89.0
+      max_rpm: 140.0
+      pid/kd: 0.0
+      pid/ki: 5.0
+      pid/kp: 0.5
+      weight_low_pass_encoder: 0.3
+      weight_low_pass_set_point: 0.2
+
+# Motor B, C and D are configured together with motor A. Motor B, C and D therefore receive the same parameters as motor A.
+    # motor_b:  
+    # motor_c:  
+    # motor_d:
+
+# Range Sensor
+    range:  
+      front:
+        left:
+          field_of_view: 0.1745329201221466
+          range_max: 5.0
+          range_min: 0.009999999776482582
+        
+        right:
+          field_of_view: 0.1745329201221466
+          range_max: 5.0
+          range_min: 0.009999999776482582
+
+      rear:    
+        left:
+          field_of_view: 0.1745329201221466
+          range_max: 5.0
+          range_min: 0.009999999776482582
+
+        right:
+          field_of_view: 0.1745329201221466
+          range_max: 5.0
+          range_min: 0.009999999776482582
+
+# Drive Kinematic
+    skid:
+      length:
+        x: 0.25
+        y: 0.3199999928474426
+      wheel_diameter: 0.17000000178813934
+
+    mecanum:
+      length:
+        x: 0.25
+        y: 0.36000001430511475
+      wheel_diameter: 0.10000000149011612
+      

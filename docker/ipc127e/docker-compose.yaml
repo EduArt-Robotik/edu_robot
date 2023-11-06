@@ -13,9 +13,9 @@ services:
         environment:
             - EDU_ROBOT_NAMESPACE=eduard/red
         network_mode: "host"
-#        networks:
-#            - multi-robot
-#            - robot-eduard
+        command: bash -c 'cd /home/user/ros/launch_content; ros2 launch eduard-ipc127e.launch.py'
+        volumes:
+            - './launch_content:/home/user/ros/launch_content:r'
         devices:
             - '/dev:/dev'
 
@@ -31,17 +31,7 @@ services:
         environment:
             - EDU_ROBOT_NAMESPACE=eduard/red
         network_mode: "host"
-#        networks:
-#            - multi-robot
-#            - robot-eduard
         devices:
             - '/dev:/dev'
         volumes:
             - '/dev:/dev'
-
-networks:
-    multi-robot:
-        name: "multi-robot"
-        external: true
-    robot-eduard:
-        name: "robot-eduard"
