@@ -27,7 +27,7 @@
       control_frequency: 16000
       timeout_ms: 500
       encoder_inverted: true
-      encoder_ratio: 256.0
+      encoder_ratio: 4096.0
       gear_ratio: 89.0
       max_rpm: 90.0
       pid/kd: 0.0
@@ -56,7 +56,7 @@
       control_frequency: 16000
       timeout_ms: 500
       encoder_inverted: true
-      encoder_ratio: 256.0
+      encoder_ratio: 4096.0
       gear_ratio: 89.0
       max_rpm: 90.0
       pid/kd: 0.0
