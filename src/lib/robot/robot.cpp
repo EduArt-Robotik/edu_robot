@@ -290,7 +290,7 @@ void Robot::callbackSetLightingColor(std::shared_ptr<const edu_robot::msg::SetLi
 
   // try to set new values
   try {
-    search->second->setColor({ msg->r, msg->g, msg->b }, fromRos(*msg));
+    search->second->setColor({ msg->r, msg->g, msg->b }, from_ros(*msg));
     search->second->setBrightness(msg->brightness.data);
   }
   catch (HardwareError& ex) {
@@ -339,12 +339,10 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
   catch (std::exception& ex) {
     RCLCPP_ERROR_STREAM(get_logger(), "Error occurred while trying to set new mode. what() = " << ex.what());
     response->state.info_message = "REJECTED";
-    response->state.state.value = response->state.state.OK;      
+    response->state.state.value = response->state.state.OK;
   }
 
-  response->state.mode.mode = static_cast<std::uint8_t>(_mode_state_machine.mode().robot_mode);
-  response->state.mode.drive_kinematic = static_cast<std::uint8_t>(_mode_state_machine.mode().drive_kinematic);
-  response->state.mode.feature_mode = static_cast<std::uint8_t>(_mode_state_machine.mode().feature_mode);  
+  response->state.mode = to_ros(_mode_state_machine.mode());
 }
 
 void Robot::registerLighting(std::shared_ptr<Lighting> lighting)
@@ -400,7 +398,9 @@ void Robot::processStatusReport()
 {
   try {
     const auto report = _hardware_interface->getStatusReport();
-    _pub_status_report->publish(toRos(report));
+    auto report_msg = to_ros(report);
+    report_msg.robot_state.mode = to_ros(_mode_state_machine.mode());
+    _pub_status_report->publish(to_ros(report));
   }
   catch (HardwareError& ex) {
     RCLCPP_ERROR_STREAM(get_logger(), "Hardware error occurred while getting status report. what() = " << ex.what());                                      
