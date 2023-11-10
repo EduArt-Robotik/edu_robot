@@ -5,6 +5,7 @@ import pytest
 import unittest
 from time import time
 
+from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 from launch import LaunchDescription
 from launch.substitutions import PathJoinSubstitution
 from launch_ros.actions import Node
@@ -16,7 +17,6 @@ from edu_robot.msg import Mode, RobotStatusReport
 from geometry_msgs.msg import Twist
 
 @pytest.mark.launch_test
-@launch_testing.markers.keep_alive
 def generate_test_description():
   path_to_test = os.path.dirname(__file__)
   package_path = FindPackageShare('edu_robot')
@@ -31,8 +31,9 @@ def generate_test_description():
     executable='ethernet-gateway',
     name='eduard',
     parameters=[parameter_file],
-    namespace='test',
-    output='screen'
+    namespace='test'
+    # prefix=['gdbserver localhost:3000']
+    # output='screen'
   )
 
   return LaunchDescription([
@@ -55,37 +56,66 @@ class SystemTestTimeout(unittest.TestCase):
   def setUp(self):
     # Create a ROS node for tests
     self.node = rclpy.create_node('system_test_timeout')
-    self.pub_twist = self.node.create_publisher(Twist, "/test/cmd_vel", 1)
+    self.pub_twist = self.node.create_publisher(Twist, '/test/cmd_vel', 1)
     self.sub_state = self.node.create_subscription(
-      RobotStatusReport, "/test/status_report", self.callback_status_report, 100
+      RobotStatusReport, '/test/status_report', self.callback_status_report, QoSProfile(
+        reliability=QoSReliabilityPolicy.BEST_EFFORT,
+        history=QoSHistoryPolicy.KEEP_LAST,
+        depth=100
+      )
     )
+    self.srv_set_mode = self.node.create_client(SetMode, '/test/set_mode')
     self.current_robot_mode = Mode.UNKNOWN
 
   def tearDown(self):
     self.node.destroy_node()
 
   def callback_status_report(self, report):
-    self.current_robot_mode = report.robot_state.mode
+    self.current_robot_mode = report.robot_state.mode.mode
+    print("received mode: " + str(report.robot_state.mode))
 
   def enable_robot(self):
     print('enable robot')
+    stamp_last_twist = time()
+    stamp_last_set_mode = stamp_last_twist
+    stamp_start = stamp_last_twist
+    wait_time = 1.0 / 10.0 # 10 Hz
     twist_msg = Twist()
-    stamp_start = time()
 
-    while rclpy.ok() and self.current_robot_mode is not Mode.REMOTE_CONTROLLED:
-      self.pub_twist.publish(twist_msg)
+    while rclpy.ok() and (self.current_robot_mode is not Mode.REMOTE_CONTROLLED):
+      # publishing twist msg with 10 Hz
+      if time() - stamp_last_twist > wait_time:
+        self.pub_twist.publish(twist_msg)
+        stamp_last_twist = time()
+
+      # set mode to REMOTE_CONTROLLED
+      if time() - stamp_last_set_mode > 1.0:
+        set_mode_request = SetMode.Request()
+        set_mode_request.mode.mode = Mode.REMOTE_CONTROLLED
+        stamp_last_set_mode = time()
+
+        if (self.srv_set_mode.service_is_ready()):
+          print("calling set mode service: try to enable robot")
+          future = self.srv_set_mode.call_async(set_mode_request)
+          rclpy.spin_until_future_complete(self.node, future)
+
+      # spinning with 100 Hz
       rclpy.spin_once(self.node, timeout_sec=0.01)
 
-      assert time() - stamp_start < 10.0
+      assert time() - stamp_start < 1000.0
+
+    print('robot is enabled')
 
   def test_no_timeout_occurred(self, launch_service, proc_output):
     self.enable_robot()
 
     stamp_last = time()
+    stamp_start = stamp_last
     wait_time = 1.0 / 10.0 # 10 Hz
     twist_msg = Twist()
 
-    while rclpy.ok():
+    # execute test for 10 seconds
+    while rclpy.ok() and time() - stamp_start < 10.0:
       # publishing twist msg with 10 Hz
       if time() - stamp_last > wait_time:
         self.pub_twist.publish(twist_msg)
@@ -96,3 +126,31 @@ class SystemTestTimeout(unittest.TestCase):
 
       assert self.current_robot_mode is Mode.REMOTE_CONTROLLED
 
+  def test_timeout_occurred(self, launch_service, proc_output):
+    self.enable_robot()
+
+    stamp_last = time()
+    stamp_start = stamp_last
+    wait_time = 0.4 # 400 ms --> no timeout
+    twist_msg = Twist()
+
+    # execute test for 10 seconds
+    while rclpy.ok() and time() - stamp_start < 10.0:
+      # publishing twist msg until 3s
+      if time() - stamp_last > wait_time and time() - stamp_start < 3.0:
+        self.pub_twist.publish(twist_msg)
+        stamp_last = time()
+        assert self.current_robot_mode is Mode.REMOTE_CONTROLLED
+      # interrupt sending twist message until 3.6s
+      if time() - stamp_last > wait_time and time() - stamp_start > 4.6:
+        self.pub_twist.publish(twist_msg)
+        stamp_last = time()
+
+      if time() - stamp_start > 6.0:
+        assert self.current_robot_mode is Mode.INACTIVE
+
+
+      # spinning with 100 Hz
+      rclpy.spin_once(self.node, timeout_sec=0.01)
+
+      

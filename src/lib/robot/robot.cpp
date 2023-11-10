@@ -400,7 +400,7 @@ void Robot::processStatusReport()
     const auto report = _hardware_interface->getStatusReport();
     auto report_msg = to_ros(report);
     report_msg.robot_state.mode = to_ros(_mode_state_machine.mode());
-    _pub_status_report->publish(to_ros(report));
+    _pub_status_report->publish(report_msg);
   }
   catch (HardwareError& ex) {
     RCLCPP_ERROR_STREAM(get_logger(), "Hardware error occurred while getting status report. what() = " << ex.what());                                      
