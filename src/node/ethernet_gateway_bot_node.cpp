@@ -17,7 +17,7 @@ using eduart::robot::ethernet::HardwareComponentFactory;
 class EthernetGatewayBot : public eduart::robot::eduard::Eduard
 {
 public:
-  EthernetGatewayBot() 
+  EthernetGatewayBot()
     : eduart::robot::eduard::Eduard(
         "eduard",
         std::make_unique<EthernetGatewayShield>("192.168.2.20", 1234)

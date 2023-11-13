@@ -33,6 +33,7 @@ void CheckIfMotorIsEnabled::process()
     if (motor.second->isEnabled() == false) {
       motor.second->_lost_enable = true;
       _state_machine.switchToMode(RobotMode::INACTIVE);
+      RCLCPP_INFO(rclcpp::get_logger("check_if_motor_enabled"), "switch to mode inactive");
       _keep_alive = false;
       return;
     }
