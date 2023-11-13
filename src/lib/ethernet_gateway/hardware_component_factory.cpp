@@ -29,27 +29,37 @@ HardwareComponentFactory& HardwareComponentFactory::addMotorController(
   auto compound_motor = std::make_shared<CompoundMotorControllerHardware>(
     hardware_name + "_a", hardware_name + "_b", 0, _shield->getCommunicator()
   );
-
-  _motor_controller_hardware[motor_name + "_a"] = compound_motor->dummyMotorController();
-  _motor_controller_hardware[motor_name + "_b"] = compound_motor;
-  _motor_sensor_hardware[motor_name + "_a"] = compound_motor->dummyMotorController();
-  _motor_sensor_hardware[motor_name + "_b"] = compound_motor;
+  _motor_controller_hardware[motor_name + "_a"] = compound_motor;
+  _motor_controller_hardware[motor_name + "_b"] = compound_motor->dummyMotorController();
+  _motor_sensor_hardware[motor_name + "_a"] = compound_motor;
+  _motor_sensor_hardware[motor_name + "_b"] = compound_motor->dummyMotorController();
 
   compound_motor = std::make_shared<CompoundMotorControllerHardware>(
     hardware_name + "_c", hardware_name + "_d", 1, _shield->getCommunicator()
   );  
-  _motor_controller_hardware[motor_name + "_c"] = compound_motor->dummyMotorController();
-  _motor_controller_hardware[motor_name + "_d"] = compound_motor;
-  _motor_sensor_hardware[motor_name + "_c"] = compound_motor->dummyMotorController();
-  _motor_sensor_hardware[motor_name + "_d"] = compound_motor;
+  _motor_controller_hardware[motor_name + "_c"] = compound_motor;
+  _motor_controller_hardware[motor_name + "_d"] = compound_motor->dummyMotorController();
+
+  _motor_sensor_hardware[motor_name + "_c"] = compound_motor;
+  _motor_sensor_hardware[motor_name + "_d"] = compound_motor->dummyMotorController();
 
   compound_motor = std::make_shared<CompoundMotorControllerHardware>(
     hardware_name + "_e", hardware_name + "_f", 2, _shield->getCommunicator()
   );  
-  _motor_controller_hardware[motor_name + "_e"] = compound_motor->dummyMotorController();
-  _motor_controller_hardware[motor_name + "_f"] = compound_motor;
-  _motor_sensor_hardware[motor_name + "_e"] = compound_motor->dummyMotorController();
-  _motor_sensor_hardware[motor_name + "_f"] = compound_motor;
+  _motor_controller_hardware[motor_name + "_e"] = compound_motor;
+  _motor_controller_hardware[motor_name + "_f"] = compound_motor->dummyMotorController();
+
+  _motor_sensor_hardware[motor_name + "_e"] = compound_motor;
+  _motor_sensor_hardware[motor_name + "_f"] = compound_motor->dummyMotorController();
+
+  compound_motor = std::make_shared<CompoundMotorControllerHardware>(
+    hardware_name + "_g", hardware_name + "_h", 2, _shield->getCommunicator()
+  );  
+  _motor_controller_hardware[motor_name + "_g"] = compound_motor;
+  _motor_controller_hardware[motor_name + "_h"] = compound_motor->dummyMotorController();
+
+  _motor_sensor_hardware[motor_name + "_g"] = compound_motor;
+  _motor_sensor_hardware[motor_name + "_h"] = compound_motor->dummyMotorController();
 
   // _shield->registerIotShieldRxDevice(compound_motor);
 

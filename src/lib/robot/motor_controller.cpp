@@ -21,6 +21,7 @@ MotorController::Parameter MotorController::get_parameter(
   ros_node.declare_parameter<float>(prefix + ".encoder_ratio", default_parameter.encoder_ratio);
   ros_node.declare_parameter<float>(prefix + ".max_rpm", default_parameter.max_rpm);
   ros_node.declare_parameter<int>(prefix + ".control_frequency", default_parameter.control_frequency);
+  ros_node.declare_parameter<int>(prefix + ".timeout_ms", default_parameter.timeout_ms);
   ros_node.declare_parameter<float>(prefix + ".pid.kp", default_parameter.kp);
   ros_node.declare_parameter<float>(prefix + ".pid.ki", default_parameter.ki);
   ros_node.declare_parameter<float>(prefix + ".pid.kd", default_parameter.kd);
@@ -28,12 +29,14 @@ MotorController::Parameter MotorController::get_parameter(
   ros_node.declare_parameter<float>(prefix + ".weight_low_pass_encoder", default_parameter.weight_low_pass_encoder);
   ros_node.declare_parameter<bool>(prefix + ".encoder_inverted", default_parameter.encoder_inverted);
   ros_node.declare_parameter<bool>(prefix + ".closed_loop", default_parameter.closed_loop);
+  ros_node.declare_parameter<int>(prefix + ".index", 0);
   
   parameter.inverted = ros_node.get_parameter(prefix + ".inverted").as_bool();
   parameter.gear_ratio = ros_node.get_parameter(prefix + ".gear_ratio").as_double();
   parameter.encoder_ratio = ros_node.get_parameter(prefix + ".encoder_ratio").as_double();
   parameter.max_rpm = ros_node.get_parameter(prefix + ".max_rpm").as_double();
   parameter.control_frequency = ros_node.get_parameter(prefix + ".control_frequency").as_int();
+  parameter.timeout_ms = ros_node.get_parameter(prefix + ".timeout_ms").as_int();
   parameter.kp = ros_node.get_parameter(prefix + ".pid.kp").as_double();
   parameter.ki = ros_node.get_parameter(prefix + ".pid.ki").as_double();
   parameter.kd = ros_node.get_parameter(prefix + ".pid.kd").as_double();
@@ -41,6 +44,7 @@ MotorController::Parameter MotorController::get_parameter(
   parameter.weight_low_pass_encoder = ros_node.get_parameter(prefix + ".weight_low_pass_encoder").as_double();
   parameter.encoder_inverted = ros_node.get_parameter(prefix + ".encoder_inverted").as_bool();
   parameter.closed_loop = ros_node.get_parameter(prefix + ".closed_loop").as_bool();
+  parameter.index = ros_node.get_parameter(prefix + ".index").as_int();
 
   return parameter;
 }

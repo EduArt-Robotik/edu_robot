@@ -16,7 +16,7 @@
 namespace eduart {
 namespace robot {
 
-inline edu_robot::msg::RobotStatusReport toRos(const RobotStatusReport& report)
+inline edu_robot::msg::RobotStatusReport to_ros(const RobotStatusReport& report)
 {
   edu_robot::msg::RobotStatusReport msg;
 
@@ -34,7 +34,7 @@ inline edu_robot::msg::RobotStatusReport toRos(const RobotStatusReport& report)
   return msg;
 }
 
-inline Lighting::Mode fromRos(const edu_robot::msg::SetLightingColor& msg)
+inline Lighting::Mode from_ros(const edu_robot::msg::SetLightingColor& msg)
 {
   switch (msg.mode) {
   case 0u: // OFF

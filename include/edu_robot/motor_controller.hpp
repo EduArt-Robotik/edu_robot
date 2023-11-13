@@ -9,6 +9,7 @@
 #include "edu_robot/rotation_per_minute.hpp"
 #include "edu_robot/angle.hpp"
 
+#include <cstddef>
 #include <edu_robot/action/motor_action.hpp>
 
 #include <edu_robot/diagnostic/diagnostic_component.hpp>
@@ -47,6 +48,8 @@ public:
     std::uint32_t control_frequency = 16000;
     bool encoder_inverted = false;
     bool closed_loop = true;
+    std::size_t index = 0;
+    std::uint32_t timeout_ms = 1000;
 
     float kp = 0.5f;
     float ki = 5.0f;

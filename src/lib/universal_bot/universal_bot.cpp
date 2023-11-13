@@ -1,4 +1,4 @@
-#include <edu_robot/flex_bot/flex_bot.hpp>
+#include <edu_robot/universal_bot/universal_bot.hpp>
 #include <edu_robot/hardware_component_factory.hpp>
 
 #include <edu_robot/hardware_component_interface.hpp>
@@ -18,42 +18,49 @@
 
 namespace eduart {
 namespace robot {
-namespace flex_bot {
+namespace universal_bot {
 
-static FlexBot::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
+static UniversalBot::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
 {
-  FlexBot::Parameter parameter;
+  UniversalBot::Parameter parameter;
 
-  // Declaring of Parameters
-  ros_node.declare_parameter<float>("skid.length.x", parameter.skid.length.x);
-  ros_node.declare_parameter<float>("skid.length.y", parameter.skid.length.y);
-  ros_node.declare_parameter<float>("skid.wheel_diameter", parameter.skid.wheel_diameter);
+  // Requesting Number of Axes
+  ros_node.declare_parameter<int>("number_of_axes", 0);
+  parameter.axis.resize(ros_node.get_parameter("number_of_axes").as_int());
 
-  // Reading Parameters
-  parameter.skid.length.x = ros_node.get_parameter("skid.length.x").as_double();
-  parameter.skid.length.y = ros_node.get_parameter("skid.length.y").as_double();
-  parameter.skid.wheel_diameter = ros_node.get_parameter("skid.wheel_diameter").as_double();
+  for (std::size_t i = 0; i < parameter.axis.size(); ++i) {
+    // Declaring of Parameters
+    const std::string prefix = std::string("axis_") + std::to_string(i + 1);
+    ros_node.declare_parameter<float>(prefix + ".skid.length.x", parameter.axis[i].length.x);
+    ros_node.declare_parameter<float>(prefix + ".skid.length.y", parameter.axis[i].length.y);
+    ros_node.declare_parameter<float>(prefix + ".skid.wheel_diameter", parameter.axis[i].wheel_diameter);
+
+    // Reading Parameters
+    parameter.axis[i].length.x = ros_node.get_parameter(prefix + ".skid.length.x").as_double();
+    parameter.axis[i].length.y = ros_node.get_parameter(prefix + ".skid.length.y").as_double();
+    parameter.axis[i].wheel_diameter = ros_node.get_parameter(prefix + ".skid.wheel_diameter").as_double();
+  }
 
   return parameter;
 }
 
-FlexBot::FlexBot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface)
+UniversalBot::UniversalBot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface)
   : robot::Robot(robot_name, std::move(hardware_interface))
   , _parameter(get_robot_ros_parameter(*this))
 { }
 
-void FlexBot::initialize(eduart::robot::HardwareComponentFactory& factory)
+void UniversalBot::initialize(eduart::robot::HardwareComponentFactory& factory)
 {
   // Motor Controllers
   constexpr robot::MotorController::Parameter motor_controller_default_parameter{ };
-  constexpr std::array<const char*, 6> motor_controller_name = {
-    "motor_a", "motor_b", "motor_c", "motor_d", "motor_e", "motor_f"};
+  constexpr std::array<const char*, 8> motor_controller_name = {
+    "motor_a", "motor_b", "motor_c", "motor_d", "motor_e", "motor_f", "motor_g", "motor_h"};
   // \todo fix the wrong order of joints!
-  constexpr std::array<const char*, 6> motor_controller_joint_name = {
-    "base_to_wheel_rear_right", "base_to_wheel_front_right", "base_to_wheel_rear_left",
-    "base_to_wheel_front_left", "base_to_wheel_middle_right", "base_to_wheel_middle_left" };
+  constexpr std::array<const char*, 8> motor_controller_joint_name = {
+    "base_to_motor_1", "base_to_motor_2", "base_to_motor_3", "base_to_motor_4",
+    "base_to_motor_5", "base_to_motor_6", "base_to_motor_7", "base_to_motor_8"};
 
-  for (std::size_t i = 0; i < motor_controller_name.size(); ++i) {
+  for (std::size_t i = 0; i < _parameter.axis.size() * 2; ++i) {
     const auto motor_controller_parameter = robot::MotorController::get_parameter(
       motor_controller_name[i], motor_controller_default_parameter, *this
     );
@@ -93,32 +100,30 @@ void FlexBot::initialize(eduart::robot::HardwareComponentFactory& factory)
   // of robot base class.
   // \todo maybe introduce an initialize method that can be called after construction of robot class.
   _kinematic_matrix = getKinematicMatrix(DriveKinematic::SKID_DRIVE);
-  _inverse_kinematic_matrix = _kinematic_matrix.completeOrthogonalDecomposition().pseudoInverse(); 
+  _inverse_kinematic_matrix = _kinematic_matrix.completeOrthogonalDecomposition().pseudoInverse();
 }
 
-FlexBot::~FlexBot()
+UniversalBot::~UniversalBot()
 {
 
 }
 
-Eigen::MatrixXf FlexBot::getKinematicMatrix(const DriveKinematic kinematic) const
+Eigen::MatrixXf UniversalBot::getKinematicMatrix(const DriveKinematic kinematic) const
 {
   Eigen::MatrixXf kinematic_matrix;
 
   if (kinematic == DriveKinematic::SKID_DRIVE) {
-    const float l_x = _parameter.skid.length.x;
-    const float l_y = _parameter.skid.length.y;
-    const float wheel_diameter = _parameter.skid.wheel_diameter;
-    const float l_squared = l_x * l_x + l_y * l_y;
+    kinematic_matrix.resize(_parameter.axis.size() * 2, 3);
 
-    kinematic_matrix.resize(6, 3);
-    kinematic_matrix <<  1.0f, 0.0f, l_squared / (2.0f * l_y),
-                        -1.0f, 0.0f, l_squared / (2.0f * l_y),
-                         1.0f, 0.0f, l_y / 2.0f,
-                        -1.0f, 0.0f, l_y / 2.0f,
-                         1.0f, 0.0f, l_squared / (2.0f * l_y),
-                        -1.0f, 0.0f, l_squared / (2.0f * l_y);
-    kinematic_matrix *= 1.0f / wheel_diameter;
+    for (std::size_t axis = 0; axis < _parameter.axis.size(); ++axis) {
+      const float l_x = _parameter.axis[axis].length.x;
+      const float l_y = _parameter.axis[axis].length.y;
+      const float wheel_radius = _parameter.axis[axis].wheel_diameter * 0.5f;
+      const float l_squared = l_x * l_x + l_y * l_y;
+
+      kinematic_matrix.row(axis * 2 + 0) = Eigen::Vector3f( 1.0f, 0.0f, l_squared / (2.0f * l_y)) / wheel_radius;
+      kinematic_matrix.row(axis * 2 + 1) = Eigen::Vector3f(-1.0f, 0.0f, l_squared / (2.0f * l_y)) / wheel_radius;
+    }
   }
   else {
     throw std::invalid_argument("Flex Bot: given kinematic is not supported.");
@@ -127,6 +132,6 @@ Eigen::MatrixXf FlexBot::getKinematicMatrix(const DriveKinematic kinematic) cons
   return kinematic_matrix;
 }
 
-} // end namespace flex_bot
+} // end namespace universal_bot
 } // end namespace robot
 } // end namespace eduart

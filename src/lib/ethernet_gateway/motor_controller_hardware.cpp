@@ -67,7 +67,8 @@ void SingleChannelMotorControllerHardware::initialize(const MotorController::Par
       parameter.max_rpm,
       parameter.threshold_stall_check,
       parameter.weight_low_pass_set_point,
-      parameter.control_frequency
+      parameter.control_frequency,
+      parameter.timeout_ms
     );
     auto future_response = _communicator->sendRequest(std::move(request));
     wait_for_future(future_response, 200ms);
@@ -205,7 +206,8 @@ void CompoundMotorControllerHardware::initialize(const MotorController::Paramete
       parameter.max_rpm,
       parameter.threshold_stall_check,
       parameter.weight_low_pass_set_point,
-      parameter.control_frequency
+      parameter.control_frequency,
+      parameter.timeout_ms
     );
     auto future_response = _communicator->sendRequest(std::move(request));
     wait_for_future(future_response, 200ms);

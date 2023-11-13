@@ -11,8 +11,9 @@ add_library(eduart-ethernet-gateway
 
 target_link_libraries(eduart-ethernet-gateway
   "${cpp_typesupport_target}"
-  eduart-robot-eduard
-  eduart-robot-flex-bot
+  # eduart-robot-eduard
+  # eduart-robot-flex-bot
+  eduart-robot
 )
 target_compile_features(eduart-ethernet-gateway PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 target_include_directories(eduart-ethernet-gateway PUBLIC
