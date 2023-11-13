@@ -131,9 +131,8 @@ class SystemTestTimeout(unittest.TestCase):
 
     stamp_start = self.stamp_last_twist
     wait_time = 0.4 # 400 ms --> timeout
-    wait_time_timeout = 0.8 # 600ms --> timeout
+    wait_time_timeout = 0.6 # 600ms --> timeout
     twist_msg = Twist()
-    self.pub_twist.publish(twist_msg)
 
     # execute test for 10 seconds
     while rclpy.ok() and time() - stamp_start < 10.0:
@@ -148,7 +147,7 @@ class SystemTestTimeout(unittest.TestCase):
         self.pub_twist.publish(twist_msg)
         self.stamp_last_twist = time()
 
-      if time() - stamp_start > 9.0:
+      if time() - stamp_start > 4.5: # 1 second interval for feedback --> 3s + 1s + tolerance
         assert self.current_robot_mode is Mode.INACTIVE
 
 
