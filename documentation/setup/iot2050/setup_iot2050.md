@@ -2,15 +2,98 @@
 
 ## SD Card Image
 
-It is considered that the official ["Example Image V1.3.1"](https://support.industry.siemens.com/cs/document/109741799/downloads-f%C3%BCr-simatic-iot20x0?dti=0&lc=de-DE) provided by Siemens will be used for the IoT2050. If this is not the case it cloud lead in a misinterpretation of the game pad, because of an different kernel version.
+It is considered that the official ["Example Image V1.3.1"](https://support.industry.siemens.com/cs/document/109741799/downloads-f%C3%BCr-simatic-iot20x0?dti=0&lc=de-DE) provided by Siemens will be used for the IoT2050. If this is not the case there is no guarantee that the instructions below will work as expected.
 
 ### Flashing SD Card on Linux
 
+> **Note**: sudo privileges are required.
+
+On Linux the SD card can be flashed using two commands after the ["Example Image V1.3.1"](https://support.industry.siemens.com/cs/document/109741799/downloads-f%C3%BCr-simatic-iot20x0?dti=0&lc=de-DE) was downloaded.
+
+First estimate the SD card device name on your Linux system. Connect the SD card by using an card reader. After the SD card is connected execute following command:
+
+```bash
+sudo dmesg
+```
+
+This prints the kernel messages on the terminal. Only the few latest are important. It should look like following:
+
+```bash
+[24180.935724] sd 3:0:0:4: [sdg] 124735488 512-byte logical blocks: (63.9 GB/59.5 GiB)
+[24180.974016]  sdg: sdg1
+```
+
+In this case, the device name is **sdg**. So we will use this to flash the image. Execute
+
+```bash
+unzip -p IOT2050_Example_Image_V1.3.1.zip | sudo dd of=/dev/<device name like sdg> bs=4M status=progress
+sync
+```
+
+to unzip the downloaded image and flash it to the SD card. Note: replace the device name according your estimated one. Thats it! Now put the SD card into the IOT2050.
+
 ### Flashing SD Card on Windows
+
+### Booting Up First Time
+
+After the SD card was flashed successfully connect a keyboard and monitor to the IoT2050 device. Power it on. The **STAT** LED will start to flash in orange when the IoT2050 is power up the first time. This will take some time (~ 1 minute). When the LED stops blinking it should then light up in green. At this moment a login prompt is displayed on the monitor:
+
+```bash
+Debian GNU/Linux 11 iot2050-debian tty1
+
+iot2050-debian login: 
+```
+
+Login with user name 'root' and password 'root'. During the login you have to set a new password for the root user. Now connect your robot with the internet using the LAN **P2** connector. After we need to install the SSH server by the command:
+
+```bash
+apt update
+apt install openssh-server
+```
+
+After we recommend to create a user to avoid working with the root user. In this case the user 'user' is created. Execute following command:
+
+```bash
+adduser user
+adduser user sudo
+```
+
+The questions regarding phone, etc can be empty. Do like you want. Now a connection to the robot can be established using SSH. That means no keyboard and monitor is required anymore.
 
 ## Configure Devices on IoT2050
 
+> **Note**: All commands below are executed on the Robot. Either connect a monitor and keyboard to the IoT2050 or connect via SSH.
+
+For the SSH connection first you have to estimate the robot's IP address. Usually this cloud be found on your routers web interface. When you estimated the IP address you can connect by:
+
+```bash
+ssh user@<robot ip address>
+```
+
+### UART
+
+The UART is required to communicate with the IoT Shield. Therefor it has to be enabled and set up. This could be done using the iot2050 setup tool. Open the tool by:
+
+```bash
+sudo iot2050setup
+```
+
+First select 'Peripherals' ![](../../image/iot2050setup-select-peripherals.png)
+Then select 'Configure Arduino IO' ![](../../image/iot2050setup-select-io.png)
+After select 'Enable UART on...' ![](../../image/iot2050setup-select-configure-uart.png)
+And as last step configure the UART according following image ![](../../image/iot2050setup-configure-uart.png)
+
+### GPIO
+
 ## Install Required Software
+
+> **Note**: All commands below are executed on the Robot. Either connect a monitor and keyboard to the IoT2050 or connect via SSH.
+
+For the SSH connection first you have to estimate the robot's IP address. Usually this cloud be found on your routers web interface. When you estimated the IP address you can connect by:
+
+```bash
+ssh user@<robot ip address>
+```
 
 ### Docker Engine
 
@@ -69,15 +152,6 @@ sudo apt update
 sudo apt install git
 ```
 
-### SSH
-
-Install ssh by following command:
-
-```bash
-sudo apt update
-sudo apt install openssh-server
-```
-
 ## Install ROS Control Software
 
 ### Prepare Environment
@@ -88,14 +162,14 @@ By default the used namespace for ROS topics, services and tf is 'eduard'. If mu
 sudo nano /etc/environment
 ```
 
-Now defines the variable. Here in this example 'eduard/blue' was chosen. This namespace will respected by all EduArt ROS nodes.
+Now define the variable. Here in this example 'eduard/blue' was chosen. This namespace will respected by all EduArt's ROS nodes.
 
 ```bash
 # EduArt
 EDU_ROBOT_NAMESPACE=eduard/blue
 ```
 
-### Get Software and Launch it
+### Get Control Software and Launch it
 
 First clone the Git repository by executing the command:
 
@@ -134,5 +208,42 @@ To apply the new set parameter the software has to be relaunched. This can be do
 ```bash
 cd ~/edu_robot/docker/iot2050
 docker compose down
+docker compose up
+```
+
+### Get Web Joy and Launch it
+
+There is also a web server as an alternative to controlling the game with the gamepad. This makes it possible to control the robot with a browser.
+
+First clone the repository 'edu_docker' which contains a docker compose file for starting up the web server:
+
+```bash
+cd ~
+git clone --branch main https://github.com/EduArt-Robotik/edu_docker.git
+```
+
+After go inside the 'edu_web_joy' folder and launch the application by executing following command:
+
+```bash
+cd ~/edu_docker/edu_web_joy/iot2050
+docker compose up
+```
+
+### Get RPLidar and Launch it
+
+If your robot came with an RPLidar scanner than you can use our Docker image for controlling them. The ROS launch file was adapted in the way that the namespace is respected as in all EduArt's ROS nodes.
+
+First clone the repository 'edu_docker' by the following command:
+
+```bash
+cd ~
+git clone --branch main https://github.com/EduArt-Robotik/edu_docker.git
+```
+
+After go inside the 'rplidar' folder and launch the application by executing following command:
+
+```bash
+cd ~/edu_docker/rplidar
+make install-udev-rules
 docker compose up
 ```
