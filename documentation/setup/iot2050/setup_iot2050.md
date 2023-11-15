@@ -14,9 +14,69 @@ It is considered that the official ["Example Image V1.3.1"](https://support.indu
 
 ### Docker Engine
 
+Docker engine is used for executing our ROS software on the robot. Therefor the engine has to be installed. Please follow these [instructions](https://docs.docker.com/engine/install/debian/) including the [post install instructions](https://docs.docker.com/engine/install/linux-postinstall/).
+
+> **Note:** We have also summarized the instructions here, but it could happen that they are not up to date:
+
+1. Set up Docker's apt repository.
+
+```bash
+# Add Docker's official GPG key:
+sudo apt-get update
+sudo apt-get install ca-certificates curl gnupg
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+# Add the repository to Apt sources:
+echo \
+  "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
+  "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+```
+
+2. Install the Docker packages.
+
+```bash
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+
+3. Add your user to the docker group.
+
+```bash
+sudo usermod -aG docker $USER
+```
+
+4. Run the following command to activate the changes to groups:
+
+```bash
+newgrp docker
+```
+
+5. Verify that you can run docker commands without sudo:
+
+```bash
+docker run hello-world
+```
+
 ### Git
 
+Install git by following command:
+
+```bash
+sudo apt update
+sudo apt install git
+```
+
 ### SSH
+
+Install ssh by following command:
+
+```bash
+sudo apt update
+sudo apt install openssh-server
+```
 
 ## Install ROS Control Software
 
