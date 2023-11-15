@@ -2,8 +2,8 @@ version: "3.0"
 
 services:
     eduard-iot2050:
-        image: eduartrobotik/eduard-iotbot:0.3.2
-        container_name: eduard-iotbot-0.3.2
+        image: eduartrobotik/eduard-iotbot:0.3.3
+        container_name: eduard-iotbot-0.3.3
         user: root
         restart: always
         privileged: true
@@ -33,8 +33,9 @@ services:
         environment:
             - EDU_ROBOT_NAMESPACE=eduard/red
         network_mode: "host"
+        command: bash -c 'cd /home/user/ros/launch_content; ros2 launch robot_remote_control_iot2050.launch.py'
+        volumes:
+            - './launch_content:/home/user/ros/launch_content:r'
+            - '/dev:/dev'
         devices:
             - '/dev:/dev'
-        volumes:
-            - '/dev:/dev'
-
