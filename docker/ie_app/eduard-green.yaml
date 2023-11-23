@@ -2,8 +2,8 @@ version: "2.4"
 
 services:
     eduard-ipc127e:
-        image: eduartrobotik/eduard-ipc127e:0.3.2
-        container_name: eduard-green-ipc127e-ie-app-0.3.2
+        image: eduartrobotik/eduard-ipc127e:0.3.3
+        container_name: eduard-green-ipc127e-ie-app-0.3.3
         restart: on-failure
         privileged: true
         ipc: host
