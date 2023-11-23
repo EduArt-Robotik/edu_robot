@@ -33,103 +33,38 @@ The software package 'edu_robot' provides ROS2 interface. For details please fol
 
 ### On IoT2050
 
+* [First Time Setup](documentation/setup/iot2050/setup_iot2050.md)
+* [Update ROS Software](documentation/update/update-software.md)
+* [Setup PS5 Controller](documentation/setup/joystick/ps5-gamepad.md)
+
 ### On IPC127e
+
+* [First Time Setup](documentation/setup/ipc127e/setup_ipc127.md)
+* [Update ROS Software](documentation/update/update-software.md)
+* [Setup PS5 Controller](documentation/setup/joystick/ps5-gamepad.md)
 
 ### As Siemens Industrial Application
 
-
-A Docker container is used to run this software on our robots. Normally, all our robots are shipped with a Docker container registered to start after a reboot. If you want to deploy a newer version, or whatever the reason, make sure to remove the previously deployed container. To check which containers are running, use the following command:
-
-```bash
-docker container ls 
-```
-A typically print out looks like:
-
-```bash
-CONTAINER ID   IMAGE                      COMMAND                  CREATED      STATUS          PORTS     NAMES
-46c8590424c0   eduard-iotbot:0.2.1-beta   "/ros_entrypoint.sh …"   6 days ago   Up 21 minutes             eduard-iotbot-0.2.1-beta
-```
-
-To stop and remove the container, use the following command with the container ID displayed by the above command:
-
-```bash
-docker stop <container id>
-docker rm <container id>
-```
-
-## Deploying on IoT2050
-
-### Use Prebuilt Docker Images
-
-The easiest way, and one that is usually quite sufficient, is to use a prebuilt Docker image. All released versions of edu_robot software are usually available. 
-
-The following command deploys and starts the image. Note: please make sure that the robot has internet connection. It is considered that the official ["Example Image V1.3.1"](https://support.industry.siemens.com/cs/document/109741799/downloads-f%C3%BCr-simatic-iot20x0?dti=0&lc=de-DE) provided by Siemens will be used for the IoT2050. If this is not the case it cloud lead in a misinterpretation of the game pad.
-
-We provide a docker compose file for the IoT2050. Either [download the file](docker/iot2050/docker-compose.yaml) on IoT2050 or clone the repository and navigate to the file:
-
-```bash
-git clone https://github.com/EduArt-Robotik/edu_robot.git
-cd edu_robot_control/docker/iot2050
-```
-
-Then execute following command inside the folder where the ["docker-compose.yaml"](docker/iot2050/docker-compose.yaml) is located:
-
-```bash
-docker compose up
-```
-
-Inside the docker compose file a namespace is defined. This namespace can freely be modified. We recommend to reflect the robot color with this namespace. But in general do it like you want.
-
-For removing the docker container execute the command:
-
-```bash
-docker compose down
-```
-
-at the location of the docker compose file.
-
-## Deploying on IPC127e
-### Use Prebuilt Docker Images
-
-The easiest way, and one that is usually quite sufficient, is to use a prebuilt Docker image. All released versions of edu_robot software are usually available. 
-
-We provide a docker compose file for the IPC127e. Either [download the file](docker/ipc127e/docker-compose.yaml) on IPC127e or clone the repository and navigate to the file:
-
-```bash
-git clone https://github.com/EduArt-Robotik/edu_robot.git
-cd edu_robot_control/docker/ipc127e
-```
-
-Then execute following command inside the folder where the ["docker-compose.yaml"](docker/ipc127e/docker-compose.yaml) is located:
-
-```bash
-docker compose up
-```
-
-Inside the docker compose file a namespace is defined. This namespace can freely be modified. We recommend to reflect the robot color with this namespace. But in general do it like you want.
-
-For removing the docker container execute the command:
-
-```bash
-docker compose down
-```
-
-at the location of the docker compose file.
+> **Note**: will be updated soon
 
 # Controlling the Robot
 
-With the package [edu_robot_control](https://github.com/EduArt-Robotik/edu_robot_control) the EduArt's robots can be controlled remotely. Please visit this page for future information. The basic information about how to set up the joystick is also listed below. Note: the package "edu_robot_control" needs to be deployed extra. It is not included in the "edu_robot" deployment.
+## Controller
+
+With the package [edu_robot_control](https://github.com/EduArt-Robotik/edu_robot_control) the EduArt's robots can be controlled remotely. The basic information about how to set up the joystick is also listed below. 
+
+> **Note**: the package "edu_robot_control" don't need to be deployed extra. It is included in the "edu_robot" deployment.
 
 A controller can be requested to connect by pressing a specific button once. For the recommended controllers, it is the symbol between the axes. To operate the Robot, the following buttons and axes of the controller are assigned as follows:
 
 
 | Axis  | DS5                       | Idle position | Value range | function          | 
 |-------|---------------------------|---------------|-------------|-------------------|
-| [0]   | Joystick L: left & right  | 0.0           | 1.0 to -1.0 | Steering
-| [1]   | Joystick L: up & down     | 0.0           | 1.0 to -1.0 | not in use
+| [0]   | Joystick L: left & right  | 0.0           | 1.0 to -1.0 | Moving Forward/Backwards
+| [1]   | Joystick L: up & down     | 0.0           | 1.0 to -1.0 | Moving Sidewards
 | [2]   | L2                        | 1.0           | 1.0 to -1.0 | not in use
-| [3]   | Joystick R: left & right  | 0.0           | 1.0 to -1.0 | not in use
-| [4]   | Joystick R: up & down     | 0.0           | 1.0 to -1.0 | Throttle
+| [3]   | Joystick R: left & right  | 0.0           | 1.0 to -1.0 | Steering
+| [4]   | Joystick R: up & down     | 0.0           | 1.0 to -1.0 | not in use
 | [5]   | R2                        | 1.0           | 1.0 to -1.0 | not in use
 | [6]   | D-Pad: left & right       | 0.0           | 1.0 to -1.0 | not in use
 | [7]   | D-Pad: up & down          | 0.0           | 1.0 to -1.0 | not in use
@@ -151,49 +86,12 @@ A controller can be requested to connect by pressing a specific button once. For
 | [12]      | R3            | 0             | 0 or 1        | not in use
 | [13]      | Map           | 0             | 0 or 1        | Light pattern: Warning light
 
-# Setting up your Joystick;
 
-A joystick can be used to operate Eduard. For this purpose, the robot must be extended by a Debian-compatible Bluetooth stick. PlayStation&reg; 4 and PlayStation&reg; 5 controllers were used, which are interpreted identically in their operating interface. The initial start-up of a Bluetooth controller follows.
+## Node Red
 
-Start the Bluetooth controller in the operating system:
+We have a Node Red Web Server, which can also be deployed as a Docker container. With this it is possible to use Topic, Services and Actions to control the robot. For more information please use the following link:
 
-```console
-$ bluetoothctl
-```
-
-Set up the controller and prepare for scanning:
-
-```console
-$ agent on 
-$ default-agent 
-$ power on 
-$ discoverable on 
-$ pairable on
-```
-
-Put the PlayStation&reg; Controller into connection mode by pressing the Share and PS buttons simultaneously. 
-Rapid flashing indicates the status.
-
-<!-- <img src="documentation/images/controller_pairing.jpg" width="500" /> <br> -->
-
-Now start the scanning process:
-
-```console
-$ scan on
-```
-
-The connection process so far should look like this. Your joystick is now recognised as a wireless controller. Copy the MAC address of the device for the rest of the procedure.
-
-Connect the controller using the following commands and its MAC address. If needed, press the PlayStation button again when the light signals stop flashing.
-
-```console
-$ pair XX:XX:XX:XX:XX:XX 
-$ trust XX:XX:XX:XX:XX:XX 
-$ connect XX:XX:XX:XX:XX:XX
-$ exit 
-```
-
-NOTE: These steps are only required once at the very beginning. From now on, when the PS button is pressed, the joystick should automatically connect to the IOT2050 once it has successfully booted up. These operations are only then necessary again if the controller has been connected to another device in the meantime.
+[Node Red Web Server](https://github.com/EduArt-Robotik/edu_nodered_ros2_plugin)
 
 # Monitoring Eduard using ROS Tools
 
