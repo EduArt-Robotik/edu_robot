@@ -1,4 +1,4 @@
-# edu_robot
+# edu_robot - Control Software for IoT Shield and Ethernet Gateway
 
 Welcome to the EduArt ROS2 robot control software. In first place it provides a ROS2 node for controlling and monitoring EduArt robots, i.e., the robot Eduard in different hardware realizations like the IoT Bot, the IPC Bot or a custom build robot relying on our stackable drive system. There is also a [digital twin](https://github.com/EduArt-Robotik/edu_simulation) in the making, which is not yet feature complete. But, some basic interfaces are already implemented.
 
@@ -6,69 +6,19 @@ These packages are also designed for being used in a robot fleet setup. Basicall
 
 > **_NOTE:_** For further help please visit our [Forum](https://forum.eduart-robotik.com) or drop a message to info@eduart-robotik.com.
 
+# EduArt's Robot - Eduard
 
-# EduArt's Robot ROS Interfaces
+Eduard comes in two hardware realizations. Both using this control software. Below you will find documentation about how to install, update, control and monitor the robot.
 
-These basic interfaces are valid for all our robots. Following inputs are required for an operating robot:
+![](documentation/image/eduard-orange.jpg)
 
+## ROS2 Interfaces
 
-![EduArt's Robot Interfaces](documentation/image/eduart-robot-interfaces.png)
+The software package 'edu_robot' provides ROS2 interface. For details please follow the link below:
 
-## Topics
+[ROS2 Interfaces](documentation/interface/interface.md)
 
-| Description                     | Topic                    | Type  | Message Type |
-|---------------------------------|--------------------------|-----------|---------------------------|
-| Velocity Input                  | /eduard/cmd_vel            | Input | sensor_msgs/msg/Twist                |
-| Set Lighting Color/Mode         | /eduard/set_lighting_color | Input | edu_robot/msg/SetLightingColor       |
-| TF | /tf | In-/Output | |
-| Measured Odometry | /eduard/odom | Output | nav_msgs/Odometry |
-| Robot Status Report            | /eduard/status_report | Output | edu_robot/msg/RobotStatusReport      |
-| Join States of the Wheels       | /joint_states | Output            | sensor_msgs/msg/JointState           |
-
-Note: "/eduard" in topic name is the default namespace if no other was defined. This namespace can be freely defined by the "namespace" ROS parameter. Please take into account that the topic name changes according to the namespace.
-
-## Services
-
-| Description                     | Service                  | Message type                         |
-|---------------------------------|--------------------------|--------------------------------------|
-| Set Mode Service (used for Enable robot) | /eduard/set_mode       | edu_robot/srv/SetMode                |
-
-Note: "/eduard" in service name is the default namespace if no other was defined. This namespace can be freely defined. Please take into account that the service name changes according to the namespace, too.
-
-## Different Operation Modes
-
-The minium input the robots require are the velocity command and the service "set_mode". Without an velocity command, the robot will detect an timeout and switch of the motor controller. This leads in an "inactive" robot (disabled). If the velocity input is send the robot can be activated for remote control drive by calling the service "set_mode". Below all current implemented modes are listed:
-
-| Mode | Description |
-|------|-------------|
-| INACTIVE | The robot is inactive. All drives are disabled. The velocity commands have no effect. |
-| REMOTE_CONTROLLED | The robot is active. All drives are enabled. The robot processes the velocity commands. |
-| AUTONOMOUS | The robot is active. The mecanum drive kinematic is used. The robot will subscribe to the topic "autonomous/cmd_vel". |
-| SKID_DRIVE | Uses the kinematic of an skid drive. Note: only available if the robot supports it. |
-| MECANUM_DRIVE | Uses the kinematic of an mecanum drive. Note: only available if the robot supports it. |
-| COLLISION_AVOIDANCE_OVERRIDE_ENABLED | If the robots accepts it the integrated collision avoidance will be overridden. |
-| COLLISION_AVOIDANCE_OVERRIDE_DISABLED | If the robot accepts it the integrated collision avoidance will be activated when it is enabled in general. |
-
-These modes are combinable, but they must be requested separately by the "set_mode" service. In the response of this service a list of the robot's complete mode is sent.
-
-Note: a ready to use package is available for controlling the robot by an Gamepad or Joystick. Please see section "Controlling the Robot" or visit the repository [edu_robot_control](https://github.com/EduArt-Robotik/edu_robot_control).
-
-# EudArt's Robot Eduard ROS Interface
-
-![Eduard Four Wheel Mobile Robot](documentation/image/eduard-orange.jpg)
-
-Eduard is our main robot system. It consists from of four wheels, four lightings including range sensors. And of an integrated IMU sensor. The robot realizes the above defined interfaces and expand it by the following ones:
-
-| Description                     | Topic                    | Message type                         |
-|---------------------------------|--------------------------|--------------------------------------|
-| Range Sensor Output Front Left  | /range/front/left/range  | sensor_msgs/msg/Range                |
-| Range Sensor Output Front Right | /range/front/right/range | sensor_msgs/msg/Range                |
-| Range Sensor Output Rear Left   | /range/rear/left/range   | sensor_msgs/msg/Range                |
-| Range Sensor Output Rear Right  | /range/rear/right/range  | sensor_msgs/msg/Range                |
-
-
-
-# Lighting Codes
+## Lighting Codes
 
 | Mode | Color | Description |
 |------|-------|-------------|
@@ -79,100 +29,42 @@ Eduard is our main robot system. It consists from of four wheels, four lightings
 |CHARGING| green (pulsation) | |
 
 
-# Deploying
+## Deploying
 
-A Docker container is used to run this software on our robots. Normally, all our robots are shipped with a Docker container registered to start after a reboot. If you want to deploy a newer version, or whatever the reason, make sure to remove the previously deployed container. To check which containers are running, use the following command:
+### On IoT2050
 
-```bash
-docker container ls 
-```
-A typically print out looks like:
+* [First Time Setup](documentation/setup/iot2050/setup_iot2050.md)
+* [Update ROS Software](documentation/update/update-software.md)
+* [Setup PS5 Controller](documentation/setup/joystick/ps5-gamepad.md)
 
-```bash
-CONTAINER ID   IMAGE                      COMMAND                  CREATED      STATUS          PORTS     NAMES
-46c8590424c0   eduard-iotbot:0.2.1-beta   "/ros_entrypoint.sh …"   6 days ago   Up 21 minutes             eduard-iotbot-0.2.1-beta
-```
+### On IPC127e
 
-To stop and remove the container, use the following command with the container ID displayed by the above command:
+* [First Time Setup](documentation/setup/ipc127e/setup_ipc127.md)
+* [Update ROS Software](documentation/update/update-software.md)
+* [Setup PS5 Controller](documentation/setup/joystick/ps5-gamepad.md)
 
-```bash
-docker stop <container id>
-docker rm <container id>
-```
+### As Siemens Industrial Application
 
-## Deploying on IoT2050
-
-### Use Prebuilt Docker Images
-
-The easiest way, and one that is usually quite sufficient, is to use a prebuilt Docker image. All released versions of edu_robot software are usually available. 
-
-The following command deploys and starts the image. Note: please make sure that the robot has internet connection. It is considered that the official ["Example Image V1.3.1"](https://support.industry.siemens.com/cs/document/109741799/downloads-f%C3%BCr-simatic-iot20x0?dti=0&lc=de-DE) provided by Siemens will be used for the IoT2050. If this is not the case it cloud lead in a misinterpretation of the game pad.
-
-We provide a docker compose file for the IoT2050. Either [download the file](docker/iot2050/docker-compose.yaml) on IoT2050 or clone the repository and navigate to the file:
-
-```bash
-git clone https://github.com/EduArt-Robotik/edu_robot.git
-cd edu_robot_control/docker/iot2050
-```
-
-Then execute following command inside the folder where the ["docker-compose.yaml"](docker/iot2050/docker-compose.yaml) is located:
-
-```bash
-docker compose up
-```
-
-Inside the docker compose file a namespace is defined. This namespace can freely be modified. We recommend to reflect the robot color with this namespace. But in general do it like you want.
-
-For removing the docker container execute the command:
-
-```bash
-docker compose down
-```
-
-at the location of the docker compose file.
-
-## Deploying on IPC127e
-### Use Prebuilt Docker Images
-
-The easiest way, and one that is usually quite sufficient, is to use a prebuilt Docker image. All released versions of edu_robot software are usually available. 
-
-We provide a docker compose file for the IPC127e. Either [download the file](docker/ipc127e/docker-compose.yaml) on IPC127e or clone the repository and navigate to the file:
-
-```bash
-git clone https://github.com/EduArt-Robotik/edu_robot.git
-cd edu_robot_control/docker/ipc127e
-```
-
-Then execute following command inside the folder where the ["docker-compose.yaml"](docker/ipc127e/docker-compose.yaml) is located:
-
-```bash
-docker compose up
-```
-
-Inside the docker compose file a namespace is defined. This namespace can freely be modified. We recommend to reflect the robot color with this namespace. But in general do it like you want.
-
-For removing the docker container execute the command:
-
-```bash
-docker compose down
-```
-
-at the location of the docker compose file.
+> **Note**: will be updated soon
 
 # Controlling the Robot
 
-With the package [edu_robot_control](https://github.com/EduArt-Robotik/edu_robot_control) the EduArt's robots can be controlled remotely. Please visit this page for future information. The basic information about how to set up the joystick is also listed below. Note: the package "edu_robot_control" needs to be deployed extra. It is not included in the "edu_robot" deployment.
+## Controller
+
+With the package [edu_robot_control](https://github.com/EduArt-Robotik/edu_robot_control) the EduArt's robots can be controlled remotely. The basic information about how to set up the joystick is also listed below. 
+
+> **Note**: the package "edu_robot_control" don't need to be deployed extra. It is included in the "edu_robot" deployment.
 
 A controller can be requested to connect by pressing a specific button once. For the recommended controllers, it is the symbol between the axes. To operate the Robot, the following buttons and axes of the controller are assigned as follows:
 
 
 | Axis  | DS5                       | Idle position | Value range | function          | 
 |-------|---------------------------|---------------|-------------|-------------------|
-| [0]   | Joystick L: left & right  | 0.0           | 1.0 to -1.0 | Steering
-| [1]   | Joystick L: up & down     | 0.0           | 1.0 to -1.0 | not in use
+| [0]   | Joystick L: left & right  | 0.0           | 1.0 to -1.0 | Moving Forward/Backwards
+| [1]   | Joystick L: up & down     | 0.0           | 1.0 to -1.0 | Moving Sidewards
 | [2]   | L2                        | 1.0           | 1.0 to -1.0 | not in use
-| [3]   | Joystick R: left & right  | 0.0           | 1.0 to -1.0 | not in use
-| [4]   | Joystick R: up & down     | 0.0           | 1.0 to -1.0 | Throttle
+| [3]   | Joystick R: left & right  | 0.0           | 1.0 to -1.0 | Steering
+| [4]   | Joystick R: up & down     | 0.0           | 1.0 to -1.0 | not in use
 | [5]   | R2                        | 1.0           | 1.0 to -1.0 | not in use
 | [6]   | D-Pad: left & right       | 0.0           | 1.0 to -1.0 | not in use
 | [7]   | D-Pad: up & down          | 0.0           | 1.0 to -1.0 | not in use
@@ -194,49 +86,12 @@ A controller can be requested to connect by pressing a specific button once. For
 | [12]      | R3            | 0             | 0 or 1        | not in use
 | [13]      | Map           | 0             | 0 or 1        | Light pattern: Warning light
 
-# Setting up your Joystick;
 
-A joystick can be used to operate Eduard. For this purpose, the robot must be extended by a Debian-compatible Bluetooth stick. PlayStation&reg; 4 and PlayStation&reg; 5 controllers were used, which are interpreted identically in their operating interface. The initial start-up of a Bluetooth controller follows.
+## Node Red
 
-Start the Bluetooth controller in the operating system:
+We have a Node Red Web Server, which can also be deployed as a Docker container. With this it is possible to use Topic, Services and Actions to control the robot. For more information please use the following link:
 
-```console
-$ bluetoothctl
-```
-
-Set up the controller and prepare for scanning:
-
-```console
-$ agent on 
-$ default-agent 
-$ power on 
-$ discoverable on 
-$ pairable on
-```
-
-Put the PlayStation&reg; Controller into connection mode by pressing the Share and PS buttons simultaneously. 
-Rapid flashing indicates the status.
-
-<!-- <img src="documentation/images/controller_pairing.jpg" width="500" /> <br> -->
-
-Now start the scanning process:
-
-```console
-$ scan on
-```
-
-The connection process so far should look like this. Your joystick is now recognised as a wireless controller. Copy the MAC address of the device for the rest of the procedure.
-
-Connect the controller using the following commands and its MAC address. If needed, press the PlayStation button again when the light signals stop flashing.
-
-```console
-$ pair XX:XX:XX:XX:XX:XX 
-$ trust XX:XX:XX:XX:XX:XX 
-$ connect XX:XX:XX:XX:XX:XX
-$ exit 
-```
-
-NOTE: These steps are only required once at the very beginning. From now on, when the PS button is pressed, the joystick should automatically connect to the IOT2050 once it has successfully booted up. These operations are only then necessary again if the controller has been connected to another device in the meantime.
+[Node Red Web Server](https://github.com/EduArt-Robotik/edu_nodered_ros2_plugin)
 
 # Monitoring Eduard using ROS Tools
 
@@ -258,25 +113,49 @@ git clone https://github.com/EduArt-Robotik/edu_robot_control.git
 
 Please make sure the package will be cloned into the "src" folder in the workspace. If no knowledge about ROS is present please see [docs.ros.org](https://docs.ros.org/en/galactic/Tutorials/Beginner-Client-Libraries/Creating-A-Workspace/Creating-A-Workspace.html) for further information. 
 
-After the package was cloned it needs to be installed via:
+After the package was cloned it needs to be installed. First leave the "src" folder:
+
+```bash
+cd ..
+```
+
+Then build it by:
 
 ```bash
 colcon build --packages-select edu_robot_control --symlink-install
 ```
 
-Now RViz with the correct configuration can be launched by:
+Now RViz with the correct configuration can be launched. But before, the used namespace of the robot needs to be estimated. This can be done by:
 
 ```bash
-ros2 launch edu_robot_control eduard_monitor.launch.py
+ros2 topic list
 ```
 
-If RViz comes up properly it will be shown following:
+This prints a list of all topics of your robot Eduard:
 
-![Eduard visualized using RViz](documentation/image/eduard-red-rviz.png)
+```bash
+/eduard/blue/cmd_vel
+/eduard/blue/imu
+/eduard/blue/joy
+/eduard/blue/joy/set_feedback
+/eduard/blue/odometry
+/eduard/blue/range/front/left/range
+/eduard/blue/range/front/right/range
+/eduard/blue/range/rear/left/range
+/eduard/blue/range/rear/right/range
+/eduard/blue/robot_kinematic_description
+/eduard/blue/set_lighting_color
+/eduard/blue/set_motor_rpm
+/eduard/blue/status_report
+```
+
+The namespace is a prefix used by the topic names. In this case it is "eduard/blue".
 
 #### Important: Setting Correct Namespace
 
 Each Eduard robot comes with a preset namespace, e.g. to reflect the robot's color. This allows that multiple robots are connected to the same network (with same DOMAIN_ID). However this makes it necessary to deal with the namespace, too, when the robot's data shall be received. For example when displaying data using RViz2.
+
+> Note: when a namespace is used the **Fixed Frame** has to be reselected, otherwise the robot is not displayed correctly.
 
 The namespace can be set by using an environment variable. Either set it via the system or define it in front of the ros command:
 
@@ -317,3 +196,92 @@ Following window will open. Errors and warnings will be shown on the both top li
  If you want to see the **OK** states, too, then press on the check box **Alternative view** on the top left corner.
 
  ![good-case](documentation/image/diagnostic-good-case.png)
+
+## Safety instructions
+
+Read this document carefully before using the product for the first time and make sure that no safety-related questions remain unanswered. Use this document only as an aid for expansions and handling of the robot. Pay attention to the warnings and symbols described below in order to understand potential dangers for the user and the device and to avoid accidents. 
+
+
+### Limits of use
+
+|<img src="documentation/image/warning.png" width="100"/>     | Risk of damage to the robot platform and/or objects in the surroundings due to operation in an unsuitable environment!          |
+|-----------------------------------------------------------------------|--------------------|
+
+Do not operate the robotic platform 
+- not in areas with holes and/or stairs.
+- not on uneven, wet and/or soft surfaces.
+- if on raised platforms (e.g. table, pedestal, stage), then only on the rack provided for this purpose.
+- not in outdoor areas.
+- only at a suitable ambient temperature between 0°C and 40°C .
+- not in wet or humid environments.
+- not in potentially explosive atmospheres.
+- if a minor, then only under the supervision of a parent or tutor.
+
+
+### Predictable misapplication
+
+|<img src="documentation/image/warning.png" width="100"/>     | Dangers result from incorrect handling of the unit (electrical as well as mechanical)!          |
+|-----------------------------------------------------------------------|--------------------|
+
+- Do not short-circuit the battery!
+- Do not damage the battery with intent!
+- Do not extend the device with extensions with sharp edges or tips!
+- Risk of crushing or impact injuries if the robot falls down!
+- Always switch off the unit completely before making mechanical or electrical changes and disconnect the accumulator from the entire system when making major modifications!
+
+|<img src="documentation/image/warning.png" width="100"/>     | In case of inappropriate programming and use of the robotic platform, damage may occur to the platform itself or to surrounding objects.         |
+|-----------------------------------------------------------------------|--------------------|
+
+|<img src="documentation/image/clue.png" width="100"/>     | Incorrect storage can also cause damage to the robot. Incorrect storage can also cause damage to the robot. Therefore, store the robot as described.       |
+|-----------------------------------------------------------------------|--------------------|
+
+- not in direct sunlight.
+- only on the storage rack provided.
+- for long storage with the battery unplugged.
+- only in dry rooms.
+- not within reach of children when used unsupervised.
+
+## Remaining risks
+
+|<img src="documentation/image/warning.png" width="100"/>     | Under certain circumstances, the platform can cause serious damage to health even when used professionally!          |
+|-----------------------------------------------------------------------|--------------------|
+
+- Do not work with the platform if you suffer from epilepsy.
+- Looking directly and continuously at the light emitting diodes from a short distance may cause irreversible eye damage.
+
+
+|<img src="documentation/image/warning.png" width="100"/>     | Fire hazard due to overheating of the robot platform!         |
+|-----------------------------------------------------------------------|--------------------|
+
+- Do not operate the robot unsupervised.
+- Only charge the accumulator under supervision .
+
+|<img src="documentation/image/warning.png" width="100"/>     | Danger of burns from touching heated parts!       |
+|-----------------------------------------------------------------------|--------------------|
+
+The following parts of the robot platform heat up during operation and must not be touched until they have had enough time to cool down:
+- IOT expansion board
+- Motors after heavy use
+- If applicable, components attached afterwards
+
+|<img src="documentation/image/warning.png" width="100"/>     | Danger of squeezing due to rotating components.       |
+|-----------------------------------------------------------------------|--------------------|
+
+- Avoid reaching into the drive system.
+- Activate the emergency stop if you notice a malfunction during operation.
+- Lift and carry the robot by the handle provided.
+
+|<img src="documentation/image/warning.png" width="100"/>     | Injuries due to unexpected weight.     |
+|-----------------------------------------------------------------------|--------------------|
+
+- Expect the weight of the platform to become heavier when lifting.
+
+|<img src="documentation/image/warning.png" width="100"/>     | Risk of injury from falling!     |
+|-----------------------------------------------------------------------|--------------------|
+
+- Do not place the platform in escape routes or walkways to avoid tripping over it.
+
+# References
+
+[https://www.eduart-robotik.com](https://www.eduart-robotik.com)
+

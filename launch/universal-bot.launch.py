@@ -11,13 +11,13 @@ def generate_launch_description():
     parameter_file = os.path.join(
       package_path,
       'parameter',
-      'flex_bot.yaml'
+      'universal_bot.yaml'
     )
 
     ethernet_gateway_flex_bot = Node(
       package='edu_robot',
-      executable='ethernet-gateway-flex-bot',
-      name='ethernet_gateway_flex_bot',
+      executable='ethernet-gateway-universal-bot',
+      name='ethernet_gateway_universal_bot',
       namespace=EnvironmentVariable('EDU_ROBOT_NAMESPACE', default_value="eduard"),      
       # prefix=['gdbserver localhost:3000'],
       parameters=[parameter_file],

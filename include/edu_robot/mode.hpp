@@ -54,5 +54,16 @@ inline bool operator&(const FeatureMode lhs, const FeatureMode rhs)
   return static_cast<std::uint8_t>(lhs) & static_cast<std::uint8_t>(rhs);
 }
 
+inline edu_robot::msg::Mode to_ros(const Mode& mode)
+{
+  edu_robot::msg::Mode msg;
+
+  msg.mode = static_cast<std::uint8_t>(mode.robot_mode);
+  msg.drive_kinematic = static_cast<std::uint8_t>(mode.drive_kinematic);
+  msg.feature_mode = static_cast<std::uint8_t>(mode.feature_mode);
+
+  return msg;
+}
+
 } // end namespace robot
 } // end namespace eduart

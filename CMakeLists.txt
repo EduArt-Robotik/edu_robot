@@ -56,7 +56,7 @@ add_subdirectory(src/lib/diagnostic)
 add_subdirectory(src/lib/robot)
 add_subdirectory(src/lib/processing_component)
 add_subdirectory(src/lib/eduard)
-add_subdirectory(src/lib/flex_bot)
+add_subdirectory(src/lib/universal_bot)
 add_subdirectory(src/lib/ohmni_bot)
 add_subdirectory(src/lib/iotbot_shield)
 add_subdirectory(src/lib/ethernet_gateway)
@@ -78,7 +78,7 @@ install(
   TARGETS
     iotbot-shield
     ethernet-gateway
-    ethernet-gateway-flex-bot
+    ethernet-gateway-universal-bot
     ethernet-gateway-ohmni-bot
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
@@ -90,7 +90,7 @@ install(
 )
 install(
   TARGETS
-    eduart-robot-flex-bot
+    eduart-robot-universal-bot
     eduart-iotbot-shield
     eduart-robot-eduard
     eduart-robot
@@ -127,7 +127,7 @@ ament_export_libraries(
   eduart-robot
   processing-component
   eduart-ethernet-gateway
-  eduart-robot-flex-bot
+  eduart-robot-universal-bot
   eduart-action
 )
 ament_export_targets(

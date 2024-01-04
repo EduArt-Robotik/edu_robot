@@ -128,6 +128,14 @@ void CompoundMotorControllerHardware::initialize(const MotorController::Paramete
       parameter.control_frequency, 0));
   future_response.wait_for(100ms);
   future_response.get();
+
+  // set UART timeout
+  future_response = _communicator->sendRequest(
+    ShieldRequest::make_request<uart::message::SetValueF<UART::COMMAND::SET::UART_TIMEOUT>>(
+      static_cast<float>(parameter.timeout_ms) * 1000.0f, 0
+  ));
+  wait_for_future(future_response, 100ms);
+  future_response.get();  
 }
 
 } // end namespace iotbot

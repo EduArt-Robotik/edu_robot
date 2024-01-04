@@ -1,0 +1,28 @@
+version: "2.4"
+
+services:
+    eduard-ipc127e:
+        image: eduartrobotik/eduard-ipc127e:0.3.3
+        container_name: eduard-red-ipc127e-ie-app-0.3.3
+        restart: on-failure
+        privileged: true
+        ipc: host
+        pid: host
+        mem_limit: 300mb
+        environment:
+            - EDU_ROBOT_NAMESPACE=eduard/red
+        networks:
+            - proxy-redirect
+            - zzz_layer2_net1
+        volumes:
+            - './publish/:/publish/'
+            - './cfg-data/:/cfg-data/'
+        ports:
+            - "1234:1234/udp"
+
+networks:
+    proxy-redirect:
+        external: true
+    zzz_layer2_net1:
+        name: zzz_layer2_net1
+        external: true
