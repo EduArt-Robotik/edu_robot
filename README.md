@@ -113,21 +113,43 @@ git clone https://github.com/EduArt-Robotik/edu_robot_control.git
 
 Please make sure the package will be cloned into the "src" folder in the workspace. If no knowledge about ROS is present please see [docs.ros.org](https://docs.ros.org/en/galactic/Tutorials/Beginner-Client-Libraries/Creating-A-Workspace/Creating-A-Workspace.html) for further information. 
 
-After the package was cloned it needs to be installed via:
+After the package was cloned it needs to be installed. First leave the "src" folder:
+
+```bash
+cd ..
+```
+
+Then build it by:
 
 ```bash
 colcon build --packages-select edu_robot_control --symlink-install
 ```
 
-Now RViz with the correct configuration can be launched by:
+Now RViz with the correct configuration can be launched. But before, the used namespace of the robot needs to be estimated. This can be done by:
 
 ```bash
-ros2 launch edu_robot_control eduard_monitor.launch.py
+ros2 topic list
 ```
 
-If RViz comes up properly it will be shown following:
+This prints a list of all topics of your robot Eduard:
 
-![Eduard visualized using RViz](documentation/image/eduard-red-rviz.png)
+```bash
+/eduard/blue/cmd_vel
+/eduard/blue/imu
+/eduard/blue/joy
+/eduard/blue/joy/set_feedback
+/eduard/blue/odometry
+/eduard/blue/range/front/left/range
+/eduard/blue/range/front/right/range
+/eduard/blue/range/rear/left/range
+/eduard/blue/range/rear/right/range
+/eduard/blue/robot_kinematic_description
+/eduard/blue/set_lighting_color
+/eduard/blue/set_motor_rpm
+/eduard/blue/status_report
+```
+
+The namespace is a prefix used by the topic names. In this case it is "eduard/blue".
 
 #### Important: Setting Correct Namespace
 
