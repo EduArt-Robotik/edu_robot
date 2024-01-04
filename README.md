@@ -1,10 +1,10 @@
 # edu_robot - Control Software for IoT Shield and Ethernet Gateway
 
-Welcome to the EduArt ROS2 robot control software. In first place it provides a ROS2 node for controlling and monitoring the EduArt robots, most likely the robot Eduard in different hardware realizations like the IoT Bot or IPC Bot. There is also a [digital twin](https://github.com/EduArt-Robotik/edu_simulation) in the making, which is not yet feature complete but already the basic interface implements.
+Welcome to the EduArt ROS2 robot control software. In first place it provides a ROS2 node for controlling and monitoring EduArt robots, i.e., the robot Eduard in different hardware realizations like the IoT Bot, the IPC Bot or a custom build robot relying on our stackable drive system. There is also a [digital twin](https://github.com/EduArt-Robotik/edu_simulation) in the making, which is not yet feature complete. But, some basic interfaces are already implemented.
 
-This packages also designed to used in a robot fleet setup. Basically it is able to handle multiple robot instances at the same time using namespaces.
+These packages are also designed for being used in a robot fleet setup. Basically, they are able to handle multiple robot instances at the same time while using namespaces.
 
-> **_NOTE:_** For further help please visit our [Forum](https://forum.eduart-robotik.com) or write a e-mail at info@eduart-robotik.com.
+> **_NOTE:_** For further help please visit our [Forum](https://forum.eduart-robotik.com) or drop a message to info@eduart-robotik.com.
 
 # EduArt's Robot - Eduard
 
@@ -197,7 +197,6 @@ Following window will open. Errors and warnings will be shown on the both top li
 
  ![good-case](documentation/image/diagnostic-good-case.png)
 
-
 ## Safety instructions
 
 Read this document carefully before using the product for the first time and make sure that no safety-related questions remain unanswered. Use this document only as an aid for expansions and handling of the robot. Pay attention to the warnings and symbols described below in order to understand potential dangers for the user and the device and to avoid accidents. 
@@ -285,3 +284,4 @@ The following parts of the robot platform heat up during operation and must not 
 # References
 
 [https://www.eduart-robotik.com](https://www.eduart-robotik.com)
+
