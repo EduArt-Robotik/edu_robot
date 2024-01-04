@@ -113,21 +113,43 @@ git clone https://github.com/EduArt-Robotik/edu_robot_control.git
 
 Please make sure the package will be cloned into the "src" folder in the workspace. If no knowledge about ROS is present please see [docs.ros.org](https://docs.ros.org/en/galactic/Tutorials/Beginner-Client-Libraries/Creating-A-Workspace/Creating-A-Workspace.html) for further information. 
 
-After the package was cloned it needs to be installed via:
+After the package was cloned it needs to be installed. First leave the "src" folder:
+
+```bash
+cd ..
+```
+
+Then build it by:
 
 ```bash
 colcon build --packages-select edu_robot_control --symlink-install
 ```
 
-Now RViz with the correct configuration can be launched by:
+Now RViz with the correct configuration can be launched. But before, the used namespace of the robot needs to be estimated. This can be done by:
 
 ```bash
-ros2 launch edu_robot_control eduard_monitor.launch.py
+ros2 topic list
 ```
 
-If RViz comes up properly it will be shown following:
+This prints a list of all topics of your robot Eduard:
 
-![Eduard visualized using RViz](documentation/image/eduard-red-rviz.png)
+```bash
+/eduard/blue/cmd_vel
+/eduard/blue/imu
+/eduard/blue/joy
+/eduard/blue/joy/set_feedback
+/eduard/blue/odometry
+/eduard/blue/range/front/left/range
+/eduard/blue/range/front/right/range
+/eduard/blue/range/rear/left/range
+/eduard/blue/range/rear/right/range
+/eduard/blue/robot_kinematic_description
+/eduard/blue/set_lighting_color
+/eduard/blue/set_motor_rpm
+/eduard/blue/status_report
+```
+
+The namespace is a prefix used by the topic names. In this case it is "eduard/blue".
 
 #### Important: Setting Correct Namespace
 
@@ -174,3 +196,92 @@ Following window will open. Errors and warnings will be shown on the both top li
  If you want to see the **OK** states, too, then press on the check box **Alternative view** on the top left corner.
 
  ![good-case](documentation/image/diagnostic-good-case.png)
+
+
+## Safety instructions
+
+Read this document carefully before using the product for the first time and make sure that no safety-related questions remain unanswered. Use this document only as an aid for expansions and handling of the robot. Pay attention to the warnings and symbols described below in order to understand potential dangers for the user and the device and to avoid accidents. 
+
+
+### Limits of use
+
+|<img src="documentation/image/warning.png" width="100"/>     | Risk of damage to the robot platform and/or objects in the surroundings due to operation in an unsuitable environment!          |
+|-----------------------------------------------------------------------|--------------------|
+
+Do not operate the robotic platform 
+- not in areas with holes and/or stairs.
+- not on uneven, wet and/or soft surfaces.
+- if on raised platforms (e.g. table, pedestal, stage), then only on the rack provided for this purpose.
+- not in outdoor areas.
+- only at a suitable ambient temperature between 0°C and 40°C .
+- not in wet or humid environments.
+- not in potentially explosive atmospheres.
+- if a minor, then only under the supervision of a parent or tutor.
+
+
+### Predictable misapplication
+
+|<img src="documentation/image/warning.png" width="100"/>     | Dangers result from incorrect handling of the unit (electrical as well as mechanical)!          |
+|-----------------------------------------------------------------------|--------------------|
+
+- Do not short-circuit the battery!
+- Do not damage the battery with intent!
+- Do not extend the device with extensions with sharp edges or tips!
+- Risk of crushing or impact injuries if the robot falls down!
+- Always switch off the unit completely before making mechanical or electrical changes and disconnect the accumulator from the entire system when making major modifications!
+
+|<img src="documentation/image/warning.png" width="100"/>     | In case of inappropriate programming and use of the robotic platform, damage may occur to the platform itself or to surrounding objects.         |
+|-----------------------------------------------------------------------|--------------------|
+
+|<img src="documentation/image/clue.png" width="100"/>     | Incorrect storage can also cause damage to the robot. Incorrect storage can also cause damage to the robot. Therefore, store the robot as described.       |
+|-----------------------------------------------------------------------|--------------------|
+
+- not in direct sunlight.
+- only on the storage rack provided.
+- for long storage with the battery unplugged.
+- only in dry rooms.
+- not within reach of children when used unsupervised.
+
+## Remaining risks
+
+|<img src="documentation/image/warning.png" width="100"/>     | Under certain circumstances, the platform can cause serious damage to health even when used professionally!          |
+|-----------------------------------------------------------------------|--------------------|
+
+- Do not work with the platform if you suffer from epilepsy.
+- Looking directly and continuously at the light emitting diodes from a short distance may cause irreversible eye damage.
+
+
+|<img src="documentation/image/warning.png" width="100"/>     | Fire hazard due to overheating of the robot platform!         |
+|-----------------------------------------------------------------------|--------------------|
+
+- Do not operate the robot unsupervised.
+- Only charge the accumulator under supervision .
+
+|<img src="documentation/image/warning.png" width="100"/>     | Danger of burns from touching heated parts!       |
+|-----------------------------------------------------------------------|--------------------|
+
+The following parts of the robot platform heat up during operation and must not be touched until they have had enough time to cool down:
+- IOT expansion board
+- Motors after heavy use
+- If applicable, components attached afterwards
+
+|<img src="documentation/image/warning.png" width="100"/>     | Danger of squeezing due to rotating components.       |
+|-----------------------------------------------------------------------|--------------------|
+
+- Avoid reaching into the drive system.
+- Activate the emergency stop if you notice a malfunction during operation.
+- Lift and carry the robot by the handle provided.
+
+|<img src="documentation/image/warning.png" width="100"/>     | Injuries due to unexpected weight.     |
+|-----------------------------------------------------------------------|--------------------|
+
+- Expect the weight of the platform to become heavier when lifting.
+
+|<img src="documentation/image/warning.png" width="100"/>     | Risk of injury from falling!     |
+|-----------------------------------------------------------------------|--------------------|
+
+- Do not place the platform in escape routes or walkways to avoid tripping over it.
+
+# References
+
+[https://www.eduart-robotik.com](https://www.eduart-robotik.com)
