@@ -32,7 +32,7 @@ namespace robot {
  *
  * \todo below is only a draft, a first try --> please review concept after first release
  */
-class RangeSensor : public Sensor
+class SensorRange : public Sensor
                   , public processing::ProcessingComponentOutput<float>
 {
 public:
@@ -44,10 +44,10 @@ public:
 
   using SensorInterface = HardwareSensorInterface<Parameter, float>;
 
-  RangeSensor(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
+  SensorRange(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
               const tf2::Transform sensor_transform, const Parameter parameter, rclcpp::Node& ros_node,
               std::shared_ptr<SensorInterface> hardware_interface);
-  ~RangeSensor() override = default;
+  ~SensorRange() override = default;
 
 protected:
   void processMeasurementData(const float measurement);

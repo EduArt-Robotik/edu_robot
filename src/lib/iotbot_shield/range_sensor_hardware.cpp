@@ -1,7 +1,7 @@
 #include "edu_robot/iot_shield/range_sensor_hardware.hpp"
 #include "edu_robot/iot_shield/iot_shield_device.hpp"
 #include "edu_robot/iot_shield/uart/message_definition.hpp"
-#include "edu_robot/range_sensor.hpp"
+#include "edu_robot/sensor_range.hpp"
 
 #include <rclcpp/node.hpp>
 #include <rclcpp/qos.hpp>
@@ -47,7 +47,7 @@ void RangeSensorHardware::processRxData(const uart::message::RxMessageDataBuffer
   }
 }
 
-void RangeSensorHardware::initialize(const RangeSensor::Parameter& parameter)
+void RangeSensorHardware::initialize(const SensorRange::Parameter& parameter)
 {
   (void)parameter;
 }

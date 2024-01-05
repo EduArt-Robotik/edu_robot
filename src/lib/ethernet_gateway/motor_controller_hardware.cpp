@@ -3,7 +3,7 @@
 #include "edu_robot/ethernet_gateway/ethernet_gateway_device.hpp"
 #include "edu_robot/ethernet_gateway/tcp/message_definition.hpp"
 #include "edu_robot/ethernet_gateway/tcp/protocol.hpp"
-#include "edu_robot/rotation_per_minute.hpp"
+#include "edu_robot/rpm.hpp"
 #include "edu_robot/state.hpp"
 
 #include <edu_robot/hardware_component_interface.hpp>

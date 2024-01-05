@@ -6,7 +6,7 @@
 #pragma once
 
 
-#include <edu_robot/range_sensor.hpp>
+#include <edu_robot/sensor_range.hpp>
 #include <edu_robot/hardware_component_interface.hpp>
 
 #include "edu_robot/ethernet_gateway/ethernet_gateway_device.hpp"
@@ -15,7 +15,7 @@ namespace eduart {
 namespace robot {
 namespace ethernet {
 
-class RangeSensorHardware : public RangeSensor::SensorInterface
+class RangeSensorHardware : public SensorRange::SensorInterface
                           , public EthernetGatewayTxRxDevice
 {
 public:
@@ -25,7 +25,7 @@ public:
   ~RangeSensorHardware() override = default;
 
   void processRxData(const tcp::message::RxMessageDataBuffer& data) override;
-  void initialize(const RangeSensor::Parameter& parameter) override;
+  void initialize(const SensorRange::Parameter& parameter) override;
 
 private:
   void processMeasurement();

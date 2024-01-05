@@ -7,7 +7,7 @@
 
 #include "edu_robot/ethernet_gateway/ethernet_communicator.hpp"
 
-#include <edu_robot/robot_hardware_interface.hpp>
+#include <edu_robot/hardware_robot_interface.hpp>
 #include <edu_robot/robot_status_report.hpp>
 
 #include <edu_robot/processing_component/processing_component.hpp>
@@ -23,7 +23,7 @@ namespace ethernet {
 
 class EthernetCommunicator;
 
-class EthernetGatewayShield : public RobotHardwareInterface
+class EthernetGatewayShield : public HardwareRobotInterface
                             , public processing::ProcessingComponentOutput<float>
 {
 public:

@@ -41,7 +41,7 @@ void ImuSensorHardware::processRxData(const tcp::message::RxMessageDataBuffer& d
   );
 }
 
-void ImuSensorHardware::initialize(const ImuSensor::Parameter& parameter)
+void ImuSensorHardware::initialize(const SensorImu::Parameter& parameter)
 {
   auto request = Request::make_request<SetImuParameter>(
     parameter.raw_data_mode,

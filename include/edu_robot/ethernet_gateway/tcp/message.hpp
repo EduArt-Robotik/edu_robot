@@ -9,7 +9,7 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <edu_robot/rotation_per_minute.hpp>
+#include <edu_robot/rpm.hpp>
 
 #include <netinet/in.h>
 

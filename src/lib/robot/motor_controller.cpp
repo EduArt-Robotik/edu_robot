@@ -1,5 +1,5 @@
 #include "edu_robot/motor_controller.hpp"
-#include "edu_robot/rotation_per_minute.hpp"
+#include "edu_robot/rpm.hpp"
 
 #include <cstdint>
 #include <functional>

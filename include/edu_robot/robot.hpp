@@ -7,7 +7,7 @@
 
 #include "edu_robot/hardware_component_factory.hpp"
 #include "edu_robot/motor_controller.hpp"
-#include "edu_robot/robot_hardware_interface.hpp"
+#include "edu_robot/hardware_robot_interface.hpp"
 #include "edu_robot/sensor.hpp"
 #include "edu_robot/mode.hpp"
 #include "edu_robot/mode_state_machine.hpp"
@@ -53,7 +53,7 @@ class Lighting;
 class Robot : public rclcpp::Node
 {
 protected:
-  Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface, const std::string& ns = "");
+  Robot(const std::string& robot_name, std::unique_ptr<HardwareRobotInterface> hardware_interface, const std::string& ns = "");
 
 public:
   struct Parameter {
@@ -118,7 +118,7 @@ protected:
   Parameter _parameter;
 
   // Hardware Interface
-  std::shared_ptr<RobotHardwareInterface> _hardware_interface;
+  std::shared_ptr<HardwareRobotInterface> _hardware_interface;
 
   // Drive Kinematic
   Eigen::MatrixXf _kinematic_matrix;

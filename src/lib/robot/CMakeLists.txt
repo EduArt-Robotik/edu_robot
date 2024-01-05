@@ -6,8 +6,8 @@ add_library(eduart-robot
   lighting.cpp
   motor_controller.cpp
   sensor.cpp
-  range_sensor.cpp
-  imu_sensor.cpp
+  sensor_range.cpp
+  sensor_imu.cpp
 )
 target_link_libraries(eduart-robot
   Eigen3::Eigen
