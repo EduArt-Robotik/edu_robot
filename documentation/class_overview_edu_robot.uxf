@@ -121,7 +121,11 @@
       <w>270</w>
       <h>80</h>
     </coordinates>
-    <panel_attributes>EthernetGatewayDevice</panel_attributes>
+    <panel_attributes>EthernetGatewayDevice
+--
+- _name : std::string
+--
++ name() const : const std::string&amp;</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -136,7 +140,7 @@
 --
 
 --
-/processRxData(const tcp::message::RxMessageDataBuffer&amp; data) = 0 : void/
+/+processRxData(const tcp::message::RxMessageDataBuffer&amp; data) = 0 : void/
 </panel_attributes>
     <additional_attributes/>
   </element>
@@ -150,7 +154,7 @@
     </coordinates>
     <panel_attributes>EthernetGatewayTxDevice
 --
-
+# _tx_buffer : tcp::message::TxMessageDataBuffer
 --
 </panel_attributes>
     <additional_attributes/>
@@ -163,7 +167,7 @@
       <w>600</w>
       <h>80</h>
     </coordinates>
-    <panel_attributes>EthernetGatewayRxTxDevice
+    <panel_attributes>EthernetGatewayTxRxDevice
 --
 --
 </panel_attributes>
@@ -236,7 +240,7 @@
       <h>80</h>
     </coordinates>
     <panel_attributes>&lt;&lt;diagnostic::DiagnosticComponent&gt;&gt;
-Sensor</panel_attributes>
+/Sensor/</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -254,17 +258,6 @@ SensorInterface
 innerclass}
 --</panel_attributes>
     <additional_attributes/>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>120</x>
-      <y>590</y>
-      <w>30</w>
-      <h>90</h>
-    </coordinates>
-    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
@@ -298,5 +291,16 @@ innerclass}
     </coordinates>
     <panel_attributes>lt=-</panel_attributes>
     <additional_attributes>10.0;320.0;890.0;320.0;890.0;10.0;970.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>120</x>
+      <y>590</y>
+      <w>30</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
   </element>
 </diagram>
