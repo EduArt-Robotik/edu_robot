@@ -16,6 +16,7 @@ SensorImu::Parameter SensorImu::get_parameter(
   std::replace(sensor_prefix.begin(), sensor_prefix.end(), '/', '.');
   SensorImu::Parameter parameter;
 
+  ros_node.declare_parameter<bool>(sensor_prefix + ".enable", default_parameter.enable);
   ros_node.declare_parameter<bool>(
     sensor_prefix + ".raw_data_mode", default_parameter.raw_data_mode);
   ros_node.declare_parameter<bool>(sensor_prefix + "publish_tf", default_parameter.publish_tf);
@@ -30,6 +31,7 @@ SensorImu::Parameter SensorImu::get_parameter(
   ros_node.declare_parameter<std::string>(
     sensor_prefix + ".tf_frame_rotated", default_parameter.rotated_frame);
 
+  parameter.enable = ros_node.get_parameter(sensor_prefix + ".enable").as_bool();
   parameter.raw_data_mode = ros_node.get_parameter(sensor_prefix + ".raw_data_mode").as_bool();
   parameter.publish_tf = ros_node.get_parameter(sensor_prefix + "publish_tf").as_bool();
   parameter.fusion_weight = ros_node.get_parameter(sensor_prefix + ".fusion_weight").as_double();
