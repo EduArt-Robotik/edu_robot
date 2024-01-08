@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "edu_robot/rotation_per_minute.hpp"
+#include "edu_robot/rpm.hpp"
 
 #include <limits>
 #include <vector>

@@ -1,4 +1,4 @@
-#include "edu_robot/imu_sensor.hpp"
+#include "edu_robot/sensor_imu.hpp"
 #include "edu_robot/sensor.hpp"
 
 #include <functional>
@@ -9,12 +9,12 @@
 namespace eduart {
 namespace robot {
 
-ImuSensor::Parameter ImuSensor::get_parameter(
-  const std::string& sensor_name, const ImuSensor::Parameter& default_parameter, rclcpp::Node& ros_node)
+SensorImu::Parameter SensorImu::get_parameter(
+  const std::string& sensor_name, const SensorImu::Parameter& default_parameter, rclcpp::Node& ros_node)
 {
   std::string sensor_prefix = sensor_name;
   std::replace(sensor_prefix.begin(), sensor_prefix.end(), '/', '.');
-  ImuSensor::Parameter parameter;
+  SensorImu::Parameter parameter;
 
   ros_node.declare_parameter<bool>(
     sensor_prefix + ".raw_data_mode", default_parameter.raw_data_mode);
@@ -44,7 +44,7 @@ ImuSensor::Parameter ImuSensor::get_parameter(
   return parameter;
 }
 
-ImuSensor::ImuSensor(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
+SensorImu::SensorImu(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
                      const tf2::Transform sensor_transform, const Parameter parameter,
                      std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster, rclcpp::Node& ros_node,
                      std::shared_ptr<SensorInterface> hardware_interface)
@@ -60,7 +60,7 @@ ImuSensor::ImuSensor(const std::string& name, const std::string& frame_id, const
     )
 {
   _hardware_interface->registerCallbackProcessMeasurementData(std::bind(
-    &ImuSensor::processMeasurementData,
+    &SensorImu::processMeasurementData,
     this,
     std::placeholders::_1,
     std::placeholders::_2,
@@ -68,7 +68,7 @@ ImuSensor::ImuSensor(const std::string& name, const std::string& frame_id, const
   ));
 }                     
 
-void ImuSensor::processMeasurementData(
+void SensorImu::processMeasurementData(
   const Eigen::Quaterniond& orientation, const Eigen::Vector3d& angular_velocity, const Eigen::Vector3d& linear_acceleration)
 {
   // Do statistics for diagnostic
@@ -126,7 +126,7 @@ void ImuSensor::processMeasurementData(
   _tf_broadcaster->sendTransform(tf_msg);
 }
 
-diagnostic::Diagnostic ImuSensor::processDiagnosticsImpl()
+diagnostic::Diagnostic SensorImu::processDiagnosticsImpl()
 {
   diagnostic::Diagnostic diagnostic;
 

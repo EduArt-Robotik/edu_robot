@@ -4,8 +4,8 @@
 #include <edu_robot/hardware_component_interface.hpp>
 #include <edu_robot/motor_controller.hpp>
 #include <edu_robot/robot.hpp>
-#include <edu_robot/range_sensor.hpp>
-#include <edu_robot/imu_sensor.hpp>
+#include <edu_robot/sensor_range.hpp>
+#include <edu_robot/sensor_imu.hpp>
 
 #include <memory>
 #include <stdexcept>
@@ -37,7 +37,7 @@ static OhmniBot::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
   return parameter;
 }
 
-OhmniBot::OhmniBot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface)
+OhmniBot::OhmniBot(const std::string& robot_name, std::unique_ptr<HardwareRobotInterface> hardware_interface)
   : robot::Robot(robot_name, std::move(hardware_interface))
   , _parameter(get_robot_ros_parameter(*this))
 { }
@@ -71,12 +71,12 @@ void OhmniBot::initialize(eduart::robot::HardwareComponentFactory& factory)
   }
 
   // IMU Sensor
-  ImuSensor::Parameter imu_parameter;
+  SensorImu::Parameter imu_parameter;
   imu_parameter.raw_data_mode = false;
   imu_parameter.rotated_frame = getFrameIdPrefix() + Robot::_parameter.tf_base_frame;
-  imu_parameter = ImuSensor::get_parameter("imu", imu_parameter, *this);
+  imu_parameter = SensorImu::get_parameter("imu", imu_parameter, *this);
 
-  auto imu_sensor = std::make_shared<robot::ImuSensor>(
+  auto imu_sensor = std::make_shared<robot::SensorImu>(
     "imu",
     getFrameIdPrefix() + "imu/base",
     getFrameIdPrefix() + Robot::_parameter.tf_footprint_frame,

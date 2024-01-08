@@ -29,7 +29,7 @@ public:
     } mecanum;
   };
 
-  OhmniBot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface);
+  OhmniBot(const std::string& robot_name, std::unique_ptr<HardwareRobotInterface> hardware_interface);
   ~OhmniBot() override;
 
   void initialize(eduart::robot::HardwareComponentFactory& factory) override;

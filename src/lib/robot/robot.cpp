@@ -55,7 +55,7 @@ static Robot::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
   return parameter;
 }
 
-Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface, const std::string& ns)
+Robot::Robot(const std::string& robot_name, std::unique_ptr<HardwareRobotInterface> hardware_interface, const std::string& ns)
   : rclcpp::Node(robot_name, ns)
   , _hardware_interface(std::move(hardware_interface))
   , _last_twist_received(get_clock()->now())

@@ -44,7 +44,7 @@ public:
   };
 
   Eduard(
-    const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface, const std::string& ns = "");
+    const std::string& robot_name, std::unique_ptr<HardwareRobotInterface> hardware_interface, const std::string& ns = "");
   ~Eduard() override;
 
 protected:

@@ -21,7 +21,7 @@
 namespace eduart {
 namespace robot {
 
-class ImuSensor : public Sensor
+class SensorImu : public Sensor
 {
 public:
   struct Parameter {
@@ -39,14 +39,14 @@ public:
 
   using SensorInterface = HardwareSensorInterface<Parameter, Eigen::Quaterniond, Eigen::Vector3d, Eigen::Vector3d>;
 
-  ImuSensor(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
+  SensorImu(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
             const tf2::Transform sensor_transform, const Parameter parameter,
             std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster, rclcpp::Node& ros_node,
             std::shared_ptr<SensorInterface> hardware_interface);
-  ~ImuSensor() override = default;
+  ~SensorImu() override = default;
 
-  static ImuSensor::Parameter get_parameter(
-    const std::string& name, const ImuSensor::Parameter& default_parameter, rclcpp::Node& ros_node);
+  static SensorImu::Parameter get_parameter(
+    const std::string& name, const SensorImu::Parameter& default_parameter, rclcpp::Node& ros_node);
 
 protected:
   void processMeasurementData(

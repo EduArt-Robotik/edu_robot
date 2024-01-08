@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <diagram program="umlet" version="13.3">
-  <zoom_level>10</zoom_level>
+  <zoom_level>14</zoom_level>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>1230</x>
-      <y>210</y>
-      <w>880</w>
-      <h>240</h>
+      <x>5362</x>
+      <y>1162</y>
+      <w>1232</w>
+      <h>336</h>
     </coordinates>
     <panel_attributes>EthernetGatewayShield
 --
@@ -28,10 +28,10 @@
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>1000</x>
-      <y>0</y>
-      <w>680</w>
-      <h>130</h>
+      <x>5502</x>
+      <y>868</y>
+      <w>952</w>
+      <h>182</h>
     </coordinates>
     <panel_attributes>ProcessingComponentOutput
 --
@@ -47,10 +47,10 @@
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>1230</x>
-      <y>500</y>
-      <w>880</w>
-      <h>160</h>
+      <x>5362</x>
+      <y>1568</y>
+      <w>1232</w>
+      <h>224</h>
     </coordinates>
     <panel_attributes>EthernetCommunicator
 --
@@ -65,13 +65,13 @@
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>1710</x>
-      <y>0</y>
-      <w>340</w>
-      <h>130</h>
+      <x>3234</x>
+      <y>1848</y>
+      <w>476</w>
+      <h>182</h>
     </coordinates>
     <panel_attributes>&lt;&lt;interface&gt;&gt;
-/RobotHardwareInterface/
+/HardwareRobotInterface/
 --
 #_report : RobotStatusReport
 --
@@ -83,32 +83,21 @@
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1300</x>
-      <y>120</y>
-      <w>390</w>
-      <h>110</h>
+      <x>5922</x>
+      <y>1036</y>
+      <w>42</w>
+      <h>154</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;50.0;370.0;50.0;370.0;90.0</additional_attributes>
+    <additional_attributes>10.0;10.0;10.0;90.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1660</x>
-      <y>120</y>
-      <w>250</w>
-      <h>110</h>
-    </coordinates>
-    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>230.0;10.0;230.0;50.0;10.0;50.0;10.0;90.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>1640</x>
-      <y>440</y>
-      <w>30</w>
-      <h>80</h>
+      <x>5936</x>
+      <y>1484</y>
+      <w>42</w>
+      <h>112</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes>
     <additional_attributes>10.0;10.0;10.0;60.0</additional_attributes>
@@ -116,10 +105,10 @@
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>460</x>
-      <y>220</y>
-      <w>270</w>
-      <h>80</h>
+      <x>4200</x>
+      <y>1176</y>
+      <w>378</w>
+      <h>112</h>
     </coordinates>
     <panel_attributes>EthernetGatewayDevice
 --
@@ -131,10 +120,10 @@
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>20</x>
-      <y>370</y>
-      <w>560</w>
-      <h>80</h>
+      <x>3766</x>
+      <y>1386</y>
+      <w>784</w>
+      <h>112</h>
     </coordinates>
     <panel_attributes>EthernetGatewayRxDevice
 --
@@ -147,10 +136,10 @@
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>600</x>
-      <y>370</y>
-      <w>560</w>
-      <h>80</h>
+      <x>4564</x>
+      <y>1386</y>
+      <w>784</w>
+      <h>112</h>
     </coordinates>
     <panel_attributes>EthernetGatewayTxDevice
 --
@@ -162,10 +151,10 @@
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>290</x>
-      <y>520</y>
-      <w>600</w>
-      <h>80</h>
+      <x>3962</x>
+      <y>1792</y>
+      <w>840</w>
+      <h>112</h>
     </coordinates>
     <panel_attributes>EthernetGatewayTxRxDevice
 --
@@ -176,131 +165,780 @@
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>190</x>
-      <y>440</y>
-      <w>420</w>
-      <h>100</h>
+      <x>4130</x>
+      <y>1484</y>
+      <w>280</w>
+      <h>336</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;50.0;400.0;50.0;400.0;80.0</additional_attributes>
+    <additional_attributes>10.0;10.0;10.0;50.0;180.0;50.0;180.0;220.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>580</x>
-      <y>440</y>
-      <w>470</w>
-      <h>100</h>
+      <x>4368</x>
+      <y>1484</y>
+      <w>686</w>
+      <h>336</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>450.0;10.0;450.0;50.0;10.0;50.0;10.0;80.0</additional_attributes>
+    <additional_attributes>470.0;10.0;470.0;50.0;10.0;50.0;10.0;220.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>190</x>
-      <y>290</y>
-      <w>420</w>
-      <h>100</h>
+      <x>4116</x>
+      <y>1274</y>
+      <w>294</w>
+      <h>140</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>400.0;10.0;400.0;50.0;10.0;50.0;10.0;80.0</additional_attributes>
+    <additional_attributes>190.0;10.0;190.0;50.0;10.0;50.0;10.0;80.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>580</x>
-      <y>290</y>
-      <w>470</w>
-      <h>100</h>
+      <x>4368</x>
+      <y>1274</y>
+      <w>686</w>
+      <h>140</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;50.0;450.0;50.0;450.0;80.0</additional_attributes>
+    <additional_attributes>10.0;10.0;10.0;50.0;470.0;50.0;470.0;80.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>0</x>
-      <y>830</y>
-      <w>270</w>
-      <h>80</h>
+      <x>4088</x>
+      <y>2086</y>
+      <w>630</w>
+      <h>112</h>
     </coordinates>
     <panel_attributes>ImuSensorHardware
 --
 --
++ initialize(const ImuSensor::Parameter&amp; parameter) : void
 - processMeasurement() : void</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>0</x>
-      <y>520</y>
-      <w>270</w>
-      <h>80</h>
+      <x>2254</x>
+      <y>1512</y>
+      <w>994</w>
+      <h>182</h>
     </coordinates>
-    <panel_attributes>&lt;&lt;diagnostic::DiagnosticComponent&gt;&gt;
-/Sensor/</panel_attributes>
+    <panel_attributes>/Sensor/
+--
+
+--
++ name() const : const std::string&amp;
++ frameId() const : const std::string&amp; 
++ getTransformMsg(const rclcpp::Time stamp) const : geometry_msgs::msg::TransformStamped</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>0</x>
-      <y>660</y>
-      <w>270</w>
-      <h>110</h>
+      <x>2688</x>
+      <y>1848</y>
+      <w>518</w>
+      <h>154</h>
     </coordinates>
-    <panel_attributes>ImuSensor
-{innerclass
-&lt;&lt;HardwareSensorInterface&gt;&gt;
-SensorInterface
-innerclass}
+    <panel_attributes>SensorImu
+--
+- _hardware_interface : HardwareSensorInterface
 --</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>120</x>
-      <y>760</y>
-      <w>30</w>
-      <h>90</h>
+      <x>2926</x>
+      <y>1988</y>
+      <w>1190</w>
+      <h>182</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
+    <additional_attributes>10.0;10.0;10.0;110.0;830.0;110.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>120</x>
-      <y>590</y>
-      <w>490</w>
-      <h>260</h>
+      <x>4368</x>
+      <y>1890</y>
+      <w>42</w>
+      <h>224</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>470.0;10.0;470.0;210.0;10.0;210.0;10.0;240.0</additional_attributes>
+    <additional_attributes>10.0;10.0;10.0;140.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>260</x>
-      <y>560</y>
-      <w>990</w>
-      <h>340</h>
+      <x>4704</x>
+      <y>1680</y>
+      <w>686</w>
+      <h>504</h>
     </coordinates>
     <panel_attributes>lt=-</panel_attributes>
-    <additional_attributes>10.0;320.0;890.0;320.0;890.0;10.0;970.0;10.0</additional_attributes>
+    <additional_attributes>10.0;340.0;260.0;340.0;260.0;10.0;470.0;10.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>120</x>
-      <y>590</y>
-      <w>30</w>
-      <h>90</h>
+      <x>2646</x>
+      <y>1680</y>
+      <w>154</w>
+      <h>196</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;70.0;90.0;70.0;90.0;120.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1484</x>
+      <y>574</y>
+      <w>952</w>
+      <h>210</h>
+    </coordinates>
+    <panel_attributes>Robot
+--
+
+--
++ registerLighting(std::shared_ptr&lt;Lighting&gt; lighting) : void
++ void registerMotorController(std::shared_ptr&lt;MotorController&gt; motor_controller) : void
++ void registerSensor(std::shared_ptr&lt;Sensor&gt; sensor) : void
++ getKinematicMatrix(const DriveKinematic kinematic) const = 0 : Eigen::MatrixXf
++ switchKinematic(const DriveKinematic kinematic) : void
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>2506</x>
+      <y>518</y>
+      <w>1148</w>
+      <h>224</h>
+    </coordinates>
+    <panel_attributes>HardwareComponentFactory
+--
+--
++ lightingHardware() : std::map&lt;std::string, std::shared_ptr&lt;Lighting::ComponentInterface&gt;&gt;
++ motorControllerHardware() : std::map&lt;std::string, std::shared_ptr&lt;MotorController::ComponentInterface&gt;&gt;
++ motorSensorHardware() : std::map&lt;std::string, std::shared_ptr&lt;MotorController::SensorInterface&gt;&gt;
++ rangeSensorHardware() : std::map&lt;std::string, std::shared_ptr&lt;RangeSensor::SensorInterface&gt;&gt;
++ imuSensorHardware() : std::map&lt;std::string, std::shared_ptr&lt;ImuSensor::SensorInterface&gt;&gt;
+  
+  
+  
+
+  </panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1120</x>
+      <y>2170</y>
+      <w>924</w>
+      <h>252</h>
+    </coordinates>
+    <panel_attributes>HardwareSensorInterface
+--
+
+--
++registerCallbackProcessMeasurementData(ProcessMeasurementCallback callback) : void
+/+initialize(const Parameter&amp; parameter) = 0 : void/</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>3780</x>
+      <y>868</y>
+      <w>1666</w>
+      <h>210</h>
+    </coordinates>
+    <panel_attributes>HardwareComponentFactory
+--
++ addLighting(const std::string&amp; lighting_name, const std::string&amp; hardware_name) : HardwareComponentFactory&amp;
++ addMotorController(const std::string&amp; motor_name, const std::string&amp; hardware_name) : HardwareComponentFactory&amp;
++ addSingleChannelMotorController(const std::string&amp; motor_name, const std::string&amp; hardware_name) : HardwareComponentFactory&amp;
++ addRangeSensor(const std::string&amp; sensor_name, const std::string&amp; hardware_name, const std::uint8_t id, rclcpp::Node&amp; ros_node) : HardwareComponentFactory&amp;
++ addImuSensor(const std::string&amp; sensor_name, const std::string&amp; hardware_name, rclcpp::Node&amp; ros_node) : HardwareComponentFactory&amp;</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>3066</x>
+      <y>728</y>
+      <w>1568</w>
+      <h>168</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;50.0;1100.0;50.0;1100.0;100.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1568</x>
+      <y>1988</y>
+      <w>1316</w>
+      <h>210</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes>
+    <additional_attributes>920.0;10.0;920.0;70.0;10.0;70.0;10.0;130.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>168</x>
+      <y>2170</y>
+      <w>924</w>
+      <h>252</h>
+    </coordinates>
+    <panel_attributes>HardwareComponentInterface
+--
+
+--
+/+processSetValue(const Data&amp;... values) = 0 : void/
+/+initialize(const Parameter&amp; parameter) = 0 : void/</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1246</x>
+      <y>1848</y>
+      <w>854</w>
+      <h>154</h>
+    </coordinates>
+    <panel_attributes>MotorController
+--
+- _hardware_sensor_interface : std::shared_ptr&lt;SensorInterface&gt;
+- _hardware_component_interface : std::shared_ptr&lt;ComponentInterface&gt;
+--</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLPackage</id>
+    <coordinates>
+      <x>140</x>
+      <y>448</y>
+      <w>3598</w>
+      <h>2450</h>
+    </coordinates>
+    <panel_attributes>eduard::robot
+layer=-1
+bg=#CCFFCC</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLPackage</id>
+    <coordinates>
+      <x>3752</x>
+      <y>448</y>
+      <w>2870</w>
+      <h>2450</h>
+    </coordinates>
+    <panel_attributes>eduard::robot::ethernet
+layer=-1
+bg=#CCCCFF</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>3668</x>
+      <y>1106</y>
+      <w>1722</w>
+      <h>770</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;530.0;10.0;10.0;1050.0;10.0;1050.0;140.0;1210.0;140.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1666</x>
+      <y>1330</y>
+      <w>966</w>
+      <h>546</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>670.0;10.0;670.0;70.0;10.0;70.0;10.0;370.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>2590</x>
+      <y>1330</y>
+      <w>784</w>
+      <h>546</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;70.0;540.0;70.0;540.0;370.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>700</x>
+      <y>1988</y>
+      <w>826</w>
+      <h>210</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>570.0;10.0;570.0;70.0;10.0;70.0;10.0;130.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1484</x>
+      <y>1988</y>
+      <w>42</w>
+      <h>210</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;130.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>238</x>
+      <y>1848</y>
+      <w>854</w>
+      <h>154</h>
+    </coordinates>
+    <panel_attributes>Lighting
+--
+- _hardware_interface : std::shared_ptr&lt;ComponentInterface&gt;
+--</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>490</x>
+      <y>1988</y>
+      <w>42</w>
+      <h>210</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;130.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>2380</x>
+      <y>1176</y>
+      <w>490</w>
+      <h>168</h>
+    </coordinates>
+    <panel_attributes>DiagnosticComponent</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>2590</x>
+      <y>1330</y>
+      <w>42</w>
+      <h>210</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;130.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLPackage</id>
+    <coordinates>
+      <x>2282</x>
+      <y>994</y>
+      <w>658</w>
+      <h>406</h>
+    </coordinates>
+    <panel_attributes>diagnostic
+bg=#BBFFBB</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1162</x>
+      <y>938</y>
+      <w>280</w>
+      <h>196</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;enum&gt;&gt;
+DriveKinematic
+--
+  SKID_DRIVE
+  MECANUM_DRIVE</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>868</x>
+      <y>574</y>
+      <w>588</w>
+      <h>182</h>
+    </coordinates>
+    <panel_attributes>Rpm
+--
+- _value = 0.0f : float
+--
++ static fromRps(const float value) : constexpr Rpm
++ static fromRadps(const float value) : constexpr Rpm
++ rps() const : constexpr float
++ radps() const : constexpr float
+
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLPackage</id>
+    <coordinates>
+      <x>1512</x>
+      <y>0</y>
+      <w>980</w>
+      <h>420</h>
+    </coordinates>
+    <panel_attributes>rclcpp
+layer=-1
+bg=#FFCCCC</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1890</x>
+      <y>266</y>
+      <w>140</w>
+      <h>42</h>
+    </coordinates>
+    <panel_attributes>Node</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1946</x>
+      <y>294</y>
+      <w>42</w>
+      <h>308</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;200.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>3108</x>
+      <y>1008</y>
+      <w>504</w>
+      <h>308</h>
+    </coordinates>
+    <panel_attributes>StatusReport
+--
++ temperature : float
+{innerclass
+voltage
+--
++ mcu : float
++ drive : float
+innerclass}
+{innerclass
+current
+--
++ mcu : float
++ drive : float
+innerclass}
++ rpm : std::vector&lt;Rpm&gt;
++ status_emergency_stop : bool</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>462</x>
+      <y>1008</y>
+      <w>322</w>
+      <h>112</h>
+    </coordinates>
+    <panel_attributes>RobotState
+--
++ state : State
++ mode : Mode
++ info_message : std::string</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1078</x>
+      <y>1288</y>
+      <w>420</w>
+      <h>168</h>
+    </coordinates>
+    <panel_attributes>Mode
+--
++ robot_mode : RobotMode
++ drive_kinematic : DriveKinematic
++ feature_mode : FeatureMode</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>490</x>
+      <y>574</y>
+      <w>350</w>
+      <h>280</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;enum&gt;&gt;
+State
+--
+  OK
+  CHARGER_CONNECTED
+  MOTOR_ERROR
+  LOW_BATTERY
+  EMERGENCY_STOP
+  UART_SENDING_FAILED
+  UART_RECEIVING_FAILED
+  SHIELD_REQUEST_TIMEOUT
+  TCP_SOCKET_ERROR</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>826</x>
+      <y>938</y>
+      <w>280</w>
+      <h>196</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;enum&gt;&gt;
+RobotMode
+--
+  UNCONFIGURED
+  INACTIVE    
+  REMOTE_CONTROLLED
+  AUTONOMOUS       
+  CHARGING</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1484</x>
+      <y>938</y>
+      <w>378</w>
+      <h>196</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;enum&gt;&gt;
+FeatureMode
+--
+  NONE
+  COLLISION_AVOIDANCE_OVERRIDE
+  COLLISION_AVOIDANCE</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>952</x>
+      <y>1120</y>
+      <w>364</w>
+      <h>196</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>240.0;120.0;240.0;70.0;10.0;70.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1274</x>
+      <y>1120</y>
+      <w>42</w>
+      <h>196</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;120.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1274</x>
+      <y>1120</y>
+      <w>420</w>
+      <h>196</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;120.0;10.0;70.0;280.0;70.0;280.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>3472</x>
+      <y>1302</y>
+      <w>42</w>
+      <h>574</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;390.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>5432</x>
+      <y>2660</y>
+      <w>672</w>
+      <h>182</h>
+    </coordinates>
+    <panel_attributes>DummyMotorControllerHardware
+--
+--
++ processSetValue(const Rpm&amp; rpm) : void
++ initialize(const MotorController::Parameter&amp; parameter) : void</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>4592</x>
+      <y>2394</y>
+      <w>770</w>
+      <h>182</h>
+    </coordinates>
+    <panel_attributes>SingleChannelMotorControllerHardware
+--
+--
++ processSetValue(const Rpm&amp; rpm)
++ initialize(const MotorController::Parameter&amp; parameter) : void
++ processRxData(const tcp::message::RxMessageDataBuffer&amp; data) : void</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>5390</x>
+      <y>2394</y>
+      <w>812</w>
+      <h>182</h>
+    </coordinates>
+    <panel_attributes>CompoundMotorControllerHardware
+--
+--
++ processSetValue(const Rpm&amp; rpm)
++ initialize(const MotorController::Parameter&amp; parameter) : void
++ processRxData(const tcp::message::RxMessageDataBuffer&amp; data) : void
++ dummyMotorController() const : const std::shared_ptr&lt;DummyMotorControllerHardware&gt;&amp;</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>5754</x>
+      <y>2562</y>
+      <w>42</w>
+      <h>126</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes>
     <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>2058</x>
+      <y>1988</y>
+      <w>2968</w>
+      <h>434</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-
+fg=red</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;250.0;2100.0;250.0;2100.0;290.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>2058</x>
+      <y>1988</y>
+      <w>3682</w>
+      <h>434</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-
+fg=red</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;250.0;2610.0;250.0;2610.0;290.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>4424</x>
+      <y>1890</y>
+      <w>1344</w>
+      <h>532</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-
+fg=red</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;70.0;940.0;70.0;940.0;360.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>4424</x>
+      <y>1890</y>
+      <w>644</w>
+      <h>532</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-
+fg=red</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;70.0;440.0;70.0;440.0;360.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>2156</x>
+      <y>1848</y>
+      <w>504</w>
+      <h>154</h>
+    </coordinates>
+    <panel_attributes>SensorRange
+--
+- _hardware_interface : HardwareSensorInterface
+--</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>2394</x>
+      <y>1680</y>
+      <w>294</w>
+      <h>196</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>190.0;10.0;190.0;70.0;10.0;70.0;10.0;120.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1568</x>
+      <y>1988</y>
+      <w>868</w>
+      <h>210</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes>
+    <additional_attributes>600.0;10.0;600.0;70.0;10.0;70.0;10.0;130.0</additional_attributes>
   </element>
 </diagram>

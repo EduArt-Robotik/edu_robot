@@ -6,7 +6,7 @@
 #pragma once
 
 #include <edu_robot/hardware_component_interface.hpp>
-#include <edu_robot/imu_sensor.hpp>
+#include <edu_robot/sensor_imu.hpp>
 
 #include "edu_robot/ethernet_gateway/ethernet_gateway_device.hpp"
 
@@ -16,7 +16,7 @@ namespace ethernet {
 
 class EthernetCommunicator;
 
-class ImuSensorHardware : public ImuSensor::SensorInterface
+class ImuSensorHardware : public SensorImu::SensorInterface
                         , public EthernetGatewayTxRxDevice
 {
 public:
@@ -25,7 +25,7 @@ public:
   ~ImuSensorHardware() override = default;
 
   void processRxData(const tcp::message::RxMessageDataBuffer& data) override;
-  void initialize(const ImuSensor::Parameter& parameter) override;
+  void initialize(const SensorImu::Parameter& parameter) override;
 
 private:
   void processMeasurement();

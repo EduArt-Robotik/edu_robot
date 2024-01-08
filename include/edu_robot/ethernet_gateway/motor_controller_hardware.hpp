@@ -10,7 +10,7 @@
 #include "edu_robot/hardware_component_interface.hpp"
 #include "edu_robot/ethernet_gateway/ethernet_communicator.hpp"
 #include "edu_robot/ethernet_gateway/ethernet_gateway_device.hpp"
-#include "edu_robot/rotation_per_minute.hpp"
+#include "edu_robot/rpm.hpp"
 
 #include <memory>
 #include <array>

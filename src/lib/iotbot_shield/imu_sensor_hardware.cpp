@@ -1,5 +1,5 @@
 #include "edu_robot/iot_shield/imu_sensor_hardware.hpp"
-#include "edu_robot/imu_sensor.hpp"
+#include "edu_robot/sensor_imu.hpp"
 #include "edu_robot/iot_shield/iot_shield_device.hpp"
 #include "edu_robot/iot_shield/uart/message_definition.hpp"
 #include <Eigen/src/Core/Matrix.h>
@@ -28,7 +28,7 @@ void ImuSensorHardware::processRxData(const uart::message::RxMessageDataBuffer& 
   );
 }
 
-void ImuSensorHardware::initialize(const ImuSensor::Parameter& parameter)
+void ImuSensorHardware::initialize(const SensorImu::Parameter& parameter)
 {
   // set IMU data mode
   auto request = ShieldRequest::make_request<uart::message::SetImuRawDataMode>(parameter.raw_data_mode, 0, 0, 0);
