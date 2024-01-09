@@ -25,6 +25,7 @@ class SensorImu : public Sensor
 {
 public:
   struct Parameter {
+    bool enable = true;
     bool raw_data_mode = false;
     bool publish_tf = true;
     float fusion_weight = 0.03f;

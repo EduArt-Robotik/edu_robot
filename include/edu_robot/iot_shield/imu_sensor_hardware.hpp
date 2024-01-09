@@ -23,6 +23,9 @@ public:
 
   void processRxData(const uart::message::RxMessageDataBuffer& data) override;
   void initialize(const SensorImu::Parameter& parameter) override;
+
+private:
+  bool _enable;
 };
 
 } // end namespace iotbot
