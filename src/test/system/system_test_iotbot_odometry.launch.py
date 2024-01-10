@@ -106,12 +106,12 @@ class SystemTestIotBotOdometry(unittest.TestCase):
 
     # Drive 1 meter straight in x direction.
     ## Reset Odometry
-    # print('Reset Odometry')
-    # assert self.srv_reset_odometry.service_is_ready() is True
-    # future = self.srv_reset_odometry.call_async(Trigger.Request())
-    # rclpy.spin_until_future_complete(self.node, future)
+    print('Reset Odometry')
+    assert self.srv_reset_odometry.service_is_ready() is True
+    future = self.srv_reset_odometry.call_async(Trigger.Request())
+    rclpy.spin_until_future_complete(self.node, future)
 
-    # assert future.result().success is True
+    assert future.result().success is True
 
     ## Drive in x direction until distance of one meter is reached.
     stamp_last_sent = time()
@@ -135,7 +135,7 @@ class SystemTestIotBotOdometry(unittest.TestCase):
       # spinning with 100 Hz
       rclpy.spin_once(self.node, timeout_sec=0.01)
 
-    # Disabling Robot
+    ## Disabling Robot
     print('Disabling IotBot')
     twist_msg = Twist()
     twist_msg.linear.x = 0.0

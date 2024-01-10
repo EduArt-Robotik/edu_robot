@@ -354,7 +354,7 @@ void Robot::callbackServiceResetOdometry(const std::shared_ptr<std_srvs::srv::Tr
 {
   (void)request;
 
-  _odometry_component.reset();
+  _odometry_component->reset();
 
   if (_parameter.publish_tf_odom) {
     _tf_broadcaster->sendTransform(_odometry_component->getTfMessage(
