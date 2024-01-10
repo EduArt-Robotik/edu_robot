@@ -94,6 +94,10 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<HardwareRobotInterfa
     "set_mode",
     std::bind(&Robot::callbackServiceSetMode, this, std::placeholders::_1, std::placeholders::_2)
   );
+  _srv_reset_odometry = create_service<std_srvs::srv::Trigger>(
+    "reset_odometry",
+    std::bind(&Robot::callbackServiceResetOdometry, this, std::placeholders::_1, std::placeholders::_2)
+  );
 
   // Subscriptions
   _sub_twist = create_subscription<geometry_msgs::msg::Twist>(
@@ -344,6 +348,23 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
 
   response->state.mode = to_ros(_mode_state_machine.mode());
 }
+
+void Robot::callbackServiceResetOdometry(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+                                         std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+{
+  (void)request;
+
+  _odometry_component.reset();
+
+  if (_parameter.publish_tf_odom) {
+    _tf_broadcaster->sendTransform(_odometry_component->getTfMessage(
+      getFrameIdPrefix() + _parameter.tf_footprint_frame, getFrameIdPrefix() + "odom"
+    ));
+  }
+
+  response->success = true;
+  response->message = "odometry was reset successfully";
+}                                         
 
 void Robot::registerLighting(std::shared_ptr<Lighting> lighting)
 {

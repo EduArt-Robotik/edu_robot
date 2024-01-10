@@ -91,6 +91,18 @@ geometry_msgs::msg::TransformStamped OdometryEstimator::getTfMessage(const std::
   return tf_msg;
 }
 
+void OdometryEstimator::reset()
+{
+  _orientation = 0.0;
+  _position_x = 0.0f;
+  _position_y = 0.0f;
+  _linear_velocity_x = 0.0f;
+  _linear_velocity_y = 0.0f;
+  _angular_velocity_z = 0.0f;
+
+  _last_processing = _clock->now();
+}
+
 } // end namespace processing
 } // end namespace robot
 } // end namespace eduart

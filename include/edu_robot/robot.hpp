@@ -36,6 +36,7 @@
 #include <std_msgs/msg/float32_multi_array.hpp>
 #include <geometry_msgs/msg/twist.hpp>
 #include <nav_msgs/msg/odometry.hpp>
+#include <std_srvs/srv/trigger.hpp>
 
 #include <memory>
 #include <map>
@@ -101,6 +102,13 @@ protected:
    */
   void callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode::Request> request,
                               std::shared_ptr<edu_robot::srv::SetMode::Response> response);
+  /**
+   * \brief Callback to reset odometry state to zero.
+   * \param request The request mode.
+   * \param response The response to the send request.   
+   */
+  void callbackServiceResetOdometry(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+                                    std::shared_ptr<std_srvs::srv::Trigger::Response> response);
   // void callbackServiceGetKinematicDescription(
   //   const std::shared_ptr<edu_robot::srv::GetKinematicDescription::Request> request,
   //   std::shared_ptr<edu_robot::srv::GetKinematicDescription::Response> response);
@@ -154,6 +162,7 @@ private:
   std::shared_ptr<rclcpp::Publisher<edu_robot::msg::RobotKinematicDescription>> _pub_kinematic_description;
 
   std::shared_ptr<rclcpp::Service<edu_robot::srv::SetMode>> _srv_set_mode;
+  std::shared_ptr<rclcpp::Service<std_srvs::srv::Trigger>> _srv_reset_odometry;
 
   std::shared_ptr<rclcpp::Subscription<geometry_msgs::msg::Twist>> _sub_twist;
   std::shared_ptr<rclcpp::Subscription<std_msgs::msg::Float32MultiArray>> _sub_set_rpm;
