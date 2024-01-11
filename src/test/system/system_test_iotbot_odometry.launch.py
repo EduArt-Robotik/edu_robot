@@ -92,18 +92,6 @@ class SystemTestIotBotOdometry(unittest.TestCase):
     while self.getKey(0.1) != 's': pass
     print('Test is running...')
 
-    # Enable Robot
-    set_mode_request = SetMode.Request()
-    set_mode_request.mode.mode = Mode.REMOTE_CONTROLLED
-    set_mode_request.mode.drive_kinematic = Mode.MECANUM_DRIVE
-
-    print('Enabling IotBot')
-    assert self.srv_set_mode.service_is_ready() is True
-    future = self.srv_set_mode.call_async(set_mode_request)
-    rclpy.spin_until_future_complete(self.node, future)
-
-    assert future.result().state.mode.mode is Mode.REMOTE_CONTROLLED
-
     # Drive 1 meter straight in x direction.
     ## Reset Odometry
     print('Reset Odometry')
@@ -112,6 +100,18 @@ class SystemTestIotBotOdometry(unittest.TestCase):
     rclpy.spin_until_future_complete(self.node, future)
 
     assert future.result().success is True
+
+    ## Enable Robot
+    set_mode_request = SetMode.Request()
+    set_mode_request.mode.mode = Mode.REMOTE_CONTROLLED
+    set_mode_request.mode.drive_kinematic = Mode.SKID_DRIVE
+
+    print('Enabling IotBot')
+    assert self.srv_set_mode.service_is_ready() is True
+    future = self.srv_set_mode.call_async(set_mode_request)
+    rclpy.spin_until_future_complete(self.node, future)
+
+    assert future.result().state.mode.mode is Mode.REMOTE_CONTROLLED
 
     ## Drive in x direction until distance of one meter is reached.
     stamp_last_sent = time()

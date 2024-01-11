@@ -90,6 +90,7 @@ void MotorController::setRpm(const Rpm rpm)
   _last_processing = now;
 
   // set rpm
+  RCLCPP_INFO(rclcpp::get_logger("MotorController"), "set rpm %f", static_cast<float>(rpm));
   _hardware_component_interface->processSetValue(rpm);
   _set_rpm = rpm;
 }
@@ -100,6 +101,7 @@ void MotorController::processMeasurementData(const Rpm rpm, const bool enabled_f
     std::lock_guard guard(_mutex_access_data);
     _measured_rpm = rpm;
     _enabled = enabled_flag;
+    RCLCPP_INFO(rclcpp::get_logger("MotorController"), "measured rpm %f", static_cast<float>(rpm));
 
     if (_enabled == true) {
       _lost_enable = false;
