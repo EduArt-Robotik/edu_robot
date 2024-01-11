@@ -10,7 +10,7 @@ import tty
 
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 from launch import LaunchDescription
-from launch.substitutions import PathJoinSubstitution
+from launch.substitutions import PathJoinSubstitution, Command
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 import launch_testing.actions
@@ -28,6 +28,10 @@ def generate_test_description():
     executable='listener',
     output='log'
   )
+
+  # dummy_node = Command(
+  #   command='tail -F anything'
+  # )
 
   return LaunchDescription([
     dummy_node, # need node to make test running
@@ -80,6 +84,36 @@ class SystemTestIotBotOdometry(unittest.TestCase):
 
     return key
 
+  def enableRobot(self):
+    set_mode_request = SetMode.Request()
+    set_mode_request.mode.mode = Mode.REMOTE_CONTROLLED
+    set_mode_request.mode.drive_kinematic = Mode.MECANUM_DRIVE
+    set_mode_request.mode.feature_mode = Mode.COLLISION_AVOIDANCE_OVERRIDE
+
+    print('Enabling IotBot')
+    assert self.srv_set_mode.service_is_ready() is True
+    future = self.srv_set_mode.call_async(set_mode_request)
+    rclpy.spin_until_future_complete(self.node, future)
+
+    assert future.result().state.mode.mode is Mode.REMOTE_CONTROLLED
+
+  def disableRobot(self):
+    print('Disabling IotBot')
+    twist_msg = Twist()
+    twist_msg.linear.x = 0.0
+    self.pub_twist.publish(twist_msg)
+
+    set_mode_request = SetMode.Request()
+    set_mode_request.mode.mode = Mode.INACTIVE
+    set_mode_request.mode.drive_kinematic = Mode.MECANUM_DRIVE
+    set_mode_request.disable_feature = Mode.COLLISION_AVOIDANCE_OVERRIDE
+
+    assert self.srv_reset_odometry.service_is_ready() is True
+    future = self.srv_set_mode.call_async(set_mode_request)
+    rclpy.spin_until_future_complete(self.node, future)
+
+    assert future.result().state.mode.mode is Mode.INACTIVE
+
   def test_drive_one_meter_with_mecanum(self, launch_service, proc_output):
     # Wait for User to be ready.
     print('###########################################################################################')
@@ -102,16 +136,7 @@ class SystemTestIotBotOdometry(unittest.TestCase):
     assert future.result().success is True
 
     ## Enable Robot
-    set_mode_request = SetMode.Request()
-    set_mode_request.mode.mode = Mode.REMOTE_CONTROLLED
-    set_mode_request.mode.drive_kinematic = Mode.SKID_DRIVE
-
-    print('Enabling IotBot')
-    assert self.srv_set_mode.service_is_ready() is True
-    future = self.srv_set_mode.call_async(set_mode_request)
-    rclpy.spin_until_future_complete(self.node, future)
-
-    assert future.result().state.mode.mode is Mode.REMOTE_CONTROLLED
+    self.enableRobot()
 
     ## Drive in x direction until distance of one meter is reached.
     stamp_last_sent = time()
@@ -136,15 +161,4 @@ class SystemTestIotBotOdometry(unittest.TestCase):
       rclpy.spin_once(self.node, timeout_sec=0.01)
 
     ## Disabling Robot
-    print('Disabling IotBot')
-    twist_msg = Twist()
-    twist_msg.linear.x = 0.0
-    self.pub_twist.publish(twist_msg)
-
-    set_mode_request = SetMode.Request()
-    set_mode_request.mode.mode = Mode.INACTIVE
-    set_mode_request.mode.drive_kinematic = Mode.MECANUM_DRIVE
-
-    assert self.srv_reset_odometry.service_is_ready() is True
-    future = self.srv_set_mode.call_async(set_mode_request)
-    rclpy.spin_until_future_complete(self.node, future)    
+    self.disableRobot()
