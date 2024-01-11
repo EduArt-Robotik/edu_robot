@@ -187,6 +187,7 @@ void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> tw
 
     // Calculate wheel rotation speed using provided kinematic matrix.
     // Apply velocity reduction if a limit is reached.
+    std::cout << "velocity in:\n" << velocity_cmd << std::endl;
     Eigen::VectorXf radps = _kinematic_matrix * velocity_cmd;
     float reduce_factor = 1.0f;
   
@@ -195,6 +196,7 @@ void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> tw
         std::abs(_motor_controllers[i]->parameter().max_rpm / Rpm::fromRadps(radps(i))), reduce_factor
       );
     }
+    std::cout << "reduce factor = " << reduce_factor << std::endl;
     for (Eigen::Index i = 0; i < radps.size(); ++i) {
       const std::size_t index = _motor_controllers[i]->parameter().index == 0 ? i : _motor_controllers[i]->parameter().index - 1;
       _motor_controllers[i]->setRpm(Rpm::fromRadps(radps(index)) * reduce_factor);
@@ -204,7 +206,8 @@ void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> tw
     Eigen::VectorXf radps_measured(_motor_controllers.size());
 
     for (std::size_t i = 0; i < _motor_controllers.size(); ++i) {
-      radps_measured(i) = _motor_controllers[i]->getMeasuredRpm().radps();
+      const std::size_t index = _motor_controllers[i]->parameter().index == 0 ? i : _motor_controllers[i]->parameter().index - 1;
+      radps_measured(index) = _motor_controllers[i]->getMeasuredRpm().radps();
     }
 
     const Eigen::Vector3f velocity_measured = _inverse_kinematic_matrix * radps_measured;
@@ -572,7 +575,10 @@ std::string Robot::getFrameIdPrefix() const
 void Robot::switchKinematic(const DriveKinematic kinematic)
 {
   _kinematic_matrix = getKinematicMatrix(kinematic);
+  std::cout << "kinematic matrix:\n" << _kinematic_matrix << std::endl;
   _inverse_kinematic_matrix = _kinematic_matrix.completeOrthogonalDecomposition().pseudoInverse();
+  std::cout << "inverse:\n" << _inverse_kinematic_matrix << std::endl;
+  std::cout << "I:\n" << _kinematic_matrix * _inverse_kinematic_matrix << std::endl;
 
   edu_robot::msg::RobotKinematicDescription msg;
 
