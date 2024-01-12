@@ -179,6 +179,19 @@ The following two wheel types are available: mecanum and offroad
 
 ![eduard-mecanum](documentation/image/eduard-red-mecanum.png)![eduard-offroad](documentation/image/eduard-red-offroad.png)
 
+
+### Trouble Shooting
+
+#### No module named 'roslaunch'
+
+If the following error raises at the launch:
+
+```bash
+[ERROR] [launch]: Caught exception in launch (see debug for traceback): substitution args not supported:  No module named 'roslaunch'
+```
+
+Please make sure that the correct 'xacro' is installed. For example for ROS humble install 'ros-humble-xacro'.
+
 ## rqt robot monitor
 
 The Eduard control software provides a diagnostic aggregation. With this, the status of major components can be displayed, as well as live characteristics of these.
@@ -196,6 +209,7 @@ Following window will open. Errors and warnings will be shown on the both top li
  If you want to see the **OK** states, too, then press on the check box **Alternative view** on the top left corner.
 
  ![good-case](documentation/image/diagnostic-good-case.png)
+
 
 ## Safety instructions
 

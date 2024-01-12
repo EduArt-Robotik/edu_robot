@@ -30,6 +30,7 @@ public:
   void process(const Eigen::Vector3f& measured_velocity);
   nav_msgs::msg::Odometry getOdometryMessage(const std::string& robot_base_frame, const std::string& odom_frame) const;
   geometry_msgs::msg::TransformStamped getTfMessage(const std::string& robot_base_frame, const std::string& odom_frame) const;
+  void reset();
 
 private:
   AnglePiToPi _orientation = 0.0;

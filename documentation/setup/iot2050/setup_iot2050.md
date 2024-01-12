@@ -169,6 +169,8 @@ Now define the variable. Here in this example 'eduard/blue' was chosen. This nam
 EDU_ROBOT_NAMESPACE=eduard/blue
 ```
 
+You have to log out and log in again for the setting to take effect.
+
 ### Get Control Software and Launch it
 
 First clone the Git repository by executing the command:

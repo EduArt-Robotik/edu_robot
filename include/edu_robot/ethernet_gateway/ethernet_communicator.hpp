@@ -6,7 +6,6 @@
 #pragma once
 
 #include "edu_robot/ethernet_gateway/tcp/message.hpp"
-#include "edu_robot/ethernet_gateway/tcp/message_definition.hpp"
 #include "edu_robot/ethernet_gateway/tcp/protocol.hpp"
 
 #include <cstddef>
@@ -20,10 +19,8 @@
 #include <mutex>
 #include <functional>
 #include <memory>
-#include <array>
 #include <chrono>
 #include <thread>
-#include <condition_variable>
 #include <future>
 #include <queue>
 #include <vector>
@@ -31,8 +28,6 @@
 namespace eduart {
 namespace robot {
 namespace ethernet {
-
-class IotShieldDevice;
 
 class Request
 {

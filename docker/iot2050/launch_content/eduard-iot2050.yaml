@@ -18,23 +18,24 @@
       raw_data_mode: false
 
 # Motor Controller
-    motor_a:
+    motor_d:
       control_frequency: 16000
       timeout_ms: 500
       encoder_inverted: true
-      encoder_ratio: 4096.0
+      encoder_ratio: 2048.0
       gear_ratio: 89.0
       max_rpm: 140.0
-      pid/kd: 0.0
-      pid/ki: 5.0
-      pid/kp: 0.5
+      pid:
+        kd: 0.0
+        ki: 5.0
+        kp: 0.5
       weight_low_pass_encoder: 0.3
       weight_low_pass_set_point: 0.2
 
-# Motor B, C and D are configured together with motor A. Motor B, C and D therefore receive the same parameters as motor A.
+# Motor A, B and C are configured together with motor D. Motor A, B and C therefore receive the same parameters as motor D.
+    # motor_a:  
     # motor_b:  
-    # motor_c:  
-    # motor_d:
+    # motor_c:
 
 # Range Sensor
     range:  
