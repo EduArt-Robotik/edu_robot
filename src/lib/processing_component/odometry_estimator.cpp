@@ -19,8 +19,6 @@ void OdometryEstimator::process(const Eigen::Vector3f& measured_velocity)
   // Estimate delta t
   const auto now = _clock->now();
   const double dt = std::min((now - _last_processing).seconds(), 1.0); // allow dt max = 1s
-  std::cout << "dt = " << dt << std::endl;
-  _last_processing = now;
 
   // Processing Velocity
   const Eigen::Vector2f liner_velocity(measured_velocity.x(), measured_velocity.y());
@@ -29,13 +27,12 @@ void OdometryEstimator::process(const Eigen::Vector3f& measured_velocity)
   _orientation += measured_velocity.z() * dt;
   _position_x  += direction.x() * dt;
   _position_y  += direction.y() * dt;
-  std::cout << "orientation = " << _orientation << std::endl;
-  std::cout << "position x = " << _position_x << std::endl;
-  std::cout << "position y = " << _position_y << std::endl;
 
   _linear_velocity_x = measured_velocity.x();
   _linear_velocity_y = measured_velocity.y();
   _angular_velocity_z = measured_velocity.z();
+
+  _last_processing = now;
 }
 
 nav_msgs::msg::Odometry OdometryEstimator::getOdometryMessage(const std::string& robot_base_frame, const std::string& odom_frame) const

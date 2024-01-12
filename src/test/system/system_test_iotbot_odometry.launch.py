@@ -140,7 +140,8 @@ class SystemTestIotBotOdometry(unittest.TestCase):
 
     ## Drive in x direction until distance of one meter is reached.
     stamp_last_sent = time()
-    wait_time_twist = 1.0 / 10.0
+    stamp_start = stamp_last_sent
+    wait_time_twist = 1.0 / 10.0 # 10 Hz
     goal_distance = 1.0
     slow_down_distance = 0.1
 
@@ -161,4 +162,5 @@ class SystemTestIotBotOdometry(unittest.TestCase):
       rclpy.spin_once(self.node, timeout_sec=0.01)
 
     ## Disabling Robot
+    print('Test finished after ' + str(time() - stamp_start) + ' s.')
     self.disableRobot()

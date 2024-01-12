@@ -187,9 +187,7 @@ void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> tw
 
     // Calculate wheel rotation speed using provided kinematic matrix.
     // Apply velocity reduction if a limit is reached.
-    std::cout << "velocity in:\n" << velocity_cmd << std::endl;
     Eigen::VectorXf radps = _kinematic_matrix * velocity_cmd;
-    std::cout << "radps in\n:" << radps << std::endl;
     float reduce_factor = 1.0f;
   
     for (Eigen::Index i = 0; i < radps.size(); ++i) {
@@ -197,7 +195,6 @@ void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> tw
         std::abs(_motor_controllers[i]->parameter().max_rpm / Rpm::fromRadps(radps(i))), reduce_factor
       );
     }
-    std::cout << "reduce factor = " << reduce_factor << std::endl;
     for (Eigen::Index i = 0; i < radps.size(); ++i) {
       const std::size_t index = _motor_controllers[i]->parameter().index == 0 ? i : _motor_controllers[i]->parameter().index - 1;
       _motor_controllers[i]->setRpm(Rpm::fromRadps(radps(index)) * reduce_factor);
@@ -212,7 +209,6 @@ void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> tw
     }
 
     const Eigen::Vector3f velocity_measured = _inverse_kinematic_matrix * radps_measured;
-    std::cout << "velocity measured:\n" << velocity_measured << std::endl;
     _odometry_component->process(velocity_measured);
     _pub_odometry->publish(_odometry_component->getOdometryMessage(
       getFrameIdPrefix() + _parameter.tf_footprint_frame, getFrameIdPrefix() + "odom"
@@ -577,10 +573,7 @@ std::string Robot::getFrameIdPrefix() const
 void Robot::switchKinematic(const DriveKinematic kinematic)
 {
   _kinematic_matrix = getKinematicMatrix(kinematic);
-  std::cout << "kinematic matrix:\n" << _kinematic_matrix << std::endl;
   _inverse_kinematic_matrix = _kinematic_matrix.completeOrthogonalDecomposition().pseudoInverse();
-  std::cout << "inverse:\n" << _inverse_kinematic_matrix << std::endl;
-  std::cout << "probe:\n" << _kinematic_matrix * _inverse_kinematic_matrix * _kinematic_matrix << std::endl;
 
   edu_robot::msg::RobotKinematicDescription msg;
 
