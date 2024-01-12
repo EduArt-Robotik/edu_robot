@@ -23,7 +23,7 @@
       timeout_ms: 500
       encoder_inverted: true
       encoder_ratio: 2048.0
-      gear_ratio: 59.0
+      gear_ratio: 89.0
       max_rpm: 140.0
       pid:
         kd: 0.0

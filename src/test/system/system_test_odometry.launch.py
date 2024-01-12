@@ -114,10 +114,10 @@ class SystemTestIotBotOdometry(unittest.TestCase):
 
     assert future.result().state.mode.mode is Mode.INACTIVE
 
-  def test_drive_one_meter_with_mecanum(self, launch_service, proc_output):
+  def test_drive_one_meter_in_x_with_mecanum(self, launch_service, proc_output):
     # Wait for User to be ready.
     print('###########################################################################################')
-    print('# Test drive one meter with Mecanum                                                       #')
+    print('# Test drive one meter in x direction with Mecanum                                        #')
     print('###########################################################################################')
     print('Please place the IoTBot on the ground with 1m space in front of the robot.')
     print('Please make sure the Mecanum wheels are mounted.')
@@ -155,6 +155,58 @@ class SystemTestIotBotOdometry(unittest.TestCase):
       if time() - stamp_last_sent > wait_time_twist:
         twist_msg = Twist()
         twist_msg.linear.x = velocity_x
+        self.pub_twist.publish(twist_msg)
+        stamp_last_sent = time()
+
+      # spinning with 100 Hz
+      rclpy.spin_once(self.node, timeout_sec=0.01)
+
+    ## Disabling Robot
+    print('Test finished after ' + str(time() - stamp_start) + ' s.')
+    self.disableRobot()
+
+
+  def test_drive_one_meter_in_y_with_mecanum(self, launch_service, proc_output):
+    # Wait for User to be ready.
+    print('###########################################################################################')
+    print('# Test drive one meter in y direction with Mecanum                                        #')
+    print('###########################################################################################')
+    print('Please place the IoTBot on the ground with 1m space on left side of the robot.')
+    print('Please make sure the Mecanum wheels are mounted.')
+    print('Mark the starting position so you can measure the driven distance after the test finished.')
+    print('Press any key "s" to start the test...')
+    while self.getKey(0.1) != 's': pass
+    print('Test is running...')
+
+    # Drive 1 meter straight in x direction.
+    ## Reset Odometry
+    print('Reset Odometry')
+    assert self.srv_reset_odometry.service_is_ready() is True
+    future = self.srv_reset_odometry.call_async(Trigger.Request())
+    rclpy.spin_until_future_complete(self.node, future)
+
+    assert future.result().success is True
+
+    ## Enable Robot
+    self.enableRobot()
+
+    ## Drive in x direction until distance of one meter is reached.
+    stamp_last_sent = time()
+    stamp_start = stamp_last_sent
+    wait_time_twist = 1.0 / 10.0 # 10 Hz
+    goal_distance = 1.0
+    slow_down_distance = 0.1
+
+    print('Driving One Meter in X Direction')
+    while rclpy.ok() and self.odom_msg.pose.pose.position.y < goal_distance:
+      # Calculate
+      position_diff = self.odom_msg.pose.pose.position.y - goal_distance
+      velocity_y = 0.3 if abs(position_diff) > slow_down_distance else 0.1
+
+      # Sending Twist with 10 Hz
+      if time() - stamp_last_sent > wait_time_twist:
+        twist_msg = Twist()
+        twist_msg.linear.y = velocity_y
         self.pub_twist.publish(twist_msg)
         stamp_last_sent = time()
 
