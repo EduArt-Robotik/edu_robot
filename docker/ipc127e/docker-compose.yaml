@@ -11,7 +11,7 @@ services:
         pid: host
         mem_limit: 300mb
         environment:
-            - EDU_ROBOT_NAMESPACE=eduard/red
+            - EDU_ROBOT_NAMESPACE=${EDU_ROBOT_NAMESPACE}
         network_mode: "host"
         command: bash -c 'cd /home/user/ros/launch_content; ros2 launch eduard-ipc127e.launch.py'
         volumes:
@@ -29,7 +29,7 @@ services:
         pid: host
         mem_limit: 300mb
         environment:
-            - EDU_ROBOT_NAMESPACE=eduard/red
+            - EDU_ROBOT_NAMESPACE=${EDU_ROBOT_NAMESPACE}
         network_mode: "host"
         devices:
             - '/dev:/dev'
