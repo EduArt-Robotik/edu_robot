@@ -94,9 +94,19 @@ The "interfaces" file must be edited for the configuration. Open the file using 
 sudo nano /etc/network/interfaces
 ```
 
-and put following at the end of the file. Do not delete already existing configuration.
+and put following into the file. Overwrite existing configuration.
 
 ```bash
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+source /etc/network/interfaces.d/*
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# The primary network interface
 auto eno1
 iface eno1 inet static
   address 192.168.2.100
@@ -108,9 +118,10 @@ iface eno2 inet static
   address 192.168.0.100
   netmask 255.255.255.0
   network 192.168.0.0
-  
+
 auto eno3
 iface eno3 inet dhcp
+
 ```
 
 Restart the networking service to make the settings become valid by following command:
