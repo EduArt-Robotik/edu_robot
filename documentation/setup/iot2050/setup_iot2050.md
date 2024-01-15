@@ -34,6 +34,8 @@ to unzip the downloaded image and flash it to the SD card. Note: replace the dev
 
 ### Flashing SD Card on Windows
 
+> **Note**: will be updated soon
+
 ### Booting Up First Time
 
 After the SD card was flashed successfully connect a keyboard and monitor to the IoT2050 device. Power it on. The **STAT** LED will start to flash in orange when the IoT2050 is power up the first time. This will take some time (~ 1 minute). When the LED stops blinking it should then light up in green. At this moment a login prompt is displayed on the monitor:
