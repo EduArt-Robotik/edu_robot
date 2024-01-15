@@ -114,10 +114,7 @@ iface eno1 inet static
   network 192.168.2.0
 
 auto eno2
-iface eno2 inet static
-  address 192.168.0.100
-  netmask 255.255.255.0
-  network 192.168.0.0
+iface eno2 inet dhcp
 
 auto eno3
 iface eno3 inet dhcp
