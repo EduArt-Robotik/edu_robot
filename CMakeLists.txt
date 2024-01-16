@@ -131,6 +131,19 @@ ament_export_libraries(
   eduart-robot-universal-bot
   eduart-action
 )
+ament_export_dependencies(
+  rclcpp
+  tf2
+  tf2_ros
+  tf2_geometry_msgs
+  std_msgs
+  geometry_msgs
+  nav_msgs
+  sensor_msgs
+  diagnostic_updater
+  Eigen3
+  std_srvs
+)
 ament_export_targets(
   export_${PROJECT_NAME}
 )
