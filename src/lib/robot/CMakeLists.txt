@@ -6,8 +6,8 @@ add_library(eduart-robot
   lighting.cpp
   motor_controller.cpp
   sensor.cpp
-  range_sensor.cpp
-  imu_sensor.cpp
+  sensor_range.cpp
+  sensor_imu.cpp
 )
 target_link_libraries(eduart-robot
   Eigen3::Eigen
@@ -33,6 +33,7 @@ ament_target_dependencies(
   "sensor_msgs"
   "diagnostic_updater"
   "diagnostic_msgs"
+  "std_srvs"
 )
 # Below ROS humble this line is needed...
 # rosidl_target_interfaces(eduart-robot ${PROJECT_NAME} "rosidl_typesupport_cpp")

@@ -37,7 +37,7 @@ void RangeSensorHardware::processRxData(const tcp::message::RxMessageDataBuffer&
   _callback_process_measurement(AcknowledgedDistanceMeasurement::distance(data));
 }
 
-void RangeSensorHardware::initialize(const RangeSensor::Parameter& parameter)
+void RangeSensorHardware::initialize(const SensorRange::Parameter& parameter)
 {
   (void)parameter;
 }

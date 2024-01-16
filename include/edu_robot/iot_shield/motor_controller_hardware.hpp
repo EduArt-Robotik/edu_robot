@@ -10,7 +10,7 @@
 #include "edu_robot/hardware_component_interface.hpp"
 #include "edu_robot/iot_shield/iot_shield_communicator.hpp"
 #include "edu_robot/iot_shield/iot_shield_device.hpp"
-#include "edu_robot/rotation_per_minute.hpp"
+#include "edu_robot/rpm.hpp"
 
 #include <memory>
 #include <string>

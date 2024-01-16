@@ -9,7 +9,7 @@
 #include "edu_robot/iot_shield/uart/message.hpp"
 #include "edu_robot/iot_shield/iot_shield_communicator.hpp"
 
-#include <edu_robot/robot_hardware_interface.hpp>
+#include <edu_robot/hardware_robot_interface.hpp>
 #include <edu_robot/robot_status_report.hpp>
 
 #include <edu_robot/processing_component/processing_component.hpp>
@@ -26,7 +26,7 @@ namespace iotbot {
 class IotShieldCommunicator;
 class IotShieldRxDevice;
 
-class IotShield : public RobotHardwareInterface
+class IotShield : public HardwareRobotInterface
                 , public processing::ProcessingComponentOutput<float>
 {
 public:

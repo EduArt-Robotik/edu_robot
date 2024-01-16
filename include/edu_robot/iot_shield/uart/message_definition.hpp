@@ -9,7 +9,7 @@
 
 #include <Eigen/Dense>
 #include <array>
-#include <edu_robot/rotation_per_minute.hpp>
+#include <edu_robot/rpm.hpp>
 #include <edu_robot/color.hpp>
 
 namespace eduart {

@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "edu_robot/rotation_per_minute.hpp"
+#include "edu_robot/rpm.hpp"
 #include "edu_robot/lighting.hpp"
 #include "edu_robot/robot_status_report.hpp"
 
@@ -16,10 +16,10 @@
 namespace eduart {
 namespace robot {
 
-class RobotHardwareInterface : public diagnostic::DiagnosticComponent
+class HardwareRobotInterface : public diagnostic::DiagnosticComponent
 {
 public:
-  virtual ~RobotHardwareInterface() = default;
+  virtual ~HardwareRobotInterface() = default;
 
   virtual void enable() = 0;
   virtual void disable() = 0;

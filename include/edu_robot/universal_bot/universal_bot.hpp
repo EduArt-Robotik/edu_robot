@@ -38,7 +38,7 @@ public:
     std::vector<Axis> axis;
   };
 
-  UniversalBot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface);
+  UniversalBot(const std::string& robot_name, std::unique_ptr<HardwareRobotInterface> hardware_interface);
   ~UniversalBot() override;
 
 protected:

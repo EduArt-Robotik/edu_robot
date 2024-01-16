@@ -4,8 +4,8 @@
 #include <edu_robot/hardware_component_interface.hpp>
 #include <edu_robot/motor_controller.hpp>
 #include <edu_robot/robot.hpp>
-#include <edu_robot/range_sensor.hpp>
-#include <edu_robot/imu_sensor.hpp>
+#include <edu_robot/sensor_range.hpp>
+#include <edu_robot/sensor_imu.hpp>
 
 #include <tf2/LinearMath/Transform.h>
 #include <rclcpp/logging.hpp>
@@ -47,7 +47,7 @@ static Eduard::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
 }
 
 Eduard::Eduard(
-  const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface, const std::string& ns)
+  const std::string& robot_name, std::unique_ptr<HardwareRobotInterface> hardware_interface, const std::string& ns)
   : robot::Robot(robot_name, std::move(hardware_interface), ns)
   , _parameter(get_robot_ros_parameter(*this))
 { }
@@ -126,10 +126,10 @@ void Eduard::initialize(eduart::robot::HardwareComponentFactory& factory)
     tf2::Transform(tf2::Quaternion(0.0, 0.0, 1.0, 0.0), tf2::Vector3(-0.17,  0.063, 0.050)),
     tf2::Transform(tf2::Quaternion(0.0, 0.0, 1.0, 0.0), tf2::Vector3(-0.17, -0.063, 0.050))
   };
-  constexpr eduart::robot::RangeSensor::Parameter range_sensor_parameter{ 10.0 * M_PI / 180.0, 0.01, 5.0 };
+  constexpr eduart::robot::SensorRange::Parameter range_sensor_parameter{ 10.0 * M_PI / 180.0, 0.01, 5.0 };
 
   for (std::size_t i = 0; i < range_sensor_name.size(); ++i) {
-    auto range_sensor = std::make_shared<robot::RangeSensor>(
+    auto range_sensor = std::make_shared<robot::SensorRange>(
       range_sensor_name[i],
       getFrameIdPrefix() + range_sensor_name[i],
       getFrameIdPrefix() + Robot::_parameter.tf_base_frame,
@@ -144,12 +144,12 @@ void Eduard::initialize(eduart::robot::HardwareComponentFactory& factory)
   }
 
   // IMU Sensor
-  ImuSensor::Parameter imu_parameter;
+  SensorImu::Parameter imu_parameter;
   imu_parameter.raw_data_mode = false;
   imu_parameter.rotated_frame = getFrameIdPrefix() + Robot::_parameter.tf_base_frame;
-  imu_parameter = ImuSensor::get_parameter("imu", imu_parameter, *this);
+  imu_parameter = SensorImu::get_parameter("imu", imu_parameter, *this);
 
-  auto imu_sensor = std::make_shared<robot::ImuSensor>(
+  auto imu_sensor = std::make_shared<robot::SensorImu>(
     "imu",
     getFrameIdPrefix() + "imu/base",
     getFrameIdPrefix() + Robot::_parameter.tf_footprint_frame,

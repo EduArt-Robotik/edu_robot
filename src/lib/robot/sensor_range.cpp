@@ -1,4 +1,4 @@
-#include "edu_robot/range_sensor.hpp"
+#include "edu_robot/sensor_range.hpp"
 #include "edu_robot/sensor.hpp"
 
 #include <functional>
@@ -11,12 +11,12 @@
 namespace eduart {
 namespace robot {
 
-static RangeSensor::Parameter get_range_sensor_parameter(
-  const std::string& name, const RangeSensor::Parameter& default_parameter, rclcpp::Node& ros_node)
+static SensorRange::Parameter get_range_sensor_parameter(
+  const std::string& name, const SensorRange::Parameter& default_parameter, rclcpp::Node& ros_node)
 {
   std::string prefix = name;
   std::replace(prefix.begin(), prefix.end(), '/', '.');
-  RangeSensor::Parameter parameter;
+  SensorRange::Parameter parameter;
 
   ros_node.declare_parameter<float>(prefix + ".field_of_view", default_parameter.field_of_view);
   ros_node.declare_parameter<float>(prefix + ".range_min", default_parameter.range_min);
@@ -30,7 +30,7 @@ static RangeSensor::Parameter get_range_sensor_parameter(
 }
 
 
-RangeSensor::RangeSensor(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
+SensorRange::SensorRange(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
                          const tf2::Transform sensor_transform, const Parameter parameter, rclcpp::Node& ros_node,
                          std::shared_ptr<SensorInterface> hardware_interface)
   : Sensor(name, frame_id, reference_frame_id, sensor_transform)
@@ -45,11 +45,11 @@ RangeSensor::RangeSensor(const std::string& name, const std::string& frame_id, c
     )
 {
   _hardware_interface->registerCallbackProcessMeasurementData(
-    std::bind(&RangeSensor::processMeasurementData, this, std::placeholders::_1)
+    std::bind(&SensorRange::processMeasurementData, this, std::placeholders::_1)
   );
 }                         
 
-void RangeSensor::processMeasurementData(const float measurement)
+void SensorRange::processMeasurementData(const float measurement)
 {
   // Do statistics for diagnostic
   const auto now = _clock->now();
@@ -72,7 +72,7 @@ void RangeSensor::processMeasurementData(const float measurement)
   sendInputValue(measurement);
 }
 
-diagnostic::Diagnostic RangeSensor::processDiagnosticsImpl()
+diagnostic::Diagnostic SensorRange::processDiagnosticsImpl()
 {
   diagnostic::Diagnostic diagnostic;
 

@@ -11,7 +11,7 @@
 #include <Eigen/Dense>
 #include <Eigen/src/Geometry/Quaternion.h>
 #include <array>
-#include <edu_robot/rotation_per_minute.hpp>
+#include <edu_robot/rpm.hpp>
 #include <edu_robot/color.hpp>
 
 namespace eduart {

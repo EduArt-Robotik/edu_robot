@@ -55,7 +55,7 @@ static Robot::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
   return parameter;
 }
 
-Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterface> hardware_interface, const std::string& ns)
+Robot::Robot(const std::string& robot_name, std::unique_ptr<HardwareRobotInterface> hardware_interface, const std::string& ns)
   : rclcpp::Node(robot_name, ns)
   , _hardware_interface(std::move(hardware_interface))
   , _last_twist_received(get_clock()->now())
@@ -93,6 +93,10 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<RobotHardwareInterfa
   _srv_set_mode = create_service<edu_robot::srv::SetMode>(
     "set_mode",
     std::bind(&Robot::callbackServiceSetMode, this, std::placeholders::_1, std::placeholders::_2)
+  );
+  _srv_reset_odometry = create_service<std_srvs::srv::Trigger>(
+    "reset_odometry",
+    std::bind(&Robot::callbackServiceResetOdometry, this, std::placeholders::_1, std::placeholders::_2)
   );
 
   // Subscriptions
@@ -200,7 +204,8 @@ void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> tw
     Eigen::VectorXf radps_measured(_motor_controllers.size());
 
     for (std::size_t i = 0; i < _motor_controllers.size(); ++i) {
-      radps_measured(i) = _motor_controllers[i]->getMeasuredRpm().radps();
+      const std::size_t index = _motor_controllers[i]->parameter().index == 0 ? i : _motor_controllers[i]->parameter().index - 1;
+      radps_measured(index) = _motor_controllers[i]->getMeasuredRpm().radps();
     }
 
     const Eigen::Vector3f velocity_measured = _inverse_kinematic_matrix * radps_measured;
@@ -344,6 +349,23 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
 
   response->state.mode = to_ros(_mode_state_machine.mode());
 }
+
+void Robot::callbackServiceResetOdometry(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+                                         std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+{
+  (void)request;
+
+  _odometry_component->reset();
+
+  if (_parameter.publish_tf_odom) {
+    _tf_broadcaster->sendTransform(_odometry_component->getTfMessage(
+      getFrameIdPrefix() + _parameter.tf_footprint_frame, getFrameIdPrefix() + "odom"
+    ));
+  }
+
+  response->success = true;
+  response->message = "odometry was reset successfully";
+}                                         
 
 void Robot::registerLighting(std::shared_ptr<Lighting> lighting)
 {
