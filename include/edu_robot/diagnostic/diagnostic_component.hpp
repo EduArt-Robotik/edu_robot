@@ -21,6 +21,7 @@ class DiagnosticComponent
 {
 protected:
   DiagnosticComponent() = default;
+  virtual ~DiagnosticComponent() = default;
 
   virtual diagnostic::Diagnostic processDiagnosticsImpl() = 0;
 
