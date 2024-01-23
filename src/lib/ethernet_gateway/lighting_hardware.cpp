@@ -1,6 +1,5 @@
 #include "edu_robot/ethernet_gateway/lighting_hardware.hpp"
 #include "edu_robot/ethernet_gateway/ethernet_communicator.hpp"
-#include "edu_robot/ethernet_gateway/ethernet_gateway_device.hpp"
 #include "edu_robot/ethernet_gateway/tcp/message_definition.hpp"
 #include "edu_robot/ethernet_gateway/tcp/protocol.hpp"
 
@@ -15,10 +14,9 @@ using namespace std::chrono_literals;
 using tcp::message::SetLighting;
 using tcp::message::PROTOCOL;
 
-LightingHardware::LightingHardware(const std::string& hardware_name,
-                                   std::shared_ptr<EthernetCommunicator> communicator)
-  : EthernetGatewayDevice(hardware_name)
-  , EthernetGatewayTxDevice(hardware_name, communicator) 
+LightingHardware::LightingHardware(const std::string& name, std::shared_ptr<EthernetCommunicator> communicator)
+  : EthernetGatewayTxDevice(communicator)
+  , _name(name)
 {
 
 }
@@ -35,21 +33,21 @@ void LightingHardware::processSetValue(const Color& color, const robot::Lighting
   // HACK! At the moment each light can't controlled separately.
   switch (mode) {
   case Mode::FLASH:
-    if (name().find("left") != std::string::npos) {
+    if (_name.find("left") != std::string::npos) {
       auto request = Request::make_request<SetLighting>(
         PROTOCOL::LIGHTING::MODE::FLASH::LEFT, color.r, color.g, color.b);
       auto response = _communicator->sendRequest(std::move(request));
       wait_for_future(response, 100ms);
       response.get();
     }
-    else if (name().find("right") != std::string::npos) {
+    else if (_name.find("right") != std::string::npos) {
       auto request = Request::make_request<SetLighting>(
         PROTOCOL::LIGHTING::MODE::FLASH::RIGHT, color.r, color.g, color.b);
       auto response = _communicator->sendRequest(std::move(request));
       wait_for_future(response, 100ms);
       response.get();
     }
-    else if (name().find("all") != std::string::npos) {
+    else if (_name.find("all") != std::string::npos) {
       auto request = Request::make_request<SetLighting>(
         PROTOCOL::LIGHTING::MODE::FLASH::ALL, color.r, color.g, color.b);
       auto response = _communicator->sendRequest(std::move(request));

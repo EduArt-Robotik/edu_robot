@@ -34,7 +34,7 @@ public:
    */
   class HardwareInterface : public HardwareComponent<Motor::Parameter>
                           , public HardwareActuator<std::vector<Rpm>>
-                          , public HardwareSensor<std::vector<Rpm>, std::vector<bool>>
+                          , public HardwareSensor<std::vector<Rpm>, bool>
   { };                       
 
   /**
@@ -70,7 +70,7 @@ public:
   inline const Motor& motor(const std::size_t index) const { return _motor[index]; }
 
 private:
-  void processMeasurementData(const std::vector<Rpm>& rpm, const std::vector<bool>& enabled_flag);
+  void processMeasurementData(const std::vector<Rpm>& rpm, const bool enabled_flag);
   diagnostic::Diagnostic processDiagnosticsImpl() override;
 
   mutable std::mutex _mutex_access_data;

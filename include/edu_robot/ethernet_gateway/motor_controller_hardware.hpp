@@ -7,73 +7,35 @@
 
 #include <edu_robot/motor_controller.hpp>
 
-#include "edu_robot/hardware_component_interface.hpp"
 #include "edu_robot/ethernet_gateway/ethernet_communicator.hpp"
-#include "edu_robot/ethernet_gateway/ethernet_gateway_device.hpp"
+#include "edu_robot/ethernet_gateway/ethernet_gateway_device_interfaces.hpp"
 #include "edu_robot/rpm.hpp"
 
 #include <memory>
-#include <array>
 
 namespace eduart {
 namespace robot {
 namespace ethernet {
 
-class SingleChannelMotorControllerHardware : public MotorController::ComponentInterface
-                                           , public EthernetGatewayTxRxDevice
-                                           , public MotorController::SensorInterface
+template <std::size_t NUM_CHANNELS>
+class MotorControllerHardware : public MotorController::HardwareInterface
+                              , public EthernetGatewayTxRxDevice
 {
 public:
-  SingleChannelMotorControllerHardware(
-    const std::string& hardware_name_motor, const std::uint8_t can_id, std::shared_ptr<EthernetCommunicator> communicator);
-  ~SingleChannelMotorControllerHardware() override;
+  MotorControllerHardware(const std::uint8_t can_id, std::shared_ptr<EthernetCommunicator> communicator)
+    : EthernetGatewayTxRxDevice(communicator)
+    , _can_id(can_id)
+    , _measured_rpm(NUM_CHANNELS, 0.0)
+  { }
+  ~MotorControllerHardware() override = default;
 
-  void processSetValue(const Rpm& rpm) override;
-  void initialize(const MotorController::Parameter& parameter) override;
+  void processSetValue(const std::vector<Rpm>& rpm) override;
+  void initialize(const Motor::Parameter& parameter) override;
   void processRxData(const tcp::message::RxMessageDataBuffer& data) override;
 
 private:
   std::uint8_t _can_id;
-};
-
-class DummyMotorControllerHardware : public MotorController::ComponentInterface
-                                   , public MotorController::SensorInterface
-{
-public:
-  friend class CompoundMotorControllerHardware;
-
-  DummyMotorControllerHardware(const std::string& hardware_name);
-  ~DummyMotorControllerHardware() override;
-
-  void processSetValue(const Rpm& rpm) override;
-  void initialize(const MotorController::Parameter& parameter) override;
-
-private:
-  Rpm _current_set_value;
-};
-
-class CompoundMotorControllerHardware : public MotorController::ComponentInterface
-                                      , public EthernetGatewayTxRxDevice
-                                      , public MotorController::SensorInterface
-{
-public:
-  CompoundMotorControllerHardware(const std::string& hardware_name_motor_a,
-                                  const std::string& hardware_name_motor_b,
-                                  const std::uint8_t can_id,
-                                  std::shared_ptr<EthernetCommunicator> communicator);
-  ~CompoundMotorControllerHardware() override;
-
-  void processSetValue(const Rpm& rpm) override;
-  void initialize(const MotorController::Parameter& parameter) override;
-  void processRxData(const tcp::message::RxMessageDataBuffer& data) override;
-
-  inline const std::shared_ptr<DummyMotorControllerHardware>& dummyMotorController() const {
-    return _dummy_motor_controller;
-  }
-
-private:
-  std::shared_ptr<DummyMotorControllerHardware> _dummy_motor_controller;
-  std::uint8_t _can_id;
+  std::vector<Rpm> _measured_rpm;
 };
 
 } // end namespace ethernet

@@ -1,10 +1,8 @@
 #include "edu_robot/ethernet_gateway/range_sensor_hardware.hpp"
-#include "edu_robot/ethernet_gateway/ethernet_gateway_device.hpp"
 #include "edu_robot/ethernet_gateway/ethernet_communicator.hpp"
 #include "edu_robot/ethernet_gateway/tcp/message_definition.hpp"
 
 #include <rclcpp/qos.hpp>
-#include <stdexcept>
 
 namespace eduart {
 namespace robot {
@@ -16,10 +14,8 @@ using tcp::message::GetDistanceMeasurement;
 using tcp::message::AcknowledgedDistanceMeasurement;
 
 RangeSensorHardware::RangeSensorHardware(
-  const std::string& hardware_name, const std::uint8_t id, rclcpp::Node& ros_node,
-  std::shared_ptr<EthernetCommunicator> communicator)
-  : EthernetGatewayDevice(hardware_name)
-  , EthernetGatewayTxRxDevice(hardware_name, communicator)
+  const std::uint8_t id, rclcpp::Node& ros_node, std::shared_ptr<EthernetCommunicator> communicator)
+  : EthernetGatewayTxRxDevice(communicator)
   , _id(id)
   , _timer_get_measurement(
       ros_node.create_wall_timer(100ms, std::bind(&RangeSensorHardware::processMeasurement, this))

@@ -45,14 +45,14 @@ void MotorController::setRpm(const std::vector<Rpm>& rpm)
   _hardware_interface->processSetValue(rpm);
 }
 
-void MotorController::processMeasurementData(const std::vector<Rpm>& rpm, const std::vector<bool>& enabled_flag)
+void MotorController::processMeasurementData(const std::vector<Rpm>& rpm, const bool enabled_flag)
 {
   std::lock_guard guard(_mutex_access_data);
   bool all_enabled = true;
   const auto now = _clock->now();
 
   for (std::size_t i = 0; i < _motor.size(); ++i) {
-    _motor[i].processMeasurementData(rpm[i], enabled_flag[i], now);
+    _motor[i].processMeasurementData(rpm[i], enabled_flag, now);
     all_enabled &= _motor[i].isEnabled();
   }
 
