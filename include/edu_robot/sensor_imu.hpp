@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "edu_robot/hardware_component_interface.hpp"
+#include "edu_robot/hardware_component_interfaces.hpp"
 #include "edu_robot/sensor.hpp"
 #include "edu_robot/diagnostic/standard_deviation.hpp"
 
@@ -38,7 +38,9 @@ public:
     std::string rotated_frame = "imu/rotated";
   };
 
-  using SensorInterface = HardwareSensorInterface<Parameter, Eigen::Quaterniond, Eigen::Vector3d, Eigen::Vector3d>;
+  class SensorInterface : public HardwareComponent<Parameter>
+                        , public HardwareSensor<Eigen::Quaterniond, Eigen::Vector3d, Eigen::Vector3d>
+  { };
 
   SensorImu(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
             const tf2::Transform sensor_transform, const Parameter parameter,

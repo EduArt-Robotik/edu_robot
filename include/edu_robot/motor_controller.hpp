@@ -40,15 +40,17 @@ public:
   /**
    * \brief Constructs this motor controller class using finished initialized motors and hardware interface.
    * \param name Name of the controller.
+   * \param id Motor ID.
    * \param motors Finished initialized motors that are controlled by this controller class.
    * \param ros_node ROS node instance.
    * \param hardware_interface Interface to the hardware instance used to communication.
    */
-  MotorController(const std::string& name, std::vector<Motor>&& motors, rclcpp::Node& ros_node,
-    std::shared_ptr<HardwareInterface> hardware_interface);
+  MotorController(const std::string& name, const std::size_t id, std::vector<Motor>&& motors,
+    rclcpp::Node& ros_node, std::shared_ptr<HardwareInterface> hardware_interface);
   virtual ~MotorController();
 
   inline const std::string& name() const { return _name; }
+  inline std::size_t id() const { return _id; }
   void setRpm(const std::vector<Rpm>& rpm);
   inline const std::vector<Rpm>& getMeasuredRpm() const {
     std::lock_guard guard(_mutex_access_data);
@@ -74,6 +76,7 @@ private:
   mutable std::mutex _mutex_access_data;
 
   std::string _name;
+  std::size_t _id;
   std::vector<Motor> _motor;
   std::vector<Rpm> _measured_rpm;
   std::shared_ptr<HardwareInterface> _hardware_interface;

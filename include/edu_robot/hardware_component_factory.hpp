@@ -25,10 +25,8 @@ public:
 
   inline std::map<std::string, std::shared_ptr<Lighting::ComponentInterface>>
   lightingHardware() { return _lighting_hardware; }
-  inline std::map<std::string, std::shared_ptr<MotorController::ComponentInterface>>
+  inline std::map<std::string, std::shared_ptr<MotorController::HardwareInterface>>
   motorControllerHardware() { return _motor_controller_hardware; }
-  inline std::map<std::string, std::shared_ptr<MotorController::SensorInterface>>
-  motorSensorHardware() { return _motor_sensor_hardware; }
   inline std::map<std::string, std::shared_ptr<SensorRange::SensorInterface>>
   rangeSensorHardware() { return _range_sensor_hardware; }
   inline std::map<std::string, std::shared_ptr<SensorImu::SensorInterface>>
@@ -36,8 +34,7 @@ public:
 
 protected:
   std::map<std::string, std::shared_ptr<Lighting::ComponentInterface>> _lighting_hardware;
-  std::map<std::string, std::shared_ptr<MotorController::ComponentInterface>> _motor_controller_hardware;
-  std::map<std::string, std::shared_ptr<MotorController::SensorInterface>> _motor_sensor_hardware;
+  std::map<std::string, std::shared_ptr<MotorController::HardwareInterface>> _motor_controller_hardware;
   std::map<std::string, std::shared_ptr<SensorRange::SensorInterface>> _range_sensor_hardware;
   std::map<std::string, std::shared_ptr<SensorImu::SensorInterface>> _imu_sensor_hardware;
 };

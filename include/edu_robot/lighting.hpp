@@ -6,7 +6,7 @@
 #pragma once
 
 #include "edu_robot/color.hpp"
-#include "edu_robot/hardware_component_interface.hpp"
+#include "edu_robot/hardware_component_interfaces.hpp"
 
 #include <memory>
 #include <string>
@@ -37,7 +37,8 @@ public:
 
   };
 
-  using ComponentInterface = HardwareComponentInterface<Parameter, Color, Mode>;
+  class ComponentInterface : public HardwareComponent<Parameter>
+                           , public HardwareActuator<Color, Mode> { };
 
   Lighting(const std::string& name, const Color default_color, const float default_brightness,
            std::shared_ptr<ComponentInterface> hardware_interface);

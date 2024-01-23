@@ -9,9 +9,11 @@
 namespace eduart {
 namespace robot {
 
-MotorController::MotorController(const std::string& name, std::vector<Motor>&& motors, rclcpp::Node& ros_node,
+MotorController::MotorController(
+  const std::string& name, const std::size_t id, std::vector<Motor>&& motors, rclcpp::Node& ros_node,
     std::shared_ptr<HardwareInterface> hardware_interface)
   : _name(name)
+  , _id(id)
   , _motor(motors)
   , _hardware_interface(hardware_interface)
   , _clock(ros_node.get_clock())

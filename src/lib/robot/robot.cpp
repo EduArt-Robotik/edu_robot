@@ -188,24 +188,39 @@ void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> tw
     // Calculate wheel rotation speed using provided kinematic matrix.
     // Apply velocity reduction if a limit is reached.
     Eigen::VectorXf radps = _kinematic_matrix * velocity_cmd;
+    // Reserve memory, so no reallocation is required.
+    std::vector<Rpm> set_rpm(8);
     float reduce_factor = 1.0f;
-  
-    for (Eigen::Index i = 0; i < radps.size(); ++i) {
-      reduce_factor = std::min(
-        std::abs(_motor_controllers[i]->parameter().max_rpm / Rpm::fromRadps(radps(i))), reduce_factor
-      );
+
+    for (std::size_t c = 0, row = 0; c < _motor_controllers.size(); ++c) {
+      for (std::size_t m = 0; m < _motor_controllers[c]->motors(); ++m, ++row) {
+        reduce_factor = std::min(
+          std::abs(_motor_controllers[c]->motor(m).parameter().max_rpm / Rpm::fromRadps(radps(row))),
+          reduce_factor
+        );
+      }
     }
-    for (Eigen::Index i = 0; i < radps.size(); ++i) {
-      const std::size_t index = _motor_controllers[i]->parameter().index == 0 ? i : _motor_controllers[i]->parameter().index - 1;
-      _motor_controllers[i]->setRpm(Rpm::fromRadps(radps(index)) * reduce_factor);
+    for (std::size_t c = 0, row = 0; c < _motor_controllers.size(); ++c) {
+      set_rpm.resize(_motor_controllers.size());
+
+      for (std::size_t m = 0; m < _motor_controllers[c]->motors(); ++m, ++row) {
+        const auto parameter = _motor_controllers[c]->motor(m).parameter();
+        const std::size_t index = parameter.index == 0 ? row : parameter.index - 1;
+        set_rpm[m] = Rpm::fromRadps(radps(index)) * reduce_factor;
+      }
+        
+      _motor_controllers[c]->setRpm(set_rpm);
     }
 
     // Calculating Odometry and Publishing it
-    Eigen::VectorXf radps_measured(_motor_controllers.size());
+    Eigen::VectorXf radps_measured(radps.size());
 
-    for (std::size_t i = 0; i < _motor_controllers.size(); ++i) {
-      const std::size_t index = _motor_controllers[i]->parameter().index == 0 ? i : _motor_controllers[i]->parameter().index - 1;
-      radps_measured(index) = _motor_controllers[i]->getMeasuredRpm().radps();
+    for (std::size_t c = 0, row = 0; c < _motor_controllers.size(); ++c) {
+      for (std::size_t m = 0; m < _motor_controllers[c]->motors(); ++m, ++row) {
+        const auto parameter = _motor_controllers[c]->motor(m).parameter();
+        const std::size_t index = parameter.index == 0 ? row : parameter.index - 1;
+        radps_measured(index) = _motor_controllers[c]->getMeasuredRpm()[m].radps();
+      }
     }
 
     const Eigen::Vector3f velocity_measured = _inverse_kinematic_matrix * radps_measured;
@@ -242,16 +257,26 @@ void Robot::callbackSetMotorRpm(std::shared_ptr<const std_msgs::msg::Float32Mult
     _last_twist_received = get_clock()->now();
 
     // Setting RPM motor input values.
-    for (std::size_t i = 0; i < rpm_msg->data.size(); ++i) {
-      _motor_controllers[i]->setRpm(rpm_msg->data[i]);
+    std::vector<Rpm> set_rpm(8);
+
+    for (std::size_t c = 0, i; c < rpm_msg->data.size(); ++c) {
+      set_rpm.resize(_motor_controllers[c]->motors());
+
+      for (std::size_t m = 0; m < _motor_controllers[c]->motors(); ++m, ++i) {
+        set_rpm[m] = rpm_msg->data[i];
+      }
+
+      _motor_controllers[c]->setRpm(set_rpm);
     }
 
     // Calculating Odometry and Publishing it
     // \todo code duplication!
     Eigen::VectorXf radps_measured(_motor_controllers.size());
 
-    for (std::size_t i = 0; i < _motor_controllers.size(); ++i) {
-      radps_measured(i) = _motor_controllers[i]->getMeasuredRpm().radps();
+    for (std::size_t c = 0, row = 0; c < _motor_controllers.size(); ++c) {
+      for (std::size_t m = 0; m < _motor_controllers[c]->motors(); ++m, ++row) {
+        radps_measured(row) = _motor_controllers[c]->getMeasuredRpm()[m].radps();
+      }
     }
 
     const Eigen::Vector3f velocity_measured = _inverse_kinematic_matrix * radps_measured;
@@ -586,8 +611,10 @@ void Robot::switchKinematic(const DriveKinematic kinematic)
       msg.k.data[row * _kinematic_matrix.cols() + col] = _kinematic_matrix(row, col);
     }
   }
-  for (const auto& motor : _motor_controllers) {
-    msg.wheel_limits.push_back(motor.second->parameter().max_rpm);
+  for (std::size_t c = 0; c < _motor_controllers.size(); ++c) {
+    for (std::size_t m = 0; m < _motor_controllers[c]->motors(); ++m) {
+      msg.wheel_limits.push_back(_motor_controllers[c]->motor(m).parameter().max_rpm);
+    }
   }
 
   _pub_kinematic_description->publish(msg);
