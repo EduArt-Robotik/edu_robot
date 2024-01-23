@@ -1,5 +1,6 @@
 #include "edu_robot/motor_controller.hpp"
 #include "edu_robot/rpm.hpp"
+#include "edu_robot/hardware_component_factory.hpp"
 
 #include <cstdint>
 #include <functional>
@@ -80,6 +81,50 @@ diagnostic::Diagnostic MotorController::processDiagnosticsImpl()
 
   return diagnostic;
 }
+
+
+std::vector<std::shared_ptr<MotorController>> helper_create_motor_controller(
+  const HardwareComponentFactory& factory, const std::vector<std::string>& motor_name,
+  const std::vector<std::string>& motor_joint_name, rclcpp::Node& ros_node)
+{
+  constexpr robot::Motor::Parameter motor_controller_default_parameter{ };  
+  std::size_t idx_motor = 0;
+  std::size_t idx_motor_controller = 0;
+  std::vector<std::shared_ptr<MotorController>> motor_controllers;
+
+  // Create for each motor controller motors and use it for creation of motor controllers.
+  for (auto& motor_controller_hardware : factory.motorControllerHardware()) {
+    std::vector<Motor> motors;
+
+    // Creating Motors
+    for (std::size_t m = 0; m < motor_controller_hardware.second->motors(); ++m, ++idx_motor) {
+      // Get parameter for motor.
+      const auto motor_controller_parameter = robot::Motor::get_parameter(
+        motor_name[idx_motor], motor_controller_default_parameter, ros_node
+      );
+
+      // Creating Motor
+      motors.emplace_back(
+        motor_name[idx_motor],
+        motor_controller_parameter,
+        ros_node,
+        motor_joint_name[idx_motor]
+      );
+    }
+
+    auto motor_controller = std::make_shared<robot::MotorController>(
+      motor_controller_hardware.first,
+      idx_motor_controller++,
+      std::move(motors),
+      ros_node,
+      motor_controller_hardware.second
+    );
+    motor_controller->initialize();
+    motor_controllers.push_back(motor_controller);
+  }
+
+  return motor_controllers;
+}  
 
 } // end namespace robot
 } // end namespace eduart

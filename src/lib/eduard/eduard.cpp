@@ -1,7 +1,7 @@
 #include <edu_robot/eduard/eduard.hpp>
 #include <edu_robot/hardware_component_factory.hpp>
 
-#include <edu_robot/hardware_component_interface.hpp>
+#include <edu_robot/hardware_component_interfaces.hpp>
 #include <edu_robot/motor_controller.hpp>
 #include <edu_robot/robot.hpp>
 #include <edu_robot/sensor_range.hpp>

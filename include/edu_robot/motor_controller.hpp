@@ -35,7 +35,16 @@ public:
   class HardwareInterface : public HardwareComponent<Motor::Parameter>
                           , public HardwareActuator<std::vector<Rpm>>
                           , public HardwareSensor<std::vector<Rpm>, bool>
-  { };                       
+  {
+  protected:
+    HardwareInterface(const std::size_t num_motors) : _num_motors(num_motors) { }
+
+  public:
+    inline std::size_t motors() const { return _num_motors; }
+
+  private:
+    std::size_t _num_motors;
+  };                       
 
   /**
    * \brief Constructs this motor controller class using finished initialized motors and hardware interface.
@@ -68,6 +77,9 @@ public:
   }
   inline std::size_t motors() const { return _motor.size(); }
   inline const Motor& motor(const std::size_t index) const { return _motor[index]; }
+  void initialize() {
+    _hardware_interface->initialize(_motor[0].parameter());
+  }
 
 private:
   void processMeasurementData(const std::vector<Rpm>& rpm, const bool enabled_flag);
@@ -88,6 +100,12 @@ private:
   std::shared_ptr<diagnostic::StandardDeviationDiagnostic<std::int64_t, std::greater<std::int64_t>>> _processing_dt_statistic;
   std::atomic_bool _lost_enable = false;
 };
+
+class HardwareComponentFactory;
+
+std::vector<std::shared_ptr<MotorController>> helper_create_motor_controller(
+  const HardwareComponentFactory& factory, const std::vector<std::string>& motor_name,
+  const std::vector<std::string>& motor_joint_name, rclcpp::Node& ros_node);
 
 } // end namespace robot
 } // end namespace eduart

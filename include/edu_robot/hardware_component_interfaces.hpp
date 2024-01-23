@@ -15,6 +15,7 @@ class HardwareComponent
 {
 protected:
   virtual ~HardwareComponent() = default;
+public:
   virtual void initialize(const Parameter& parameter) = 0;
 };
 

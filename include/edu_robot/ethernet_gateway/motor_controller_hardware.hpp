@@ -23,7 +23,8 @@ class MotorControllerHardware : public MotorController::HardwareInterface
 {
 public:
   MotorControllerHardware(const std::uint8_t can_id, std::shared_ptr<EthernetCommunicator> communicator)
-    : EthernetGatewayTxRxDevice(communicator)
+    : MotorController::HardwareInterface(NUM_CHANNELS)
+    , EthernetGatewayTxRxDevice(communicator)
     , _can_id(can_id)
     , _measured_rpm(NUM_CHANNELS, 0.0)
   { }
