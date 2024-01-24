@@ -1,6 +1,5 @@
 #include "edu_robot/iot_shield/iot_shield_communicator.hpp"
 #include "edu_robot/hardware_error.hpp"
-#include "edu_robot/iot_shield/iot_shield_device.hpp"
 #include "edu_robot/iot_shield/uart/message.hpp"
 
 #include <chrono>

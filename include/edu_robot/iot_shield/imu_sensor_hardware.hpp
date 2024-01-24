@@ -5,10 +5,10 @@
  */
 #pragma once
 
-#include <edu_robot/hardware_component_interface.hpp>
+#include <edu_robot/hardware_component_interfaces.hpp>
 #include <edu_robot/sensor_imu.hpp>
 
-#include "edu_robot/iot_shield/iot_shield_device.hpp"
+#include "edu_robot/iot_shield/iot_shield_device_interfaces.hpp"
 
 namespace eduart {
 namespace robot {
@@ -18,14 +18,14 @@ class ImuSensorHardware : public SensorImu::SensorInterface
                         , public IotShieldTxRxDevice
 {
 public:
-  ImuSensorHardware(const std::string& hardware_name, std::shared_ptr<IotShieldCommunicator> communicator);
+  ImuSensorHardware(std::shared_ptr<IotShieldCommunicator> communicator);
   ~ImuSensorHardware() override = default;
 
   void processRxData(const uart::message::RxMessageDataBuffer& data) override;
   void initialize(const SensorImu::Parameter& parameter) override;
 
 private:
-  bool _enable;
+  bool _raw_mode = true;
 };
 
 } // end namespace iotbot

@@ -50,6 +50,7 @@ public:
 
   static SensorImu::Parameter get_parameter(
     const std::string& name, const SensorImu::Parameter& default_parameter, rclcpp::Node& ros_node);
+  inline const Parameter& parameter() const { return _parameter; }
 
 protected:
   void processMeasurementData(

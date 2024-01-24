@@ -1,7 +1,7 @@
 #include "edu_robot/iot_shield/motor_controller_hardware.hpp"
 #include "edu_robot/hardware_error.hpp"
 #include "edu_robot/iot_shield/iot_shield_communicator.hpp"
-#include "edu_robot/iot_shield/iot_shield_device.hpp"
+#include "edu_robot/iot_shield/iot_shield_device_interfaces.hpp"
 #include "edu_robot/iot_shield/uart/message_definition.hpp"
 #include "edu_robot/motor_controller.hpp"
 
@@ -14,61 +14,43 @@ namespace iotbot {
 
 using namespace std::chrono_literals;
 
-DummyMotorControllerHardware::DummyMotorControllerHardware(const std::string& hardware_name)
-  : _current_set_value(0.0)
-{
-  (void)hardware_name; // \todo do something with hardware name or just remove it!
-}
-
-DummyMotorControllerHardware::~DummyMotorControllerHardware()
+MotorControllerHardware::MotorControllerHardware(std::shared_ptr<IotShieldCommunicator> communicator)
+  : MotorController::HardwareInterface(4)
+  , IotShieldTxRxDevice(communicator)
+  , _measured_rpm(4, 0.0)
 {
 
-}
-
-void DummyMotorControllerHardware::processSetValue(const Rpm& rpm)
-{
-  _current_set_value = rpm;
-}
-
-void DummyMotorControllerHardware::initialize(const MotorController::Parameter& parameter)
-{
-  (void)parameter;
-}
-
-CompoundMotorControllerHardware::CompoundMotorControllerHardware(
-  const std::string& hardware_name, std::shared_ptr<IotShieldCommunicator> communicator)
-  : IotShieldDevice(hardware_name + "_d")
-  , IotShieldTxRxDevice(hardware_name + "_d", communicator)
-{
-  _dummy_motor_controllers[0] = std::make_shared<DummyMotorControllerHardware>(hardware_name + "_a");
-  _dummy_motor_controllers[1] = std::make_shared<DummyMotorControllerHardware>(hardware_name + "_b");
-  _dummy_motor_controllers[2] = std::make_shared<DummyMotorControllerHardware>(hardware_name + "_c");
 }            
 
-CompoundMotorControllerHardware::~CompoundMotorControllerHardware()
+MotorControllerHardware::~MotorControllerHardware()
 {
 
 }
 
-void CompoundMotorControllerHardware::processRxData(const uart::message::RxMessageDataBuffer &data)
+void MotorControllerHardware::processRxData(const uart::message::RxMessageDataBuffer &data)
 {
   if (_callback_process_measurement == nullptr) {
     return;
   }
   
-  _dummy_motor_controllers[0]->_callback_process_measurement(-uart::message::ShieldResponse::rpm0(data), true);
-  _dummy_motor_controllers[1]->_callback_process_measurement(-uart::message::ShieldResponse::rpm1(data), true);
-  _dummy_motor_controllers[2]->_callback_process_measurement(-uart::message::ShieldResponse::rpm2(data), true);
-  _callback_process_measurement(-uart::message::ShieldResponse::rpm3(data), true);
+  _measured_rpm[0] = -uart::message::ShieldResponse::rpm0(data);
+  _measured_rpm[1] = -uart::message::ShieldResponse::rpm1(data);
+  _measured_rpm[2] = -uart::message::ShieldResponse::rpm2(data);
+  _measured_rpm[3] = -uart::message::ShieldResponse::rpm3(data);
+  _callback_process_measurement(_measured_rpm, true);
 }
 
-void CompoundMotorControllerHardware::processSetValue(const Rpm& rpm)
+void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
 {
+  if (rpm.size() < 4) {
+    throw std::runtime_error("Given rpm vector needs a minimum size of 4.");
+  }
+
   auto request = ShieldRequest::make_request<uart::message::SetRpm>(
-    -_dummy_motor_controllers[0]->_current_set_value,
-    -_dummy_motor_controllers[1]->_current_set_value,
-    -_dummy_motor_controllers[2]->_current_set_value,
-    -rpm
+    -rpm[0],
+    -rpm[1],
+    -rpm[2],
+    -rpm[3]
   );
 
   auto future_response = _communicator->sendRequest(std::move(request));
@@ -76,7 +58,7 @@ void CompoundMotorControllerHardware::processSetValue(const Rpm& rpm)
   future_response.get();
 }
 
-void CompoundMotorControllerHardware::initialize(const MotorController::Parameter& parameter)
+void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
 {
   // Initial Motor Controller Hardware
   if (false == parameter.isValid()) {

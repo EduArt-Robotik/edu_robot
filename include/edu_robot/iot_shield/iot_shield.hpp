@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "edu_robot/iot_shield/iot_shield_device.hpp"
+#include "edu_robot/iot_shield/iot_shield_device_interfaces.hpp"
 #include "edu_robot/iot_shield/uart/message.hpp"
 #include "edu_robot/iot_shield/iot_shield_communicator.hpp"
 
@@ -39,6 +39,9 @@ public:
   std::shared_ptr<IotShieldCommunicator> getCommunicator() { return _communicator; }
   void registerIotShieldRxDevice(std::shared_ptr<IotShieldRxDevice> device);
   void processStatusReport();
+  inline void setImuRawDataMode(const bool raw_data_mode) {
+    _imu_raw_data_mode = raw_data_mode;
+  }
 
 private:
   diagnostic::Diagnostic processDiagnosticsImpl() override;
@@ -47,6 +50,7 @@ private:
   uart::message::TxMessageDataBuffer _tx_buffer;
   std::vector<std::shared_ptr<IotShieldRxDevice>> _rx_devices;
   std::shared_ptr<rclcpp::Clock> _clock;
+  bool _imu_raw_data_mode = false;
 
   // diagnostics
   struct {

@@ -7,10 +7,10 @@
 
 
 #include <edu_robot/sensor_range.hpp>
-#include <edu_robot/hardware_component_interface.hpp>
+#include <edu_robot/hardware_component_interfaces.hpp>
 #include <rclcpp/parameter.hpp>
 
-#include "edu_robot/iot_shield/iot_shield_device.hpp"
+#include "edu_robot/iot_shield/iot_shield_device_interfaces.hpp"
 
 namespace eduart {
 namespace robot {
@@ -20,7 +20,7 @@ class RangeSensorHardware : public SensorRange::SensorInterface
                           , public IotShieldRxDevice
 {
 public:
-  RangeSensorHardware(const std::string& hardware_name, const std::uint8_t id);
+  RangeSensorHardware(const std::uint8_t id);
   ~RangeSensorHardware() override = default;
 
   void processRxData(const uart::message::RxMessageDataBuffer& data) override;
