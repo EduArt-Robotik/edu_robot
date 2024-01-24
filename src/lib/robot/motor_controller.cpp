@@ -97,7 +97,7 @@ std::vector<std::shared_ptr<MotorController>> helper_create_motor_controller(
     std::vector<Motor> motors;
 
     // Creating Motors
-    for (std::size_t m = 0; m < motor_controller_hardware.second->motors(); ++m, ++idx_motor) {
+    for (std::size_t m = 0; m < motor_controller_hardware->motors(); ++m, ++idx_motor) {
       // Get parameter for motor.
       const auto motor_controller_parameter = robot::Motor::get_parameter(
         motor_name[idx_motor], motor_controller_default_parameter, ros_node
@@ -113,11 +113,11 @@ std::vector<std::shared_ptr<MotorController>> helper_create_motor_controller(
     }
 
     auto motor_controller = std::make_shared<robot::MotorController>(
-      motor_controller_hardware.first,
+      motor_controller_hardware->name(),
       idx_motor_controller++,
       std::move(motors),
       ros_node,
-      motor_controller_hardware.second
+      motor_controller_hardware
     );
     motor_controller->initialize();
     motor_controllers.push_back(motor_controller);

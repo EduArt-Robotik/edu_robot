@@ -28,20 +28,21 @@ public:
     // _timer_process_status_report = create_wall_timer(100ms, [shield]{ shield->processStatusReport(); });
 
             // Lightings
-    factory.addLighting("head", "head_lighting")
-           .addLighting("right_side", "right_side_lighting")
-           .addLighting("left_side", "left_side_lighting")
-           .addLighting("back", "back_lighting")
-           .addLighting("all", "all_lighting")
+    factory.addLighting("head")
+           .addLighting("right_side")
+           .addLighting("left_side")
+           .addLighting("back")
+           .addLighting("all")
            // Motor Controller
-           .addMotorController("motor", "motor_hardware")
+           .addMotorController("motor_controller_0", 0)
+           .addMotorController("motor_controller_1", 1)
            // Range Sensor
-           .addRangeSensor("range/front/left", "range/front/left/hardware", 0u, *this)
-           .addRangeSensor("range/front/right", "range/front/right/hardware", 1u, *this)
-           .addRangeSensor("range/rear/left", "range/rear/left/hardware", 2u, *this)
-           .addRangeSensor("range/rear/right", "range/rear/right/hardware", 3u, *this)
+           .addRangeSensor("range/front/left", 0u, *this)
+           .addRangeSensor("range/front/right", 1u, *this)
+           .addRangeSensor("range/rear/left", 2u, *this)
+           .addRangeSensor("range/rear/right", 3u, *this)
            // IMU Sensor
-           .addImuSensor("imu", "imu_hardware", *this);
+           .addImuSensor("imu", *this);
 
     initialize(factory);
     shield->registerComponentInput(_detect_charging_component);

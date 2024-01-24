@@ -24,7 +24,7 @@ class MotorControllerHardware : public MotorController::HardwareInterface
                               , public eduart::robot::iotbot::IotShieldTxRxDevice
 {
 public:
-  MotorControllerHardware(std::shared_ptr<IotShieldCommunicator> communicator);
+  MotorControllerHardware(const std::string& name, std::shared_ptr<IotShieldCommunicator> communicator);
   ~MotorControllerHardware() override;
 
   void processRxData(const uart::message::RxMessageDataBuffer& data) override;

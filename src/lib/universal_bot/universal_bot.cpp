@@ -52,12 +52,14 @@ UniversalBot::UniversalBot(const std::string& robot_name, std::unique_ptr<Hardwa
 void UniversalBot::initialize(eduart::robot::HardwareComponentFactory& factory)
 {
   // Motor Controllers
-  const std::vector<std::string> motor_name = {
+  std::vector<std::string> motor_name = {
     "motor_a", "motor_b", "motor_c", "motor_d", "motor_e", "motor_f", "motor_g", "motor_h"};
   // \todo fix the wrong order of joints!
-  const std::vector<std::string> motor_joint_name = {
+  std::vector<std::string> motor_joint_name = {
     "base_to_motor_1", "base_to_motor_2", "base_to_motor_3", "base_to_motor_4",
     "base_to_motor_5", "base_to_motor_6", "base_to_motor_7", "base_to_motor_8"};
+  
+  // Create motors and motor controllers.
   auto motor_controllers = helper_create_motor_controller(factory, motor_name, motor_joint_name, *this);
 
   for (auto& motor_controller : motor_controllers) {

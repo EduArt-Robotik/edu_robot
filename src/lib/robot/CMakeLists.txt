@@ -8,6 +8,7 @@ add_library(eduart-robot
   sensor.cpp
   sensor_range.cpp
   sensor_imu.cpp
+  motor.cpp
 )
 target_link_libraries(eduart-robot
   Eigen3::Eigen

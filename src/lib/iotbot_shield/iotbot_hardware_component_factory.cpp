@@ -22,9 +22,9 @@ IotBotHardwareComponentFactory& IotBotHardwareComponentFactory::addLighting(cons
 
 IotBotHardwareComponentFactory& IotBotHardwareComponentFactory::addMotorController(const std::string& controller_name)
 {
-  auto compound_motor = std::make_shared<MotorControllerHardware>(_shield->getCommunicator());
+  auto compound_motor = std::make_shared<MotorControllerHardware>(controller_name, _shield->getCommunicator());
 
-  _motor_controller_hardware[controller_name] = compound_motor;
+  _motor_controller_hardware.push_back(compound_motor);
   _shield->registerIotShieldRxDevice(compound_motor);
 
   return *this;

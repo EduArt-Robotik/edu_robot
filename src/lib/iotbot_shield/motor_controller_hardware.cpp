@@ -14,8 +14,9 @@ namespace iotbot {
 
 using namespace std::chrono_literals;
 
-MotorControllerHardware::MotorControllerHardware(std::shared_ptr<IotShieldCommunicator> communicator)
-  : MotorController::HardwareInterface(4)
+MotorControllerHardware::MotorControllerHardware(
+  const std::string& name, std::shared_ptr<IotShieldCommunicator> communicator)
+  : MotorController::HardwareInterface(name, 4)
   , IotShieldTxRxDevice(communicator)
   , _measured_rpm(4, 0.0)
 {

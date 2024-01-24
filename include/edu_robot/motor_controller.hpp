@@ -37,12 +37,14 @@ public:
                           , public HardwareSensor<std::vector<Rpm>, bool>
   {
   protected:
-    HardwareInterface(const std::size_t num_motors) : _num_motors(num_motors) { }
+    HardwareInterface(const std::string& name, const std::size_t num_motors) : _name(name), _num_motors(num_motors) { }
 
   public:
     inline std::size_t motors() const { return _num_motors; }
+    inline const std::string& name() const { return _name; }
 
   private:
+    std::string _name;
     std::size_t _num_motors;
   };                       
 
@@ -78,6 +80,10 @@ public:
   inline std::size_t motors() const { return _motor.size(); }
   inline const Motor& motor(const std::size_t index) const { return _motor[index]; }
   void initialize() {
+    if (_motor.empty()) {
+      throw std::runtime_error("No motor is present --> can't initialize motors.");
+    }
+
     _hardware_interface->initialize(_motor[0].parameter());
   }
 
