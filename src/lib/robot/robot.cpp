@@ -259,7 +259,7 @@ void Robot::callbackSetMotorRpm(std::shared_ptr<const std_msgs::msg::Float32Mult
     // Setting RPM motor input values.
     std::vector<Rpm> set_rpm(8);
 
-    for (std::size_t c = 0, i; c < rpm_msg->data.size(); ++c) {
+    for (std::size_t c = 0, i = 0; c < rpm_msg->data.size(); ++c) {
       set_rpm.resize(_motor_controllers[c]->motors());
 
       for (std::size_t m = 0; m < _motor_controllers[c]->motors(); ++m, ++i) {
