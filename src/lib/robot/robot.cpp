@@ -200,38 +200,31 @@ void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> tw
         );
       }
     }
-    std::cout << "count motor controller = " << _motor_controllers.size() << std::endl;
+
     for (std::size_t c = 0, row = 0; c < _motor_controllers.size(); ++c) {
-      std::cout << "motor controller " << c << ": count motors = " << _motor_controllers[c]->motors() << std::endl;
       set_rpm.resize(_motor_controllers[c]->motors());
 
       for (std::size_t m = 0; m < _motor_controllers[c]->motors(); ++m, ++row) {
-        std::cout << "doing motor " << m << " of motor controller " << c << std::endl;
         const auto parameter = _motor_controllers[c]->motor(m).parameter();
         const std::size_t index = parameter.index == 0 ? row : parameter.index - 1;
         set_rpm[m] = Rpm::fromRadps(radps(index)) * reduce_factor;
-        std::cout << "end motor " << m << std::endl;
       }
         
       _motor_controllers[c]->setRpm(set_rpm);
     }
 
     // Calculating Odometry and Publishing it
-    std::cout << "calculation odometry" << std::endl;
     Eigen::VectorXf radps_measured(radps.size());
-    std::cout << "size of radps = " << radps.size() << std::endl;
 
     for (std::size_t c = 0, row = 0; c < _motor_controllers.size(); ++c) {
       for (std::size_t m = 0; m < _motor_controllers[c]->motors(); ++m, ++row) {
         const auto parameter = _motor_controllers[c]->motor(m).parameter();
         const std::size_t index = parameter.index == 0 ? row : parameter.index - 1;
-        std::cout << "index = " << index << std::endl;
         radps_measured(index) = _motor_controllers[c]->getMeasuredRpm()[m].radps();
       }
     }
 
     const Eigen::Vector3f velocity_measured = _inverse_kinematic_matrix * radps_measured;
-    std::cout << "publishing odometry" << std::endl;
     _odometry_component->process(velocity_measured);
     _pub_odometry->publish(_odometry_component->getOdometryMessage(
       getFrameIdPrefix() + _parameter.tf_footprint_frame, getFrameIdPrefix() + "odom"
