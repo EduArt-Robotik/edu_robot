@@ -67,26 +67,26 @@ struct ShieldResponse : public uart::message::Message<element::Uint8, element::I
   inline static constexpr Rpm rpm3(const RxMessageDataBuffer& rx_buffer) { return static_cast<float>(deserialize<4>(rx_buffer)) / 100.0f; }
   inline static Eigen::Quaterniond imuOrientation(const RxMessageDataBuffer& rx_buffer) {
     return Eigen::Quaterniond(
-      static_cast<double>(deserialize<5>(rx_buffer)) / 1000.0,
-      static_cast<double>(deserialize<6>(rx_buffer)) / 1000.0,
-      static_cast<double>(deserialize<7>(rx_buffer)) / 1000.0,
-      static_cast<double>(deserialize<8>(rx_buffer)) / 1000.0
+      static_cast<double>(deserialize<5>(rx_buffer)) / 10000.0,
+      static_cast<double>(deserialize<6>(rx_buffer)) / 10000.0,
+      static_cast<double>(deserialize<7>(rx_buffer)) / 10000.0,
+      static_cast<double>(deserialize<8>(rx_buffer)) / 10000.0
     );
   }
   inline static Eigen::Vector3d linearAcceleration(const RxMessageDataBuffer& rx_buffer) {
     return Eigen::Vector3d(
       // Convert from [mg/s] to [m/s^2].
-      static_cast<double>(deserialize<5>(rx_buffer)) / 1000.0 * 9.81,
-      static_cast<double>(deserialize<6>(rx_buffer)) / 1000.0 * 9.81,
-      static_cast<double>(deserialize<7>(rx_buffer)) / 1000.0 * 9.81
+      static_cast<double>(deserialize<5>(rx_buffer)) / 10000.0 * 9.81,
+      static_cast<double>(deserialize<6>(rx_buffer)) / 10000.0 * 9.81,
+      static_cast<double>(deserialize<7>(rx_buffer)) / 10000.0 * 9.81
     );
   }
   inline static Eigen::Vector3d angularVelocity(const RxMessageDataBuffer& rx_buffer) {
     return Eigen::Vector3d(
       // Convert from [mdeg/s] to [rad/s].
-      (static_cast<double>(deserialize< 8>(rx_buffer)) / 1000.0) * (2.0 * M_PI / 180.0),
-      (static_cast<double>(deserialize< 9>(rx_buffer)) / 1000.0) * (2.0 * M_PI / 180.0),
-      (static_cast<double>(deserialize<10>(rx_buffer)) / 1000.0) * (2.0 * M_PI / 180.0)
+      (static_cast<double>(deserialize< 8>(rx_buffer)) / 10000.0) * (2.0 * M_PI / 180.0),
+      (static_cast<double>(deserialize< 9>(rx_buffer)) / 10000.0) * (2.0 * M_PI / 180.0),
+      (static_cast<double>(deserialize<10>(rx_buffer)) / 10000.0) * (2.0 * M_PI / 180.0)
     );
   }
   inline static constexpr float temperature(const RxMessageDataBuffer& rx_buffer) { return static_cast<float>(deserialize<9>(rx_buffer)) / 100.0f; }
