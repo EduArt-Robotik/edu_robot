@@ -5,32 +5,23 @@
  */
 #pragma once
 
-#include "edu_robot/hardware_component_interface.hpp"
-#include "edu_robot/rpm.hpp"
-#include "edu_robot/angle.hpp"
-
-#include <cstddef>
-#include <edu_robot/action/motor_action.hpp>
+#include "edu_robot/hardware_component_interfaces.hpp"
+#include "edu_robot/motor.hpp"
 
 #include <edu_robot/diagnostic/diagnostic_component.hpp>
 #include <edu_robot/diagnostic/standard_deviation.hpp>
 
-#include <mutex>
 #include <rclcpp/node.hpp>
 #include <rclcpp/clock.hpp>
-#include <rclcpp/publisher.hpp>
 
-#include <sensor_msgs/msg/joint_state.hpp>
-
-#include <cstdint>
-#include <string>
 #include <memory>
+#include <mutex>
 
 namespace eduart {
 namespace robot {
 
 /**
- * \brief Represents a hardware motor controller, but without concrete realization.
+ * \brief Represents a hardware motor controller with n motors. This class expects finished initialized motors at construction.
  *        This class needs to be realized by a specific hardware layer.
  */
 class MotorController : public diagnostic::DiagnosticComponent
@@ -38,82 +29,89 @@ class MotorController : public diagnostic::DiagnosticComponent
 public:
   friend class action::CheckIfMotorIsEnabled;
 
-  struct Parameter
+  /**
+   * \brief Hardware interface used for communication with actual hardware.
+   */
+  class HardwareInterface : public HardwareComponent<Motor::Parameter>
+                          , public HardwareActuator<std::vector<Rpm>>
+                          , public HardwareSensor<std::vector<Rpm>, bool>
   {
-    bool inverted = false;
-    float gear_ratio = 89.0f;
-    float encoder_ratio = 2048.0f;
-    float max_rpm = 100.0f;
-    float threshold_stall_check = 0.25f;
-    std::uint32_t control_frequency = 16000;
-    bool encoder_inverted = false;
-    bool closed_loop = true;
-    std::size_t index = 0;
-    std::uint32_t timeout_ms = 1000;
+  protected:
+    HardwareInterface(const std::string& name, const std::size_t num_motors) : _name(name), _num_motors(num_motors) { }
 
-    float kp = 0.5f;
-    float ki = 5.0f;
-    float kd = 0.0f;
+  public:
+    inline std::size_t motors() const { return _num_motors; }
+    inline const std::string& name() const { return _name; }
 
-    float weight_low_pass_set_point = 0.2f;
-    float weight_low_pass_encoder   = 0.3f;
+  private:
+    std::string _name;
+    std::size_t _num_motors;
+  };                       
 
-    bool isValid() const { return true; } // \todo implement properly
-  };
-
-  using ComponentInterface = HardwareComponentInterface<Parameter, Rpm>;
-  using SensorInterface = HardwareSensorInterface<Parameter, Rpm, bool>;
-
-  MotorController(const std::string& name, const std::uint8_t id, const Parameter& parameter,
-                  const std::string& urdf_joint_name, rclcpp::Node& ros_node,
-                  std::shared_ptr<ComponentInterface> hardware_component_interface,
-                  std::shared_ptr<SensorInterface> hardware_sensor_interface);
+  /**
+   * \brief Constructs this motor controller class using finished initialized motors and hardware interface.
+   * \param name Name of the controller.
+   * \param id Motor ID.
+   * \param motors Finished initialized motors that are controlled by this controller class.
+   * \param ros_node ROS node instance.
+   * \param hardware_interface Interface to the hardware instance used to communication.
+   */
+  MotorController(const std::string& name, const std::size_t id, std::vector<Motor>&& motors,
+    rclcpp::Node& ros_node, std::shared_ptr<HardwareInterface> hardware_interface);
   virtual ~MotorController();
 
   inline const std::string& name() const { return _name; }
-  inline std::uint8_t id() const { return _id; }
-  /**
-   * \brief Sets RPM of this motor. Positive RPM 
-   */
-  void setRpm(const Rpm rpm);
-  inline Rpm getMeasuredRpm() const {
+  inline std::size_t id() const { return _id; }
+  void setRpm(const std::vector<Rpm>& rpm);
+  inline const std::vector<Rpm>& getMeasuredRpm() const {
     std::lock_guard guard(_mutex_access_data);
     return _measured_rpm;
   }
   inline bool isEnabled() const {
     std::lock_guard guard(_mutex_access_data);
-    return _enabled;    
+    bool enabled = true;
+
+    for (const auto& motor : _motor) {
+      enabled &= motor.isEnabled();
+    }
+
+    return enabled;
+  }
+  inline std::size_t motors() const { return _motor.size(); }
+  inline const Motor& motor(const std::size_t index) const { return _motor[index]; }
+  void initialize() {
+    if (_motor.empty()) {
+      throw std::runtime_error("No motor is present --> can't initialize motors.");
+    }
+
+    _hardware_interface->initialize(_motor[0].parameter());
   }
 
-  static MotorController::Parameter get_parameter(
-    const std::string& name, const MotorController::Parameter& default_parameter, rclcpp::Node& ros_node);
-  const Parameter& parameter() const { return _parameter; }
-
 private:
-  void processMeasurementData(const Rpm measurement, const bool enabled_flag);
+  void processMeasurementData(const std::vector<Rpm>& rpm, const bool enabled_flag);
   diagnostic::Diagnostic processDiagnosticsImpl() override;
 
-  const Parameter _parameter;
-  Rpm _set_rpm;
-  Rpm _measured_rpm;
-  bool _enabled = false;
-  std::string _name;
-  std::uint8_t _id;
-  std::string _urdf_joint_name;
-  std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::JointState>> _pub_joint_state;
-  std::shared_ptr<rclcpp::Clock> _clock;
-  rclcpp::Time _stamp_last_measurement;
-  Angle0To2Pi _current_wheel_position = 0.0;
   mutable std::mutex _mutex_access_data;
 
-  std::shared_ptr<ComponentInterface> _hardware_component_interface;
-  std::shared_ptr<SensorInterface> _hardware_sensor_interface;
+  std::string _name;
+  std::size_t _id;
+  std::vector<Motor> _motor;
+  std::vector<Rpm> _measured_rpm;
+  std::shared_ptr<HardwareInterface> _hardware_interface;
 
   // diagnostic
+  std::shared_ptr<rclcpp::Clock> _clock;
+  rclcpp::Time _stamp_last_measurement;  
   rclcpp::Time _last_processing;
   std::shared_ptr<diagnostic::StandardDeviationDiagnostic<std::int64_t, std::greater<std::int64_t>>> _processing_dt_statistic;
   std::atomic_bool _lost_enable = false;
 };
+
+class HardwareComponentFactory;
+
+std::vector<std::shared_ptr<MotorController>> helper_create_motor_controller(
+  const HardwareComponentFactory& factory, const std::vector<std::string>& motor_name,
+  const std::vector<std::string>& motor_joint_name, rclcpp::Node& ros_node);
 
 } // end namespace robot
 } // end namespace eduart

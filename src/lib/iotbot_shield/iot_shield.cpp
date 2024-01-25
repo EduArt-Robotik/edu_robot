@@ -100,7 +100,6 @@ void IotShield::processStatusReport()
   }
 
   const auto buffer = _communicator->getRxBuffer();
-  _report.temperature = uart::message::ShieldResponse::temperature(buffer);
   _report.voltage.mcu = uart::message::ShieldResponse::voltage(buffer);
   _report.current.mcu = uart::message::ShieldResponse::current(buffer);
   _report.rpm.resize(4u);
@@ -108,7 +107,14 @@ void IotShield::processStatusReport()
   _report.rpm[1] = -uart::message::ShieldResponse::rpm1(buffer);
   _report.rpm[2] = -uart::message::ShieldResponse::rpm2(buffer);
   _report.rpm[3] = -uart::message::ShieldResponse::rpm3(buffer);
-  
+
+  if (_imu_raw_data_mode) {
+    _report.temperature = std::numeric_limits<float>::quiet_NaN();
+  }
+  else {
+    _report.temperature = uart::message::ShieldResponse::temperature(buffer);
+  }
+
   sendInputValue(_report.voltage.mcu);
 
   for (auto& device : _rx_devices) {

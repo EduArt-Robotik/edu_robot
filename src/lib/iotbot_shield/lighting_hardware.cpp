@@ -1,5 +1,4 @@
 #include "edu_robot/iot_shield/lighting_hardware.hpp"
-#include "edu_robot/iot_shield/iot_shield_device.hpp"
 #include "edu_robot/iot_shield/iot_shield_communicator.hpp"
 #include "edu_robot/iot_shield/uart/message_definition.hpp"
 #include "edu_robot/lighting.hpp"
@@ -14,10 +13,9 @@ namespace iotbot {
 using uart::message::UART;
 using namespace std::chrono_literals;
 
-LightingHardware::LightingHardware(const std::string& hardware_name,
-                                   std::shared_ptr<IotShieldCommunicator> communicator)
-  : IotShieldDevice(hardware_name)
-  , IotShieldTxDevice(hardware_name, communicator) 
+LightingHardware::LightingHardware(const std::string& name, std::shared_ptr<IotShieldCommunicator> communicator)
+  : IotShieldTxDevice(communicator)
+  , _name(name)
 {
 
 }
@@ -34,21 +32,21 @@ void LightingHardware::processSetValue(const Color& color, const robot::Lighting
   // HACK! At the moment each light can't controlled separately.
   switch (mode) {
   case Mode::FLASH:
-    if (name().find("left") != std::string::npos) {
+    if (_name.find("left") != std::string::npos) {
       auto request = ShieldRequest::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::FLASH::LEFT>>(
       color.r, color.g, color.b, 0, 0);
       auto response = _communicator->sendRequest(std::move(request));
       wait_for_future(response, 100ms);
       response.get();
     }
-    else if (name().find("right") != std::string::npos) {
+    else if (_name.find("right") != std::string::npos) {
       auto request = ShieldRequest::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::FLASH::RIGHT>>(
       color.r, color.g, color.b, 0, 0);
       auto response = _communicator->sendRequest(std::move(request));
       wait_for_future(response, 100ms);
       response.get();
     }
-    else if (name().find("all") != std::string::npos) {
+    else if (_name.find("all") != std::string::npos) {
       auto request = ShieldRequest::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::FLASH::ALL>>(
       color.r, color.g, color.b, 0, 0);
       auto response = _communicator->sendRequest(std::move(request));

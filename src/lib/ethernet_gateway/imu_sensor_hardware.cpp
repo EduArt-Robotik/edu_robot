@@ -1,5 +1,4 @@
 #include "edu_robot/ethernet_gateway/imu_sensor_hardware.hpp"
-#include "edu_robot/ethernet_gateway/ethernet_gateway_device.hpp"
 #include "edu_robot/ethernet_gateway/ethernet_communicator.hpp"
 #include "edu_robot/ethernet_gateway/tcp/message_definition.hpp"
 #include "edu_robot/ethernet_gateway/tcp/protocol.hpp"
@@ -17,10 +16,8 @@ using tcp::message::AcknowledgedImuMeasurement;
 
 using tcp::message::PROTOCOL;
 
-ImuSensorHardware::ImuSensorHardware(
-  const std::string& hardware_name, rclcpp::Node& ros_node, std::shared_ptr<EthernetCommunicator> communicator)
-  : EthernetGatewayDevice(hardware_name)
-  , EthernetGatewayTxRxDevice(hardware_name, communicator)
+ImuSensorHardware::ImuSensorHardware(rclcpp::Node& ros_node, std::shared_ptr<EthernetCommunicator> communicator)
+  : EthernetGatewayTxRxDevice(communicator)
   , _timer_get_measurement(
       ros_node.create_wall_timer(100ms, std::bind(&ImuSensorHardware::processMeasurement, this))
     )

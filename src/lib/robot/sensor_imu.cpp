@@ -16,10 +16,11 @@ SensorImu::Parameter SensorImu::get_parameter(
   std::replace(sensor_prefix.begin(), sensor_prefix.end(), '/', '.');
   SensorImu::Parameter parameter;
 
-  ros_node.declare_parameter<bool>(sensor_prefix + ".enable", default_parameter.enable);
   ros_node.declare_parameter<bool>(
     sensor_prefix + ".raw_data_mode", default_parameter.raw_data_mode);
-  ros_node.declare_parameter<bool>(sensor_prefix + "publish_tf", default_parameter.publish_tf);
+  ros_node.declare_parameter<bool>(sensor_prefix + ".publish_tf", default_parameter.publish_tf);
+  ros_node.declare_parameter<bool>(
+    sensor_prefix + ".publish_orientation_tf", default_parameter.publish_orientation_tf);
   ros_node.declare_parameter<float>(
     sensor_prefix + ".fusion_weight", default_parameter.fusion_weight);
   ros_node.declare_parameter<float>(
@@ -31,9 +32,9 @@ SensorImu::Parameter SensorImu::get_parameter(
   ros_node.declare_parameter<std::string>(
     sensor_prefix + ".tf_frame_rotated", default_parameter.rotated_frame);
 
-  parameter.enable = ros_node.get_parameter(sensor_prefix + ".enable").as_bool();
   parameter.raw_data_mode = ros_node.get_parameter(sensor_prefix + ".raw_data_mode").as_bool();
-  parameter.publish_tf = ros_node.get_parameter(sensor_prefix + "publish_tf").as_bool();
+  parameter.publish_tf = ros_node.get_parameter(sensor_prefix + ".publish_tf").as_bool();
+  parameter.publish_orientation_tf = ros_node.get_parameter(sensor_prefix + ".publish_orientation_tf").as_bool();
   parameter.fusion_weight = ros_node.get_parameter(sensor_prefix + ".fusion_weight").as_double();
   parameter.mount_orientation.roll = ros_node.get_parameter(
     sensor_prefix + ".mounting_orientation.roll").as_double();
@@ -101,6 +102,11 @@ void SensorImu::processMeasurementData(
   _pub_imu_message->publish(imu_msg);
 
   // TF
+  // Only publish tf if enabled.
+  if (_parameter.publish_tf == false) {
+    return;
+  }
+
   geometry_msgs::msg::TransformStamped tf_msg;
 
   tf_msg.header.frame_id = frameId();
@@ -111,7 +117,7 @@ void SensorImu::processMeasurementData(
   tf_msg.transform.translation.y = 0.0;
   tf_msg.transform.translation.z = 0.0;
 
-  if (_parameter.publish_tf) {
+  if (_parameter.publish_orientation_tf) {
     tf_msg.transform.rotation.x = orientation.x();
     tf_msg.transform.rotation.y = orientation.y();
     tf_msg.transform.rotation.z = orientation.z();

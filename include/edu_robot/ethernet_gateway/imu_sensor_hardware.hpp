@@ -5,10 +5,9 @@
  */
 #pragma once
 
-#include <edu_robot/hardware_component_interface.hpp>
 #include <edu_robot/sensor_imu.hpp>
 
-#include "edu_robot/ethernet_gateway/ethernet_gateway_device.hpp"
+#include "edu_robot/ethernet_gateway/ethernet_gateway_device_interfaces.hpp"
 
 namespace eduart {
 namespace robot {
@@ -20,8 +19,7 @@ class ImuSensorHardware : public SensorImu::SensorInterface
                         , public EthernetGatewayTxRxDevice
 {
 public:
-  ImuSensorHardware(
-    const std::string& hardware_name, rclcpp::Node& ros_node, std::shared_ptr<EthernetCommunicator> communicator);
+  ImuSensorHardware(rclcpp::Node& ros_node, std::shared_ptr<EthernetCommunicator> communicator);
   ~ImuSensorHardware() override = default;
 
   void processRxData(const tcp::message::RxMessageDataBuffer& data) override;

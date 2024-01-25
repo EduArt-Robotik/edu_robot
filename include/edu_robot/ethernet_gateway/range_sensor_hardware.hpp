@@ -7,9 +7,9 @@
 
 
 #include <edu_robot/sensor_range.hpp>
-#include <edu_robot/hardware_component_interface.hpp>
+#include <edu_robot/hardware_component_interfaces.hpp>
 
-#include "edu_robot/ethernet_gateway/ethernet_gateway_device.hpp"
+#include "edu_robot/ethernet_gateway/ethernet_gateway_device_interfaces.hpp"
 
 namespace eduart {
 namespace robot {
@@ -19,9 +19,7 @@ class RangeSensorHardware : public SensorRange::SensorInterface
                           , public EthernetGatewayTxRxDevice
 {
 public:
-  RangeSensorHardware(
-    const std::string& hardware_name, const std::uint8_t id, rclcpp::Node& ros_node,
-    std::shared_ptr<EthernetCommunicator> communicator);
+  RangeSensorHardware(const std::uint8_t id, rclcpp::Node& ros_node, std::shared_ptr<EthernetCommunicator> communicator);
   ~RangeSensorHardware() override = default;
 
   void processRxData(const tcp::message::RxMessageDataBuffer& data) override;

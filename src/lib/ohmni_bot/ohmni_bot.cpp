@@ -1,7 +1,7 @@
 #include <edu_robot/ohmni_bot/ohmni_bot.hpp>
 #include <edu_robot/hardware_component_factory.hpp>
 
-#include <edu_robot/hardware_component_interface.hpp>
+#include <edu_robot/hardware_component_interfaces.hpp>
 #include <edu_robot/motor_controller.hpp>
 #include <edu_robot/robot.hpp>
 #include <edu_robot/sensor_range.hpp>
@@ -45,29 +45,16 @@ OhmniBot::OhmniBot(const std::string& robot_name, std::unique_ptr<HardwareRobotI
 void OhmniBot::initialize(eduart::robot::HardwareComponentFactory& factory)
 {
   // Motor Controllers
-  constexpr robot::MotorController::Parameter motor_controller_default_parameter{ };
-  constexpr std::array<const char*, 4> motor_controller_name = {
+  const std::vector<std::string> motor_name = {
     "motor_a", "motor_b", "motor_c", "motor_d"};
   // \todo fix the wrong order of joints!
-  constexpr std::array<const char*, 4> motor_controller_joint_name = {
+  const std::vector<std::string> motor_joint_name = {
     "base_to_wheel_rear_right", "base_to_wheel_front_right", "base_to_wheel_rear_left",
     "base_to_wheel_front_left"};
+  auto motor_controllers = helper_create_motor_controller(factory, motor_name, motor_joint_name, *this);
 
-  for (std::size_t i = 0; i < motor_controller_name.size(); ++i) {
-    const auto motor_controller_parameter = robot::MotorController::get_parameter(
-      motor_controller_name[i], motor_controller_default_parameter, *this
-    );
-    registerMotorController(std::make_shared<robot::MotorController>(
-      motor_controller_name[i],
-      i,
-      motor_controller_parameter,
-      motor_controller_joint_name[i],
-      *this,
-      factory.motorControllerHardware().at(motor_controller_name[i]),
-      factory.motorSensorHardware().at(motor_controller_name[i])
-    ));
-    factory.motorControllerHardware().at(motor_controller_name[i])->initialize(motor_controller_parameter);
-    factory.motorSensorHardware().at(motor_controller_name[i])->initialize(motor_controller_parameter);
+  for (auto& motor_controller : motor_controllers) {
+    registerMotorController(motor_controller);
   }
 
   // IMU Sensor

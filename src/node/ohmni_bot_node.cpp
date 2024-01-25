@@ -25,8 +25,11 @@ public:
     auto shield = std::dynamic_pointer_cast<eduart::robot::ethernet::EthernetGatewayShield>(_hardware_interface);
     auto factory = eduart::robot::ethernet::HardwareComponentFactory(shield);
 
-    factory.addSingleChannelMotorController("motor", "motor_hardware")
-           .addImuSensor("imu", "imu_hardware", *this);
+    factory.addSingleChannelMotorController("motor_controller_0", 0u)
+           .addSingleChannelMotorController("motor_controller_1", 1u)
+           .addSingleChannelMotorController("motor_controller_2", 2u)
+           .addSingleChannelMotorController("motor_controller_3", 3u)
+           .addImuSensor("imu", *this);
 
     initialize(factory);
     _mode_state_machine.switchToMode(eduart::robot::RobotMode::INACTIVE);

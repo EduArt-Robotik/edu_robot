@@ -24,11 +24,10 @@ public:
   IotBotHardwareComponentFactory(std::shared_ptr<IotShield> shield) : _shield(shield) { }
   ~IotBotHardwareComponentFactory() override = default;
 
-  IotBotHardwareComponentFactory& addLighting(const std::string& lighting_name, const std::string& hardware_name);
-  IotBotHardwareComponentFactory& addMotorController(const std::string& motor_name, const std::string& hardware_name);
-  IotBotHardwareComponentFactory& addRangeSensor(
-    const std::string& sensor_name, const std::string& hardware_name, const std::uint8_t id);
-  IotBotHardwareComponentFactory& addImuSensor(const std::string& sensor_name, const std::string& hardware_name);
+  IotBotHardwareComponentFactory& addLighting(const std::string& lighting_name);
+  IotBotHardwareComponentFactory& addMotorController(const std::string& controller_name);
+  IotBotHardwareComponentFactory& addRangeSensor(const std::string& sensor_name, const std::uint8_t id);
+  IotBotHardwareComponentFactory& addImuSensor(const std::string& sensor_name);
 
 private:
   std::shared_ptr<IotShield> _shield;

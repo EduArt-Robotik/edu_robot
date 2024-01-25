@@ -26,14 +26,14 @@ public:
   HardwareComponentFactory(std::shared_ptr<EthernetGatewayShield> shield) : _shield(shield) { }
   ~HardwareComponentFactory() override = default;
 
-  HardwareComponentFactory& addLighting(const std::string& lighting_name, const std::string& hardware_name);
-  HardwareComponentFactory& addMotorController(const std::string& motor_name, const std::string& hardware_name);
+  HardwareComponentFactory& addLighting(const std::string& lighting_name);
+  HardwareComponentFactory& addMotorController(const std::string& controller_name, const std::size_t can_id);
   HardwareComponentFactory& addSingleChannelMotorController(
-    const std::string& motor_name, const std::string& hardware_name);
+    const std::string& controller_name, const std::size_t can_id);
   HardwareComponentFactory& addRangeSensor(
-    const std::string& sensor_name, const std::string& hardware_name, const std::uint8_t id, rclcpp::Node& ros_node);
+    const std::string& sensor_name, const std::uint8_t id, rclcpp::Node& ros_node);
   HardwareComponentFactory& addImuSensor(
-    const std::string& sensor_name, const std::string& hardware_name, rclcpp::Node& ros_node);
+    const std::string& sensor_name, rclcpp::Node& ros_node);
 
 private:
   std::shared_ptr<EthernetGatewayShield> _shield;
