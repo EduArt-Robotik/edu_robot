@@ -13,9 +13,10 @@
 
 # IMU Sensor
     imu:
-      enable: false
       fusion_weight: 0.029999999329447746
-      raw_data_mode: false
+      raw_data_mode: true
+      publish_tf: true
+      publish_orientation_tf : false
 
 # Motor Controller
     motor_a:

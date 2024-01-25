@@ -25,9 +25,9 @@ class SensorImu : public Sensor
 {
 public:
   struct Parameter {
-    bool enable = true;
     bool raw_data_mode = false;
     bool publish_tf = true;
+    bool publish_orientation_tf = false;
     float fusion_weight = 0.03f;
     struct {
       // Use mounting orientation from IoT Shield as default.

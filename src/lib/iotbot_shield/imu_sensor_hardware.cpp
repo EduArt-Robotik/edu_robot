@@ -43,7 +43,7 @@ void ImuSensorHardware::initialize(const SensorImu::Parameter& parameter)
   wait_for_future(response, 100ms);
   response.get();
 
-  _raw_mode = parameter.enable;
+  _raw_mode = parameter.raw_data_mode;
 }
 
 } // end namespace iotbot
