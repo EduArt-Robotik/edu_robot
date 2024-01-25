@@ -80,7 +80,7 @@ void Motor::processMeasurementData(const Rpm rpm, const bool enabled_flag, const
   joint_state_msg.velocity.push_back(rpm.radps());
   joint_state_msg.position.push_back(_current_wheel_position);
 
-  _pub_joint_state->publish(joint_state_msg);  
+  _pub_joint_state->publish(joint_state_msg);
 }
 
 } // end namespace robot

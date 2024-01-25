@@ -200,8 +200,10 @@ void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> tw
         );
       }
     }
+    std::cout << "count motor controller = " << _motor_controllers.size() << std::endl;
     for (std::size_t c = 0, row = 0; c < _motor_controllers.size(); ++c) {
-      set_rpm.resize(_motor_controllers.size());
+      std::cout << "motor controller " << c << ": count motors = " << _motor_controllers[c]->motors() << std::endl;
+      set_rpm.resize(_motor_controllers[c]->motors());
 
       for (std::size_t m = 0; m < _motor_controllers[c]->motors(); ++m, ++row) {
         const auto parameter = _motor_controllers[c]->motor(m).parameter();
