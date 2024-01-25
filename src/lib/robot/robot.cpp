@@ -219,11 +219,13 @@ void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> tw
     // Calculating Odometry and Publishing it
     std::cout << "calculation odometry" << std::endl;
     Eigen::VectorXf radps_measured(radps.size());
+    std::cout << "size of radps = " << radps.size() << std::endl;
 
     for (std::size_t c = 0, row = 0; c < _motor_controllers.size(); ++c) {
       for (std::size_t m = 0; m < _motor_controllers[c]->motors(); ++m, ++row) {
         const auto parameter = _motor_controllers[c]->motor(m).parameter();
         const std::size_t index = parameter.index == 0 ? row : parameter.index - 1;
+        std::cout << "index = " << index << std::endl;
         radps_measured(index) = _motor_controllers[c]->getMeasuredRpm()[m].radps();
       }
     }

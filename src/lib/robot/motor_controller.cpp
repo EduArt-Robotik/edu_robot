@@ -16,6 +16,7 @@ MotorController::MotorController(
   : _name(name)
   , _id(id)
   , _motor(motors)
+  , _measured_rpm(_motor.size(), 0.0)
   , _hardware_interface(hardware_interface)
   , _clock(ros_node.get_clock())
   , _stamp_last_measurement(_clock->now())
@@ -54,6 +55,7 @@ void MotorController::processMeasurementData(const std::vector<Rpm>& rpm, const 
 
   for (std::size_t i = 0; i < _motor.size(); ++i) {
     _motor[i].processMeasurementData(rpm[i], enabled_flag, now);
+    _measured_rpm[i] = _motor[i].measuredRpm();
     all_enabled &= _motor[i].isEnabled();
   }
 

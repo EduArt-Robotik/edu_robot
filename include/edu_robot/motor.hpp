@@ -57,6 +57,7 @@ public:
   static Parameter get_parameter(
     const std::string& name, const Parameter& default_parameter, rclcpp::Node& ros_node);
   const Parameter& parameter() const { return _parameter; }
+  Rpm measuredRpm() const { return _measured_rpm; }
 
 private:
   const Parameter _parameter;
