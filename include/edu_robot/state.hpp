@@ -18,6 +18,7 @@ enum class State {
   UART_RECEIVING_FAILED,
   SHIELD_REQUEST_TIMEOUT,
   TCP_SOCKET_ERROR,
+  CAN_SOCKET_ERROR,
 };
 
 } // end namespace robot

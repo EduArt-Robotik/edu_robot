@@ -1,2 +1,3 @@
 add_subdirectory(ethernet_gateway)
 add_subdirectory(iotbot_shield)
+add_subdirectory(igus)
