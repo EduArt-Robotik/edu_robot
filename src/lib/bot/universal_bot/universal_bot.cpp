@@ -1,4 +1,4 @@
-#include <edu_robot/universal_bot/universal_bot.hpp>
+#include <edu_robot/bot/universal_bot/universal_bot.hpp>
 #include <edu_robot/hardware_component_factory.hpp>
 
 #include <edu_robot/hardware_component_interfaces.hpp>
