@@ -78,6 +78,7 @@ install(
     ethernet-gateway
     ethernet-gateway-universal-bot
     ethernet-gateway-ohmni-bot
+    igus-can-turtle-bot
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   # for humble...
@@ -97,6 +98,8 @@ install(
     ohmni-bot
     eduart-action
     eduart-diagnostic
+    eduart-turtle
+    igus
   EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

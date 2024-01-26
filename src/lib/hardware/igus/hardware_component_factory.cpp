@@ -1,5 +1,5 @@
 #include "edu_robot/hardware/igus/hardware_component_factory.hpp"
-// #include "edu_robot/hardware/igus/motor_controller_hardware.hpp"
+#include "edu_robot/hardware/igus/motor_controller_hardware.hpp"
 #include "edu_robot/hardware/igus/can_gateway_shield.hpp"
 
 #include <functional>
@@ -12,6 +12,7 @@ namespace igus {
 
 HardwareComponentFactory& HardwareComponentFactory::addLighting(const std::string& lighting_name)
 {
+  (void)lighting_name;
   // _lighting_hardware[lighting_name] = std::make_unique<ethernet::LightingHardware>(
   //   lighting_name, _shield->getCommunicator()
   // );
@@ -22,8 +23,8 @@ HardwareComponentFactory& HardwareComponentFactory::addLighting(const std::strin
 HardwareComponentFactory& HardwareComponentFactory::addMotorController(
   const std::string& controller_name, const std::size_t can_id)
 {
-  // auto compound_motor = std::make_shared<MotorControllerHardware<2>>(controller_name, can_id, _shield->getCommunicator());
-  // _motor_controller_hardware.push_back(compound_motor);
+  auto compound_motor = std::make_shared<MotorControllerHardware>(controller_name, can_id, _shield->getCommunicator());
+  _motor_controller_hardware.push_back(compound_motor);
 
   return *this;
 }
@@ -31,6 +32,9 @@ HardwareComponentFactory& HardwareComponentFactory::addMotorController(
 HardwareComponentFactory& HardwareComponentFactory::addRangeSensor(
   const std::string& sensor_name, const std::uint8_t id, rclcpp::Node& ros_node)
 {
+  (void)sensor_name;
+  (void)id;
+  (void)ros_node;
   // auto range_sensor_hardware = std::make_shared<RangeSensorHardware>(
   //   id, ros_node, _shield->getCommunicator()
   // );
@@ -42,6 +46,8 @@ HardwareComponentFactory& HardwareComponentFactory::addRangeSensor(
 HardwareComponentFactory& HardwareComponentFactory::addImuSensor(
   const std::string& sensor_name, rclcpp::Node& ros_node)
 {
+  (void)sensor_name;
+  (void)ros_node;
   // auto imu_hardware = std::make_shared<ImuSensorHardware>(
   //   ros_node, _shield->getCommunicator()
   // );
