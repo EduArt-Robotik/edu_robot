@@ -15,12 +15,12 @@ namespace eduart {
 namespace robot {
 namespace igus {
 
-class CanShield;
+class CanGatewayShield;
 
 class HardwareComponentFactory : public eduart::robot::HardwareComponentFactory
 {
 public:
-  HardwareComponentFactory(std::shared_ptr<CanShield> shield) : _shield(shield) { }
+  HardwareComponentFactory(std::shared_ptr<CanGatewayShield> shield) : _shield(shield) { }
   ~HardwareComponentFactory() override = default;
 
   HardwareComponentFactory& addLighting(const std::string& lighting_name);
@@ -31,7 +31,7 @@ public:
     const std::string& sensor_name, rclcpp::Node& ros_node);
 
 private:
-  std::shared_ptr<CanShield> _shield;
+  std::shared_ptr<CanGatewayShield> _shield;
 };
 
 } // end namespace igus
