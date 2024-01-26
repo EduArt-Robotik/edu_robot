@@ -3,7 +3,7 @@
  *
  * Author: Christian Wendt (christian.wendt@eduart-robotik.com)
  */
-#include <edu_robot/eduard/eduard.hpp>
+#include <edu_robot/bot/eduard/eduard.hpp>
 
 #include <edu_robot/hardware/ethernet_gateway/hardware_component_factory.hpp>
 #include <edu_robot/hardware/ethernet_gateway/ethernet_gateway_shield.hpp>

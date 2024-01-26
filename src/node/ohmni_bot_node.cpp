@@ -3,7 +3,7 @@
  *
  * Author: Christian Wendt (christian.wendt@eduart-robotik.com)
  */
-#include <edu_robot/ohmni_bot/ohmni_bot.hpp>
+#include <edu_robot/bot/ohmni_bot/ohmni_bot.hpp>
 
 #include <edu_robot/hardware/ethernet_gateway/hardware_component_factory.hpp>
 #include <edu_robot/hardware/ethernet_gateway/ethernet_gateway_shield.hpp>

@@ -1,4 +1,4 @@
-#include <edu_robot/eduard/eduard.hpp>
+#include <edu_robot/bot/eduard/eduard.hpp>
 #include <edu_robot/hardware_component_factory.hpp>
 
 #include <edu_robot/hardware_component_interfaces.hpp>
