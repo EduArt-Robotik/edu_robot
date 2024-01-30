@@ -5,8 +5,7 @@
  */
 #pragma once
 
-#include "edu_robot/hardware/igus/can/message.hpp"
-#include "edu_robot/hardware/igus/can/protocol.hpp"
+#include "edu_robot/hardware/can/message.hpp"
 
 #include <cstddef>
 #include <cstdint>
@@ -26,7 +25,7 @@
 
 namespace eduart {
 namespace robot {
-namespace igus {
+namespace hardware {
 
 class Request
 {
