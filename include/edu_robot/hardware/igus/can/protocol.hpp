@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include <cstdint>
+#include <edu_robot/hardware/can/message.hpp>
 
 namespace eduart {
 namespace robot {
@@ -13,7 +13,7 @@ namespace igus {
 namespace can {
 namespace message {
 
-using Byte = std::uint8_t;
+using hardware::can::message::Byte;
 
 struct PROTOCOL {
   struct BUFFER {
