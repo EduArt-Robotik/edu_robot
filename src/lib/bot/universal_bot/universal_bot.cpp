@@ -60,7 +60,9 @@ void UniversalBot::initialize(eduart::robot::HardwareComponentFactory& factory)
     "base_to_motor_5", "base_to_motor_6", "base_to_motor_7", "base_to_motor_8"};
   
   // Create motors and motor controllers.
-  auto motor_controllers = helper_create_motor_controller(factory, motor_name, motor_joint_name, *this);
+  auto motor_controllers = helper_create_motor_controller(
+    factory, motor_name, motor_joint_name, getFrameIdPrefix(), *this
+  );
 
   for (auto& motor_controller : motor_controllers) {
     registerMotorController(motor_controller);

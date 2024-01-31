@@ -111,7 +111,7 @@ class HardwareComponentFactory;
 
 std::vector<std::shared_ptr<MotorController>> helper_create_motor_controller(
   const HardwareComponentFactory& factory, const std::vector<std::string>& motor_name,
-  const std::vector<std::string>& motor_joint_name, rclcpp::Node& ros_node);
+  const std::vector<std::string>& motor_joint_name, const std::string& robot_name, rclcpp::Node& ros_node);
 
 } // end namespace robot
 } // end namespace eduart

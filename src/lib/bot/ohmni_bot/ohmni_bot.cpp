@@ -51,7 +51,9 @@ void OhmniBot::initialize(eduart::robot::HardwareComponentFactory& factory)
   const std::vector<std::string> motor_joint_name = {
     "base_to_wheel_rear_right", "base_to_wheel_front_right", "base_to_wheel_rear_left",
     "base_to_wheel_front_left"};
-  auto motor_controllers = helper_create_motor_controller(factory, motor_name, motor_joint_name, *this);
+  auto motor_controllers = helper_create_motor_controller(
+    factory, motor_name, motor_joint_name, getFrameIdPrefix(), *this
+  );
 
   for (auto& motor_controller : motor_controllers) {
     registerMotorController(motor_controller);
