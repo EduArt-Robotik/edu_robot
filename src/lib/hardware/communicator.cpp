@@ -1,62 +1,37 @@
-#include "edu_robot/hardware/igus/can_communicator.hpp"
-#include "edu_robot/hardware/igus/can/message.hpp"
-#include "edu_robot/hardware/igus/can/message_definition.hpp"
-#include "edu_robot/hardware/igus/can/protocol.hpp"
-#include "edu_robot/state.hpp"
+#include "edu_robot/hardware/communicator.hpp"
 
+#include <edu_robot/state.hpp>
 #include <edu_robot/hardware_error.hpp>
 #include <edu_robot/component_error.hpp>
 
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/logging.hpp>
 
+#include <chrono>
 #include <cstddef>
 #include <exception>
-#include <iterator>
+#include <future>
+#include <iostream>
+#include <mutex>
 #include <sys/socket.h>
+#include <thread>
 #include <utility>
 #include <sys/ioctl.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 
-#include <linux/can.h>
-#include <linux/can/raw.h>
-#include <net/if.h>
-
 namespace eduart {
 namespace robot {
-namespace igus {
+namespace hardware {
 
 using namespace std::chrono_literals;
 
-std::uint8_t eduart::robot::igus::Request::_sequence_number = 0;
-
-CanCommunicator::CanCommunicator(char const* const can_device)
-  : _is_running(true)
+Communicator::Communicator(std::shared_ptr<CommunicationDevice> device)
+  : _device(device)
+  , _is_running(true)
   , _new_incoming_requests(false)
   , _wait_time_after_sending(20ms) // \todo check if wait time is still needed.
   , _new_received_data(false)
 {
-  // Creating Socket CAN Instance
-  _socket_fd = ::socket(PF_CAN, SOCK_RAW, CAN_RAW);
-
-  if (_socket_fd < -1) {
-    throw HardwareError(State::TCP_SOCKET_ERROR, "Error occurred during opening CAN socket.");
-  }
-
-  // Binding CAN Interface
-  struct ifreq ifr;
-  struct sockaddr_can addr;
-
-  strcpy(ifr.ifr_name, can_device);
-  ioctl(_socket_fd, SIOCGIFINDEX, &ifr);
-  addr.can_family = AF_CAN;
-  addr.can_ifindex = ifr.ifr_ifindex;
-
-  if (bind(_socket_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-    throw HardwareError(State::CAN_SOCKET_ERROR, "Can't bind CAN socket.");
-  }
-
-  // Bringing Up Processing Threads
   _tcp_sending_thread = std::thread([this]{
     processSending(_wait_time_after_sending);
   });
@@ -68,18 +43,17 @@ CanCommunicator::CanCommunicator(char const* const can_device)
   });
 }
 
-CanCommunicator::~CanCommunicator()
+Communicator::~Communicator()
 {
-  RCLCPP_INFO(rclcpp::get_logger("CanCommunicator"), "Shuting down TCP communicator.");
+  std::cout << "Shuting down TCP communicator." << std::endl;
 
   _is_running = false;
   _handling_thread.join();
   _tcp_sending_thread.join();
   _tcp_receiving_thread.join();  
-  ::close(_socket_fd);
 }
 
-std::future<Request> CanCommunicator::sendRequest(Request request)
+std::future<Request> Communicator::sendRequest(Request request)
 {
   std::promise<Request> feedback;
   auto future = feedback.get_future();
@@ -92,13 +66,13 @@ std::future<Request> CanCommunicator::sendRequest(Request request)
   return future;
 }
 
-void CanCommunicator::registerRxDataEndpoint(RxDataEndPoint&& endpoint)
+void Communicator::registerRxDataEndpoint(RxDataEndPoint&& endpoint)
 {
   std::lock_guard guard(_mutex_rx_data_endpoint);
   _rx_data_endpoint.emplace_back(std::move(endpoint));
 }
 
-can::message::RxMessageDataBuffer CanCommunicator::getRxBuffer()
+message::RxMessageDataBuffer Communicator::getRxBuffer()
 {
   // Make received data available for polling.
   std::lock_guard guard(_mutex_received_data_copy);
@@ -120,7 +94,7 @@ static bool is_same(const Left& lhs, const Right& rhs) {
   return is_same;
 }
 
-void CanCommunicator::processing()
+void Communicator::processing()
 {
   while (_is_running) {
     auto start = std::chrono::system_clock::now();
@@ -132,10 +106,10 @@ void CanCommunicator::processing()
       auto request = std::move(_incoming_requests.front());
       _incoming_requests.pop();
       // Add tx message to sending queue. The data pointer must not be changed as long the data will be sent. 
-      can::message::Byte const *const tx_buffer = request.first._request_message.data();
+      message::Byte const *const tx_buffer = request.first._request_message.data();
       const std::size_t length = request.first._request_message.size();
       TaskSendingUart task([this, tx_buffer, length]{
-        sendingData(tx_buffer, length);
+        _device->send(tx_buffer, length);
       });
       auto future = task.get_future();
       _sending_in_progress.emplace(std::move(task));
@@ -168,7 +142,7 @@ void CanCommunicator::processing()
     if (_new_received_data == true) {      
       // Reading data thread is waiting.
       try {
-        can::message::RxMessageDataBuffer rx_buffer;
+        message::RxMessageDataBuffer rx_buffer;
         {
           std::unique_lock lock(_mutex_receiving_data);
           rx_buffer = std::move(_rx_buffer_queue.front());
@@ -214,9 +188,10 @@ void CanCommunicator::processing()
         }
       }
       catch (std::exception& ex) {
-        // \todo this class needs an logger!
         RCLCPP_ERROR_STREAM(
-          rclcpp::get_logger("CanCommunicator"), "Error occurred during reading TCP interface: what() = " << ex.what());
+          rclcpp::get_logger("Communicator"),
+          "Error occurred during reading TCP interface: what() = " << ex.what()
+        );
       }
     }
 
@@ -229,38 +204,38 @@ void CanCommunicator::processing()
   }
 }
 
-void CanCommunicator::sendingData(can::message::Byte const *const tx_buffer, const std::size_t length)
-{
-  // \todo think about it! If there is only one line here remove the sending method.
-  ::send(_socket_fd, tx_buffer, length, 0);
-}
+// void Communicator::sendingData(tcp::message::Byte const *const tx_buffer, const std::size_t length)
+// {
+//   // \todo think about it! If there is only one line here remove the sending method.
+//   ::send(_socket_fd, tx_buffer, length, 0);
+// }
 
-can::message::RxMessageDataBuffer CanCommunicator::receivingData()
-{
-  std::uint8_t buffer[_max_rx_buffer_queue_size];
+// tcp::message::RxMessageDataBuffer Communicator::receivingData()
+// {
+//   std::uint8_t buffer[_max_rx_buffer_queue_size];
 
-  const int received_bytes = ::recv(_socket_fd, buffer, _max_rx_buffer_queue_size, MSG_DONTWAIT);
+//   const int received_bytes = ::recv(_socket_fd, buffer, _max_rx_buffer_queue_size, MSG_DONTWAIT);
 
-  if (received_bytes < 0) {
-    return { };
-  }
+//   if (received_bytes < 0) {
+//     return { };
+//   }
 
-  // Set correct size to rx buffer.
-  can::message::RxMessageDataBuffer rx_buffer;
+//   // Set correct size to rx buffer.
+//   tcp::message::RxMessageDataBuffer rx_buffer;
 
-  rx_buffer.resize(received_bytes);
-  std::copy(std::begin(buffer), std::begin(buffer) + received_bytes, rx_buffer.begin());
+//   rx_buffer.resize(received_bytes);
+//   std::copy(std::begin(buffer), std::begin(buffer) + received_bytes, rx_buffer.begin());
   
-  std::cout << std::hex;
-  for (const auto byte : rx_buffer) {
-    std::cout << static_cast<int>(byte) << " ";
-  }
-  std::cout << std::dec << std::endl;
+//   std::cout << std::hex;
+//   for (const auto byte : rx_buffer) {
+//     std::cout << static_cast<int>(byte) << " ";
+//   }
+//   std::cout << std::dec << std::endl;
 
-  return rx_buffer;
-}
+//   return rx_buffer;
+// }
 
-void CanCommunicator::processSending(const std::chrono::milliseconds wait_time_after_sending)
+void Communicator::processSending(const std::chrono::milliseconds wait_time_after_sending)
 {
   std::chrono::time_point<std::chrono::system_clock> last_sending = std::chrono::system_clock::now();
 
@@ -299,12 +274,11 @@ void CanCommunicator::processSending(const std::chrono::milliseconds wait_time_a
   }
 }
 
-void CanCommunicator::processReceiving()
+void Communicator::processReceiving()
 {
   while (_is_running) {
     try {
-      can::message::RxMessageDataBuffer rx_buffer;
-      rx_buffer = receivingData();
+      message::RxMessageDataBuffer rx_buffer = _device->receive();
 
       if (rx_buffer.empty()) {
         std::this_thread::sleep_for(1ms);
@@ -315,7 +289,7 @@ void CanCommunicator::processReceiving()
         std::unique_lock lock(_mutex_receiving_data);
 
         if (_rx_buffer_queue.size() >= _max_rx_buffer_queue_size) {
-          throw ComponentError(State::TCP_SOCKET_ERROR, "Max rx buffer queue size is reached.");
+          throw ComponentError(State::FUNCTIONAL_ERROR, "Max rx buffer queue size is reached.");
         }
 
         _rx_buffer_queue.emplace(rx_buffer);
@@ -323,9 +297,8 @@ void CanCommunicator::processReceiving()
       }
     }
     catch (std::exception& ex) {
-      RCLCPP_ERROR_STREAM(
-        rclcpp::get_logger("CanCommunicator"), "error occurred during receiving data: what() = " << ex.what());
-      RCLCPP_INFO(rclcpp::get_logger("CanCommunicator"), "drop message");
+      std::cout << "error occurred during receiving data: what() = " << ex.what() << std::endl;
+      std::cout << "drop message" << std::endl;
       continue;
     }
   }

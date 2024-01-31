@@ -1,18 +1,17 @@
 /**
- * Copyright EduArt Robotik GmbH 2022
+ * Copyright EduArt Robotik GmbH 2023
  *
  * Author: Christian Wendt (christian.wendt@eduart-robotik.com)
  */
 #pragma once
 
 #include "edu_robot/hardware/message_buffer.hpp"
+#include "edu_robot/hardware/communication_device.hpp"
 
 #include <cstddef>
-#include <cstdint>
 #include <edu_robot/state.hpp>
 #include <edu_robot/hardware_error.hpp>
 
-#include <algorithm>
 #include <atomic>
 #include <list>
 #include <mutex>
@@ -40,17 +39,14 @@ class Request
   };
 
 public:
-  inline const message::RxMessageDataBuffer& response() const { return _response_message; }
-
-protected:
-  Request(message::TxMessageDataBuffer&& request_message, std::vector<message::Byte>&& response_search_pattern)
-    : _request_message(request_message)
-    , _response_search_pattern(response_search_pattern)
-  { }
   Request(Request&&) = default;
   virtual ~Request() = default;
 
-private:
+  inline const message::RxMessageDataBuffer& response() const { return _response_message; }
+
+protected:
+  Request() = default;
+
   State _state = State::CREATED;
   message::TxMessageDataBuffer _request_message;
   message::RxMessageDataBuffer _response_message;
@@ -91,7 +87,7 @@ private:
   { }
 
   std::vector<message::Byte> _response_search_pattern;
-  std::function<void(const can::message::RxMessageDataBuffer&)> _callback_process_data;
+  std::function<void(const message::RxMessageDataBuffer&)> _callback_process_data;
 };
 
 template <typename Request, typename Duration>
@@ -104,10 +100,10 @@ inline void wait_for_future(std::future<Request>& future, const Duration& timeou
 class Communicator
 {
   using TaskSendingUart = std::packaged_task<void()>;
-  using TaskReceiving = std::packaged_task<can::message::RxMessageDataBuffer()>;
+  using TaskReceiving = std::packaged_task<message::RxMessageDataBuffer()>;
 
 public:
-  Communicator(char const* const can_device);
+  Communicator(std::shared_ptr<CommunicationDevice> device);
   ~Communicator();
 
   std::future<Request> sendRequest(Request request);
@@ -118,11 +114,9 @@ private:
   void processSending(const std::chrono::milliseconds wait_time_after_sending);
   void processReceiving();
   void processing();
-  void sendingData(can::message::Byte const *const tx_buffer, const std::size_t length);
-  can::message::RxMessageDataBuffer receivingData();
 
-  // Ethernet Interface
-  int _socket_fd = -1; // \todo make more generic
+  // Communication Interface
+  std::shared_ptr<CommunicationDevice> _device;
 
   // Handling Thread
   std::thread _handling_thread;
@@ -142,7 +136,7 @@ private:
   std::thread _tcp_sending_thread;
 
   // Reading Thread
-  static constexpr std::size_t _max_rx_buffer_queue_size = 100;
+  static constexpr std::size_t _max_rx_buffer_queue_size = 100;  
   std::mutex _mutex_receiving_data;
   std::mutex _mutex_received_data_copy;
   std::thread _tcp_receiving_thread;

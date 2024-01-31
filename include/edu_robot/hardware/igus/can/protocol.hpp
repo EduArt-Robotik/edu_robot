@@ -9,6 +9,7 @@
 
 namespace eduart {
 namespace robot {
+namespace hardware {
 namespace igus {
 namespace can {
 namespace message {
@@ -53,5 +54,6 @@ struct PROTOCOL {
 } // end namespace message
 } // end namespace can
 } // end namespace igus
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

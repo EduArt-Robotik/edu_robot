@@ -12,23 +12,28 @@
 
 namespace eduart {
 namespace robot {
+namespace hardware {
 namespace igus {
 namespace can {
 namespace message {
+
+using hardware::can::message::RxMessageDataBuffer;
+using hardware::can::message::MessageFrame;
+using hardware::can::message::element::Uint8;
 
 using SetEnableMotor = MessageFrame<PROTOCOL::COMMAND::ENABLE_MOTOR>;
 using SetDisableMotor = MessageFrame<PROTOCOL::COMMAND::DISABLE_MOTOR>;
 
 using SetVelocity = MessageFrame<PROTOCOL::COMMAND::SET::VELOCITY,
                                  element::Velocity,  // velocity in ?
-                                 element::Uint8>;    // timestamp in ?
+                                 Uint8>;             // timestamp in ?
 
 struct AcknowledgedVelocity : public MessageFrame<PROTOCOL::COMMAND::SET::VELOCITY,
-                                                 element::Uint8,    // error code
-                                                 element::Velocity, // measured velocity ?
-                                                 element::Uint8,    // timestamp in ?
-                                                 element::Uint8,    // shunt in ?
-                                                 element::Uint8>    // digital input
+                                                  Uint8,    // error code
+                                                  element::Velocity, // measured velocity ?
+                                                  Uint8,    // timestamp in ?
+                                                  Uint8,    // shunt in ?
+                                                  Uint8>    // digital input
 {
   inline static constexpr std::uint8_t canId(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<0>(rx_buffer);
@@ -56,5 +61,6 @@ struct AcknowledgedVelocity : public MessageFrame<PROTOCOL::COMMAND::SET::VELOCI
 } // end namespace message
 } // end namespace can
 } // end namespace igus
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

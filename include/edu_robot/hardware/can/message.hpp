@@ -5,10 +5,12 @@
  */
 #pragma once
 
-#include <vector>
+#include <edu_robot/hardware/message_buffer.hpp>
+
 #include <cstddef>
 #include <cstdint>
 #include <array>
+#include <tuple>
 
 #include <netinet/in.h>
 
@@ -19,9 +21,9 @@ namespace can {
 namespace message {
 
 static constexpr std::size_t MAX_MESSAGE_SIZE = 8;
-using Byte = std::uint8_t;
-using TxMessageDataBuffer = std::vector<Byte>;
-using RxMessageDataBuffer = std::vector<Byte>;
+using hardware::message::Byte;
+using hardware::message::RxMessageDataBuffer;
+using hardware::message::TxMessageDataBuffer;
 
 namespace element {
 
@@ -143,7 +145,7 @@ TxMessageDataBuffer serialize(const typename Elements::type&... element_value, c
 }
 
 template <std::size_t... Indices, class... Elements>
-inline constexpr auto make_message_search_pattern(const Byte can_address, const std::tuple<Elements...>)
+inline constexpr auto make_message_search_pattern(const std::uint32_t can_address, const std::tuple<Elements...>)
 {
   constexpr std::size_t bytes = (std::tuple_element<Indices, std::tuple<Elements...>>::type::size() + ...);
   std::array<Byte, bytes> search_pattern = { 0 };
@@ -187,9 +189,9 @@ inline constexpr auto make_message_search_pattern(const std::tuple<Elements...>)
 template <Byte CommandByte>
 struct Command : public impl::ConstDataField<Byte, CommandByte> { };
 
-struct CanAddress : public impl::DataField<Byte> {
-  inline static constexpr std::array<Byte, CanAddress::size()> makeSearchPattern(const Byte can_address) {
-    return impl::DataField<Byte>::serialize(can_address | 0x01);
+struct CanAddress : public impl::DataField<std::uint32_t> {
+  inline static constexpr std::array<Byte, CanAddress::size()> makeSearchPattern(const std::uint32_t can_address) {
+    return impl::DataField<std::uint32_t>::serialize(can_address);
   }
 };
 

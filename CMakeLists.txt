@@ -100,6 +100,8 @@ install(
     eduart-diagnostic
     eduart-turtle
     igus
+    eduart-hardware
+    eduart-hardware-can
   EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

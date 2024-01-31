@@ -54,6 +54,7 @@ add_executable(igus-can-turtle-bot
 target_link_libraries(igus-can-turtle-bot
   igus
   eduart-turtle
+  eduart-hardware-can
 )
 ament_target_dependencies(igus-can-turtle-bot
   "rclcpp"
