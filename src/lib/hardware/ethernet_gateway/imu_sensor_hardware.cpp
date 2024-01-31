@@ -1,22 +1,23 @@
 #include "edu_robot/hardware/ethernet_gateway/imu_sensor_hardware.hpp"
-#include "edu_robot/hardware/ethernet_gateway/ethernet_communicator.hpp"
-#include "edu_robot/hardware/ethernet_gateway/tcp/message_definition.hpp"
-#include "edu_robot/hardware/ethernet_gateway/tcp/protocol.hpp"
+#include "edu_robot/hardware/ethernet_gateway/udp/message_definition.hpp"
+#include "edu_robot/hardware/ethernet_gateway/udp/protocol.hpp"
+#include "edu_robot/hardware/ethernet_gateway/ethernet_request.hpp"
 
 namespace eduart {
 namespace robot {
+namespace hardware {
 namespace ethernet {
 
 using namespace std::chrono_literals;
 
-using tcp::message::GetImuMeasurement;
-using tcp::message::SetImuParameter;
-using tcp::message::Acknowledgement;
-using tcp::message::AcknowledgedImuMeasurement;
+using udp::message::GetImuMeasurement;
+using udp::message::SetImuParameter;
+using udp::message::Acknowledgement;
+using udp::message::AcknowledgedImuMeasurement;
 
-using tcp::message::PROTOCOL;
+using udp::message::PROTOCOL;
 
-ImuSensorHardware::ImuSensorHardware(rclcpp::Node& ros_node, std::shared_ptr<EthernetCommunicator> communicator)
+ImuSensorHardware::ImuSensorHardware(rclcpp::Node& ros_node, std::shared_ptr<Communicator> communicator)
   : EthernetGatewayTxRxDevice(communicator)
   , _timer_get_measurement(
       ros_node.create_wall_timer(100ms, std::bind(&ImuSensorHardware::processMeasurement, this))
@@ -25,7 +26,7 @@ ImuSensorHardware::ImuSensorHardware(rclcpp::Node& ros_node, std::shared_ptr<Eth
 
 }
  
-void ImuSensorHardware::processRxData(const tcp::message::RxMessageDataBuffer& data)
+void ImuSensorHardware::processRxData(const message::RxMessageDataBuffer& data)
 {
   if (_callback_process_measurement == nullptr) {
     return;
@@ -40,7 +41,7 @@ void ImuSensorHardware::processRxData(const tcp::message::RxMessageDataBuffer& d
 
 void ImuSensorHardware::initialize(const SensorImu::Parameter& parameter)
 {
-  auto request = Request::make_request<SetImuParameter>(
+  auto request = EthernetRequest::make_request<SetImuParameter>(
     parameter.raw_data_mode,
     parameter.fusion_weight,
     parameter.mount_orientation.roll,
@@ -60,7 +61,7 @@ void ImuSensorHardware::processMeasurement()
 {
   try {
     // Get measurement data from ethernet gateway and parse it to processing pipeline.
-    auto request = Request::make_request<GetImuMeasurement>();
+    auto request = EthernetRequest::make_request<GetImuMeasurement>();
     auto future_response = _communicator->sendRequest(std::move(request));
     wait_for_future(future_response, 100ms);
 
@@ -72,5 +73,6 @@ void ImuSensorHardware::processMeasurement()
 }
 
 } // end namespace ethernet
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

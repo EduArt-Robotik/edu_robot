@@ -11,18 +11,17 @@
 
 namespace eduart {
 namespace robot {
+namespace hardware {
 namespace ethernet {
-
-class EthernetCommunicator;
 
 class ImuSensorHardware : public SensorImu::SensorInterface
                         , public EthernetGatewayTxRxDevice
 {
 public:
-  ImuSensorHardware(rclcpp::Node& ros_node, std::shared_ptr<EthernetCommunicator> communicator);
+  ImuSensorHardware(rclcpp::Node& ros_node, std::shared_ptr<Communicator> communicator);
   ~ImuSensorHardware() override = default;
 
-  void processRxData(const tcp::message::RxMessageDataBuffer& data) override;
+  void processRxData(const message::RxMessageDataBuffer& data) override;
   void initialize(const SensorImu::Parameter& parameter) override;
 
 private:
@@ -32,5 +31,6 @@ private:
 };
 
 } // end namespace ethernet
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

@@ -1,20 +1,21 @@
 #include "edu_robot/hardware/ethernet_gateway/range_sensor_hardware.hpp"
-#include "edu_robot/hardware/ethernet_gateway/ethernet_communicator.hpp"
-#include "edu_robot/hardware/ethernet_gateway/tcp/message_definition.hpp"
+#include "edu_robot/hardware/ethernet_gateway/udp/message_definition.hpp"
+#include "edu_robot/hardware/ethernet_gateway/ethernet_request.hpp"
 
 #include <rclcpp/qos.hpp>
 
 namespace eduart {
 namespace robot {
+namespace hardware {
 namespace ethernet {
 
 using namespace std::chrono_literals;
 
-using tcp::message::GetDistanceMeasurement;
-using tcp::message::AcknowledgedDistanceMeasurement;
+using udp::message::GetDistanceMeasurement;
+using udp::message::AcknowledgedDistanceMeasurement;
 
 RangeSensorHardware::RangeSensorHardware(
-  const std::uint8_t id, rclcpp::Node& ros_node, std::shared_ptr<EthernetCommunicator> communicator)
+  const std::uint8_t id, rclcpp::Node& ros_node, std::shared_ptr<Communicator> communicator)
   : EthernetGatewayTxRxDevice(communicator)
   , _id(id)
   , _timer_get_measurement(
@@ -24,7 +25,7 @@ RangeSensorHardware::RangeSensorHardware(
 
 }
 
-void RangeSensorHardware::processRxData(const tcp::message::RxMessageDataBuffer& data)
+void RangeSensorHardware::processRxData(const message::RxMessageDataBuffer& data)
 {
   if (_callback_process_measurement == nullptr) {
     return;
@@ -42,7 +43,7 @@ void RangeSensorHardware::processMeasurement()
 {
   try {
     // Get measurement data from ethernet gateway and parse it to processing pipeline.
-    auto request = Request::make_request<GetDistanceMeasurement>(_id);
+    auto request = EthernetRequest::make_request<GetDistanceMeasurement>(_id);
     auto future_response = _communicator->sendRequest(std::move(request));
     wait_for_future(future_response, 100ms);
 
@@ -54,5 +55,6 @@ void RangeSensorHardware::processMeasurement()
 }
 
 } // end namespace ethernet
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

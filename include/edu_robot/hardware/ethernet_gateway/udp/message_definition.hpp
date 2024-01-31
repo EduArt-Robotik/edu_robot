@@ -5,20 +5,23 @@
  */
 #pragma once
 
-#include "edu_robot/hardware/ethernet_gateway/tcp/protocol.hpp"
-#include "edu_robot/hardware/ethernet_gateway/tcp/message.hpp"
+#include "edu_robot/hardware/ethernet_gateway/udp/protocol.hpp"
+#include "edu_robot/hardware/ethernet_gateway/udp/message.hpp"
 
 #include <Eigen/Dense>
 #include <Eigen/src/Geometry/Quaternion.h>
-#include <array>
+
 #include <edu_robot/rpm.hpp>
 #include <edu_robot/color.hpp>
 
 namespace eduart {
 namespace robot {
+namespace hardware {
 namespace ethernet {
-namespace tcp {
+namespace udp {
 namespace message {
+
+using hardware::ethernet::udp::message::MessageFrame;
 
 // Request Firmware Version
 using GetFirmwareVersion = MessageFrame<element::Command<PROTOCOL::COMMAND::GET::FIRMWARE_VERSION>>;
@@ -172,7 +175,8 @@ struct RpmMeasurement : public MeasurementFrame<element::Command<PROTOCOL::MEASU
 };
 
 } // end namespace message
-} // end namespace tcp
+} // end namespace udp
 } // end namespace ethernet
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

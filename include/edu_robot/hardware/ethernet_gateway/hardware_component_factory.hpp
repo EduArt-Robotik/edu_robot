@@ -14,6 +14,7 @@
 
 namespace eduart {
 namespace robot {
+namespace hardware {
 namespace ethernet {
 
 class EthernetGatewayShield;
@@ -37,6 +38,7 @@ private:
   std::shared_ptr<EthernetGatewayShield> _shield;
 };
 
-} // end namespace iotbot
+} // end namespace ethernet
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

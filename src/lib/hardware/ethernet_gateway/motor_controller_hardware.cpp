@@ -1,6 +1,7 @@
 #include "edu_robot/hardware/ethernet_gateway/motor_controller_hardware.hpp"
-#include "edu_robot/hardware/ethernet_gateway/tcp/message_definition.hpp"
-#include "edu_robot/hardware/ethernet_gateway/tcp/protocol.hpp"
+#include "edu_robot/hardware/ethernet_gateway/udp/message_definition.hpp"
+#include "edu_robot/hardware/ethernet_gateway/udp/protocol.hpp"
+#include "edu_robot/hardware/ethernet_gateway/ethernet_request.hpp"
 
 #include <edu_robot/component_error.hpp>
 #include <edu_robot/rpm.hpp>
@@ -13,21 +14,22 @@
 
 namespace eduart {
 namespace robot {
+namespace hardware {
 namespace ethernet {
 
 using namespace std::chrono_literals;
 
-using tcp::message::PROTOCOL;
-using tcp::message::Acknowledgement;
-using tcp::message::SetEncoderParameter;
-using tcp::message::SetMotorControllerParameter;
-using tcp::message::SetPidControllerParameter;
-using tcp::message::SetMotorRpm;
-using tcp::message::SetMotorMeasurement;
-using tcp::message::AcknowledgedMotorRpm;
+using udp::message::PROTOCOL;
+using udp::message::Acknowledgement;
+using udp::message::SetEncoderParameter;
+using udp::message::SetMotorControllerParameter;
+using udp::message::SetPidControllerParameter;
+using udp::message::SetMotorRpm;
+using udp::message::SetMotorMeasurement;
+using udp::message::AcknowledgedMotorRpm;
 
 void initialize_controller(
-  const Motor::Parameter& parameter, const std::uint8_t can_id, std::shared_ptr<EthernetCommunicator> communicator)
+  const Motor::Parameter& parameter, const std::uint8_t can_id, std::shared_ptr<Communicator> communicator)
 {
   // Initial Motor Controller Hardware
   if (false == parameter.isValid()) {
@@ -36,7 +38,7 @@ void initialize_controller(
 
   // Motor Controller Parameter
   {
-    auto request = Request::make_request<SetMotorControllerParameter>(
+    auto request = EthernetRequest::make_request<SetMotorControllerParameter>(
       0,
       can_id,
       parameter.gear_ratio,
@@ -56,7 +58,7 @@ void initialize_controller(
   }
   // Encoder Parameter
   {
-    auto request = Request::make_request<SetEncoderParameter>(
+    auto request = EthernetRequest::make_request<SetEncoderParameter>(
       0,
       can_id,
       parameter.encoder_ratio,
@@ -73,7 +75,7 @@ void initialize_controller(
   }
   // Pid Controller
   {
-    auto request = Request::make_request<SetPidControllerParameter>(
+    auto request = EthernetRequest::make_request<SetPidControllerParameter>(
       0,
       can_id,
       parameter.kp,
@@ -107,9 +109,9 @@ void initialize_controller(
 }
 
 template <>
-void MotorControllerHardware<1>::processRxData(const tcp::message::RxMessageDataBuffer &data)
+void MotorControllerHardware<1>::processRxData(const message::RxMessageDataBuffer &data)
 {
-  if (_callback_process_measurement == nullptr || tcp::message::RpmMeasurement::canId(data) != _can_id) {
+  if (_callback_process_measurement == nullptr || udp::message::RpmMeasurement::canId(data) != _can_id) {
     return;
   }
   
@@ -119,9 +121,9 @@ void MotorControllerHardware<1>::processRxData(const tcp::message::RxMessageData
 }
 
 template <>
-void MotorControllerHardware<2>::processRxData(const tcp::message::RxMessageDataBuffer &data)
+void MotorControllerHardware<2>::processRxData(const message::RxMessageDataBuffer &data)
 {
-  if (_callback_process_measurement == nullptr || tcp::message::RpmMeasurement::canId(data) != _can_id) {
+  if (_callback_process_measurement == nullptr || udp::message::RpmMeasurement::canId(data) != _can_id) {
     return;
   }
   
@@ -149,7 +151,7 @@ void MotorControllerHardware<1>::processSetValue(const std::vector<Rpm>& rpm)
     throw std::runtime_error("Given RPM vector is too small.");
   }
 
-  auto request = Request::make_request<tcp::message::SetMotorRpm>(
+  auto request = EthernetRequest::make_request<udp::message::SetMotorRpm>(
     _can_id,
     rpm[0],
     0.0
@@ -175,7 +177,7 @@ void MotorControllerHardware<2>::processSetValue(const std::vector<Rpm>& rpm)
     throw std::runtime_error("Given RPM vector is too small.");
   }
 
-  auto request = Request::make_request<tcp::message::SetMotorRpm>(
+  auto request = EthernetRequest::make_request<udp::message::SetMotorRpm>(
     _can_id,
     rpm[0],
     rpm[1]
@@ -194,6 +196,7 @@ void MotorControllerHardware<2>::processSetValue(const std::vector<Rpm>& rpm)
   _callback_process_measurement(_measured_rpm, AcknowledgedMotorRpm::enabled(got.response()));
 }
 
-} // end namespace iotbot
+} // end namespace ethernet
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

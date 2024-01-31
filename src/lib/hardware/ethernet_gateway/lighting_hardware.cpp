@@ -1,20 +1,21 @@
 #include "edu_robot/hardware/ethernet_gateway/lighting_hardware.hpp"
-#include "edu_robot/hardware/ethernet_gateway/ethernet_communicator.hpp"
-#include "edu_robot/hardware/ethernet_gateway/tcp/message_definition.hpp"
-#include "edu_robot/hardware/ethernet_gateway/tcp/protocol.hpp"
+#include "edu_robot/hardware/ethernet_gateway/udp/message_definition.hpp"
+#include "edu_robot/hardware/ethernet_gateway/udp/protocol.hpp"
+#include "edu_robot/hardware/ethernet_gateway/ethernet_request.hpp"
 
 #include <stdexcept>
 #include <string>
 
 namespace eduart {
 namespace robot {
+namespace hardware {
 namespace ethernet {
 
 using namespace std::chrono_literals;
-using tcp::message::SetLighting;
-using tcp::message::PROTOCOL;
+using udp::message::SetLighting;
+using udp::message::PROTOCOL;
 
-LightingHardware::LightingHardware(const std::string& name, std::shared_ptr<EthernetCommunicator> communicator)
+LightingHardware::LightingHardware(const std::string& name, std::shared_ptr<Communicator> communicator)
   : EthernetGatewayTxDevice(communicator)
   , _name(name)
 {
@@ -34,21 +35,21 @@ void LightingHardware::processSetValue(const Color& color, const robot::Lighting
   switch (mode) {
   case Mode::FLASH:
     if (_name.find("left") != std::string::npos) {
-      auto request = Request::make_request<SetLighting>(
+      auto request = EthernetRequest::make_request<SetLighting>(
         PROTOCOL::LIGHTING::MODE::FLASH::LEFT, color.r, color.g, color.b);
       auto response = _communicator->sendRequest(std::move(request));
       wait_for_future(response, 100ms);
       response.get();
     }
     else if (_name.find("right") != std::string::npos) {
-      auto request = Request::make_request<SetLighting>(
+      auto request = EthernetRequest::make_request<SetLighting>(
         PROTOCOL::LIGHTING::MODE::FLASH::RIGHT, color.r, color.g, color.b);
       auto response = _communicator->sendRequest(std::move(request));
       wait_for_future(response, 100ms);
       response.get();
     }
     else if (_name.find("all") != std::string::npos) {
-      auto request = Request::make_request<SetLighting>(
+      auto request = EthernetRequest::make_request<SetLighting>(
         PROTOCOL::LIGHTING::MODE::FLASH::ALL, color.r, color.g, color.b);
       auto response = _communicator->sendRequest(std::move(request));
       wait_for_future(response, 100ms);
@@ -58,7 +59,7 @@ void LightingHardware::processSetValue(const Color& color, const robot::Lighting
 
     // all lightings are addressed
   case Mode::DIM: {
-    auto request = Request::make_request<SetLighting>(
+    auto request = EthernetRequest::make_request<SetLighting>(
       PROTOCOL::LIGHTING::MODE::DIM_LIGHT, color.r, color.g, color.b);
     auto response = _communicator->sendRequest(std::move(request));
     wait_for_future(response, 100ms);
@@ -67,7 +68,7 @@ void LightingHardware::processSetValue(const Color& color, const robot::Lighting
   break;
 
   case Mode::OFF: {
-    auto request = Request::make_request<SetLighting>(
+    auto request = EthernetRequest::make_request<SetLighting>(
       PROTOCOL::LIGHTING::MODE::LIGHTS_OFF, color.r, color.g, color.b);
     auto response = _communicator->sendRequest(std::move(request));
     wait_for_future(response, 100ms);
@@ -76,7 +77,7 @@ void LightingHardware::processSetValue(const Color& color, const robot::Lighting
   break;
 
   case Mode::PULSATION: {
-    auto request = Request::make_request<SetLighting>(
+    auto request = EthernetRequest::make_request<SetLighting>(
       PROTOCOL::LIGHTING::MODE::PULSATION, color.r, color.g, color.b);
     auto response = _communicator->sendRequest(std::move(request));
     wait_for_future(response, 100ms);
@@ -85,7 +86,7 @@ void LightingHardware::processSetValue(const Color& color, const robot::Lighting
   break;
 
   case Mode::ROTATION: {
-    auto request = Request::make_request<SetLighting>(
+    auto request = EthernetRequest::make_request<SetLighting>(
       PROTOCOL::LIGHTING::MODE::ROTATION, color.r, color.g, color.b);
     auto response = _communicator->sendRequest(std::move(request));
     wait_for_future(response, 100ms);
@@ -94,7 +95,7 @@ void LightingHardware::processSetValue(const Color& color, const robot::Lighting
   break;
 
   case Mode::RUNNING: {
-    auto request = Request::make_request<SetLighting>(
+    auto request = EthernetRequest::make_request<SetLighting>(
       PROTOCOL::LIGHTING::MODE::RUNNING, color.r, color.g, color.b);
     auto response = _communicator->sendRequest(std::move(request));
     wait_for_future(response, 100ms);
@@ -113,5 +114,6 @@ void LightingHardware::initialize(const Lighting::Parameter& parameter)
 }
 
 } // end namespace ethernet
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot
