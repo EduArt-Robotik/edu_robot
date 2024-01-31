@@ -2,21 +2,23 @@
 #include "edu_robot/hardware/igus/can/message_definition.hpp"
 #include "edu_robot/hardware/igus/can/protocol.hpp"
 
+#include <edu_robot/hardware/can/can_request.hpp>
+
 #include <edu_robot/component_error.hpp>
 #include <edu_robot/rpm.hpp>
 #include <edu_robot/state.hpp>
-
 #include <edu_robot/hardware_error.hpp>
 
-#include <memory>
 #include <stdexcept>
 
 namespace eduart {
 namespace robot {
+namespace hardware {
 namespace igus {
 
 using namespace std::chrono_literals;
 
+using hardware::can::Request;
 using can::message::PROTOCOL;
 using can::message::SetVelocity;
 using can::message::AcknowledgedVelocity;
@@ -70,5 +72,6 @@ void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
 }
 
 } // end namespace igus
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

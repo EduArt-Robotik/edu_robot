@@ -19,6 +19,7 @@ enum class State {
   SHIELD_REQUEST_TIMEOUT,
   TCP_SOCKET_ERROR,
   CAN_SOCKET_ERROR,
+  FUNCTIONAL_ERROR,
 };
 
 } // end namespace robot

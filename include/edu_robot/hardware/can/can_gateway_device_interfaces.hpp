@@ -11,20 +11,22 @@
 
 namespace eduart {
 namespace robot {
-namespace igus {
+namespace hardware {
 
-class CanCommunicator;
+class Communicator;
+
+namespace can {
 
 class CanGatewayTxDevice
 {
 public:
-  CanGatewayTxDevice(std::shared_ptr<CanCommunicator> communicator)
+  CanGatewayTxDevice(std::shared_ptr<Communicator> communicator)
     : _communicator(communicator)
   { }
   virtual ~CanGatewayTxDevice() = default;
 
 protected:
-  std::shared_ptr<CanCommunicator> _communicator;
+  std::shared_ptr<Communicator> _communicator;
   can::message::TxMessageDataBuffer _tx_buffer;
 };
 
@@ -41,13 +43,14 @@ public:
 class CanGatewayTxRxDevice : public CanGatewayTxDevice, public CanGatewayRxDevice
 {
 public:
-  CanGatewayTxRxDevice(std::shared_ptr<CanCommunicator> communicator)
+  CanGatewayTxRxDevice(std::shared_ptr<Communicator> communicator)
     : CanGatewayTxDevice(communicator)
     , CanGatewayRxDevice()
   { }
   ~CanGatewayTxRxDevice() override = default;
 };
 
-} // end namespace igus
+} // end namespace can
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

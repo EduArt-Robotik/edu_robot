@@ -1,6 +1,7 @@
 #include "edu_robot/hardware/igus/hardware_component_factory.hpp"
 #include "edu_robot/hardware/igus/motor_controller_hardware.hpp"
-#include "edu_robot/hardware/igus/can_gateway_shield.hpp"
+
+#include <edu_robot/hardware/can/can_gateway_shield.hpp>
 
 #include <functional>
 #include <memory>
@@ -8,6 +9,7 @@
 
 namespace eduart {
 namespace robot {
+namespace hardware {
 namespace igus {
 
 HardwareComponentFactory& HardwareComponentFactory::addLighting(const std::string& lighting_name)
@@ -57,5 +59,6 @@ HardwareComponentFactory& HardwareComponentFactory::addImuSensor(
 }
 
 } // end namespace igus
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

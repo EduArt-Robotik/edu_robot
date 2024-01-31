@@ -1,7 +1,5 @@
-#include "edu_robot/hardware/igus/can_gateway_shield.hpp"
-#include "edu_robot/hardware/igus/can_communicator.hpp"
-#include "edu_robot/hardware/igus/can/message_definition.hpp"
-#include "edu_robot/hardware/igus/can/protocol.hpp"
+#include "edu_robot/hardware/can/can_gateway_shield.hpp"
+#include "edu_robot/hardware/can/can_communication_device.hpp"
 
 #include <cstddef>
 #include <exception>
@@ -11,14 +9,16 @@
 
 namespace eduart {
 namespace robot {
-namespace igus {
+namespace hardware {
+namespace can {
 
 using namespace std::chrono_literals;
-using can::message::PROTOCOL;
 
 CanGatewayShield::CanGatewayShield(char const* const can_device)
-  : processing::ProcessingComponentOutput<float>("ethernet_gateway_shield")
-  , _communicator(std::make_shared<CanCommunicator>(can_device))
+  : processing::ProcessingComponentOutput<float>("can_gateway_shield")
+  , _communicator(std::make_shared<Communicator>(
+      std::make_shared<hardware::can::CanCommunicationDevice>(can_device))
+    )
 {
   // Configuring Diagnostic
   _clock = std::make_shared<rclcpp::Clock>();
@@ -111,6 +111,7 @@ diagnostic::Diagnostic CanGatewayShield::processDiagnosticsImpl()
   return diagnostic;
 }
 
-} // end namespace igus
+} // end namespace can
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot
