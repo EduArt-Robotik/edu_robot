@@ -5,15 +5,18 @@
  */
 #pragma once
 
+#include <edu_robot/hardware/message_buffer.hpp>
+
 #include <cstdint>
 
 namespace eduart {
 namespace robot {
+namespace hardware {
 namespace ethernet {
-namespace tcp {
+namespace udp {
 namespace message {
 
-using Byte = std::uint8_t;
+using hardware::message::Byte;
 
 struct PROTOCOL {
   struct BUFFER {
@@ -65,7 +68,8 @@ struct PROTOCOL {
 };
 
 } // end namespace message
-} // end namespace tcp
+} // end namespace udp
 } // end namespace ethernet
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

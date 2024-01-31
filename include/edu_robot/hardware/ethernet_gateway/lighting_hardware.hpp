@@ -10,15 +10,14 @@
 
 namespace eduart {
 namespace robot {
+namespace hardware {
 namespace ethernet {
-
-class EthernetCommunicator;
-
+  
 class LightingHardware : public Lighting::ComponentInterface
-                       , public eduart::robot::ethernet::EthernetGatewayTxDevice
+                       , public EthernetGatewayTxDevice
 {
 public:
-  LightingHardware(const std::string& name, std::shared_ptr<EthernetCommunicator> communicator);
+  LightingHardware(const std::string& name, std::shared_ptr<Communicator> communicator);
   ~LightingHardware() override;
 
   void processSetValue(const Color& color, const robot::Lighting::Mode& mode) override;
@@ -29,5 +28,6 @@ private:
 };
 
 } // end namespace ethernet
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

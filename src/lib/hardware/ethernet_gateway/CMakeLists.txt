@@ -1,6 +1,7 @@
 # Library Eduart IotBot Shield
 add_library(eduart-ethernet-gateway
-  ethernet_communicator.cpp
+  ethernet_communication_device.cpp
+  ethernet_request.cpp
   ethernet_gateway_shield.cpp
   hardware_component_factory.cpp
   imu_sensor_hardware.cpp
@@ -14,6 +15,7 @@ target_link_libraries(eduart-ethernet-gateway
   # eduart-robot-eduard
   # eduart-robot-flex-bot
   eduart-robot
+  eduart-hardware
 )
 target_compile_features(eduart-ethernet-gateway PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 target_include_directories(eduart-ethernet-gateway PUBLIC

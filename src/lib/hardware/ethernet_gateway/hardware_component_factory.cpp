@@ -11,6 +11,7 @@
 
 namespace eduart {
 namespace robot {
+namespace hardware {
 namespace ethernet {
 
 HardwareComponentFactory& HardwareComponentFactory::addLighting(const std::string& lighting_name)
@@ -63,5 +64,6 @@ HardwareComponentFactory& HardwareComponentFactory::addImuSensor(
 }
 
 } // end namespace ethernet
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

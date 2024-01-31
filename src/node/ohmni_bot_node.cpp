@@ -18,13 +18,13 @@ public:
   EthernetGatewayOhmniBot()
     : eduart::robot::ohmni_bot::OhmniBot(
         "ohmni_bot",
-        std::make_unique<eduart::robot::ethernet::EthernetGatewayShield>(
+        std::make_unique<eduart::robot::hardware::ethernet::EthernetGatewayShield>(
           "192.168.2.20", 1234
         )
       )
   {
-    auto shield = std::dynamic_pointer_cast<eduart::robot::ethernet::EthernetGatewayShield>(_hardware_interface);
-    auto factory = eduart::robot::ethernet::HardwareComponentFactory(shield);
+    auto shield = std::dynamic_pointer_cast<eduart::robot::hardware::ethernet::EthernetGatewayShield>(_hardware_interface);
+    auto factory = eduart::robot::hardware::ethernet::HardwareComponentFactory(shield);
 
     factory.addSingleChannelMotorController("motor_controller_0", 0u)
            .addSingleChannelMotorController("motor_controller_1", 1u)

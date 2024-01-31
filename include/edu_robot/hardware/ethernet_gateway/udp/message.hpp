@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "edu_robot/hardware/ethernet_gateway/tcp/protocol.hpp"
+#include "edu_robot/hardware/ethernet_gateway/udp/protocol.hpp"
 
 #include <cstddef>
 #include <cstdint>
@@ -17,17 +17,18 @@
 #include <array>
 #include <tuple>
 #include <type_traits>
-#include <vector>
 
 namespace eduart {
 namespace robot {
+namespace hardware {
 namespace ethernet {
-namespace tcp {
+namespace udp {
 namespace message {
 
 static constexpr std::size_t MAX_MESSAGE_SIZE = 200;
-using TxMessageDataBuffer = std::vector<Byte>;
-using RxMessageDataBuffer = std::vector<Byte>;
+using hardware::message::RxMessageDataBuffer;
+using hardware::message::TxMessageDataBuffer;
+using hardware::message::Byte;
 
 namespace element {
 
@@ -284,7 +285,8 @@ public:
 };
 
 } // end namespace message
-} // end namespace tcp
+} // end namespace udp
 } // end namespace ethernet
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

@@ -11,8 +11,8 @@
 #include <rclcpp/executors.hpp>
 #include <rclcpp/rclcpp.hpp>
 
-using eduart::robot::ethernet::EthernetGatewayShield;
-using eduart::robot::ethernet::HardwareComponentFactory;
+using eduart::robot::hardware::ethernet::EthernetGatewayShield;
+using eduart::robot::hardware::ethernet::HardwareComponentFactory;
 
 class EthernetGatewayUniversalBot : public eduart::robot::universal_bot::UniversalBot
 {

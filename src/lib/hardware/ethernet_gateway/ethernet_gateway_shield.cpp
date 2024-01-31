@@ -1,29 +1,30 @@
 #include "edu_robot/hardware/ethernet_gateway/ethernet_gateway_shield.hpp"
-#include "edu_robot/hardware/ethernet_gateway/ethernet_communicator.hpp"
-#include "edu_robot/hardware/ethernet_gateway/tcp/message_definition.hpp"
-#include "edu_robot/hardware/ethernet_gateway/tcp/protocol.hpp"
+#include "edu_robot/hardware/ethernet_gateway/ethernet_request.hpp"
+#include "edu_robot/hardware/ethernet_gateway/ethernet_communication_device.hpp"
+
+#include "edu_robot/hardware/ethernet_gateway/udp/message_definition.hpp"
+#include "edu_robot/hardware/ethernet_gateway/udp/protocol.hpp"
 
 #include <cstddef>
-#include <exception>
-#include <iterator>
 #include <memory>
 #include <stdexcept>
 
 namespace eduart {
 namespace robot {
+namespace hardware {
 namespace ethernet {
 
 using namespace std::chrono_literals;
-using tcp::message::PROTOCOL;
-using tcp::message::Acknowledgement;
-using tcp::message::SetEncoderParameter;
-using tcp::message::SetMotorControllerParameter;
-using tcp::message::SetPidControllerParameter;
-using tcp::message::AcknowledgedStatus;
+using udp::message::PROTOCOL;
+using udp::message::Acknowledgement;
+using udp::message::SetEncoderParameter;
+using udp::message::SetMotorControllerParameter;
+using udp::message::SetPidControllerParameter;
+using udp::message::AcknowledgedStatus;
 
 EthernetGatewayShield::EthernetGatewayShield(char const* const ip_address, const std::uint16_t port)
   : processing::ProcessingComponentOutput<float>("ethernet_gateway_shield")
-  , _communicator(std::make_shared<EthernetCommunicator>(ip_address, port))
+  , _communicator(std::make_shared<Communicator>(std::make_shared<EthernetCommunicationDevice>(ip_address, port)))
 {
   // Configuring Diagnostic
   _clock = std::make_shared<rclcpp::Clock>();
@@ -42,7 +43,7 @@ EthernetGatewayShield::EthernetGatewayShield(char const* const ip_address, const
   _diagnostic.last_processing = _clock->now();
 
   // Performing Firmware Check
-  auto request = Request::make_request<tcp::message::GetFirmwareVersion>();
+  auto request = EthernetRequest::make_request<udp::message::GetFirmwareVersion>();
   auto future_response = _communicator->sendRequest(std::move(request));
   wait_for_future(future_response, 200ms);
 
@@ -78,7 +79,7 @@ EthernetGatewayShield::~EthernetGatewayShield()
 void EthernetGatewayShield::enable()
 {
   for (std::size_t i = 0; i < 2; ++i) {
-    auto request = Request::make_request<tcp::message::SetMotorEnabled>();
+    auto request = EthernetRequest::make_request<udp::message::SetMotorEnabled>();
     auto future_response = _communicator->sendRequest(std::move(request));
     wait_for_future(future_response, 200ms);
 
@@ -91,7 +92,7 @@ void EthernetGatewayShield::enable()
 
 void EthernetGatewayShield::disable()
 {
-  auto request = Request::make_request<tcp::message::SetMotorDisabled>();
+  auto request = EthernetRequest::make_request<udp::message::SetMotorDisabled>();
   auto future_response = _communicator->sendRequest(std::move(request));
   wait_for_future(future_response, 200ms);
 
@@ -104,7 +105,7 @@ void EthernetGatewayShield::disable()
 RobotStatusReport EthernetGatewayShield::getStatusReport()
 {
   // Requesting Status Report
-  auto request = Request::make_request<tcp::message::GetStatus>();
+  auto request = EthernetRequest::make_request<udp::message::GetStatus>();
   auto future_response = _communicator->sendRequest(std::move(request));
   wait_for_future(future_response, 200ms);
   auto got = future_response.get();
@@ -144,6 +145,7 @@ diagnostic::Diagnostic EthernetGatewayShield::processDiagnosticsImpl()
   return diagnostic;
 }
 
-} // end namespace iotbot
+} // end namespace ethernet
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

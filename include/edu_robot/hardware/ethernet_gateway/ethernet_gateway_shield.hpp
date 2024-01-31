@@ -5,8 +5,6 @@
  */
 #pragma once
 
-#include "edu_robot/hardware/ethernet_gateway/ethernet_communicator.hpp"
-
 #include <edu_robot/hardware_robot_interface.hpp>
 #include <edu_robot/robot_status_report.hpp>
 
@@ -19,9 +17,11 @@
 
 namespace eduart {
 namespace robot {
-namespace ethernet {
+namespace hardware {
 
-class EthernetCommunicator;
+class Communicator;
+
+namespace ethernet {
 
 class EthernetGatewayShield : public HardwareRobotInterface
                             , public processing::ProcessingComponentOutput<float>
@@ -33,12 +33,12 @@ public:
   void disable() override;
   RobotStatusReport getStatusReport() override;
 
-  std::shared_ptr<EthernetCommunicator> getCommunicator() { return _communicator; }
+  std::shared_ptr<Communicator> getCommunicator() { return _communicator; }
 
 private:
   diagnostic::Diagnostic processDiagnosticsImpl() override;
 
-  std::shared_ptr<EthernetCommunicator> _communicator;
+  std::shared_ptr<Communicator> _communicator;
   std::shared_ptr<rclcpp::Clock> _clock;
 
   // diagnostics
@@ -51,6 +51,7 @@ private:
   } _diagnostic;
 };
 
-} // end namespace iotbot
+} // end namespace ethernet
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

@@ -5,27 +5,29 @@
  */
 #pragma once
 
-#include "edu_robot/hardware/ethernet_gateway/tcp/message.hpp"
+#include "edu_robot/hardware/ethernet_gateway/udp/message.hpp"
 
 #include <memory>
 
 namespace eduart {
 namespace robot {
-namespace ethernet {
+namespace hardware {
 
-class EthernetCommunicator;
+class Communicator;
+
+namespace ethernet {
 
 class EthernetGatewayTxDevice
 {
 public:
-  EthernetGatewayTxDevice(std::shared_ptr<EthernetCommunicator> communicator)
+  EthernetGatewayTxDevice(std::shared_ptr<Communicator> communicator)
     : _communicator(communicator)
   { }
   virtual ~EthernetGatewayTxDevice() = default;
 
 protected:
-  std::shared_ptr<EthernetCommunicator> _communicator;
-  tcp::message::TxMessageDataBuffer _tx_buffer;
+  std::shared_ptr<Communicator> _communicator;
+  message::TxMessageDataBuffer _tx_buffer;
 };
 
 class EthernetGatewayRxDevice
@@ -35,13 +37,13 @@ public:
   { }
   virtual ~EthernetGatewayRxDevice() = default;
 
-  virtual void processRxData(const tcp::message::RxMessageDataBuffer& data) = 0;
+  virtual void processRxData(const message::RxMessageDataBuffer& data) = 0;
 };
 
 class EthernetGatewayTxRxDevice : public EthernetGatewayTxDevice, public EthernetGatewayRxDevice
 {
 public:
-  EthernetGatewayTxRxDevice(std::shared_ptr<EthernetCommunicator> communicator)
+  EthernetGatewayTxRxDevice(std::shared_ptr<Communicator> communicator)
     : EthernetGatewayTxDevice(communicator)
     , EthernetGatewayRxDevice()
   { }
@@ -49,5 +51,6 @@ public:
 };
 
 } // end namespace ethernet
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

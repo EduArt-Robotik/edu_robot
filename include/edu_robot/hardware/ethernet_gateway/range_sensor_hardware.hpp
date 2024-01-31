@@ -13,16 +13,17 @@
 
 namespace eduart {
 namespace robot {
+namespace hardware {
 namespace ethernet {
 
 class RangeSensorHardware : public SensorRange::SensorInterface
                           , public EthernetGatewayTxRxDevice
 {
 public:
-  RangeSensorHardware(const std::uint8_t id, rclcpp::Node& ros_node, std::shared_ptr<EthernetCommunicator> communicator);
+  RangeSensorHardware(const std::uint8_t id, rclcpp::Node& ros_node, std::shared_ptr<Communicator> communicator);
   ~RangeSensorHardware() override = default;
 
-  void processRxData(const tcp::message::RxMessageDataBuffer& data) override;
+  void processRxData(const message::RxMessageDataBuffer& data) override;
   void initialize(const SensorRange::Parameter& parameter) override;
 
 private:
@@ -33,5 +34,6 @@ private:
 };               
 
 } // end namespace ethernet
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

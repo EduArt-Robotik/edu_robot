@@ -7,7 +7,6 @@
 
 #include <edu_robot/motor_controller.hpp>
 
-#include "edu_robot/hardware/ethernet_gateway/ethernet_communicator.hpp"
 #include "edu_robot/hardware/ethernet_gateway/ethernet_gateway_device_interfaces.hpp"
 #include "edu_robot/rpm.hpp"
 
@@ -15,6 +14,7 @@
 
 namespace eduart {
 namespace robot {
+namespace hardware {
 namespace ethernet {
 
 template <std::size_t NUM_CHANNELS>
@@ -23,7 +23,7 @@ class MotorControllerHardware : public MotorController::HardwareInterface
 {
 public:
   MotorControllerHardware(
-    const std::string& name, const std::uint8_t can_id, std::shared_ptr<EthernetCommunicator> communicator)
+    const std::string& name, const std::uint8_t can_id, std::shared_ptr<Communicator> communicator)
     : MotorController::HardwareInterface(name, NUM_CHANNELS)
     , EthernetGatewayTxRxDevice(communicator)
     , _can_id(can_id)
@@ -33,7 +33,7 @@ public:
 
   void processSetValue(const std::vector<Rpm>& rpm) override;
   void initialize(const Motor::Parameter& parameter) override;
-  void processRxData(const tcp::message::RxMessageDataBuffer& data) override;
+  void processRxData(const message::RxMessageDataBuffer& data) override;
 
 private:
   std::uint8_t _can_id;
@@ -41,5 +41,6 @@ private:
 };
 
 } // end namespace ethernet
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot
