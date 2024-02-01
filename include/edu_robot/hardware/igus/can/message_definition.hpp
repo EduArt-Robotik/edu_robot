@@ -1,5 +1,5 @@
 /**
- * Copyright EduArt Robotik GmbH 2022
+ * Copyright EduArt Robotik GmbH 2023
  *
  * Author: Christian Wendt (christian.wendt@eduart-robotik.com)
  */
@@ -18,11 +18,12 @@ namespace can {
 namespace message {
 
 using hardware::can::message::RxMessageDataBuffer;
-using hardware::can::message::MessageFrame;
 using hardware::can::message::element::Uint8;
+using hardware::can::message::element::Command;
 
-using SetEnableMotor = MessageFrame<PROTOCOL::COMMAND::ENABLE_MOTOR>;
-using SetDisableMotor = MessageFrame<PROTOCOL::COMMAND::DISABLE_MOTOR>;
+using SetEnableMotor = MessageFrame<PROTOCOL::COMMAND::SET::COMMAND, Command<PROTOCOL::COMMAND::ENABLE_MOTOR>>;
+using SetDisableMotor = MessageFrame<PROTOCOL::COMMAND::SET::COMMAND, Command<PROTOCOL::COMMAND::DISABLE_MOTOR>>;
+using SetReset = MessageFrame<PROTOCOL::COMMAND::SET::COMMAND, Command<PROTOCOL::COMMAND::RESET>>;
 
 using SetVelocity = MessageFrame<PROTOCOL::COMMAND::SET::VELOCITY,
                                  element::Velocity,  // velocity in ?

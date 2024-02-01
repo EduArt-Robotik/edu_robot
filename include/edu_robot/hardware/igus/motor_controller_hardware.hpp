@@ -34,8 +34,13 @@ public:
   void processSetValue(const std::vector<Rpm>& rpm) override;
   void initialize(const Motor::Parameter& parameter) override;
   void processRxData(const message::RxMessageDataBuffer& data) override;
+  void enable();
+  void disable();
+  void reset();
 
 private:
+  std::uint8_t getTimeStamp();
+
   std::uint8_t _can_id;
   std::vector<Rpm> _measured_rpm;
 };

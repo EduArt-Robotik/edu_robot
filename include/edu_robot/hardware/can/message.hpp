@@ -152,7 +152,7 @@ inline constexpr auto make_message_search_pattern(const std::uint32_t can_addres
   auto it_search_pattern = search_pattern.begin();
 
   ([&]{
-    if constexpr (std::is_same<typename std::tuple_element<Indices, std::tuple<Elements...>>::type, CanAddress>::value) {
+    if constexpr (std::is_base_of<CanAddress, typename std::tuple_element<Indices, std::tuple<Elements...>>::type>::value) {
       const auto element_pattern = std::tuple_element<Indices, std::tuple<Elements...>>::type::makeSearchPattern(can_address);
       std::copy(element_pattern.begin(), element_pattern.end(), it_search_pattern);
       it_search_pattern += element_pattern.size();

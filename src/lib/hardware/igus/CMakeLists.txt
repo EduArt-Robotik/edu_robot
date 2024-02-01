@@ -2,6 +2,7 @@
 add_library(igus
   hardware_component_factory.cpp
   motor_controller_hardware.cpp
+  can_gateway_shield.cpp
 )
 target_include_directories(igus PUBLIC
   $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>

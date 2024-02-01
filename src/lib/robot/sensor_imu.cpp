@@ -6,6 +6,8 @@
 
 #include <rclcpp/node.hpp>
 
+#include <Eigen/Eigen>
+
 namespace eduart {
 namespace robot {
 

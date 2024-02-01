@@ -25,10 +25,10 @@ public:
     auto shield = std::dynamic_pointer_cast<CanGatewayShield>(_hardware_interface);
     auto factory = HardwareComponentFactory(shield);
 
-    factory.addMotorController("motor_controller_a", 0x20)
-           .addMotorController("motor_controller_b", 0x30)
-           .addMotorController("motor_controller_c", 0x40)
-           .addMotorController("motor_controller_d", 0x50);
+    factory.addMotorController("motor_controller_a", 0x10);
+          //  .addMotorController("motor_controller_b", 0x30)
+          //  .addMotorController("motor_controller_c", 0x40)
+          //  .addMotorController("motor_controller_d", 0x50);
 
     initialize(factory);
     _mode_state_machine.switchToMode(eduart::robot::RobotMode::INACTIVE);
