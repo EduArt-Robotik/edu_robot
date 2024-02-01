@@ -6,12 +6,12 @@
 #include <edu_robot/bot/turtle/turtle.hpp>
 
 #include <edu_robot/hardware/igus/hardware_component_factory.hpp>
-#include <edu_robot/hardware/can/can_gateway_shield.hpp>
+#include <edu_robot/hardware/igus/can_gateway_shield.hpp>
 
 #include <rclcpp/executors.hpp>
 #include <rclcpp/rclcpp.hpp>
 
-using eduart::robot::hardware::can::CanGatewayShield;
+using eduart::robot::hardware::igus::CanGatewayShield;
 using eduart::robot::hardware::igus::HardwareComponentFactory;
 
 class IgusCanTurtleBot : public eduart::robot::turtle::Turtle
