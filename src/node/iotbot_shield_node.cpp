@@ -3,10 +3,10 @@
  *
  * Author: Christian Wendt (christian.wendt@eduart-robotik.com)
  */
-#include <edu_robot/eduard/eduard.hpp>
+#include <edu_robot/bot/eduard/eduard.hpp>
 
-#include <edu_robot/iot_shield/iot_shield.hpp>
-#include <edu_robot/iot_shield/iotbot_hardware_component_factory.hpp>
+#include <edu_robot/hardware/iot_shield/iot_shield.hpp>
+#include <edu_robot/hardware/iot_shield/iotbot_hardware_component_factory.hpp>
 
 #include <rclcpp/executors.hpp>
 #include <rclcpp/rclcpp.hpp>

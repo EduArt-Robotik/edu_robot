@@ -3,9 +3,10 @@
  *
  * Author: Christian Wendt (christian.wendt@eduart-robotik.com)
  */
-#include "edu_robot/ethernet_gateway/hardware_component_factory.hpp"
-#include <edu_robot/ohmni_bot/ohmni_bot.hpp>
-#include <edu_robot/ethernet_gateway/ethernet_gateway_shield.hpp>
+#include <edu_robot/bot/ohmni_bot/ohmni_bot.hpp>
+
+#include <edu_robot/hardware/ethernet_gateway/hardware_component_factory.hpp>
+#include <edu_robot/hardware/ethernet_gateway/ethernet_gateway_shield.hpp>
 
 #include <memory>
 #include <rclcpp/executors.hpp>
@@ -17,13 +18,13 @@ public:
   EthernetGatewayOhmniBot()
     : eduart::robot::ohmni_bot::OhmniBot(
         "ohmni_bot",
-        std::make_unique<eduart::robot::ethernet::EthernetGatewayShield>(
+        std::make_unique<eduart::robot::hardware::ethernet::EthernetGatewayShield>(
           "192.168.2.20", 1234
         )
       )
   {
-    auto shield = std::dynamic_pointer_cast<eduart::robot::ethernet::EthernetGatewayShield>(_hardware_interface);
-    auto factory = eduart::robot::ethernet::HardwareComponentFactory(shield);
+    auto shield = std::dynamic_pointer_cast<eduart::robot::hardware::ethernet::EthernetGatewayShield>(_hardware_interface);
+    auto factory = eduart::robot::hardware::ethernet::HardwareComponentFactory(shield);
 
     factory.addSingleChannelMotorController("motor_controller_0", 0u)
            .addSingleChannelMotorController("motor_controller_1", 1u)

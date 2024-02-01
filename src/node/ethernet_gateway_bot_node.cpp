@@ -3,16 +3,16 @@
  *
  * Author: Christian Wendt (christian.wendt@eduart-robotik.com)
  */
-#include <edu_robot/eduard/eduard.hpp>
+#include <edu_robot/bot/eduard/eduard.hpp>
 
-#include <edu_robot/ethernet_gateway/hardware_component_factory.hpp>
-#include <edu_robot/ethernet_gateway/ethernet_gateway_shield.hpp>
+#include <edu_robot/hardware/ethernet_gateway/hardware_component_factory.hpp>
+#include <edu_robot/hardware/ethernet_gateway/ethernet_gateway_shield.hpp>
 
 #include <rclcpp/executors.hpp>
 #include <rclcpp/rclcpp.hpp>
 
-using eduart::robot::ethernet::EthernetGatewayShield;
-using eduart::robot::ethernet::HardwareComponentFactory;
+using eduart::robot::hardware::ethernet::EthernetGatewayShield;
+using eduart::robot::hardware::ethernet::HardwareComponentFactory;
 
 class EthernetGatewayBot : public eduart::robot::eduard::Eduard
 {

@@ -56,11 +56,8 @@ add_subdirectory(src/lib/action)
 add_subdirectory(src/lib/diagnostic)
 add_subdirectory(src/lib/robot)
 add_subdirectory(src/lib/processing_component)
-add_subdirectory(src/lib/eduard)
-add_subdirectory(src/lib/universal_bot)
-add_subdirectory(src/lib/ohmni_bot)
-add_subdirectory(src/lib/iotbot_shield)
-add_subdirectory(src/lib/ethernet_gateway)
+add_subdirectory(src/lib/bot)
+add_subdirectory(src/lib/hardware)
 add_subdirectory(src/node)
 
 ## Installing of Content
@@ -81,6 +78,7 @@ install(
     ethernet-gateway
     ethernet-gateway-universal-bot
     ethernet-gateway-ohmni-bot
+    igus-can-turtle-bot
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   # for humble...
@@ -100,6 +98,10 @@ install(
     ohmni-bot
     eduart-action
     eduart-diagnostic
+    eduart-turtle
+    igus
+    eduart-hardware
+    eduart-hardware-can
   EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

@@ -87,7 +87,7 @@ diagnostic::Diagnostic MotorController::processDiagnosticsImpl()
 
 std::vector<std::shared_ptr<MotorController>> helper_create_motor_controller(
   const HardwareComponentFactory& factory, const std::vector<std::string>& motor_name,
-  const std::vector<std::string>& motor_joint_name, rclcpp::Node& ros_node)
+  const std::vector<std::string>& motor_joint_name, const std::string& robot_name, rclcpp::Node& ros_node)
 {
   constexpr robot::Motor::Parameter motor_controller_default_parameter{ };  
   std::size_t idx_motor = 0;
@@ -110,7 +110,7 @@ std::vector<std::shared_ptr<MotorController>> helper_create_motor_controller(
         motor_name[idx_motor],
         motor_controller_parameter,
         ros_node,
-        motor_joint_name[idx_motor]
+        robot_name + motor_joint_name[idx_motor]
       );
     }
 
