@@ -209,11 +209,7 @@ template <Byte TcpCommand>
 struct Response : public Command<TcpCommand | 0x80> { };
 
 struct Float  : public impl::DataField<float> { };
-struct Int16  : public impl::DataField<std::int16_t> {
-  inline static constexpr std::array<Byte, size()> serialize(const Rpm value) {
-    return impl::DataField<std::int16_t>::serialize(static_cast<std::int16_t>(value * 100.0f + 0.5f));
-  }
-};
+struct Int16  : public impl::DataField<std::int16_t> { };
 struct Uint8  : public impl::DataField<std::uint8_t> {
   inline static constexpr std::array<Byte, size()> serialize(const bool value) {
     return impl::DataField<std::uint8_t>::serialize(static_cast<std::uint8_t>(value));
