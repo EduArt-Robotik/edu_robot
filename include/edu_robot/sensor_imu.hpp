@@ -27,7 +27,7 @@ public:
   struct Parameter {
     bool raw_data_mode = false;
     bool publish_tf = true;
-    bool publish_orientation_tf = false;
+    bool publish_orientation_without_yaw_tf = true;
     float fusion_weight = 0.03f;
     struct {
       // Use mounting orientation from IoT Shield as default.

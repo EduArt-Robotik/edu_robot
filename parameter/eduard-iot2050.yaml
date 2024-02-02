@@ -16,7 +16,7 @@
       fusion_weight: 0.029999999329447746
       raw_data_mode: true
       publish_tf: true
-      publish_orientation_tf : false
+      publish_orientation_without_yaw_tf : true
 
 # Motor Controller
     motor_a:
