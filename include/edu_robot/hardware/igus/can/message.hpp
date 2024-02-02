@@ -42,7 +42,7 @@ struct VelocityCanAddress : public hardware::can::message::element::CanAddress {
 
 struct CommandCanAddress : public hardware::can::message::element::CanAddress {
   inline static constexpr std::array<Byte, CanAddress::size()> makeSearchPattern(const std::uint32_t can_address) {
-    return DataField<std::uint32_t>::serialize(can_address | 0x01);
+    return DataField<std::uint32_t>::serialize(can_address | 0x02);
   }
 };
 
