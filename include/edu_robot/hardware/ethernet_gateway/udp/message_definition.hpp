@@ -121,10 +121,10 @@ struct AcknowledgedImuMeasurement : MessageFrame<element::Response<PROTOCOL::COM
                                                  element::Float,  // orientation z
                                                  element::Float>{ // orientation w
   inline static Eigen::Vector3d angularVelocity(const RxMessageDataBuffer& rx_buffer) {
-    return { deserialize<3>(rx_buffer), deserialize<4>(rx_buffer), deserialize<5>(rx_buffer) };
+    return { -deserialize<3>(rx_buffer), -deserialize<4>(rx_buffer), -deserialize<5>(rx_buffer) };
   }
   inline static Eigen::Vector3d linearAcceleration(const RxMessageDataBuffer& rx_buffer) {
-    return { deserialize<0>(rx_buffer), deserialize<1>(rx_buffer), deserialize<2>(rx_buffer) };
+    return { -deserialize<0>(rx_buffer), -deserialize<1>(rx_buffer), -deserialize<2>(rx_buffer) };
   }
   inline static Eigen::Quaterniond orientation(const RxMessageDataBuffer& rx_buffer) {
     return { deserialize<9>(rx_buffer), deserialize<6>(rx_buffer), deserialize<7>(rx_buffer), deserialize<8>(rx_buffer) };
