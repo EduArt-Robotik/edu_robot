@@ -20,7 +20,7 @@ CanGatewayShield::~CanGatewayShield()
 void CanGatewayShield::enable()
 {
   for (auto& motor_controller : _motor_controller_hardware) {
-    motor_controller.reset();
+    motor_controller->reset();
     motor_controller->enable();
   }
 }

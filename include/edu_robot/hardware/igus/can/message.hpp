@@ -34,9 +34,15 @@ struct Velocity : public DataField<std::uint8_t> {
   }
 };
 
-struct CanAddress : public hardware::can::message::element::CanAddress {// DataField<std::uint32_t> {
+struct VelocityCanAddress : public hardware::can::message::element::CanAddress {
   inline static constexpr std::array<Byte, CanAddress::size()> makeSearchPattern(const std::uint32_t can_address) {
     return DataField<std::uint32_t>::serialize(can_address | 0x01);
+  }
+};
+
+struct CommandCanAddress : public hardware::can::message::element::CanAddress {
+  inline static constexpr std::array<Byte, CanAddress::size()> makeSearchPattern(const std::uint32_t can_address) {
+    return DataField<std::uint32_t>::serialize(can_address | 0x02);
   }
 };
 
@@ -47,11 +53,11 @@ using hardware::message::TxMessageDataBuffer;
 using hardware::message::RxMessageDataBuffer;
 using hardware::can::message::element::impl::make_message_search_pattern;
 
-template <Byte CommandByte, class ...Elements>
-struct MessageFrame : public Message<element::CanAddress, element::Command<CommandByte>, Elements...>
+template <class CanAddress, Byte CommandByte, class ...Elements>
+struct MessageFrame : public Message<CanAddress, element::Command<CommandByte>, Elements...>
 {
 private:
-  using MessageType = Message<element::CanAddress, element::Command<CommandByte>, Elements...>;
+  using MessageType = Message<CanAddress, element::Command<CommandByte>, Elements...>;
 
 public:
   using MessageType::size;

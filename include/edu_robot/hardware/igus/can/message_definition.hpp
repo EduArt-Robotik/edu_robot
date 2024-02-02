@@ -20,16 +20,25 @@ namespace message {
 using hardware::can::message::RxMessageDataBuffer;
 using hardware::can::message::element::Uint8;
 using hardware::can::message::element::Command;
+using hardware::igus::can::message::element::VelocityCanAddress;
+using hardware::igus::can::message::element::CommandCanAddress;
 
-using SetEnableMotor = MessageFrame<PROTOCOL::COMMAND::SET::COMMAND, Command<PROTOCOL::COMMAND::ENABLE_MOTOR>>;
-using SetDisableMotor = MessageFrame<PROTOCOL::COMMAND::SET::COMMAND, Command<PROTOCOL::COMMAND::DISABLE_MOTOR>>;
-using SetReset = MessageFrame<PROTOCOL::COMMAND::SET::COMMAND, Command<PROTOCOL::COMMAND::RESET>>;
-
-using SetVelocity = MessageFrame<PROTOCOL::COMMAND::SET::VELOCITY,
+using SetEnableMotor = MessageFrame<CommandCanAddress,
+                                    PROTOCOL::COMMAND::SET::COMMAND,
+                                    Command<PROTOCOL::COMMAND::ENABLE_MOTOR>>;
+using SetDisableMotor = MessageFrame<CommandCanAddress,
+                                     PROTOCOL::COMMAND::SET::COMMAND,
+                                     Command<PROTOCOL::COMMAND::DISABLE_MOTOR>>;
+using SetReset = MessageFrame<CommandCanAddress,
+                              PROTOCOL::COMMAND::SET::COMMAND,
+                              Command<PROTOCOL::COMMAND::RESET>>;
+using SetVelocity = MessageFrame<VelocityCanAddress,
+                                 PROTOCOL::COMMAND::SET::VELOCITY,
                                  element::Velocity,  // velocity in ?
                                  Uint8>;             // timestamp in ?
 
-struct AcknowledgedVelocity : public MessageFrame<PROTOCOL::COMMAND::SET::VELOCITY,
+struct AcknowledgedVelocity : public MessageFrame<VelocityCanAddress,
+                                                  PROTOCOL::COMMAND::SET::VELOCITY,
                                                   Uint8,    // error code
                                                   element::Velocity, // measured velocity ?
                                                   Uint8,    // timestamp in ?

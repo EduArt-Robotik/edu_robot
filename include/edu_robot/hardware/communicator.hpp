@@ -93,7 +93,7 @@ private:
 template <typename Request, typename Duration>
 inline void wait_for_future(std::future<Request>& future, const Duration& timeout) {
   if (future.wait_for(timeout) == std::future_status::timeout) {
-    throw HardwareError(State::SHIELD_REQUEST_TIMEOUT, "TCP Request Timeout!.");
+    throw HardwareError(State::SHIELD_REQUEST_TIMEOUT, "Request Timeout!.");
   }
 }
 

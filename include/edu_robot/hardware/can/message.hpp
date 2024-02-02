@@ -40,47 +40,18 @@ struct DataField {
   inline static constexpr std::array<Byte, size()> serialize(const DataType value)
   {
     // Serialization of 1, 2 and 4 bytes sized data types are supported.
-    if constexpr (size() == sizeof(Byte)) {
-      return { value };
-    }
-    else if constexpr (size() == sizeof(std::uint16_t)) {
-      const std::uint16_t host_order = *static_cast<const std::uint16_t*>(static_cast<const void*>(&value));
-      const std::uint16_t network_order = ::htons(host_order);
-      std::array<Byte, size()> serialized_bytes = { 0 };
-    
-      void* data_address = static_cast<void*>(serialized_bytes.data());
-      *static_cast<std::uint16_t*>(data_address) = network_order;
-      return serialized_bytes;
-    }
-    else if constexpr (size() == sizeof(std::uint32_t)) {
-      const std::uint32_t host_order = *static_cast<const std::uint32_t*>(static_cast<const void*>(&value));
-      const std::uint32_t network_order = ::htonl(host_order);
-      std::array<Byte, size()> serialized_bytes = { 0 };
-    
-      void* data_address = static_cast<void*>(serialized_bytes.data());
-      *static_cast<std::uint32_t*>(data_address) = network_order;
-      return serialized_bytes;
-    }
-    // else
-    static_assert((size() == 1 || size() % 2 == 0) && size() < 5, "Datatype is not supported.");
+    // Do implementation for ARM only at the moment.
+    std::array<Byte, size()> serialized_bytes = { 0 };
+    void* data_address = static_cast<void*>(serialized_bytes.data());
+    *static_cast<DataType*>(data_address) = value;
+
+    return serialized_bytes;
   }
   inline static constexpr DataType deserialize(const Byte data[size()])
   {
-    if constexpr (size() == sizeof(Byte)) {
-      return data[0];
-    }
-    else if constexpr (size() == sizeof(std::uint16_t)) {
-      const std::uint16_t host_order = ::ntohs(*reinterpret_cast<const std::uint16_t*>(data));
-      const void* data_address = static_cast<const void*>(&host_order);
-      return *static_cast<const DataType*>(data_address);      
-    }
-    else if constexpr (size() == sizeof(std::uint32_t)) {
-      const std::uint32_t host_order = ::ntohl(*reinterpret_cast<const std::uint32_t*>(data));
-      const void* data_address = static_cast<const void*>(&host_order);
-      return *static_cast<const DataType*>(data_address);       
-    }
-    // else
-    static_assert((size() == 1 || size() % 2 == 0) && size() < 5, "Datatype is not supported.");
+    // Do implementation for ARM only at the moment.    
+    const void* data_address = static_cast<const void*>(data);
+    return *static_cast<const DataType*>(data_address);
   }
   inline static constexpr bool isElementValid(const Byte[size()]) { return true; }
 };

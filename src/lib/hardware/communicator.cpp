@@ -45,7 +45,7 @@ Communicator::Communicator(std::shared_ptr<CommunicationDevice> device)
 
 Communicator::~Communicator()
 {
-  std::cout << "Shuting down TCP communicator." << std::endl;
+  RCLCPP_INFO(rclcpp::get_logger("Communicator"), "shuting down...");
 
   _is_running = false;
   _handling_thread.join();
@@ -297,8 +297,10 @@ void Communicator::processReceiving()
       }
     }
     catch (std::exception& ex) {
-      std::cout << "error occurred during receiving data: what() = " << ex.what() << std::endl;
-      std::cout << "drop message" << std::endl;
+      RCLCPP_ERROR_STREAM(
+        rclcpp::get_logger("Communicator"),
+        "error occurred during receiving data: what() = " << ex.what()
+      );
       continue;
     }
   }

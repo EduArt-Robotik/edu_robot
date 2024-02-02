@@ -69,7 +69,7 @@ void Turtle::initialize(eduart::robot::HardwareComponentFactory& factory)
 
   // Set Up Default Drive Kinematic. Needs to be done here, because method can't be called in constructor 
   // of robot base class.
-  switchKinematic(DriveKinematic::SKID_DRIVE);
+  switchKinematic(DriveKinematic::MECANUM_DRIVE);
 }
 
 Turtle::~Turtle()

@@ -54,18 +54,31 @@ CanCommunicationDevice::~CanCommunicationDevice()
 
 void CanCommunicationDevice::send(message::Byte const *const tx_buffer, const std::size_t length)
 {
+  if (length < 4 || length > 12) {
+    throw std::invalid_argument("CanCommunicationDevice::send(): given length must be in range 4 .. 12.");
+  }
+
   // Debugging
   std::stringstream debug_out;
-  debug_out << "sending: " << std::hex;
+  debug_out << "sending: " << std::hex << static_cast<int>(*reinterpret_cast<const std::uint32_t*>(&tx_buffer[0])) << "#";
 
-  for (std::size_t i = 0; i < length; ++i) {
+  for (std::size_t i = 4; i < length; ++i) {
     debug_out << static_cast<int>(tx_buffer[i]) << " ";
   }
 
   RCLCPP_DEBUG_STREAM(rclcpp::get_logger("CanCommunicationDevice"), debug_out.str());
 
   // Sending Given Data
-  if (::write(_socket_fd, tx_buffer, length) != static_cast<int>(length)) {
+  can_frame frame;
+
+  frame.can_id = static_cast<int>(*reinterpret_cast<const std::uint32_t*>(&tx_buffer[0])); // first 4 bytes are the address
+  frame.can_dlc = length - 4;
+
+  for (std::size_t i = 4; i < length; ++i) {
+    frame.data[i - 4] = tx_buffer[i];
+  }
+
+  if (::write(_socket_fd, &frame, sizeof(can_frame)) < 0) {
     throw HardwareError(State::CAN_SOCKET_ERROR, "Can't write data to interface.");
   }
 }

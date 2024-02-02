@@ -33,19 +33,19 @@ public:
   CanRequest(CanRequest&&) = default;
 
 private:
-  template <Byte CommandByte, class... Elements>
-  CanRequest(MessageFrame<CommandByte, Elements...>, const std::uint32_t can_address, const typename Elements::type&... element_value) {
-    _request_message = MessageFrame<CommandByte, Elements...>::serialize(can_address, element_value...);
-    const auto search_pattern = MessageFrame<CommandByte, Elements...>::makeSearchPattern(can_address);
+  template <class Address, Byte CommandByte, class... Elements>
+  CanRequest(MessageFrame<Address, CommandByte, Elements...>, const std::uint32_t can_address, const typename Elements::type&... element_value) {
+    _request_message = MessageFrame<Address, CommandByte, Elements...>::serialize(can_address, element_value...);
+    const auto search_pattern = MessageFrame<Address, CommandByte, Elements...>::makeSearchPattern(can_address);
 
     _response_search_pattern.resize(search_pattern.size());
     std::copy(search_pattern.begin(), search_pattern.end(), _response_search_pattern.begin());
   }
   // special case for two commands
-  template <Byte FirstCommand, Byte SecondCommand, class... Elements>
-  CanRequest(MessageFrame<FirstCommand, Command<SecondCommand>, Elements...>, const std::uint32_t can_address, const typename Elements::type&... element_value) {
-    _request_message = MessageFrame<FirstCommand, Command<SecondCommand>, Elements...>::serialize(can_address, 0, element_value...);
-    const auto search_pattern = MessageFrame<FirstCommand, Command<SecondCommand>, Elements...>::makeSearchPattern(can_address);
+  template <class Address, Byte FirstCommand, Byte SecondCommand, class... Elements>
+  CanRequest(MessageFrame<Address, FirstCommand, Command<SecondCommand>, Elements...>, const std::uint32_t can_address, const typename Elements::type&... element_value) {
+    _request_message = MessageFrame<Address, FirstCommand, Command<SecondCommand>, Elements...>::serialize(can_address, 0, element_value...);
+    const auto search_pattern = MessageFrame<Address, FirstCommand, Command<SecondCommand>, Elements...>::makeSearchPattern(can_address);
 
     _response_search_pattern.resize(search_pattern.size());
     std::copy(search_pattern.begin(), search_pattern.end(), _response_search_pattern.begin());
