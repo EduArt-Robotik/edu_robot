@@ -20,7 +20,7 @@
         roll: 0.0
         yaw: 0.0 
       publish_tf: true
-      publish_orientation_tf : false      
+      publish_orientation_without_yaw_tf : true      
 
 # Motor Controller
     motor_a:
