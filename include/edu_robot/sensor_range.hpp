@@ -29,8 +29,6 @@ namespace robot {
  * \brief Represents a range sensor without a concrete hardware realization, that has to be implemented. This class
  *        creates an publisher for publishing its measurements. This class needs to be realized by a specific
  *        hardware layer.
- *
- * \todo below is only a draft, a first try --> please review concept after first release
  */
 class SensorRange : public Sensor
                   , public processing::ProcessingComponentOutput<float>
