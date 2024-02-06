@@ -204,37 +204,6 @@ void Communicator::processing()
   }
 }
 
-// void Communicator::sendingData(tcp::message::Byte const *const tx_buffer, const std::size_t length)
-// {
-//   // \todo think about it! If there is only one line here remove the sending method.
-//   ::send(_socket_fd, tx_buffer, length, 0);
-// }
-
-// tcp::message::RxMessageDataBuffer Communicator::receivingData()
-// {
-//   std::uint8_t buffer[_max_rx_buffer_queue_size];
-
-//   const int received_bytes = ::recv(_socket_fd, buffer, _max_rx_buffer_queue_size, MSG_DONTWAIT);
-
-//   if (received_bytes < 0) {
-//     return { };
-//   }
-
-//   // Set correct size to rx buffer.
-//   tcp::message::RxMessageDataBuffer rx_buffer;
-
-//   rx_buffer.resize(received_bytes);
-//   std::copy(std::begin(buffer), std::begin(buffer) + received_bytes, rx_buffer.begin());
-  
-//   std::cout << std::hex;
-//   for (const auto byte : rx_buffer) {
-//     std::cout << static_cast<int>(byte) << " ";
-//   }
-//   std::cout << std::dec << std::endl;
-
-//   return rx_buffer;
-// }
-
 void Communicator::processSending(const std::chrono::milliseconds wait_time_after_sending)
 {
   std::chrono::time_point<std::chrono::system_clock> last_sending = std::chrono::system_clock::now();

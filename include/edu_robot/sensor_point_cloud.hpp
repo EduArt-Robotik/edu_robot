@@ -7,6 +7,7 @@
 
 #include "edu_robot/hardware_component_interfaces.hpp"
 #include "edu_robot/sensor.hpp"
+#include "angle.hpp"
 
 #include <sensor_msgs/msg/point_cloud2.hpp>
 
@@ -23,15 +24,23 @@ class PointCloudSensor : public Sensor
 {
 public:
   struct Parameter {
-    std::size_t number_of_zones;
+    struct {
+      std::size_t vertical = 8;
+      std::size_t horizontal = 8;
+    } number_of_zones; // number of sensor zones (pixel)
+    struct {
+      Angle vertical = Angle::createFromDegree(45);
+      Angle horizontal = Angle::createFromDegree(45);
+    } fov;
   };
 
   struct SensorInterface : public HardwareComponent<Parameter>
                          , public HardwareSensor<std::size_t, float, float> { };
 
-  PointCloudSensor(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
-              const tf2::Transform sensor_transform, const Parameter parameter, rclcpp::Node& ros_node,
-              std::shared_ptr<SensorInterface> hardware_interface);
+  PointCloudSensor(
+    const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
+    const tf2::Transform sensor_transform, const Parameter parameter, rclcpp::Node& ros_node,
+    std::shared_ptr<SensorInterface> hardware_interface);
   ~PointCloudSensor() override = default;
 
 protected:
@@ -42,7 +51,13 @@ private:
 
   const Parameter _parameter;
   std::shared_ptr<sensor_msgs::msg::PointCloud2> _point_cloud;
-  std::size_t _current_zone;
+  struct {
+    std::size_t number_of_zones;
+    std::size_t current_zone;
+    std::size_t next_expected_zone;
+    std::vector<float> tan_x_lookup; // used to transform to point y
+    std::vector<float> tan_y_lookup; // used to transform to point x
+  } _processing_data;
 
   std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::PointCloud2>> _publisher;
   std::shared_ptr<rclcpp::Clock> _clock;

@@ -22,23 +22,34 @@ namespace robot {
 namespace hardware {
 namespace can {
 
+class MotorControllerHardware;
+
 class CanGatewayShield : public HardwareRobotInterface
                        , public processing::ProcessingComponentOutput<float>
 {
 public:
   CanGatewayShield(char const* const can_device);
+  CanGatewayShield(char const* const can_device_0, char const* const can_device_1, char const* const can_device_2);
   ~CanGatewayShield() override;
   void enable() override;
   void disable() override;
   RobotStatusReport getStatusReport() override;
 
-  std::shared_ptr<Communicator> getCommunicator() { return _communicator; }
+  std::shared_ptr<Communicator> getCommunicator(const std::size_t index) {
+    if (index >= _communicator.size()) {
+      throw std::invalid_argument("CanGatewayShield::getCommunicator() given index is out of range.");
+    }
+    
+    return _communicator[index];
+  }
+  void registerMotorControllerHardware(std::shared_ptr<MotorControllerHardware> motor_controller_hardware);
 
 private:
   diagnostic::Diagnostic processDiagnosticsImpl() override;
 
-  std::shared_ptr<Communicator> _communicator;
+  std::array<std::shared_ptr<Communicator>, 3> _communicator;
   std::shared_ptr<rclcpp::Clock> _clock;
+  std::vector<std::shared_ptr<MotorControllerHardware>> _motor_controller_hardware;
 
   // diagnostics
   struct {

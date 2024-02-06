@@ -77,7 +77,7 @@ public:
     return RxDataEndPoint(search_pattern, callback);
   }
 
-private:
+protected:
   template <class Message>
   RxDataEndPoint(
     std::vector<message::Byte>& search_pattern,

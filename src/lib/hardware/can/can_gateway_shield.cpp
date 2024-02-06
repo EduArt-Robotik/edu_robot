@@ -16,10 +16,9 @@ using namespace std::chrono_literals;
 
 CanGatewayShield::CanGatewayShield(char const* const can_device)
   : processing::ProcessingComponentOutput<float>("can_gateway_shield")
-  , _communicator(std::make_shared<Communicator>(
-      std::make_shared<hardware::can::CanCommunicationDevice>(can_device))
-    )
 {
+  _communicator[0] = std::make_shared<Communicator>(std::make_shared<hardware::can::CanCommunicationDevice>(can_device));
+
   // Configuring Diagnostic
   _clock = std::make_shared<rclcpp::Clock>();
   _diagnostic.voltage = std::make_shared<diagnostic::MeanDiagnostic<float, std::less<float>>>(
@@ -35,6 +34,13 @@ CanGatewayShield::CanGatewayShield(char const* const can_device)
     "processing dt", "ms", 10, 700, 1000, 50, 100
   );
   _diagnostic.last_processing = _clock->now();
+}
+
+CanGatewayShield::CanGatewayShield(char const* const can_device_0, char const* const can_device_1, char const* const can_device_2)
+  : CanGatewayShield(can_device_0)
+{
+  _communicator[1] = std::make_shared<Communicator>(std::make_shared<hardware::can::CanCommunicationDevice>(can_device_1));
+  _communicator[2] = std::make_shared<Communicator>(std::make_shared<hardware::can::CanCommunicationDevice>(can_device_2));
 }
 
 CanGatewayShield::~CanGatewayShield()
