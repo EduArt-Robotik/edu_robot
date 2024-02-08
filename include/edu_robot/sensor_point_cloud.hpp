@@ -44,6 +44,9 @@ public:
     std::shared_ptr<SensorInterface> hardware_interface);
   ~SensorPointCloud() override = default;
 
+static Parameter get_parameter(
+  const std::string& name, const Parameter& default_parameter, rclcpp::Node& ros_node);
+
 protected:
   void processMeasurementData(const std::size_t zone_index, const float distance, const float sigma);
 

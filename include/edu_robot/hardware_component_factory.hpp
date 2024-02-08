@@ -5,6 +5,7 @@
  */
 #pragma once
 
+#include <edu_robot/hardware_interface.hpp>
 #include <edu_robot/lighting.hpp>
 #include <edu_robot/motor_controller.hpp>
 #include <edu_robot/sensor_range.hpp>
@@ -31,12 +32,16 @@ public:
   rangeSensorHardware() const { return _range_sensor_hardware; }
   inline const std::map<std::string, std::shared_ptr<SensorImu::SensorInterface>>&
   imuSensorHardware() const { return _imu_sensor_hardware; }
+  inline const std::map<std::string, std::shared_ptr<HardwareInterface>>& hardware() const {
+    return _hardware;
+  }
 
 protected:
   std::map<std::string, std::shared_ptr<Lighting::ComponentInterface>> _lighting_hardware;
   std::vector<std::shared_ptr<MotorController::HardwareInterface>> _motor_controller_hardware;
   std::map<std::string, std::shared_ptr<SensorRange::SensorInterface>> _range_sensor_hardware;
   std::map<std::string, std::shared_ptr<SensorImu::SensorInterface>> _imu_sensor_hardware;
+  std::map<std::string, std::shared_ptr<HardwareInterface>> _hardware;
 };
 
 } // end namespace robot

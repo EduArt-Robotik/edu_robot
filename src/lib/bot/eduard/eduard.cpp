@@ -144,7 +144,8 @@ void Eduard::initialize(eduart::robot::HardwareComponentFactory& factory)
     imu_parameter,
     getTfBroadcaster(),
     *this,
-    factory.imuSensorHardware().at("imu")
+    // factory.imuSensorHardware().at("imu")
+    factory.hardware().at("imu")->cast<SensorImu::SensorInterface>()
   );
   registerSensor(imu_sensor);
   factory.imuSensorHardware().at("imu")->initialize(imu_parameter);
