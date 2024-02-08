@@ -3,7 +3,7 @@
 namespace eduart {
 namespace robot {
 
-PointCloudSensor::PointCloudSensor(
+SensorPointCloud::SensorPointCloud(
   const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
   const tf2::Transform sensor_transform, const Parameter parameter, rclcpp::Node& ros_node,
   std::shared_ptr<SensorInterface> hardware_interface)
@@ -64,21 +64,21 @@ PointCloudSensor::PointCloudSensor(
   }
 
   // Publisher
-  _publisher = std::make_shared<rclcpp::Publisher<sensor_msgs::msg::PointCloud2>>(
+  _publisher = ros_node.create_publisher<sensor_msgs::msg::PointCloud2>(
     name + "/point_cloud", rclcpp::SensorDataQoS()
   );
 
   // Registering Processing Data Callback
   _hardware_interface->registerCallbackProcessMeasurementData(std::bind(
-    &PointCloudSensor::processMeasurementData, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)
+    &SensorPointCloud::processMeasurementData, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)
   );
 };
 
-void PointCloudSensor::processMeasurementData(const std::size_t zone_index, const float distance, const float sigma)
+void SensorPointCloud::processMeasurementData(const std::size_t zone_index, const float distance, const float sigma)
 {
   if (zone_index != _processing_data.next_expected_zone) {
     RCLCPP_WARN(
-      rclcpp::get_logger("PointCloudSensor"),
+      rclcpp::get_logger("SensorPointCloud"),
       "zone_index %u is not expected one %u.",
       static_cast<unsigned int>(zone_index),
       static_cast<unsigned int>(_processing_data.next_expected_zone)
@@ -108,7 +108,7 @@ void PointCloudSensor::processMeasurementData(const std::size_t zone_index, cons
   _publisher->publish(*_point_cloud);
 }
 
-diagnostic::Diagnostic PointCloudSensor::processDiagnosticsImpl()
+diagnostic::Diagnostic SensorPointCloud::processDiagnosticsImpl()
 {
   return { };
 }

@@ -20,7 +20,7 @@ namespace robot {
  * \brief Represents a single or a collection of EduArt point cloud sensors. These sensors are usually mounted around
  *        a robot. This class needs to be realized by a specific hardware layer.
  */
-class PointCloudSensor : public Sensor
+class SensorPointCloud : public Sensor
 {
 public:
   struct Parameter {
@@ -32,16 +32,17 @@ public:
       Angle vertical = Angle::createFromDegree(45);
       Angle horizontal = Angle::createFromDegree(45);
     } fov;
+    std::chrono::milliseconds measurement_interval;
   };
 
   struct SensorInterface : public HardwareComponent<Parameter>
                          , public HardwareSensor<std::size_t, float, float> { };
 
-  PointCloudSensor(
+  SensorPointCloud(
     const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
     const tf2::Transform sensor_transform, const Parameter parameter, rclcpp::Node& ros_node,
     std::shared_ptr<SensorInterface> hardware_interface);
-  ~PointCloudSensor() override = default;
+  ~SensorPointCloud() override = default;
 
 protected:
   void processMeasurementData(const std::size_t zone_index, const float distance, const float sigma);

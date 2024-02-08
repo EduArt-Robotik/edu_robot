@@ -2,6 +2,7 @@
 add_library(eduart-hardware-can
   can_communication_device.cpp
   can_gateway_shield.cpp
+  sensor_point_cloud_hardware.cpp
 )
 target_link_libraries(eduart-hardware-can
   eduart-robot

@@ -175,6 +175,7 @@ struct Uint8  : public impl::DataField<std::uint8_t> {
   }
 };
 struct Uint16 : public impl::DataField<std::uint16_t> { };
+struct Uint24 : public impl::DataField<std::array<unsigned char, 3>> { };
 struct Uint32 : public impl::DataField<std::uint32_t> { };
 
 } // end namespace element
@@ -196,11 +197,11 @@ struct Message : public std::tuple<Elements...>
   }
 };
 
-template <Byte CommandByte, class ...Elements>
-struct MessageFrame : public Message<element::CanAddress, element::Command<CommandByte>, Elements...>
+template <class ...Elements>
+struct MessageFrame : public Message<element::CanAddress, Elements...>
 {
 private:
-  using MessageType = Message<element::CanAddress, element::Command<CommandByte>, Elements...>;
+  using MessageType = Message<element::CanAddress, Elements...>;
 
 public:
   using MessageType::size;
@@ -208,7 +209,7 @@ public:
   inline static TxMessageDataBuffer serialize(
     const Byte can_address, const typename Elements::type&... element_value)
   {
-    return MessageType::serialize(can_address, 0, element_value...);
+    return MessageType::serialize(can_address, element_value...);
   }
   inline constexpr static auto makeSearchPattern(const Byte can_address) {
     return element::impl::make_message_search_pattern<0>(can_address, MessageType{});
@@ -216,6 +217,9 @@ public:
   template <std::size_t Index>
   inline constexpr static auto deserialize(const RxMessageDataBuffer& rx_buffer) {
     return MessageType::template deserialize<Index>(rx_buffer);
+  }
+  inline static constexpr std::uint8_t canId(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<0>(rx_buffer);
   }
 };
 

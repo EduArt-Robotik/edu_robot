@@ -74,14 +74,13 @@ public:
   inline static RxDataEndPoint make_data_endpoint(const CallbackProcessData& callback) {
     const auto search_pattern = Message::makeSearchPattern();
     std::vector<message::Byte> search_pattern_vector(search_pattern.begin(), search_pattern.end());
-    return RxDataEndPoint(search_pattern, callback);
+    return RxDataEndPoint(search_pattern_vector, callback);
   }
 
 protected:
-  template <class Message>
   RxDataEndPoint(
     std::vector<message::Byte>& search_pattern,
-    std::function<void(const message::RxMessageDataBuffer&)>& callback_process_data)
+    const std::function<void(const message::RxMessageDataBuffer&)>& callback_process_data)
     : _response_search_pattern(std::move(search_pattern))
     , _callback_process_data(callback_process_data)
   { }
@@ -95,6 +94,11 @@ inline void wait_for_future(std::future<Request>& future, const Duration& timeou
   if (future.wait_for(timeout) == std::future_status::timeout) {
     throw HardwareError(State::SHIELD_REQUEST_TIMEOUT, "Request Timeout!.");
   }
+}
+
+template <typename Request>
+inline bool is_future_ready(std::future<Request>& future) {
+  return future.wait_for(0) == std::future_status::ready;
 }
 
 class Communicator

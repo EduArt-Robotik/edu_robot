@@ -25,7 +25,7 @@ HardwareComponentFactory& HardwareComponentFactory::addLighting(const std::strin
 HardwareComponentFactory& HardwareComponentFactory::addMotorController(
   const std::string& controller_name, const std::size_t can_id)
 {
-  auto compound_motor = std::make_shared<MotorControllerHardware>(controller_name, can_id, _shield->getCommunicator());
+  auto compound_motor = std::make_shared<MotorControllerHardware>(controller_name, can_id, _shield->getCommunicator(0));
   _motor_controller_hardware.push_back(compound_motor);
   _shield->registerMotorControllerHardware(compound_motor);
 

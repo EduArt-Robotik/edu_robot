@@ -45,9 +45,6 @@ struct AcknowledgedVelocity : public MessageFrame<VelocityCanAddress,
                                                   Uint8,    // shunt in ?
                                                   Uint8>    // digital input
 {
-  inline static constexpr std::uint8_t canId(const RxMessageDataBuffer& rx_buffer) {
-    return deserialize<0>(rx_buffer);
-  }
   inline static constexpr std::uint8_t errorCode(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<1>(rx_buffer);
   }

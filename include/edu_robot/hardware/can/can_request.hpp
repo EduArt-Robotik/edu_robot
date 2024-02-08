@@ -31,14 +31,22 @@ public:
   Request(Request&&) = default;
 
 private:
-  template <can::message::Byte CommandByte, class... Elements>
-  Request(const can::message::MessageFrame<CommandByte, Elements...>, const can::message::Byte can_address, const typename Elements::type&... element_value) {
-    _request_message = can::message::MessageFrame<CommandByte, Elements...>::serialize(can_address, element_value...);
-    const auto search_pattern = can::message::MessageFrame<CommandByte, Elements...>::makeSearchPattern(can_address);
+  // template <class... Elements>
+  // Request(const can::message::MessageFrame<Elements...>, const can::message::Byte can_address, const typename Elements::type&... element_value) {
+  //   _request_message = can::message::MessageFrame<Elements...>::serialize(can_address, element_value...);
+  //   const auto search_pattern = can::message::MessageFrame<Elements...>::makeSearchPattern(can_address);
+
+  //   _response_search_pattern.resize(search_pattern.size());
+  //   std::copy(search_pattern.begin(), search_pattern.end(), _response_search_pattern.begin());
+  // }
+  template <template <class...> class Message, class... Elements>
+  Request(const Message<Elements...>, const can::message::Byte can_address, const typename Elements::type&... element_value) {
+    _request_message = Message<Elements...>::serialize(can_address, element_value...);
+    const auto search_pattern = Message<Elements...>::makeSearchPattern(can_address);
 
     _response_search_pattern.resize(search_pattern.size());
     std::copy(search_pattern.begin(), search_pattern.end(), _response_search_pattern.begin());
-  }
+  }  
 };
 
 } // end namespace can
