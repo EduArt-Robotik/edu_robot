@@ -30,12 +30,13 @@ SensorPointCloudHardware::get_parameter(const std::string& name, const Parameter
 }
 
 SensorPointCloudHardware::SensorPointCloudHardware(
-  const std::string& name, rclcpp::Node& ros_node, std::shared_ptr<Communicator> communicator)
+  const std::string& name, const Parameter& parameter, rclcpp::Node& ros_node, std::shared_ptr<Communicator> communicator)
   : SensorPointCloud::SensorInterface()
   , CanGatewayTxRxDevice(communicator)
-  , _parameter(get_parameter(name, Parameter{}, ros_node))
+  , _parameter(parameter)
   , _ros_node(ros_node)
 {
+  (void)name;
   auto measurement_end_point = CanRxDataEndPoint::make_data_endpoint<ZoneMeasurement>(
     _parameter.can_id.measurement,
     std::bind(&SensorPointCloudHardware::processRxData, this, std::placeholders::_1));

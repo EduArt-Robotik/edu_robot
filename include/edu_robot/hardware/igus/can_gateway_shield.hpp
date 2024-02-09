@@ -30,6 +30,7 @@ class CanGatewayShield : public hardware::can::CanGatewayShield
 {
 public:
   CanGatewayShield(char const* const can_device);
+  CanGatewayShield(char const* const can_device_0, char const* const can_device_1, char const* const can_device_2);  
   ~CanGatewayShield() override;
   void enable() override;
   void disable() override;

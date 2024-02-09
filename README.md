@@ -37,6 +37,10 @@ The software package 'edu_robot' provides ROS2 interface. For details please fol
 * [Update ROS Software](documentation/update/update-software.md)
 * [Setup PS5 Controller](documentation/setup/joystick/ps5-gamepad.md)
 
+### On Raspberry Pi
+
+* [First Time Setup](documentation/setup/raspberry/setup_raspberry.md)
+
 ### On IPC127e
 
 * [First Time Setup](documentation/setup/ipc127e/setup_ipc127.md)

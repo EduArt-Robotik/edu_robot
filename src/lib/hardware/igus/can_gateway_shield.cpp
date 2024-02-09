@@ -12,6 +12,12 @@ CanGatewayShield::CanGatewayShield(char const* const can_device)
 
 }
 
+CanGatewayShield::CanGatewayShield(char const* const can_device_0, char const* const can_device_1, char const* const can_device_2)
+  : hardware::can::CanGatewayShield(can_device_0, can_device_1, can_device_2)
+{
+
+}
+
 CanGatewayShield::~CanGatewayShield()
 {
 

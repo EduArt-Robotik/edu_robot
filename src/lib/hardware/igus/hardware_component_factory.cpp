@@ -1,7 +1,8 @@
 #include "edu_robot/hardware/igus/hardware_component_factory.hpp"
 #include "edu_robot/hardware/igus/motor_controller_hardware.hpp"
+#include "edu_robot/hardware/igus/can_gateway_shield.hpp"
 
-#include <edu_robot/hardware/igus/can_gateway_shield.hpp>
+#include <edu_robot/hardware/can/sensor_point_cloud_hardware.hpp>
 
 #include <functional>
 #include <memory>
@@ -56,6 +57,17 @@ HardwareComponentFactory& HardwareComponentFactory::addImuSensor(
   // );
   // // _shield->registerIotShieldRxDevice(imu_hardware);
   // _imu_sensor_hardware[sensor_name] = imu_hardware;
+  return *this;
+}
+
+HardwareComponentFactory& HardwareComponentFactory::addPointCloudSensor(
+  const std::string& sensor_name, rclcpp::Node& ros_node)
+{
+  const auto parameter = hardware::can::SensorPointCloudHardware::get_parameter(
+    sensor_name, {}, ros_node);
+  _hardware[sensor_name] = std::make_shared<hardware::can::SensorPointCloudHardware>(
+    sensor_name, parameter, ros_node, _shield->getCommunicator(0));
+
   return *this;
 }
 

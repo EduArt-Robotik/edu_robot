@@ -31,7 +31,7 @@ public:
   HardwareComponentFactory& addImuSensor(const std::string& sensor_name, rclcpp::Node& ros_node);
   HardwareComponentFactory& addPointCloudSensor(const std::string& sensor_name, rclcpp::Node& ros_node);
 
-private:
+protected:
   std::shared_ptr<CanGatewayShield> _shield;
 };
 

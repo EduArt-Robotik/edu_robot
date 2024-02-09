@@ -27,12 +27,14 @@ public:
     } can_id;
   };
 
-  SensorPointCloudHardware(const std::string& name, rclcpp::Node& ros_node, std::shared_ptr<Communicator> communicator);
+  SensorPointCloudHardware(
+    const std::string& name, const Parameter& parameter, rclcpp::Node& ros_node,
+    std::shared_ptr<Communicator> communicator);
   ~SensorPointCloudHardware() override = default;
 
   void processRxData(const message::RxMessageDataBuffer& data) override;
   void initialize(const SensorPointCloud::Parameter& parameter) override;
-  Parameter get_parameter(const std::string& name, const Parameter& default_parameter, rclcpp::Node& ros_node);
+  static Parameter get_parameter(const std::string& name, const Parameter& default_parameter, rclcpp::Node& ros_node);
 
 private:
   void processMeasurement();
