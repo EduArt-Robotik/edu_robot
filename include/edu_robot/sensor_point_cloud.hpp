@@ -5,9 +5,10 @@
  */
 #pragma once
 
-#include "edu_robot/hardware_component_interfaces.hpp"
-#include "edu_robot/sensor.hpp"
-#include "angle.hpp"
+#include <edu_robot/hardware_component_interfaces.hpp>
+#include <edu_robot/sensor.hpp>
+#include <edu_robot/angle.hpp>
+#include <edu_robot/hardware_interface.hpp>
 
 #include <sensor_msgs/msg/point_cloud2.hpp>
 
@@ -35,8 +36,11 @@ public:
     std::chrono::milliseconds measurement_interval;
   };
 
-  struct SensorInterface : public HardwareComponent<Parameter>
-                         , public HardwareSensor<std::size_t, float, float> { };
+  struct SensorInterface : public HardwareInterface
+                         , public HardwareComponent<Parameter>
+                         , public HardwareSensor<std::size_t, float, float> {
+    SensorInterface() : HardwareInterface(HardwareInterface::Type::SENSOR_POINT_CLOUD) { }
+  };
 
   SensorPointCloud(
     const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,

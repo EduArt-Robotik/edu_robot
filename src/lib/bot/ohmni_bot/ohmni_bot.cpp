@@ -73,10 +73,10 @@ void OhmniBot::initialize(eduart::robot::HardwareComponentFactory& factory)
     imu_parameter,
     getTfBroadcaster(),
     *this,
-    factory.imuSensorHardware().at("imu")
+    factory.hardware().at("imu")->cast<robot::SensorImu::SensorInterface>()
   );
   registerSensor(imu_sensor);
-  factory.imuSensorHardware().at("imu")->initialize(imu_parameter);
+  factory.hardware().at("imu")->cast<robot::SensorImu::SensorInterface>()->initialize(imu_parameter);
 
   // Set Up Default Drive Kinematic. Needs to be done here, because method can't be called in constructor 
   // of robot base class.

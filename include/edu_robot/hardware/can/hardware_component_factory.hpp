@@ -28,8 +28,8 @@ public:
   HardwareComponentFactory& addMotorController(const std::string& controller_name, const std::size_t can_id);
   HardwareComponentFactory& addRangeSensor(
     const std::string& sensor_name, const std::uint8_t id, rclcpp::Node& ros_node);
-  HardwareComponentFactory& addImuSensor(
-    const std::string& sensor_name, rclcpp::Node& ros_node);
+  HardwareComponentFactory& addImuSensor(const std::string& sensor_name, rclcpp::Node& ros_node);
+  HardwareComponentFactory& addPointCloudSensor(const std::string& sensor_name, rclcpp::Node& ros_node);
 
 private:
   std::shared_ptr<CanGatewayShield> _shield;

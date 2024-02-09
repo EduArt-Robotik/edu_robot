@@ -59,25 +59,25 @@ void Eduard::initialize(eduart::robot::HardwareComponentFactory& factory)
     "head",
     COLOR::DEFAULT::HEAD,
     1.0f,
-    factory.lightingHardware().at("head")
+    factory.hardware().at("head")->cast<robot::Lighting::ComponentInterface>()
   ));
   registerLighting(std::make_shared<robot::Lighting>(
     "right_side",
     COLOR::DEFAULT::HEAD,
     1.0f,
-    factory.lightingHardware().at("right_side")
+    factory.hardware().at("right_side")->cast<robot::Lighting::ComponentInterface>()
   ));
   registerLighting(std::make_shared<robot::Lighting>(
     "left_side",
     COLOR::DEFAULT::BACK,
     1.0f,
-    factory.lightingHardware().at("left_side")
+    factory.hardware().at("left_side")->cast<robot::Lighting::ComponentInterface>()
   ));
   registerLighting(std::make_shared<robot::Lighting>(
     "back",
     COLOR::DEFAULT::BACK,
     1.0f,
-    factory.lightingHardware().at("back")
+    factory.hardware().at("back")->cast<robot::Lighting::ComponentInterface>()
   ));
 
   // Use all representation to set a initial light.
@@ -85,7 +85,7 @@ void Eduard::initialize(eduart::robot::HardwareComponentFactory& factory)
     "all",
     COLOR::DEFAULT::HEAD,
     1.0f,
-    factory.lightingHardware().at("all")
+    factory.hardware().at("all")->cast<robot::Lighting::ComponentInterface>()
   );
   lighting_all->setColor(COLOR::DEFAULT::BACK, Lighting::Mode::RUNNING);
   registerLighting(lighting_all);
@@ -123,11 +123,11 @@ void Eduard::initialize(eduart::robot::HardwareComponentFactory& factory)
       range_sensor_pose[i],
       range_sensor_parameter,
       *this,
-      factory.rangeSensorHardware().at(range_sensor_name[i])
+      factory.hardware().at(range_sensor_name[i])->cast<robot::SensorRange::SensorInterface>()
     );
     registerSensor(range_sensor);
     range_sensor->registerComponentInput(_collision_avoidance_component);
-    factory.rangeSensorHardware().at(range_sensor_name[i])->initialize(range_sensor_parameter);
+    factory.hardware().at(range_sensor_name[i])->cast<robot::SensorRange::SensorInterface>()->initialize(range_sensor_parameter);
   }
 
   // IMU Sensor
@@ -148,7 +148,7 @@ void Eduard::initialize(eduart::robot::HardwareComponentFactory& factory)
     factory.hardware().at("imu")->cast<SensorImu::SensorInterface>()
   );
   registerSensor(imu_sensor);
-  factory.imuSensorHardware().at("imu")->initialize(imu_parameter);
+  factory.hardware().at("imu")->cast<SensorImu::SensorInterface>()->initialize(imu_parameter);
 
   // Set Up Default Drive Kinematic. Needs to be done here, because method can't be called in constructor 
   // of robot base class.

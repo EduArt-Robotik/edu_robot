@@ -25,9 +25,11 @@ HardwareComponentFactory& HardwareComponentFactory::addLighting(const std::strin
 HardwareComponentFactory& HardwareComponentFactory::addMotorController(
   const std::string& controller_name, const std::size_t can_id)
 {
-  auto compound_motor = std::make_shared<MotorControllerHardware>(controller_name, can_id, _shield->getCommunicator(0));
-  _motor_controller_hardware.push_back(compound_motor);
-  _shield->registerMotorControllerHardware(compound_motor);
+  (void)controller_name;
+  (void)can_id;
+  // auto compound_motor = std::make_shared<MotorControllerHardware>(controller_name, can_id, _shield->getCommunicator(0));
+  // _motor_controller_hardware.push_back(compound_motor);
+  // _shield->registerMotorControllerHardware(compound_motor);
 
   return *this;
 }
@@ -44,8 +46,17 @@ HardwareComponentFactory& HardwareComponentFactory::addRangeSensor(
   // // _shield->registerIotShieldRxDevice(range_sensor_hardware);
   // _range_sensor_hardware[sensor_name] = range_sensor_hardware;
   return *this;
-}                                               
-  
+}
+
+HardwareComponentFactory& HardwareComponentFactory::addPointCloudSensor(
+  const std::string& sensor_name, rclcpp::Node& ros_node)
+{
+  (void)sensor_name;
+  (void)ros_node;
+
+  return *this;
+}
+
 HardwareComponentFactory& HardwareComponentFactory::addImuSensor(
   const std::string& sensor_name, rclcpp::Node& ros_node)
 {
