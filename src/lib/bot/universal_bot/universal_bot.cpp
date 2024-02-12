@@ -54,12 +54,15 @@ void UniversalBot::initialize(eduart::robot::HardwareComponentFactory& factory)
   // Motor Controllers
   std::vector<std::string> motor_name = {
     "motor_a", "motor_b", "motor_c", "motor_d", "motor_e", "motor_f", "motor_g", "motor_h"};
-  // \todo fix the wrong order of joints!
   std::vector<std::string> motor_joint_name = {
     "base_to_motor_1", "base_to_motor_2", "base_to_motor_3", "base_to_motor_4",
     "base_to_motor_5", "base_to_motor_6", "base_to_motor_7", "base_to_motor_8"};
   
   // Create motors and motor controllers.
+  RCLCPP_INFO(get_logger(), "creating %u motors", static_cast<unsigned int>(_parameter.axis.size()));
+  motor_name.resize(_parameter.axis.size() * 2);
+  motor_joint_name.resize(_parameter.axis.size() * 2);
+
   auto motor_controllers = helper_create_motor_controller(
     factory, motor_name, motor_joint_name, getFrameIdPrefix(), *this
   );

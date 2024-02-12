@@ -56,17 +56,17 @@ Turtle::Turtle(
 void Turtle::initialize(eduart::robot::HardwareComponentFactory& factory)
 {
   // Motor Controllers
-  const std::vector<std::string> motor_name = {
-    "motor_a", "motor_b", "motor_c", "motor_d" };
-  const std::vector<std::string> motor_joint_name = {
-    "base_to_wheel_rear_right", "base_to_wheel_front_right", "base_to_wheel_rear_left", "base_to_wheel_front_left" };
-  auto motor_controllers = helper_create_motor_controller(
-    factory, motor_name, motor_joint_name, getFrameIdPrefix(), *this
-  );
+  // const std::vector<std::string> motor_name = {
+  //   "motor_a", "motor_b", "motor_c", "motor_d" };
+  // const std::vector<std::string> motor_joint_name = {
+  //   "base_to_wheel_rear_right", "base_to_wheel_front_right", "base_to_wheel_rear_left", "base_to_wheel_front_left" };
+  // auto motor_controllers = helper_create_motor_controller(
+  //   factory, motor_name, motor_joint_name, getFrameIdPrefix(), *this
+  // );
 
-  for (auto& motor_controller : motor_controllers) {
-    registerMotorController(motor_controller);
-  }
+  // for (auto& motor_controller : motor_controllers) {
+  //   registerMotorController(motor_controller);
+  // }
 
   // Point Cloud Sensors
   constexpr std::array<const char*, 1> point_cloud_name = { "pointcloud_left" };
