@@ -12,7 +12,6 @@
 #include <cstdint>
 #include <algorithm>
 #include <vector>
-#include <iostream>
 
 namespace eduart {
 namespace robot {
@@ -37,9 +36,6 @@ private:
   template <class Address, Byte CommandByte, class... Elements>
   CanRequest(MessageFrame<Address, CommandByte, Elements...>, const std::uint32_t can_address, const typename Elements::type&... element_value) {
     _request_message = MessageFrame<Address, CommandByte, Elements...>::serialize(can_address, element_value...);
-    std::cout << "CanRequest: can_id = " << std::hex << can_address << ", request message = " << std::hex;
-    for (const auto byte : _request_message) { std::cout << static_cast<int>(byte) << " "; }
-    std::cout << std::endl;
     const auto search_pattern = MessageFrame<Address, CommandByte, Elements...>::makeSearchPattern(can_address);
 
     _response_search_pattern.resize(search_pattern.size());

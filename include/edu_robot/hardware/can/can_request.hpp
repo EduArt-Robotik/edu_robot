@@ -25,7 +25,7 @@ class Request : public hardware::Request
 {
 public:
   template <class Message, class... Arguments>
-  inline static Request make_request(const std::uint16_t can_address, Arguments&&... args) {
+  inline static Request make_request(const std::uint32_t can_address, Arguments&&... args) {
     return Request(Message{}, can_address, std::forward<Arguments>(args)...);
   }
   Request(Request&&) = default;
@@ -40,7 +40,7 @@ private:
   //   std::copy(search_pattern.begin(), search_pattern.end(), _response_search_pattern.begin());
   // }
   template <template <class...> class Message, class... Elements>
-  Request(const Message<Elements...>, const can::message::Byte can_address, const typename Elements::type&... element_value) {
+  Request(const Message<Elements...>, const std::uint32_t can_address, const typename Elements::type&... element_value) {
     _request_message = Message<Elements...>::serialize(can_address, element_value...);
     const auto search_pattern = Message<Elements...>::makeSearchPattern(can_address);
 

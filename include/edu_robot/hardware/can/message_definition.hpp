@@ -18,8 +18,8 @@ namespace sensor {
 namespace tof {
 using message::MessageFrame;
 
-using StartMeasurement = NoResponseMessageFrame<element::Uint8,  // frame no.
-                                                element::Uint8>; // sensor activation bits
+using StartMeasurement = NoResponseMessageFrame<element::Uint8,   // frame no.
+                                                element::Uint16>; // sensor activation bits
 
 struct MeasurementComplete : public MessageFrame<element::Uint8,  // sensor no.
                                                  element::Uint8,  // resolution
@@ -37,19 +37,25 @@ struct MeasurementComplete : public MessageFrame<element::Uint8,  // sensor no.
 };                                                
 
 struct ZoneMeasurement : public MessageFrame<element::Uint8,  // zone no., frame no.
+                                             element::Uint24, // distance, sigma
+                                             element::Uint8,  // zone no., frame no.
                                              element::Uint24> // distance, sigma
 {
+  template <std::size_t Index>
   inline static constexpr std::size_t zone(const RxMessageDataBuffer& rx_buffer) {
-    return (deserialize<1>(rx_buffer) >> 2) & 0x3f;
+    return (deserialize<1 + Index * 2>(rx_buffer) >> 2) & 0x3f;
   }
+  template <std::size_t Index>  
   inline static constexpr std::size_t frame(const RxMessageDataBuffer& rx_buffer) {
-    return deserialize<1>(rx_buffer) & 0x03;
+    return deserialize<1 + Index * 2>(rx_buffer) & 0x03;
   }
+  template <std::size_t Index>  
   inline static float distance(const RxMessageDataBuffer& rx_buffer) {
-    return ((*reinterpret_cast<const std::uint32_t*>(&deserialize<2>(rx_buffer)[0]) >> 10) & 0x3fff) / 4.0f / 1000.0f;
+    return ((*reinterpret_cast<const std::uint32_t*>(&deserialize<2 + Index * 2>(rx_buffer)[0]) >> 10) & 0x3fff) / 4.0f / 1000.0f;
   }
+  template <std::size_t Index>  
   inline static float sigma(const RxMessageDataBuffer& rx_buffer) {
-    return ((*reinterpret_cast<const std::uint32_t*>(&deserialize<2>(rx_buffer)[0]) >> 0) & 0x3ff) / 128.0f / 1000.0f;
+    return ((*reinterpret_cast<const std::uint32_t*>(&deserialize<2 + Index * 2>(rx_buffer)[0]) >> 0) & 0x3ff) / 128.0f / 1000.0f;
   }
 };
 

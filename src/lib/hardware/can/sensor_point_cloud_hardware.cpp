@@ -49,11 +49,18 @@ void SensorPointCloudHardware::processRxData(const message::RxMessageDataBuffer&
     return;
   }
 
+  std::cout << "received zone = " << static_cast<int>(ZoneMeasurement::zone<0>(data)) << std::endl;
+  std::cout << "received zone = " << static_cast<int>(ZoneMeasurement::zone<1>(data)) << std::endl;
   _callback_process_measurement(
-    ZoneMeasurement::zone(data),
-    ZoneMeasurement::distance(data),
-    ZoneMeasurement::sigma(data)
+    ZoneMeasurement::zone<0>(data),
+    ZoneMeasurement::distance<0>(data),
+    ZoneMeasurement::sigma<0>(data)
   );
+  _callback_process_measurement(
+    ZoneMeasurement::zone<1>(data),
+    ZoneMeasurement::distance<1>(data),
+    ZoneMeasurement::sigma<1>(data)
+  );  
 }
 
 void SensorPointCloudHardware::initialize(const SensorPointCloud::Parameter& parameter)
@@ -70,7 +77,7 @@ void SensorPointCloudHardware::processMeasurement()
   try {
     // Get measurement data from can gateway and parse it to processing pipeline.
     auto request = Request::make_request<StartMeasurement>(
-      _parameter.can_id.trigger, _processing_data.frame_number, 0xff);
+      _parameter.can_id.trigger, _processing_data.frame_number, 0xffff); // \todo activate only single sensor
 
     _processing_data.future_response = _communicator->sendRequest(std::move(request));
     _processing_data.frame_number++;
