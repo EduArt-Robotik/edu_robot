@@ -64,7 +64,7 @@ HardwareComponentFactory& HardwareComponentFactory::addPointCloudSensor(
   const std::string& sensor_name, const hardware::can::SensorPointCloudHardware::Parameter& parameter, rclcpp::Node& ros_node)
 {
   _hardware[sensor_name] = std::make_shared<hardware::can::SensorPointCloudHardware>(
-    sensor_name, parameter, ros_node, _shield->getCommunicator(0));
+    sensor_name, parameter, ros_node, _shield->getCommunicator(1));
 
   return *this;
 }

@@ -19,7 +19,9 @@ class IgusCanTurtleBot : public eduart::robot::turtle::Turtle
 public:
   IgusCanTurtleBot()
     : eduart::robot::turtle::Turtle(
-        "turtle", std::make_unique<CanGatewayShield>("can0")
+        "turtle", std::make_unique<CanGatewayShield>(
+          "can0", "can1", "can2"
+        )
       )
   {
     auto shield = std::dynamic_pointer_cast<CanGatewayShield>(_hardware_interface);
