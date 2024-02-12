@@ -61,10 +61,8 @@ HardwareComponentFactory& HardwareComponentFactory::addImuSensor(
 }
 
 HardwareComponentFactory& HardwareComponentFactory::addPointCloudSensor(
-  const std::string& sensor_name, rclcpp::Node& ros_node)
+  const std::string& sensor_name, const hardware::can::SensorPointCloudHardware::Parameter& parameter, rclcpp::Node& ros_node)
 {
-  const auto parameter = hardware::can::SensorPointCloudHardware::get_parameter(
-    sensor_name, {}, ros_node);
   _hardware[sensor_name] = std::make_shared<hardware::can::SensorPointCloudHardware>(
     sensor_name, parameter, ros_node, _shield->getCommunicator(0));
 

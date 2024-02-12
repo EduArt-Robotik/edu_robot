@@ -197,7 +197,7 @@ struct Message : public std::tuple<Elements...>
   }
 };
 
-template <class ...Elements>
+template <class... Elements>
 struct MessageFrame : public Message<element::CanAddress, Elements...>
 {
 private:
@@ -220,6 +220,16 @@ public:
   }
   inline static constexpr std::uint8_t canId(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<0>(rx_buffer);
+  }
+};
+
+template <class... Elements>
+struct NoResponseMessageFrame : public MessageFrame<Elements...>
+{
+  // make a empty search pattern to indicate there is no response
+  inline constexpr static auto makeSearchPattern(const Byte can_address) {
+    (void)can_address;
+    return std::array<Byte, 0>();
   }
 };
 

@@ -21,9 +21,9 @@ class SensorPointCloudHardware : public SensorPointCloud::SensorInterface
 public:
   struct Parameter {
     struct {
-      std::uint32_t trigger = 904;
-      std::uint32_t complete = 776;
-      std::uint32_t measurement = 777;
+      std::uint32_t trigger = 0x388;
+      std::uint32_t complete = 0x308;
+      std::uint32_t measurement = 0x309;
     } can_id;
   };
 

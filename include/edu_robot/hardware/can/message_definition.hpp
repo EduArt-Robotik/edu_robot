@@ -18,8 +18,8 @@ namespace sensor {
 namespace tof {
 using message::MessageFrame;
 
-using StartMeasurement = MessageFrame<element::Uint8,  // frame no.
-                                      element::Uint8>; // sensor activation bits
+using StartMeasurement = NoResponseMessageFrame<element::Uint8,  // frame no.
+                                                element::Uint8>; // sensor activation bits
 
 struct MeasurementComplete : public MessageFrame<element::Uint8,  // sensor no.
                                                  element::Uint8,  // resolution

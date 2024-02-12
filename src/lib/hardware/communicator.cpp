@@ -129,7 +129,15 @@ void Communicator::processing()
         future.get();
         // Request was successfully sent to the shield.
         request.first._state = Request::State::SENT;
-        _open_request.emplace_back(std::move(request));
+
+        if (request.first._response_search_pattern.empty()) {
+          // no response search pattern available --> request is finished
+          request.second.set_value(std::move(request.first));
+        }
+        else {
+          // response search pattern available --> move request to open requests
+          _open_request.emplace_back(std::move(request));
+        }
       }
       catch (...) {
         // Forward exception to original requester.
@@ -167,6 +175,7 @@ void Communicator::processing()
             auto request = std::move(*it);
             it = _open_request.erase(it);
 
+            // Add received message to request, update state and send it back to sender using promise.
             request.first._state = Request::State::RECEIVED;
             request.first._response_message = std::move(rx_buffer);
             request.second.set_value(std::move(request.first));
