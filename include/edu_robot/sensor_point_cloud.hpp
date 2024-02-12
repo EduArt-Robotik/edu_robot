@@ -33,7 +33,7 @@ public:
       Angle vertical = Angle::createFromDegree(45);
       Angle horizontal = Angle::createFromDegree(45);
     } fov;
-    std::chrono::milliseconds measurement_interval;
+    std::chrono::milliseconds measurement_interval{100};
   };
 
   struct SensorInterface : public HardwareInterface

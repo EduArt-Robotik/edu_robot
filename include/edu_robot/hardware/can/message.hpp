@@ -207,11 +207,11 @@ public:
   using MessageType::size;
 
   inline static TxMessageDataBuffer serialize(
-    const Byte can_address, const typename Elements::type&... element_value)
+    const std::uint32_t can_address, const typename Elements::type&... element_value)
   {
     return MessageType::serialize(can_address, element_value...);
   }
-  inline constexpr static auto makeSearchPattern(const Byte can_address) {
+  inline constexpr static auto makeSearchPattern(const std::uint32_t can_address) {
     return element::impl::make_message_search_pattern<0>(can_address, MessageType{});
   }
   template <std::size_t Index>
@@ -227,7 +227,7 @@ template <class... Elements>
 struct NoResponseMessageFrame : public MessageFrame<Elements...>
 {
   // make a empty search pattern to indicate there is no response
-  inline constexpr static auto makeSearchPattern(const Byte can_address) {
+  inline constexpr static auto makeSearchPattern(const std::uint32_t can_address) {
     (void)can_address;
     return std::array<Byte, 0>();
   }
