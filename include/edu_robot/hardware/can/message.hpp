@@ -218,7 +218,7 @@ public:
   inline constexpr static auto deserialize(const RxMessageDataBuffer& rx_buffer) {
     return MessageType::template deserialize<Index>(rx_buffer);
   }
-  inline static constexpr std::uint8_t canId(const RxMessageDataBuffer& rx_buffer) {
+  inline static constexpr std::uint32_t canId(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<0>(rx_buffer);
   }
 };
