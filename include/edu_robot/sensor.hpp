@@ -33,6 +33,7 @@ public:
   inline const std::string& frameId() const { return _frame_id; }
   
   geometry_msgs::msg::TransformStamped getTransformMsg(const rclcpp::Time stamp) const;
+  static tf2::Transform get_transform_from_parameter(const std::string& sensor_name, rclcpp::Node& ros_node);
 
 private:
   std::string _name;
