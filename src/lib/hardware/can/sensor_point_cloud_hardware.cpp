@@ -49,8 +49,6 @@ void SensorPointCloudHardware::processRxData(const message::RxMessageDataBuffer&
     return;
   }
 
-  std::cout << "received zone = " << static_cast<int>(ZoneMeasurement::zone<0>(data)) << std::endl;
-  std::cout << "received zone = " << static_cast<int>(ZoneMeasurement::zone<1>(data)) << std::endl;
   _callback_process_measurement(
     ZoneMeasurement::zone<0>(data),
     ZoneMeasurement::distance<0>(data),

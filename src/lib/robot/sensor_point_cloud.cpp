@@ -75,15 +75,16 @@ SensorPointCloud::SensorPointCloud(
   const float alpha_increment_vertical = _parameter.fov.vertical / static_cast<double>(_parameter.number_of_zones.vertical);
   const float alpha_increment_horizontal = _parameter.fov.horizontal / static_cast<double>(_parameter.number_of_zones.horizontal);
 
+  // \todo skip idx_beam == 0
   for (std::size_t idx_height = 0; idx_height < _parameter.number_of_zones.horizontal; ++idx_height) {
-    const int idx_beam_y = ((static_cast<float>(_parameter.number_of_zones.vertical) / 2.0f) - idx_height - 0.5f);
+    const int idx_beam_y = ((static_cast<float>(_parameter.number_of_zones.vertical) / 2.0f) - idx_height);
 
     for (std::size_t idx_width = 0; idx_width < _parameter.number_of_zones.vertical; ++idx_width) {
       const std::size_t idx_zone = idx_height * _parameter.number_of_zones.horizontal + idx_width;
-      const int idx_beam_x = ((static_cast<float>(_parameter.number_of_zones.horizontal) / 2.0f) - idx_width - 0.5f);
+      const int idx_beam_x = ((static_cast<float>(_parameter.number_of_zones.horizontal) / 2.0f) - idx_width);
 
       _processing_data.tan_x_lookup[idx_zone] = std::tan(idx_beam_x * alpha_increment_horizontal);
-      _processing_data.tan_x_lookup[idx_zone] = std::tan(idx_beam_y * alpha_increment_vertical);
+      _processing_data.tan_y_lookup[idx_zone] = std::tan(idx_beam_y * alpha_increment_vertical);
     }
   }
 
@@ -112,12 +113,12 @@ void SensorPointCloud::processMeasurementData(const std::size_t zone_index, cons
   const std::size_t idx_point_x = zone_index * _point_cloud->point_step + _point_cloud->fields[0].offset;
   const std::size_t idx_point_y = zone_index * _point_cloud->point_step + _point_cloud->fields[1].offset;
   const std::size_t idx_point_z = zone_index * _point_cloud->point_step + _point_cloud->fields[2].offset;
-  const std::size_t idx_sigma = zone_index * _point_cloud->point_step + _point_cloud->fields[3].offset;
+  const std::size_t idx_sigma   = zone_index * _point_cloud->point_step + _point_cloud->fields[3].offset;
 
-  _point_cloud->data[idx_point_x] = _processing_data.tan_x_lookup[zone_index] * distance;
-  _point_cloud->data[idx_point_y] = _processing_data.tan_y_lookup[zone_index] * distance;
-  _point_cloud->data[idx_point_z] = distance;
-  _point_cloud->data[idx_sigma] = sigma;
+  *reinterpret_cast<float*>(&_point_cloud->data[idx_point_x]) = _processing_data.tan_x_lookup[zone_index] * distance;
+  *reinterpret_cast<float*>(&_point_cloud->data[idx_point_y]) = _processing_data.tan_y_lookup[zone_index] * distance;
+  *reinterpret_cast<float*>(&_point_cloud->data[idx_point_z]) = distance;
+  *reinterpret_cast<float*>(&_point_cloud->data[idx_sigma])   = sigma;
 
   _processing_data.current_zone = zone_index;
 
