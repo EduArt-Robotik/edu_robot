@@ -188,12 +188,13 @@ struct Message : public std::tuple<Elements...>
   static TxMessageDataBuffer serialize(const typename Elements::type&... element_value) {
     return element::impl::serialize<Elements...>(element_value..., std::tuple<Elements...>{});
   }
-  template <std::size_t Index>
+  template <std::size_t Index, class DataBuffer>
   inline constexpr static typename std::tuple_element<Index, std::tuple<Elements...>>::type::type deserialize(
-    const RxMessageDataBuffer& rx_buffer) {
-      return std::tuple_element<Index, std::tuple<Elements...>>::type::deserialize(
-        rx_buffer.data() + element::impl::element_byte_index<Index, std::tuple<Elements...>>::value
-      );
+    const DataBuffer& rx_buffer)
+  {
+    return std::tuple_element<Index, std::tuple<Elements...>>::type::deserialize(
+      rx_buffer.data() + element::impl::element_byte_index<Index, std::tuple<Elements...>>::value
+    );
   }
 };
 

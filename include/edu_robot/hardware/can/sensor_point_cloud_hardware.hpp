@@ -25,6 +25,7 @@ public:
       std::uint32_t complete = 0x308;
       std::uint32_t measurement = 0x309;
     } can_id;
+    std::uint8_t sensor_id = 1;
   };
 
   SensorPointCloudHardware(
@@ -44,8 +45,14 @@ private:
   rclcpp::Node& _ros_node;
 
   struct {
+    std::size_t number_of_zones;
+    std::size_t current_zone;
+    std::size_t next_expected_zone;
+    std::vector<float> tan_x_lookup; // used to transform to point y
+    std::vector<float> tan_y_lookup; // used to transform to point x    
     std::uint8_t frame_number;
     std::future<hardware::Request> future_response;
+    std::shared_ptr<sensor_msgs::msg::PointCloud2> point_cloud;
   } _processing_data;
 };                              
 

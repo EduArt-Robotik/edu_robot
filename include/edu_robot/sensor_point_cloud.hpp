@@ -38,7 +38,7 @@ public:
 
   struct SensorInterface : public HardwareInterface
                          , public HardwareComponent<Parameter>
-                         , public HardwareSensor<std::size_t, float, float> {
+                         , public HardwareSensor<sensor_msgs::msg::PointCloud2> {
     SensorInterface() : HardwareInterface(HardwareInterface::Type::SENSOR_POINT_CLOUD) { }
   };
 
@@ -52,21 +52,12 @@ static Parameter get_parameter(
   const std::string& name, const Parameter& default_parameter, rclcpp::Node& ros_node);
 
 protected:
-  void processMeasurementData(const std::size_t zone_index, const float distance, const float sigma);
+  void processMeasurementData(const sensor_msgs::msg::PointCloud2& point_cloud);
 
 private:
   diagnostic::Diagnostic processDiagnosticsImpl() override;
 
   const Parameter _parameter;
-  std::shared_ptr<sensor_msgs::msg::PointCloud2> _point_cloud;
-  struct {
-    std::size_t number_of_zones;
-    std::size_t current_zone;
-    std::size_t next_expected_zone;
-    std::vector<float> tan_x_lookup; // used to transform to point y
-    std::vector<float> tan_y_lookup; // used to transform to point x
-  } _processing_data;
-
   std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::PointCloud2>> _publisher;
   std::shared_ptr<rclcpp::Clock> _clock;
   std::shared_ptr<SensorInterface> _hardware_interface;                        
