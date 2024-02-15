@@ -78,7 +78,7 @@ void CanCommunicationDevice::send(message::Byte const *const tx_buffer, const st
     frame.data[i - 4] = tx_buffer[i];
   }
 
-  if (::write(_socket_fd, &frame, sizeof(can_frame)) < 0) {
+  if (::write(_socket_fd, &frame, sizeof(can_frame)) != sizeof(can_frame)) {
     throw HardwareError(State::CAN_SOCKET_ERROR, "Can't write data to interface.");
   }
 }

@@ -10,7 +10,6 @@
 #include <cstddef>
 #include <exception>
 #include <future>
-#include <iostream>
 #include <mutex>
 #include <sys/socket.h>
 #include <thread>
@@ -25,11 +24,12 @@ namespace hardware {
 
 using namespace std::chrono_literals;
 
-Communicator::Communicator(std::shared_ptr<CommunicationDevice> device)
+Communicator::Communicator(
+  std::shared_ptr<CommunicationDevice> device, const std::chrono::milliseconds wait_time_sending)
   : _device(device)
   , _is_running(true)
   , _new_incoming_requests(false)
-  , _wait_time_after_sending(20ms) // \todo check if wait time is still needed.
+  , _wait_time_after_sending(wait_time_sending)
   , _new_received_data(false)
 {
   _tcp_sending_thread = std::thread([this]{

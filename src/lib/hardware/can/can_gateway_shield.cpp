@@ -17,7 +17,7 @@ using namespace std::chrono_literals;
 CanGatewayShield::CanGatewayShield(char const* const can_device)
   : processing::ProcessingComponentOutput<float>("can_gateway_shield")
 {
-  _communicator[0] = std::make_shared<Communicator>(std::make_shared<hardware::can::CanCommunicationDevice>(can_device));
+  _communicator[0] = std::make_shared<Communicator>(std::make_shared<hardware::can::CanCommunicationDevice>(can_device), 10ms);
 
   // Configuring Diagnostic
   _clock = std::make_shared<rclcpp::Clock>();
@@ -39,8 +39,8 @@ CanGatewayShield::CanGatewayShield(char const* const can_device)
 CanGatewayShield::CanGatewayShield(char const* const can_device_0, char const* const can_device_1, char const* const can_device_2)
   : CanGatewayShield(can_device_0)
 {
-  _communicator[1] = std::make_shared<Communicator>(std::make_shared<hardware::can::CanCommunicationDevice>(can_device_1));
-  _communicator[2] = std::make_shared<Communicator>(std::make_shared<hardware::can::CanCommunicationDevice>(can_device_2));
+  _communicator[1] = std::make_shared<Communicator>(std::make_shared<hardware::can::CanCommunicationDevice>(can_device_1), 10ms);
+  _communicator[2] = std::make_shared<Communicator>(std::make_shared<hardware::can::CanCommunicationDevice>(can_device_2), 10ms);
 }
 
 CanGatewayShield::~CanGatewayShield()
@@ -50,28 +50,16 @@ CanGatewayShield::~CanGatewayShield()
 
 void CanGatewayShield::enable()
 {
-  // for (std::size_t i = 0; i < 2; ++i) {
-  //   auto request = Request::make_request<tcp::message::SetMotorEnabled>();
-  //   auto future_response = _communicator->sendRequest(std::move(request));
-  //   wait_for_future(future_response, 200ms);
-
-  //   auto got = future_response.get();
-  //   if (Acknowledgement<PROTOCOL::COMMAND::SET::MOTOR_ENABLE>::wasAcknowledged(got.response()) == false) {
-  //     throw std::runtime_error("Request \"Set Motor Enabled\" was not acknowledged.");
-  //   }
-  // }
+  for (auto& motor_controller : _motor_controller_hardware) {
+    // motor_controller->enable();
+  }
 }
 
 void CanGatewayShield::disable()
 {
-  // auto request = Request::make_request<tcp::message::SetMotorDisabled>();
-  // auto future_response = _communicator->sendRequest(std::move(request));
-  // wait_for_future(future_response, 200ms);
-
-  // auto got = future_response.get();
-  // if (Acknowledgement<PROTOCOL::COMMAND::SET::MOTOR_DISABLE>::wasAcknowledged(got.response()) == false) {
-  //   throw std::runtime_error("Request \"Set Motor Enabled\" was not acknowledged.");
-  // }
+  for (auto& motor_controller : _motor_controller_hardware) {
+    // motor_controller->disable();
+  }
 }
 
 RobotStatusReport CanGatewayShield::getStatusReport()
@@ -104,6 +92,18 @@ RobotStatusReport CanGatewayShield::getStatusReport()
 
   return report;
 }
+
+void CanGatewayShield::registerMotorControllerHardware(
+  std::shared_ptr<MotorControllerHardware> motor_controller_hardware)
+{
+  if (std::find(_motor_controller_hardware.begin(), _motor_controller_hardware.end(), motor_controller_hardware)
+      != _motor_controller_hardware.end())
+  {
+    throw std::runtime_error("igus::CanGatewayShield: given motor controller already exists.");
+  }
+
+  _motor_controller_hardware.push_back(motor_controller_hardware);
+} 
 
 diagnostic::Diagnostic CanGatewayShield::processDiagnosticsImpl()
 {

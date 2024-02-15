@@ -1,5 +1,6 @@
 #include "edu_robot/hardware/can/hardware_component_factory.hpp"
 #include "edu_robot/hardware/can/sensor_point_cloud_hardware.hpp"
+#include "edu_robot/hardware/can/motor_controller_hardware.hpp"
 
 #include <edu_robot/hardware/can/can_gateway_shield.hpp>
 
@@ -23,13 +24,13 @@ HardwareComponentFactory& HardwareComponentFactory::addLighting(const std::strin
 } 
 
 HardwareComponentFactory& HardwareComponentFactory::addMotorController(
-  const std::string& controller_name, const std::size_t can_id)
+  const std::string& controller_name, const std::uint32_t can_id_input, const std::uint32_t can_id_output)
 {
-  (void)controller_name;
-  (void)can_id;
-  // auto compound_motor = std::make_shared<MotorControllerHardware>(controller_name, can_id, _shield->getCommunicator(0));
-  // _motor_controller_hardware.push_back(compound_motor);
-  // _shield->registerMotorControllerHardware(compound_motor);
+  auto compound_motor = std::make_shared<MotorControllerHardware>(
+    controller_name, can_id_input, can_id_output, _shield->getCommunicator(2)
+  );
+  _motor_controller_hardware.push_back(compound_motor);
+  _shield->registerMotorControllerHardware(compound_motor);
 
   return *this;
 }

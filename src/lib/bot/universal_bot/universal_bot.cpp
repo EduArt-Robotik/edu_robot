@@ -6,6 +6,7 @@
 #include <edu_robot/robot.hpp>
 #include <edu_robot/sensor_range.hpp>
 #include <edu_robot/sensor_imu.hpp>
+#include <edu_robot/sensor_point_cloud.hpp>
 
 #include <memory>
 #include <stdexcept>
@@ -71,24 +72,48 @@ void UniversalBot::initialize(eduart::robot::HardwareComponentFactory& factory)
     registerMotorController(motor_controller);
   }
 
-  // IMU Sensor
-  SensorImu::Parameter imu_parameter;
-  imu_parameter.raw_data_mode = false;
-  imu_parameter.rotated_frame = Robot::_parameter.tf_base_frame;
-  imu_parameter = SensorImu::get_parameter("imu", imu_parameter, *this);
+  // Point Cloud Sensors
+  constexpr std::array<const char*, 1> point_cloud_name = { "pointcloud_left" };
+  constexpr std::array<const char*, 1> point_cloud_tf = { "pointcloud/left" };
+  const std::array<tf2::Transform, 1> point_cloud_pose = {
+    tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.0, 0.0, 0.0))
+  };
   
-  auto imu_sensor = std::make_shared<robot::SensorImu>(
-    "imu",
-    getFrameIdPrefix() + "imu/base",
-    getFrameIdPrefix() + Robot::_parameter.tf_footprint_frame,
-    tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.0, 0.0, 0.1)),
-    imu_parameter,
-    getTfBroadcaster(),
-    *this,
-    factory.hardware().at("imu")->cast<robot::SensorImu::SensorInterface>()
-  );
-  registerSensor(imu_sensor);
-  factory.hardware().at("imu")->cast<robot::SensorImu::SensorInterface>()->initialize(imu_parameter);
+  for (std::size_t i = 0; i < point_cloud_name.size(); ++i) {
+    const auto parameter = robot::SensorPointCloud::get_parameter(
+      point_cloud_name[i], {}, *this);
+    auto hardware_interface = factory.hardware().at("pointcloud_left")->cast<robot::SensorPointCloud::SensorInterface>();
+    auto point_cloud_sensor = std::make_shared<robot::SensorPointCloud>(
+      point_cloud_name[i],
+      getFrameIdPrefix() + point_cloud_tf[i],
+      getFrameIdPrefix() + Robot::_parameter.tf_base_frame,
+      point_cloud_pose[i],
+      parameter,
+      *this,
+      hardware_interface
+    );
+    registerSensor(point_cloud_sensor);
+    hardware_interface->initialize(parameter);
+  }
+
+  // IMU Sensor
+  // SensorImu::Parameter imu_parameter;
+  // imu_parameter.raw_data_mode = false;
+  // imu_parameter.rotated_frame = Robot::_parameter.tf_base_frame;
+  // imu_parameter = SensorImu::get_parameter("imu", imu_parameter, *this);
+  
+  // auto imu_sensor = std::make_shared<robot::SensorImu>(
+  //   "imu",
+  //   getFrameIdPrefix() + "imu/base",
+  //   getFrameIdPrefix() + Robot::_parameter.tf_footprint_frame,
+  //   tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.0, 0.0, 0.1)),
+  //   imu_parameter,
+  //   getTfBroadcaster(),
+  //   *this,
+  //   factory.hardware().at("imu")->cast<robot::SensorImu::SensorInterface>()
+  // );
+  // registerSensor(imu_sensor);
+  // factory.hardware().at("imu")->cast<robot::SensorImu::SensorInterface>()->initialize(imu_parameter);
 
   // Set Up Default Drive Kinematic. Needs to be done here, because method can't be called in constructor 
   // of robot base class.

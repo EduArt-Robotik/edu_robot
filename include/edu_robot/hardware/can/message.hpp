@@ -174,9 +174,12 @@ struct Uint8  : public impl::DataField<std::uint8_t> {
     return impl::DataField<std::uint8_t>::serialize(value);
   }
 };
-struct Uint16 : public impl::DataField<std::uint16_t> { };
-struct Uint24 : public impl::DataField<std::array<unsigned char, 3>> { };
-struct Uint32 : public impl::DataField<std::uint32_t> { };
+using Int8 = impl::DataField<std::int8_t>;
+using Int16 = impl::DataField<std::int16_t>;
+using Uint16 = impl::DataField<std::uint16_t>;
+using Uint24 = impl::DataField<std::array<unsigned char, 3>>;
+using Uint32 = impl::DataField<std::uint32_t>;
+using Float = impl::DataField<float>;
 
 } // end namespace element
 
@@ -201,7 +204,7 @@ struct Message : public std::tuple<Elements...>
 template <class... Elements>
 struct MessageFrame : public Message<element::CanAddress, Elements...>
 {
-private:
+protected:
   using MessageType = Message<element::CanAddress, Elements...>;
 
 public:

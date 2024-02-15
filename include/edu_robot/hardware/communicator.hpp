@@ -26,6 +26,8 @@ namespace eduart {
 namespace robot {
 namespace hardware {
 
+using namespace std::chrono_literals;
+
 class Request
 {
   friend class Communicator;
@@ -107,7 +109,7 @@ class Communicator
   using TaskReceiving = std::packaged_task<message::RxMessageDataBuffer()>;
 
 public:
-  Communicator(std::shared_ptr<CommunicationDevice> device);
+  Communicator(std::shared_ptr<CommunicationDevice> device, const std::chrono::milliseconds wait_time_sending = 20ms);
   ~Communicator();
 
   std::future<Request> sendRequest(Request request);

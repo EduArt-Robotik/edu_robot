@@ -6,6 +6,11 @@
 #pragma once
 
 #include "edu_robot/hardware/can/message.hpp"
+#include "edu_robot/hardware/can/protocol.hpp"
+
+#include <edu_robot/rpm.hpp>
+
+#include <stdexcept>
 
 namespace eduart {
 namespace robot {
@@ -96,7 +101,89 @@ private:
 } // end namespace tof
 } // end namespace sensor
 
+// EduArt Motor Controller Boards
+namespace motor_controller {
 
+// Message Frame and Message Element Definitions
+template <Byte CommandByte, class... Elements>
+struct MessageFrame : public message::NoResponseMessageFrame<element::Command<CommandByte>, Elements...>
+{
+  inline static TxMessageDataBuffer serialize(
+    const std::uint32_t can_address, const typename Elements::type&... element_value)
+  {
+    return message::MessageFrame<element::Command<CommandByte>, Elements...>::serialize(
+      can_address, 0, element_value...
+    );
+  }
+};
+struct Pwm : public element::Int8 {
+  inline static constexpr std::array<Byte, size()> serialize(const float value) {
+    if (value < -1.0f || value > 1.0f) {
+      throw std::invalid_argument("Pwm: given value is out of range. [-1 .. 1]");
+    }
+    return element::Int8::serialize(static_cast<std::int8_t>(value * 100.0f));
+  }
+};
+struct Rpm : public element::Int16 {
+  inline static constexpr std::array<Byte, size()> serialize(const robot::Rpm value) {
+    return element::Int16::serialize(value * 100.0);
+  }
+  inline static constexpr robot::Rpm deserialize(const Byte data[size()]) {
+    return robot::Rpm(static_cast<double>(element::Int16::deserialize(data)) / 100.0);
+  }
+};
+
+// Message Definitions
+using Enable = MessageFrame<PROTOCOL::MOTOR::COMMAND::ENABLE>;
+using Disable = MessageFrame<PROTOCOL::MOTOR::COMMAND::DISABLE>;
+using SetTimeout = MessageFrame<PROTOCOL::MOTOR::COMMAND::SET_TIMEOUT,
+                                element::Uint16>; // timeout in ms
+using SetInvertedEncoder = MessageFrame<PROTOCOL::MOTOR::COMMAND::INVERT_ENCODER,
+                                        element::Uint8>; // flag inverted encoder
+using SetPwm = MessageFrame<PROTOCOL::MOTOR::COMMAND::SET_PWM,
+                            Pwm,  // pwm value motor 0
+                            Pwm>; // pwm value motor 1
+using SetRpm = MessageFrame<PROTOCOL::MOTOR::COMMAND::SET_RPM,
+                            Rpm,  // rpm value motor 0
+                            Rpm>; // rpm value motor 1
+using SetOpenLoop = MessageFrame<PROTOCOL::MOTOR::COMMAND::OPEN_LOOP>;
+using SetClosedLoop = MessageFrame<PROTOCOL::MOTOR::COMMAND::CLOSE_LOOP>;
+using SetFrequency = MessageFrame<PROTOCOL::MOTOR::COMMAND::FREQUENCY,
+                                  element::Uint32>; // motor control frequency in Hz
+using SetCtlKp = MessageFrame<PROTOCOL::MOTOR::COMMAND::CTL_KP,
+                              element::Float>; // controller kp value
+using SetCtlKi = MessageFrame<PROTOCOL::MOTOR::COMMAND::CTL_KI,
+                              element::Float>; // controller ki value
+using SetCtlKd = MessageFrame<PROTOCOL::MOTOR::COMMAND::CTL_KD,
+                              element::Float>; // controller kd value                              
+using SetCtlAntiWindUp = MessageFrame<PROTOCOL::MOTOR::COMMAND::CTL_ANTI_WIND_UP,
+                                      element::Uint8>; // flag controller anti wind up
+using SetCtlInputFilter = MessageFrame<PROTOCOL::MOTOR::COMMAND::CTL_INPUT_FILTER,
+                                       element::Float>; // controller input filter weight
+using SetGearRatio = MessageFrame<PROTOCOL::MOTOR::COMMAND::GEAR_RATIO,
+                                  element::Float>; // gear ratio value for both motors
+using SetTicksPerRevision = MessageFrame<PROTOCOL::MOTOR::COMMAND::TICKS_PER_REVISION,
+                                         element::Float>; // ticks per revision for encoder
+using SetRpmMax = MessageFrame<PROTOCOL::MOTOR::COMMAND::SET_RPM_MAX,
+                               element::Float>; // max rpm value for both motors
+
+struct Response : public message::MessageFrame<element::Uint8, // command
+                                               Rpm,            // measured rpm motor 0
+                                               Rpm,            // measured rpm motor 1
+                                               element::Uint8> // enabled flag
+{
+  inline static constexpr robot::Rpm rpm0(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<2>(rx_buffer);
+  }
+  inline static constexpr robot::Rpm rpm1(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<3>(rx_buffer);
+  }
+  inline static constexpr bool enabled(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<4>(rx_buffer);
+  }
+};
+
+} // end namespace motor_controller
 
 } // end namespace message
 } // end namespace can

@@ -79,6 +79,7 @@ install(
     ethernet-gateway-universal-bot
     ethernet-gateway-ohmni-bot
     igus-can-turtle-bot
+    can-gateway-universal-bot
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   # for humble...

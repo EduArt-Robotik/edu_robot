@@ -27,7 +27,8 @@ public:
   ~HardwareComponentFactory() override = default;
 
   HardwareComponentFactory& addLighting(const std::string& lighting_name);
-  HardwareComponentFactory& addMotorController(const std::string& controller_name, const std::size_t can_id);
+  HardwareComponentFactory& addMotorController(
+    const std::string& controller_name, const std::uint32_t can_id_input, const std::uint32_t can_id_output);
   HardwareComponentFactory& addRangeSensor(
     const std::string& sensor_name, const std::uint8_t id, rclcpp::Node& ros_node);
   HardwareComponentFactory& addImuSensor(const std::string& sensor_name, rclcpp::Node& ros_node);
