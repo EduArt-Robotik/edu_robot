@@ -42,7 +42,7 @@ public:
   // Defining Sensor Hardware Interface
   struct SensorInterface : public HardwareInterface
                          , public HardwareComponent<Parameter>
-                         , public HardwareSensor<Eigen::Quaterniond, Eigen::Vector3d, Eigen::Vector3d>
+                         , public HardwareSensor<const Eigen::Quaterniond, const Eigen::Vector3d, const Eigen::Vector3d>
   {
     SensorInterface() : HardwareInterface(HardwareInterface::Type::SENOR_IMU) { }
   };

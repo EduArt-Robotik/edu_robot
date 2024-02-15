@@ -43,7 +43,7 @@ public:
 
   struct SensorInterface : public HardwareInterface
                          , public HardwareComponent<Parameter>
-                         , public HardwareSensor<float> {
+                         , public HardwareSensor<const float> {
     SensorInterface() : HardwareInterface(HardwareInterface::Type::SENOR_IMU) { }
   };
 

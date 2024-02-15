@@ -165,6 +165,7 @@ void SensorPointCloudHardware::processMeasurement()
       _parameter.can_id.trigger, _processing_data.frame_number, _parameter.sensor_id
     );
 
+    _processing_data.point_cloud->header.stamp = _ros_node.get_clock()->now();
     _processing_data.future_response = _communicator->sendRequest(std::move(request));
     _processing_data.frame_number++;
   }

@@ -37,9 +37,9 @@ sudo nano /etc/udev/rules.d/42-mcp251xfd.rules
 and add the following content:
 
 ```console
-KERNELS=="spi0.1", SUBSYSTEMS=="spi", DRIVERS=="mcp251xfd", ACTION=="add", NAME="can0", TAG+="systemd", ENV{SYSTEMD_WANTS}="can0-attach.service"
-KERNELS=="spi0.0", SUBSYSTEMS=="spi", DRIVERS=="mcp251xfd", ACTION=="add", NAME="can1", TAG+="systemd", ENV{SYSTEMD_WANTS}="can1-attach.service"
-KERNELS=="spi1.0", SUBSYSTEMS=="spi", DRIVERS=="mcp251xfd", ACTION=="add", NAME="can2", TAG+="systemd", ENV{SYSTEMD_WANTS}="can2-attach.service"
+KERNELS=="spi0.1", SUBSYSTEMS=="spi", DRIVERS=="mcp251xfd", ACTION=="add", NAME="eduart-can0", TAG+="systemd", ENV{SYSTEMD_WANTS}="can0-attach.service"
+KERNELS=="spi0.0", SUBSYSTEMS=="spi", DRIVERS=="mcp251xfd", ACTION=="add", NAME="eduart-can1", TAG+="systemd", ENV{SYSTEMD_WANTS}="can1-attach.service"
+KERNELS=="spi1.0", SUBSYSTEMS=="spi", DRIVERS=="mcp251xfd", ACTION=="add", NAME="eduart-can2", TAG+="systemd", ENV{SYSTEMD_WANTS}="can2-attach.service"
 ```
 
 In this way, the CAN interface for the motor controller is always named can2. The can0 and can1 interfaces can be accessed via the sockets on the expansion board (see labeling on the board) and are intended for connecting the flexible sensor ring from EduArt.
@@ -55,7 +55,7 @@ and add following lines to it:
 ```bash
 [Service]
 Type=oneshot
-ExecStart=ip link set can0 up type can bitrate 1000000 dbitrate 2000000 fd on
+ExecStart=ip link set eduart-can0 up type can bitrate 1000000 dbitrate 2000000 fd on
 ```
 
 After do the same for can1. Create the can1-attach by:
@@ -69,7 +69,7 @@ And put following lines into it:
 ```bash
 [Service]
 Type=oneshot
-ExecStart=ip link set can1 up type can bitrate 1000000 dbitrate 2000000 fd on
+ExecStart=ip link set eduart-can1 up type can bitrate 1000000 dbitrate 2000000 fd on
 ```
 
 As last create the systemd service file for can2:
@@ -83,7 +83,7 @@ And put following lines into it:
 ```bash
 [Service]
 Type=oneshot
-ExecStart=ip link set can2 up type can bitrate 500000
+ExecStart=ip link set eduart-can2 up type can bitrate 500000
 ```
 
 Now reboot the Raspberry Pi by following command:

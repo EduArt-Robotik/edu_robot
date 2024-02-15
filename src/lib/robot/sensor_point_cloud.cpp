@@ -47,8 +47,9 @@ SensorPointCloud::SensorPointCloud(
   );
 };
 
-void SensorPointCloud::processMeasurementData(const sensor_msgs::msg::PointCloud2& point_cloud)
+void SensorPointCloud::processMeasurementData(sensor_msgs::msg::PointCloud2& point_cloud)
 {
+  point_cloud.header.frame_id = frameId();
   _publisher->publish(point_cloud);
 }
 

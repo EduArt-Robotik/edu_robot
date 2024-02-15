@@ -36,7 +36,7 @@ public:
   class HardwareInterface : public eduart::robot::HardwareInterface
                           , public HardwareComponent<Motor::Parameter>
                           , public HardwareActuator<std::vector<Rpm>>
-                          , public HardwareSensor<std::vector<Rpm>, bool>
+                          , public HardwareSensor<const std::vector<Rpm>, const bool>
   {
   protected:
     HardwareInterface(const std::string& name, const std::size_t num_motors)

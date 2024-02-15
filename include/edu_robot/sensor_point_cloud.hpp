@@ -52,7 +52,7 @@ static Parameter get_parameter(
   const std::string& name, const Parameter& default_parameter, rclcpp::Node& ros_node);
 
 protected:
-  void processMeasurementData(const sensor_msgs::msg::PointCloud2& point_cloud);
+  void processMeasurementData(sensor_msgs::msg::PointCloud2& point_cloud);
 
 private:
   diagnostic::Diagnostic processDiagnosticsImpl() override;

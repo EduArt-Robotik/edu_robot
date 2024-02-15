@@ -20,7 +20,7 @@ public:
   IgusCanTurtleBot()
     : eduart::robot::turtle::Turtle(
         "turtle", std::make_unique<CanGatewayShield>(
-          "can0", "can1", "can2"
+          "eduart-can0", "eduart-can1", "eduart-can2"
         )
       )
   {
