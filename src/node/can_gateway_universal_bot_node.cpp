@@ -13,6 +13,7 @@
 
 using eduart::robot::hardware::can::CanGatewayShield;
 using eduart::robot::hardware::can::HardwareComponentFactory;
+using eduart::robot::hardware::can::SensorPointCloudHardware;
 
 class CanGatewayUniversalBot : public eduart::robot::universal_bot::UniversalBot
 {
@@ -32,13 +33,18 @@ public:
     // Motor Controller
     for (std::size_t i = 0; i < _parameter.axis.size(); ++i) {
       factory.addMotorController(
-        std::string("motor_controller_") + std::to_string(i), i, i | 0x10
+        std::string("motor_controller_") + std::to_string(i),
+        i | 0x400,
+        i | 0x480
       );
     }
 
     // IMU Sensor
     // factory.addImuSensor("imu", *this);
-    factory.addPointCloudSensor("pointcloud_left", {}, *this);
+    auto point_cloud_parameter = SensorPointCloudHardware::get_parameter(
+      "pointcloud_left", {}, *this
+    );
+    factory.addPointCloudSensor("pointcloud_left", point_cloud_parameter, *this);
 
     initialize(factory);
     shield->registerComponentInput(_detect_charging_component);

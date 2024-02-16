@@ -21,6 +21,15 @@ class SensorPointCloudHardware : public SensorPointCloud::SensorInterface
 public:
   struct Parameter {
     struct {
+      std::size_t vertical = 8;
+      std::size_t horizontal = 8;
+    } number_of_zones; // number of sensor zones (pixel)
+    struct {
+      Angle vertical = Angle::createFromDegree(45);
+      Angle horizontal = Angle::createFromDegree(45);
+    } fov;
+    std::chrono::milliseconds measurement_interval{100};    
+    struct {
       std::uint32_t trigger = 0x388;
       std::uint32_t complete = 0x308;
       std::uint32_t measurement = 0x309;

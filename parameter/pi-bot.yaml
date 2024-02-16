@@ -2,17 +2,93 @@
   ros__parameters:
     use_sim_time: false
 
-
     collision_avoidance:
-      distance_reduce_velocity: 0.4000000059604645
-      distance_velocity_zero: 0.05000000074505806
+      distance_reduce_velocity: 0.40
+      distance_velocity_zero: 0.05
       enable: true
 
     diagnostic_updater:
       period: 1.0
 
 # Axes and Motors
-    number_of_axes: 0
+    number_of_axes: 2
+    axis_1:
+      skid:
+        length:
+          x: 0.0
+          y: 0.32
+        wheel_diameter: 0.17
+    axis_2:
+      skid:
+        length:
+          x: 0.0
+          y: 0.32
+        wheel_diameter: 0.17
+
+    motor_a:
+      closed_loop: true
+      control_frequency: 16000
+      encoder_inverted: false
+      encoder_ratio: 2048.0
+      gear_ratio: 89.0
+      index: 0
+      inverted: false
+      max_rpm: 100.0
+      pid:
+        kd: 0.0
+        ki: 5.0
+        kp: 0.5
+      timeout_ms: 500
+      weight_low_pass_encoder: 0.3
+      weight_low_pass_set_point: 0.2
+    motor_b:
+      closed_loop: true
+      control_frequency: 16000
+      encoder_inverted: false
+      encoder_ratio: 2048.0
+      gear_ratio: 89.0
+      index: 0
+      inverted: false
+      max_rpm: 100.0
+      pid:
+        kd: 0.0
+        ki: 5.0
+        kp: 0.5
+      timeout_ms: 500
+      weight_low_pass_encoder: 0.3
+      weight_low_pass_set_point: 0.2
+    motor_c:
+      closed_loop: true
+      control_frequency: 16000
+      encoder_inverted: false
+      encoder_ratio: 2048.0
+      gear_ratio: 89.0
+      index: 0
+      inverted: false
+      max_rpm: 100.0
+      pid:
+        kd: 0.0
+        ki: 5.0
+        kp: 0.5
+      timeout_ms: 500
+      weight_low_pass_encoder: 0.3
+      weight_low_pass_set_point: 0.2
+    motor_d:
+      closed_loop: true
+      control_frequency: 16000
+      encoder_inverted: false
+      encoder_ratio: 2048.0
+      gear_ratio: 89.0
+      index: 0
+      inverted: false
+      max_rpm: 100.0
+      pid:
+        kd: 0.0
+        ki: 5.0
+        kp: 0.5
+      timeout_ms: 500
+      weight_low_pass_encoder: 0.3
+      weight_low_pass_set_point: 0.2
 
 # Sensors
     pointcloud_left:

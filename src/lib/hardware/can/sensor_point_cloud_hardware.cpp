@@ -13,7 +13,8 @@ using can::message::sensor::tof::StartMeasurement;
 using can::message::sensor::tof::MeasurementComplete;
 using can::message::sensor::tof::ZoneMeasurement;
 
-static std::shared_ptr<sensor_msgs::msg::PointCloud2> create_point_cloud(const SensorPointCloud::Parameter& parameter)
+static std::shared_ptr<sensor_msgs::msg::PointCloud2> create_point_cloud(
+  const SensorPointCloudHardware::Parameter& parameter)
 {
   // Preparing Point Cloud
   auto point_cloud = std::make_shared<sensor_msgs::msg::PointCloud2>();
@@ -57,10 +58,27 @@ SensorPointCloudHardware::get_parameter(const std::string& name, const Parameter
   ros_node.declare_parameter<int>(name + ".can_id.measurement", default_parameter.can_id.measurement);
   ros_node.declare_parameter<int>(name + ".sensor_id", default_parameter.sensor_id);
 
+  ros_node.declare_parameter<int>(
+    name + ".number_of_zones.vertical", default_parameter.number_of_zones.vertical);
+  ros_node.declare_parameter<int>(
+    name + ".number_of_zones.horizontal", default_parameter.number_of_zones.horizontal);
+  ros_node.declare_parameter<float>(name + ".fov.vertical", default_parameter.fov.vertical);
+  ros_node.declare_parameter<float>(name + ".fov.horizontal", default_parameter.fov.horizontal);
+  ros_node.declare_parameter<int>(
+    name + ".measurement_interval_ms", default_parameter.measurement_interval.count());
+
   parameter.can_id.trigger = ros_node.get_parameter(name + ".can_id.trigger").as_int();
   parameter.can_id.complete = ros_node.get_parameter(name + ".can_id.complete").as_int();
   parameter.can_id.measurement = ros_node.get_parameter(name + ".can_id.measurement").as_int();
   parameter.sensor_id = ros_node.get_parameter(name + ".sensor_id").as_int();
+
+  parameter.number_of_zones.vertical = ros_node.get_parameter(name + ".number_of_zones.vertical").as_int();
+  parameter.number_of_zones.horizontal = ros_node.get_parameter(name + ".number_of_zones.horizontal").as_int();
+  parameter.fov.vertical = ros_node.get_parameter(name + ".fov.vertical").as_double();
+  parameter.fov.horizontal = ros_node.get_parameter(name + ".fov.horizontal").as_double();
+  parameter.measurement_interval = std::chrono::milliseconds(
+    ros_node.get_parameter(name + ".measurement_interval_ms").as_int());
+
 
   return parameter;
 }
@@ -127,33 +145,35 @@ void SensorPointCloudHardware::processRxData(const message::RxMessageDataBuffer&
 
 void SensorPointCloudHardware::initialize(const SensorPointCloud::Parameter& parameter)
 {
+  (void)parameter;
+
   // Preparing Processing Data
-  _processing_data.number_of_zones = parameter.number_of_zones.horizontal * parameter.number_of_zones.vertical;
+  _processing_data.number_of_zones = _parameter.number_of_zones.horizontal * _parameter.number_of_zones.vertical;
   _processing_data.current_zone = 0;
   _processing_data.next_expected_zone = 0;
   _processing_data.tan_x_lookup.resize(_processing_data.number_of_zones);
   _processing_data.tan_y_lookup.resize(_processing_data.number_of_zones);
 
-  const float alpha_increment_vertical = parameter.fov.vertical / static_cast<double>(parameter.number_of_zones.vertical);
-  const float alpha_increment_horizontal = parameter.fov.horizontal / static_cast<double>(parameter.number_of_zones.horizontal);
+  const float alpha_increment_vertical = _parameter.fov.vertical / static_cast<double>(_parameter.number_of_zones.vertical);
+  const float alpha_increment_horizontal = _parameter.fov.horizontal / static_cast<double>(_parameter.number_of_zones.horizontal);
 
   // \todo skip idx_beam == 0
-  for (std::size_t idx_height = 0; idx_height < parameter.number_of_zones.horizontal; ++idx_height) {
-    const int idx_beam_y = ((static_cast<float>(parameter.number_of_zones.vertical) / 2.0f) - idx_height);
+  for (std::size_t idx_height = 0; idx_height < _parameter.number_of_zones.horizontal; ++idx_height) {
+    const int idx_beam_y = ((static_cast<float>(_parameter.number_of_zones.vertical) / 2.0f) - idx_height);
 
-    for (std::size_t idx_width = 0; idx_width < parameter.number_of_zones.vertical; ++idx_width) {
-      const std::size_t idx_zone = idx_height * parameter.number_of_zones.horizontal + idx_width;
-      const int idx_beam_x = ((static_cast<float>(parameter.number_of_zones.horizontal) / 2.0f) - idx_width);
+    for (std::size_t idx_width = 0; idx_width < _parameter.number_of_zones.vertical; ++idx_width) {
+      const std::size_t idx_zone = idx_height * _parameter.number_of_zones.horizontal + idx_width;
+      const int idx_beam_x = ((static_cast<float>(_parameter.number_of_zones.horizontal) / 2.0f) - idx_width);
 
       _processing_data.tan_x_lookup[idx_zone] = std::tan(idx_beam_x * alpha_increment_horizontal);
       _processing_data.tan_y_lookup[idx_zone] = std::tan(idx_beam_y * alpha_increment_vertical);
     }
   }
-  _processing_data.point_cloud = create_point_cloud(parameter);
+  _processing_data.point_cloud = create_point_cloud(_parameter);
   _processing_data.frame_number = 0;
 
   _timer_get_measurement = _ros_node.create_wall_timer(
-    parameter.measurement_interval, std::bind(&SensorPointCloudHardware::processMeasurement, this)
+    _parameter.measurement_interval, std::bind(&SensorPointCloudHardware::processMeasurement, this)
   );
 }
 
