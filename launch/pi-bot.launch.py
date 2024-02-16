@@ -12,19 +12,19 @@ def generate_launch_description():
     parameter_file = PathJoinSubstitution([
       package_path,
       'parameter',
-      'ohmni-bot.yaml'
+      'pi-bot.yaml'
     ])
 
-    ohmni_bot = Node(
+    pi_bot = Node(
       package='edu_robot',
-      executable='ethernet-gateway-ohmni-bot',
-      name='ohmni_bot',
+      executable='can-gateway-universal-bot',
+      name='pi_bot',
       parameters=[parameter_file],
       # prefix=['gdbserver localhost:3000'],
       output='screen'
     )
 
     return LaunchDescription([
-      ohmni_bot
+      pi_bot
     ])
     

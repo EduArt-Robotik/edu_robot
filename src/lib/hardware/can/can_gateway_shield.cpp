@@ -1,9 +1,7 @@
 #include "edu_robot/hardware/can/can_gateway_shield.hpp"
 #include "edu_robot/hardware/can/can_communication_device.hpp"
+#include "edu_robot/hardware/can/motor_controller_hardware.hpp"
 
-#include <cstddef>
-#include <exception>
-#include <iterator>
 #include <memory>
 #include <stdexcept>
 
@@ -51,14 +49,14 @@ CanGatewayShield::~CanGatewayShield()
 void CanGatewayShield::enable()
 {
   for (auto& motor_controller : _motor_controller_hardware) {
-    // motor_controller->enable();
+    motor_controller->enable();
   }
 }
 
 void CanGatewayShield::disable()
 {
   for (auto& motor_controller : _motor_controller_hardware) {
-    // motor_controller->disable();
+    motor_controller->disable();
   }
 }
 

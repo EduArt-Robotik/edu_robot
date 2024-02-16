@@ -21,12 +21,18 @@ class MotorControllerHardware : public MotorController::HardwareInterface
                               , public CanGatewayTxRxDevice
 {
 public:
+  struct Parameter {
+    struct {
+      std::uint32_t input;
+      std::uint32_t output;
+    } can_id;
+  };
+
   MotorControllerHardware(
-    const std::string& name, const std::uint32_t can_id_input, const std::uint32_t can_id_output,
-    std::shared_ptr<Communicator> communicator)
+    const std::string& name, const Parameter& parameter, std::shared_ptr<Communicator> communicator)
     : MotorController::HardwareInterface(name, 2)
     , CanGatewayTxRxDevice(communicator)
-    , _can_id{can_id_input, can_id_output}
+    , _parameter(parameter)
     , _measured_rpm(2, 0.0)
   { }
   ~MotorControllerHardware() override = default;
@@ -34,12 +40,13 @@ public:
   void processSetValue(const std::vector<Rpm>& rpm) override;
   void initialize(const Motor::Parameter& parameter) override;
   void processRxData(const message::RxMessageDataBuffer& data) override;
+  void enable();
+  void disable();
+
+  static Parameter get_parameter(const std::string& name, const Parameter& default_parameter, rclcpp::Node& ros_node);
 
 private:
-  struct {
-    std::uint32_t input;
-    std::uint32_t output;
-  } _can_id;
+  const Parameter _parameter;
   std::vector<Rpm> _measured_rpm;
 };
 

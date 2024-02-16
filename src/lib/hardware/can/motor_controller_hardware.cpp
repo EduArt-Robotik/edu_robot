@@ -38,6 +38,20 @@ using message::motor_controller::SetTicksPerRevision;
 using message::motor_controller::SetRpmMax;
 using message::motor_controller::Response;
 
+MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
+  const std::string& name, const Parameter& default_parameter, rclcpp::Node& ros_node)
+{
+  MotorControllerHardware::Parameter parameter;
+
+  ros_node.declare_parameter<int>(name + ".can_id.input", default_parameter.can_id.input);
+  ros_node.declare_parameter<int>(name + ".can_id.output", default_parameter.can_id.output);
+
+  parameter.can_id.input = ros_node.get_parameter(name + ".can_id.input").as_int();
+  parameter.can_id.output = ros_node.get_parameter(name + ".can_id.output").as_int();
+
+  return parameter;
+}
+
 void initialize_controller(
   const Motor::Parameter& parameter, const std::uint8_t can_id, std::shared_ptr<Communicator> communicator)
 {
@@ -141,7 +155,7 @@ void initialize_controller(
 
 void MotorControllerHardware::processRxData(const message::RxMessageDataBuffer &data)
 {
-  if (_callback_process_measurement == nullptr || Response::canId(data) != _can_id.output) {
+  if (_callback_process_measurement == nullptr || Response::canId(data) != _parameter.can_id.output) {
     return;
   }
   
@@ -152,10 +166,10 @@ void MotorControllerHardware::processRxData(const message::RxMessageDataBuffer &
 
 void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
 {
-  initialize_controller(parameter, _can_id.input, _communicator);
+  initialize_controller(parameter, _parameter.can_id.input, _communicator);
 
   auto measurement_end_point = CanRxDataEndPoint::make_data_endpoint<Response>(
-    _can_id.output,
+    _parameter.can_id.output,
     std::bind(&MotorControllerHardware::processRxData, this, std::placeholders::_1)
   );
   _communicator->registerRxDataEndpoint(std::move(measurement_end_point));  
@@ -186,14 +200,30 @@ void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
   }
 
   auto request = Request::make_request<SetRpm>(
-    _can_id.input,
+    _parameter.can_id.input,
     rpm[0],
     rpm[1]
   );
 
   auto future_response = _communicator->sendRequest(std::move(request));
-  wait_for_future(future_response, 200ms);
+  wait_for_future(future_response, 100ms);
   auto got = future_response.get();
+}
+
+void MotorControllerHardware::enable()
+{
+  auto request = Request::make_request<Enable>(_parameter.can_id.input);
+  auto future_response = _communicator->sendRequest(std::move(request));
+  wait_for_future(future_response, 100ms);
+  auto got = future_response.get();  
+}
+
+void MotorControllerHardware::disable()
+{
+  auto request = Request::make_request<Disable>(_parameter.can_id.input);
+  auto future_response = _communicator->sendRequest(std::move(request));
+  wait_for_future(future_response, 100ms);
+  auto got = future_response.get();  
 }
 
 } // end namespace can

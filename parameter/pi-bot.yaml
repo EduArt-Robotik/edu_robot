@@ -1,0 +1,46 @@
+/**:
+  ros__parameters:
+    use_sim_time: false
+
+
+    collision_avoidance:
+      distance_reduce_velocity: 0.4000000059604645
+      distance_velocity_zero: 0.05000000074505806
+      enable: true
+
+    diagnostic_updater:
+      period: 1.0
+
+# Axes and Motors
+    number_of_axes: 0
+
+# Sensors
+    pointcloud_left:
+      fov:
+        horizontal: 0.7853981852531433
+        vertical: 0.7853981852531433
+      measurement_interval_ms: 100
+      number_of_zones:
+        horizontal: 8
+        vertical: 8
+
+# TF Settings
+    publish_tf_odom: true
+    tf_base_frame: base_link
+    tf_footprint_frame: base_footprint
+
+# QoS Overrides
+    qos_overrides:
+      /parameter_events:
+        publisher:
+          depth: 1000
+          durability: volatile
+          history: keep_last
+          reliability: reliable
+      /tf:
+        publisher:
+          depth: 100
+          durability: volatile
+          history: keep_last
+          reliability: reliable
+
