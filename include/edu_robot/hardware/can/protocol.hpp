@@ -39,6 +39,12 @@ struct PROTOCOL {
       static constexpr Byte SET_RPM_MAX = 0x04;
     };
   };
+  struct POWER_MANAGEMENT {
+    struct MEASUREMENT {
+      static constexpr Byte CURRENT = 0x01;
+      static constexpr Byte VOLTAGE = 0x02;
+    };
+  };
 };
 
 } // end namespace message

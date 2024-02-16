@@ -185,6 +185,39 @@ struct Response : public message::MessageFrame<element::Uint8, // command
 
 } // end namespace motor_controller
 
+namespace power_management {
+
+struct Response : public message::MessageFrame<element::Uint8, // measurement type indicator
+                                               element::Float> // measurement value
+{
+  inline static constexpr bool isCurrent(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<1>(rx_buffer) == PROTOCOL::POWER_MANAGEMENT::MEASUREMENT::CURRENT;
+  }
+  inline static constexpr bool isVoltage(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<1>(rx_buffer) == PROTOCOL::POWER_MANAGEMENT::MEASUREMENT::VOLTAGE;
+  }
+  inline static constexpr float value(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<2>(rx_buffer);
+  }
+};
+
+} // end namespace_power_management
+
+namespace can_gateway_shield {
+
+struct Response : public message::MessageFrame<element::Int16, // temperature measurement
+                                               element::Int16> // voltage measurement
+{
+  inline static constexpr float temperature(const RxMessageDataBuffer& rx_buffer) {
+    return static_cast<float>(deserialize<1>(rx_buffer));
+  }
+  inline static constexpr float voltage(const RxMessageDataBuffer& rx_buffer) {
+    return static_cast<float>(deserialize<2>(rx_buffer));
+  }
+};
+
+} // end namespace can_gateway_shield
+
 } // end namespace message
 } // end namespace can
 } // end namespace hardware

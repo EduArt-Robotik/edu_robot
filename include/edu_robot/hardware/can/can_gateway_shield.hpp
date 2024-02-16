@@ -46,10 +46,14 @@ public:
 
 private:
   diagnostic::Diagnostic processDiagnosticsImpl() override;
+  void processPowerManagementBoardResponse(const message::RxMessageDataBuffer &data);
+  void processCanGatewayShieldResponse(const message::RxMessageDataBuffer &data);
 
   std::array<std::shared_ptr<Communicator>, 3> _communicator;
   std::shared_ptr<rclcpp::Clock> _clock;
   std::vector<std::shared_ptr<MotorControllerHardware>> _motor_controller_hardware;
+
+  RobotStatusReport _status_report;
 
   // diagnostics
   struct {

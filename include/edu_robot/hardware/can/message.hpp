@@ -199,6 +199,10 @@ struct Message : public std::tuple<Elements...>
       rx_buffer.data() + element::impl::element_byte_index<Index, std::tuple<Elements...>>::value
     );
   }
+  template <class DataBuffer>
+  inline static constexpr bool hasCorrectLength(const DataBuffer& buffer) {
+    return buffer.size() == size();
+  } 
 };
 
 template <class... Elements>

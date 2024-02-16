@@ -1,6 +1,8 @@
 #include "edu_robot/hardware/can/can_gateway_shield.hpp"
 #include "edu_robot/hardware/can/can_communication_device.hpp"
 #include "edu_robot/hardware/can/motor_controller_hardware.hpp"
+#include "edu_robot/hardware/can/message_definition.hpp"
+#include "edu_robot/hardware/can/can_rx_data_endpoint.hpp"
 
 #include <memory>
 #include <stdexcept>
@@ -39,6 +41,16 @@ CanGatewayShield::CanGatewayShield(char const* const can_device_0, char const* c
 {
   _communicator[1] = std::make_shared<Communicator>(std::make_shared<hardware::can::CanCommunicationDevice>(can_device_1), 10ms);
   _communicator[2] = std::make_shared<Communicator>(std::make_shared<hardware::can::CanCommunicationDevice>(can_device_2), 10ms);
+
+  // Creating Data Endpoints for Measurements
+  auto endpoint_power = CanRxDataEndPoint::make_data_endpoint<message::power_management::Response>(
+    0x580, std::bind(&CanGatewayShield::processPowerManagementBoardResponse, this, std::placeholders::_1)
+  );
+  _communicator[2]->registerRxDataEndpoint(std::move(endpoint_power));
+
+  auto endpoint_shield = CanRxDataEndPoint::make_data_endpoint<message::can_gateway_shield::Response>(
+    0x381, std::bind(&CanGatewayShield::processCanGatewayShieldResponse, this, std::placeholders::_1)
+  );
 }
 
 CanGatewayShield::~CanGatewayShield()
@@ -60,35 +72,53 @@ void CanGatewayShield::disable()
   }
 }
 
+void CanGatewayShield::processPowerManagementBoardResponse(const message::RxMessageDataBuffer &data)
+{
+  using message::power_management::Response;
+
+  if (Response::isCurrent(data)) {
+    _status_report.current.mcu = Response::value(data);
+  }
+  else if (Response::isVoltage(data)) {
+    _status_report.voltage.mcu = Response::value(data);
+    sendInputValue(_status_report.voltage.mcu);
+  }
+
+  // Do Diagnostics
+  const auto now = _clock->now();
+  const std::uint64_t dt = (now - _diagnostic.last_processing).nanoseconds();
+
+  _diagnostic.processing_dt->update(dt / 1000000);
+  _diagnostic.last_processing = now;
+
+  _diagnostic.voltage->update(_status_report.voltage.mcu);
+  _diagnostic.current->update(_status_report.current.mcu);
+}
+
+void CanGatewayShield::processCanGatewayShieldResponse(const message::RxMessageDataBuffer &data)
+{
+  using message::can_gateway_shield::Response;
+
+  if (Response::hasCorrectLength(data) == false) {
+    // wrong message
+    return;
+  }
+
+  _status_report.temperature = Response::temperature(data);
+
+  // Do Diagnostics
+  const auto now = _clock->now();
+  const std::uint64_t dt = (now - _diagnostic.last_processing).nanoseconds();
+
+  _diagnostic.processing_dt->update(dt / 1000000);
+  _diagnostic.last_processing = now;
+
+  _diagnostic.temperature->update(_status_report.temperature);
+}
+
 RobotStatusReport CanGatewayShield::getStatusReport()
 {
-  // Requesting Status Report
-  // auto request = Request::make_request<tcp::message::GetStatus>();
-  // auto future_response = _communicator->sendRequest(std::move(request));
-  // wait_for_future(future_response, 200ms);
-  // auto got = future_response.get();
-
-  // Do Status Report
-  RobotStatusReport report;
-
-  // report.temperature = AcknowledgedStatus::temperature(got.response());
-  // report.voltage.mcu = AcknowledgedStatus::voltage(got.response());
-  // report.current.mcu = AcknowledgedStatus::current(got.response());
-  // report.status_emergency_stop = AcknowledgedStatus::statusEmergencyButton(got.response());
-
-  // sendInputValue(report.voltage.mcu);
-
-  // // Do Diagnostics
-  // const auto now = _clock->now();
-  // const std::uint64_t dt = (now - _diagnostic.last_processing).nanoseconds();
-  // _diagnostic.processing_dt->update(dt / 1000000);
-  // _diagnostic.last_processing = now;
-
-  // _diagnostic.voltage->update(report.voltage.mcu);
-  // _diagnostic.current->update(report.current.mcu);
-  // _diagnostic.temperature->update(report.temperature);
-
-  return report;
+  return _status_report;
 }
 
 void CanGatewayShield::registerMotorControllerHardware(
@@ -97,7 +127,7 @@ void CanGatewayShield::registerMotorControllerHardware(
   if (std::find(_motor_controller_hardware.begin(), _motor_controller_hardware.end(), motor_controller_hardware)
       != _motor_controller_hardware.end())
   {
-    throw std::runtime_error("igus::CanGatewayShield: given motor controller already exists.");
+    throw std::runtime_error("CanGatewayShield: given motor controller already exists.");
   }
 
   _motor_controller_hardware.push_back(motor_controller_hardware);
