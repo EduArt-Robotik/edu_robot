@@ -23,7 +23,7 @@ namespace sensor {
 namespace tof {
 using message::MessageFrame;
 
-struct ActivationBitfield : public element::Uint16 {
+struct ActivationBitfield : public element::Uint16LE {
   inline static constexpr std::array<Byte, size()> serialize(const std::uint8_t sensor_id) {
     return element::Uint16::serialize((1 << (sensor_id - 1)));
   }
@@ -47,8 +47,8 @@ struct MeasurementComplete : public MessageFrame<element::Uint8,  // sensor no.
   } 
 };                                                
 
-struct Measurement : public Message<element::Uint24, // distance, sigma
-                                    element::Uint8>  // zone no., frame no.
+struct Measurement : public Message<element::Uint24LE, // distance, sigma
+                                    element::Uint8>    // zone no., frame no.
 {
   inline static constexpr std::size_t zone(
     const std::array<RxMessageDataBuffer::value_type, Measurement::size()>& rx_buffer)

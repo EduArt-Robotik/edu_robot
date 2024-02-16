@@ -31,7 +31,7 @@ struct CanAddress;
 
 namespace impl {
 
-template <typename DataType>
+template <typename DataType, bool BigEndian = true>
 struct DataField {
   inline static constexpr std::size_t size() { return sizeof(DataType); }
   using type = DataType;
@@ -39,25 +39,47 @@ struct DataField {
   // It is a default serialization. On demand customization should take place in derived classes.
   inline static constexpr std::array<Byte, size()> serialize(const DataType value)
   {
-    // Serialization of 1, 2 and 4 bytes sized data types are supported.
-    // Do implementation for ARM only at the moment.
     std::array<Byte, size()> serialized_bytes = { 0 };
-    void* data_address = static_cast<void*>(serialized_bytes.data());
-    *static_cast<DataType*>(data_address) = value;
+
+    // Serialization of 1, 2 and 4 bytes sized data types are supported.
+    if constexpr (BigEndian) {
+      const std::uint8_t* value_address = reinterpret_cast<const std::uint8_t*>(&value);
+
+      for (std::size_t i = 0, j = size() - 1; i < size(); ++i, --j) {
+        serialized_bytes[i] = value_address[j];
+      }
+    }
+    else {
+      // Do implementation for ARM only at the moment.
+      void* data_address = static_cast<void*>(serialized_bytes.data());
+      *static_cast<DataType*>(data_address) = value;
+    }
 
     return serialized_bytes;
   }
   inline static constexpr DataType deserialize(const Byte data[size()])
   {
-    // Do implementation for ARM only at the moment.    
-    const void* data_address = static_cast<const void*>(data);
-    return *static_cast<const DataType*>(data_address);
+    if constexpr (BigEndian) {
+      DataType value;
+      std::uint8_t* value_address = reinterpret_cast<std::uint8_t*>(&value);
+
+      for (std::size_t i = 0, j = size() - 1; i < size(); ++i, --j) {
+        value_address[i] = data[j];
+      }
+
+      return value;
+    }
+    else {
+      // Do implementation for ARM only at the moment.    
+      const void* data_address = static_cast<const void*>(data);
+      return *static_cast<const DataType*>(data_address);
+    }
   }
   inline static constexpr bool isElementValid(const Byte[size()]) { return true; }
 };
 
 // (Partial-)Specialized Data Fields
-template <typename DataType, DataType Value>
+template <typename DataType, DataType Value, bool BigEndian = true>
 struct ConstDataField : public DataField<DataType> {
   using DataField<DataType>::size;
   using type = typename DataField<DataType>::type;
@@ -160,7 +182,7 @@ inline constexpr auto make_message_search_pattern(const std::tuple<Elements...>)
 template <Byte CommandByte>
 struct Command : public impl::ConstDataField<Byte, CommandByte> { };
 
-struct CanAddress : public impl::DataField<std::uint32_t> {
+struct CanAddress : public impl::DataField<std::uint32_t, false> {
   inline static constexpr std::array<Byte, CanAddress::size()> makeSearchPattern(const std::uint32_t can_address) {
     return impl::DataField<std::uint32_t>::serialize(can_address);
   }
@@ -174,12 +196,18 @@ struct Uint8  : public impl::DataField<std::uint8_t> {
     return impl::DataField<std::uint8_t>::serialize(value);
   }
 };
+
+// Big Endian
 using Int8 = impl::DataField<std::int8_t>;
 using Int16 = impl::DataField<std::int16_t>;
 using Uint16 = impl::DataField<std::uint16_t>;
 using Uint24 = impl::DataField<std::array<unsigned char, 3>>;
 using Uint32 = impl::DataField<std::uint32_t>;
 using Float = impl::DataField<float>;
+
+// Little Endian
+using Uint16LE = impl::DataField<std::uint16_t, false>;
+using Uint24LE = impl::DataField<std::array<unsigned char, 3>, false>;
 
 } // end namespace element
 
