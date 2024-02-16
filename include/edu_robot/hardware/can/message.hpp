@@ -184,7 +184,7 @@ struct Command : public impl::ConstDataField<Byte, CommandByte> { };
 
 struct CanAddress : public impl::DataField<std::uint32_t, false> {
   inline static constexpr std::array<Byte, CanAddress::size()> makeSearchPattern(const std::uint32_t can_address) {
-    return impl::DataField<std::uint32_t>::serialize(can_address);
+    return impl::DataField<std::uint32_t, false>::serialize(can_address);
   }
 };
 

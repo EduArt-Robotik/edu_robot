@@ -53,7 +53,7 @@ MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
 }
 
 void initialize_controller(
-  const Motor::Parameter& parameter, const std::uint8_t can_id, std::shared_ptr<Communicator> communicator)
+  const Motor::Parameter& parameter, const std::uint32_t can_id, std::shared_ptr<Communicator> communicator)
 {
   // Initial Motor Controller Hardware
   if (false == parameter.isValid()) {

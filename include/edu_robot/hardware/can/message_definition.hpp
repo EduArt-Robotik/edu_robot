@@ -23,9 +23,9 @@ namespace sensor {
 namespace tof {
 using message::MessageFrame;
 
-struct ActivationBitfield : public element::Uint16LE {
+struct ActivationBitfield : public element::Uint8 {
   inline static constexpr std::array<Byte, size()> serialize(const std::uint8_t sensor_id) {
-    return element::Uint16::serialize((1 << (sensor_id - 1)));
+    return element::Uint8::serialize(static_cast<std::uint8_t>(1 << (sensor_id - 1)));
   }
 };
 
