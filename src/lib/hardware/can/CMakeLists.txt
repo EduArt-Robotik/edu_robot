@@ -5,6 +5,7 @@ add_library(eduart-hardware-can
   sensor_point_cloud_hardware.cpp
   hardware_component_factory.cpp
   motor_controller_hardware.cpp
+  imu_sensor_hardware.cpp
 )
 target_link_libraries(eduart-hardware-can
   eduart-robot

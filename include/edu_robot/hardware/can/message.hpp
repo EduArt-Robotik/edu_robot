@@ -206,8 +206,10 @@ using Uint32 = impl::DataField<std::uint32_t>;
 using Float = impl::DataField<float>;
 
 // Little Endian
+using Int16LE = impl::DataField<std::int16_t, false>;
 using Uint16LE = impl::DataField<std::uint16_t, false>;
 using Uint24LE = impl::DataField<std::array<unsigned char, 3>, false>;
+using FloatLE = impl::DataField<float, false>;
 
 } // end namespace element
 

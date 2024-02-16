@@ -51,6 +51,7 @@ CanGatewayShield::CanGatewayShield(char const* const can_device_0, char const* c
   auto endpoint_shield = CanRxDataEndPoint::make_data_endpoint<message::can_gateway_shield::Response>(
     0x381, std::bind(&CanGatewayShield::processCanGatewayShieldResponse, this, std::placeholders::_1)
   );
+  _communicator[2]->registerRxDataEndpoint(std::move(endpoint_shield));
 }
 
 CanGatewayShield::~CanGatewayShield()

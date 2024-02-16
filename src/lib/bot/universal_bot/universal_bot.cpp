@@ -97,23 +97,23 @@ void UniversalBot::initialize(eduart::robot::HardwareComponentFactory& factory)
   }
 
   // IMU Sensor
-  // SensorImu::Parameter imu_parameter;
-  // imu_parameter.raw_data_mode = false;
-  // imu_parameter.rotated_frame = Robot::_parameter.tf_base_frame;
-  // imu_parameter = SensorImu::get_parameter("imu", imu_parameter, *this);
+  SensorImu::Parameter imu_parameter;
+  imu_parameter.raw_data_mode = false;
+  imu_parameter.rotated_frame = Robot::_parameter.tf_base_frame;
+  imu_parameter = SensorImu::get_parameter("imu", imu_parameter, *this);
   
-  // auto imu_sensor = std::make_shared<robot::SensorImu>(
-  //   "imu",
-  //   getFrameIdPrefix() + "imu/base",
-  //   getFrameIdPrefix() + Robot::_parameter.tf_footprint_frame,
-  //   tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.0, 0.0, 0.1)),
-  //   imu_parameter,
-  //   getTfBroadcaster(),
-  //   *this,
-  //   factory.hardware().at("imu")->cast<robot::SensorImu::SensorInterface>()
-  // );
-  // registerSensor(imu_sensor);
-  // factory.hardware().at("imu")->cast<robot::SensorImu::SensorInterface>()->initialize(imu_parameter);
+  auto imu_sensor = std::make_shared<robot::SensorImu>(
+    "imu",
+    getFrameIdPrefix() + "imu/base",
+    getFrameIdPrefix() + Robot::_parameter.tf_footprint_frame,
+    tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.0, 0.0, 0.1)),
+    imu_parameter,
+    getTfBroadcaster(),
+    *this,
+    factory.hardware().at("imu")->cast<robot::SensorImu::SensorInterface>()
+  );
+  registerSensor(imu_sensor);
+  factory.hardware().at("imu")->cast<robot::SensorImu::SensorInterface>()->initialize(imu_parameter);
 
   // Set Up Default Drive Kinematic. Needs to be done here, because method can't be called in constructor 
   // of robot base class.

@@ -1,6 +1,7 @@
 #include "edu_robot/hardware/can/hardware_component_factory.hpp"
 #include "edu_robot/hardware/can/sensor_point_cloud_hardware.hpp"
 #include "edu_robot/hardware/can/motor_controller_hardware.hpp"
+#include "edu_robot/hardware/can/imu_sensor_hardware.hpp"
 
 #include <edu_robot/hardware/can/can_gateway_shield.hpp>
 
@@ -37,39 +38,23 @@ HardwareComponentFactory& HardwareComponentFactory::addMotorController(
   return *this;
 }
 
-HardwareComponentFactory& HardwareComponentFactory::addRangeSensor(
-  const std::string& sensor_name, const std::uint8_t id, rclcpp::Node& ros_node)
-{
-  (void)sensor_name;
-  (void)id;
-  (void)ros_node;
-  // auto range_sensor_hardware = std::make_shared<RangeSensorHardware>(
-  //   id, ros_node, _shield->getCommunicator()
-  // );
-  // // _shield->registerIotShieldRxDevice(range_sensor_hardware);
-  // _range_sensor_hardware[sensor_name] = range_sensor_hardware;
-  return *this;
-}
-
 HardwareComponentFactory& HardwareComponentFactory::addPointCloudSensor(
   const std::string& sensor_name, const SensorPointCloudHardware::Parameter& parameter, rclcpp::Node& ros_node)
 {
   _hardware[sensor_name] = std::make_shared<SensorPointCloudHardware>(
-    sensor_name, parameter, ros_node, _shield->getCommunicator(1));
+    sensor_name, parameter, ros_node, _shield->getCommunicator(1)
+  );
 
   return *this;
 }
 
 HardwareComponentFactory& HardwareComponentFactory::addImuSensor(
-  const std::string& sensor_name, rclcpp::Node& ros_node)
+  const std::string& sensor_name, const std::uint32_t can_id, rclcpp::Node& ros_node)
 {
-  (void)sensor_name;
-  (void)ros_node;
-  // auto imu_hardware = std::make_shared<ImuSensorHardware>(
-  //   ros_node, _shield->getCommunicator()
-  // );
-  // // _shield->registerIotShieldRxDevice(imu_hardware);
-  // _imu_sensor_hardware[sensor_name] = imu_hardware;
+  _hardware[sensor_name] = std::make_shared<ImuSensorHardware>(
+    ros_node, can_id, _shield->getCommunicator(2)
+  );
+
   return *this;
 }
 

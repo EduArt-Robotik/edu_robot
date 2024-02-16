@@ -40,12 +40,15 @@ public:
     }
 
     // IMU Sensor
-    // factory.addImuSensor("imu", *this);
+    factory.addImuSensor("imu", 0x381, *this);
+
+    // Pointcloud Sensor
     auto point_cloud_parameter = SensorPointCloudHardware::get_parameter(
       "pointcloud_left", {}, *this
     );
     factory.addPointCloudSensor("pointcloud_left", point_cloud_parameter, *this);
 
+    // Initialize
     initialize(factory);
     shield->registerComponentInput(_detect_charging_component);
     _mode_state_machine.switchToMode(eduart::robot::RobotMode::INACTIVE);

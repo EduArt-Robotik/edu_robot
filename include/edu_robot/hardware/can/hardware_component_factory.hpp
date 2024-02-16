@@ -31,7 +31,8 @@ public:
     const std::string& controller_name, const std::uint32_t can_id_input, const std::uint32_t can_id_output);
   HardwareComponentFactory& addRangeSensor(
     const std::string& sensor_name, const std::uint8_t id, rclcpp::Node& ros_node);
-  HardwareComponentFactory& addImuSensor(const std::string& sensor_name, rclcpp::Node& ros_node);
+  HardwareComponentFactory& addImuSensor(
+    const std::string& sensor_name, const std::uint32_t can_id, rclcpp::Node& ros_node);
   HardwareComponentFactory& addPointCloudSensor(
     const std::string& sensor_name, const SensorPointCloudHardware::Parameter& parameter, rclcpp::Node& ros_node);
 

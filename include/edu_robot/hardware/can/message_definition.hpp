@@ -10,6 +10,8 @@
 
 #include <edu_robot/rpm.hpp>
 
+#include <Eigen/Dense>
+
 #include <stdexcept>
 
 namespace eduart {
@@ -99,6 +101,26 @@ private:
 };
 
 } // end namespace tof
+
+namespace imu {
+
+struct Response : public message::MessageFrame<element::FloatLE, // orientation w
+                                               element::FloatLE, // orientation x
+                                               element::FloatLE, // orientation y
+                                               element::FloatLE> // orientation z
+{
+  inline static Eigen::Quaterniond orientation(const RxMessageDataBuffer& rx_buffer) {
+    return Eigen::Quaterniond(
+      static_cast<double>(deserialize<1>(rx_buffer)) / 10000.0,
+      static_cast<double>(deserialize<2>(rx_buffer)) / 10000.0,
+      static_cast<double>(deserialize<3>(rx_buffer)) / 10000.0,
+      static_cast<double>(deserialize<4>(rx_buffer)) / 10000.0
+    );
+  }
+};
+
+} // end namespace imu
+
 } // end namespace sensor
 
 // EduArt Motor Controller Boards
@@ -205,8 +227,8 @@ struct Response : public message::MessageFrame<element::Uint8, // measurement ty
 
 namespace can_gateway_shield {
 
-struct Response : public message::MessageFrame<element::Int16, // temperature measurement
-                                               element::Int16> // voltage measurement
+struct Response : public message::MessageFrame<element::Int16LE, // temperature measurement
+                                               element::Int16LE> // voltage measurement
 {
   inline static constexpr float temperature(const RxMessageDataBuffer& rx_buffer) {
     return static_cast<float>(deserialize<1>(rx_buffer));
