@@ -104,10 +104,10 @@ private:
 
 namespace imu {
 
-struct Response : public message::MessageFrame<element::FloatLE, // orientation w
-                                               element::FloatLE, // orientation x
-                                               element::FloatLE, // orientation y
-                                               element::FloatLE> // orientation z
+struct Response : public message::MessageFrame<element::Int16LE, // orientation w
+                                               element::Int16LE, // orientation x
+                                               element::Int16LE, // orientation y
+                                               element::Int16LE> // orientation z
 {
   inline static Eigen::Quaterniond orientation(const RxMessageDataBuffer& rx_buffer) {
     return Eigen::Quaterniond(
@@ -231,7 +231,7 @@ struct Response : public message::MessageFrame<element::Int16LE, // temperature 
                                                element::Int16LE> // voltage measurement
 {
   inline static constexpr float temperature(const RxMessageDataBuffer& rx_buffer) {
-    return static_cast<float>(deserialize<1>(rx_buffer));
+    return static_cast<float>(deserialize<1>(rx_buffer)) / 100.0f;
   }
   inline static constexpr float voltage(const RxMessageDataBuffer& rx_buffer) {
     return static_cast<float>(deserialize<2>(rx_buffer));
