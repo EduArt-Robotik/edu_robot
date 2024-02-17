@@ -204,11 +204,12 @@ void Communicator::processing()
       }
     }
 
-    // Make a period of 1ms
-    // \todo fix lines below. Its a bit nasty.
-    if (std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - start) < 1ms) {
-      const auto diff = 1ms - std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - start);
-      std::this_thread::sleep_for(diff);      
+    // Make a period of 1ms if nothing to do.
+    if (_rx_buffer_queue.empty()) {
+      if (std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - start) < 1ms) {
+        const auto diff = 1ms - std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - start);
+        std::this_thread::sleep_for(diff);      
+      }
     }
   }
 }

@@ -5,8 +5,8 @@
  */
 #pragma once
 
-#include "edu_robot/hardware/can_gateway/can_gateway_device_interfaces.hpp"
 #include "edu_robot/hardware/can_gateway/can/can_request.hpp"
+#include "edu_robot/hardware/can_gateway/can_gateway_device_interfaces.hpp"
 
 #include <edu_robot/sensor_point_cloud.hpp>
 
