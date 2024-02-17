@@ -9,7 +9,6 @@ target_link_libraries(iotbot-shield
 ament_target_dependencies(iotbot-shield
   "rclcpp"
 )
-# rosidl_target_interfaces(iotbot-shield ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
 ### Ehternet Gateway
 add_executable(ethernet-gateway
@@ -22,7 +21,6 @@ target_link_libraries(ethernet-gateway
 ament_target_dependencies(ethernet-gateway
   "rclcpp"
 )
-# rosidl_target_interfaces(ethernet-gateway ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
 ### Ehternet Gateway Universal Bot
 add_executable(ethernet-gateway-universal-bot
@@ -36,7 +34,6 @@ target_link_libraries(ethernet-gateway-universal-bot
 ament_target_dependencies(ethernet-gateway-universal-bot
   "rclcpp"
 )
-# rosidl_target_interfaces(ethernet-gateway ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
 ### Ehternet Gateway Ohmni Bot
 add_executable(ethernet-gateway-ohmni-bot
@@ -49,4 +46,16 @@ target_link_libraries(ethernet-gateway-ohmni-bot
 ament_target_dependencies(ethernet-gateway-ohmni-bot
   "rclcpp"
 )
-# rosidl_target_interfaces(ethernet-gateway ${PROJECT_NAME} "rosidl_typesupport_cpp")
+
+### Igus Can Turtle Bot
+add_executable(igus-can-turtle-bot
+  igus_can_turtle_bot_node.cpp
+)
+target_link_libraries(igus-can-turtle-bot
+  igus
+  eduart-turtle
+  eduart-hardware-can
+)
+ament_target_dependencies(igus-can-turtle-bot
+  "rclcpp"
+)

@@ -3,16 +3,16 @@
  *
  * Author: Christian Wendt (christian.wendt@eduart-robotik.com)
  */
-#include <edu_robot/universal_bot/universal_bot.hpp>
+#include <edu_robot/bot/universal_bot/universal_bot.hpp>
 
-#include <edu_robot/ethernet_gateway/ethernet_gateway_shield.hpp>
-#include <edu_robot/ethernet_gateway/hardware_component_factory.hpp>
+#include <edu_robot/hardware/ethernet_gateway/ethernet_gateway_shield.hpp>
+#include <edu_robot/hardware/ethernet_gateway/hardware_component_factory.hpp>
 
 #include <rclcpp/executors.hpp>
 #include <rclcpp/rclcpp.hpp>
 
-using eduart::robot::ethernet::EthernetGatewayShield;
-using eduart::robot::ethernet::HardwareComponentFactory;
+using eduart::robot::hardware::ethernet::EthernetGatewayShield;
+using eduart::robot::hardware::ethernet::HardwareComponentFactory;
 
 class EthernetGatewayUniversalBot : public eduart::robot::universal_bot::UniversalBot
 {
@@ -27,25 +27,13 @@ public:
     auto factory = HardwareComponentFactory(shield);
     // _timer_process_status_report = create_wall_timer(100ms, [shield]{ shield->processStatusReport(); });
 
-           // Lightings
-    factory//.addLighting("head", "head_lighting")
-           //.addLighting("right_side", "right_side_lighting")
-           //.addLighting("left_side", "left_side_lighting")
-           //.addLighting("back", "back_lighting")
-           //.addLighting("all", "all_lighting")
-           // Motor Controller
-           .addMotorController("motor", "motor_hardware")
-           // Range Sensor
-           //.addRangeSensor("range/front/left", "range/front/left/hardware",
-           //                0u, RangeSensorHardware::Parameter{ })
-           //.addRangeSensor("range/front/right", "range/front/right/hardware",
-           //                1u, RangeSensorHardware::Parameter{ })
-           //.addRangeSensor("range/rear/left", "range/rear/left/hardware",
-           //                2u, RangeSensorHardware::Parameter{ })
-           //.addRangeSensor("range/rear/right", "range/rear/right/hardware",
-           //                3u, RangeSensorHardware::Parameter{ })
-           // IMU Sensor
-           .addImuSensor("imu", "imu_hardware", *this);
+    // Motor Controller
+    for (std::size_t i = 0; i < _parameter.axis.size(); ++i) {
+      factory.addMotorController(std::string("motor_controller_") + std::to_string(i), i);
+    }
+
+    // IMU Sensor
+    factory.addImuSensor("imu", *this);
 
     initialize(factory);
     shield->registerComponentInput(_detect_charging_component);

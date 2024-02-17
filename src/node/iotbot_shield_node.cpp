@@ -3,10 +3,10 @@
  *
  * Author: Christian Wendt (christian.wendt@eduart-robotik.com)
  */
-#include <edu_robot/eduard/eduard.hpp>
+#include <edu_robot/bot/eduard/eduard.hpp>
 
-#include <edu_robot/iot_shield/iot_shield.hpp>
-#include <edu_robot/iot_shield/iotbot_hardware_component_factory.hpp>
+#include <edu_robot/hardware/iot_shield/iot_shield.hpp>
+#include <edu_robot/hardware/iot_shield/iotbot_hardware_component_factory.hpp>
 
 #include <rclcpp/executors.hpp>
 #include <rclcpp/rclcpp.hpp>
@@ -29,23 +29,30 @@ public:
     auto factory = IotBotHardwareComponentFactory(iot_shield);
 
             // Lightings
-    factory.addLighting("head", "head_lighting")
-           .addLighting("right_side", "right_side_lighting")
-           .addLighting("left_side", "left_side_lighting")
-           .addLighting("back", "back_lighting")
-           .addLighting("all", "all_lighting")
+    factory.addLighting("head")
+           .addLighting("right_side")
+           .addLighting("left_side")
+           .addLighting("back")
+           .addLighting("all")
            // Motor Controller
-           .addMotorController("motor", "motor_hardware")
+           .addMotorController("motor_controller")
            // Range Sensor
-           .addRangeSensor("range/front/left", "range/front/left/hardware", 0u)
-           .addRangeSensor("range/front/right", "range/front/right/hardware", 1u)
-           .addRangeSensor("range/rear/left", "range/rear/left/hardware", 2u)
-           .addRangeSensor("range/rear/right", "range/rear/right/hardware", 3u)
+           .addRangeSensor("range/front/left", 0u)
+           .addRangeSensor("range/front/right", 1u)
+           .addRangeSensor("range/rear/left", 2u)
+           .addRangeSensor("range/rear/right", 3u)
            // IMU Sensor
-           .addImuSensor("imu", "imu_hardware");
+           .addImuSensor("imu");
 
     initialize(factory);
+
+    // Configure IoT Shield.
+    // \todo move it into shield somehow.
+    const bool imu_data_mode = std::dynamic_pointer_cast<eduart::robot::SensorImu>(_sensors.at("imu"))->parameter().raw_data_mode;
     iot_shield->registerComponentInput(_detect_charging_component);
+    iot_shield->setImuRawDataMode(imu_data_mode);
+    
+    // Start up with robot mode INACTIVE.
     _mode_state_machine.switchToMode(eduart::robot::RobotMode::INACTIVE);
 
     // HACK! Timer should be in class IoTShield.

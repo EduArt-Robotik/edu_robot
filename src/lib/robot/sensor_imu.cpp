@@ -6,6 +6,8 @@
 
 #include <rclcpp/node.hpp>
 
+#include <Eigen/Eigen>
+
 namespace eduart {
 namespace robot {
 
@@ -16,10 +18,12 @@ SensorImu::Parameter SensorImu::get_parameter(
   std::replace(sensor_prefix.begin(), sensor_prefix.end(), '/', '.');
   SensorImu::Parameter parameter;
 
-  ros_node.declare_parameter<bool>(sensor_prefix + ".enable", default_parameter.enable);
   ros_node.declare_parameter<bool>(
     sensor_prefix + ".raw_data_mode", default_parameter.raw_data_mode);
-  ros_node.declare_parameter<bool>(sensor_prefix + "publish_tf", default_parameter.publish_tf);
+  ros_node.declare_parameter<bool>(sensor_prefix + ".publish_tf", default_parameter.publish_tf);
+  ros_node.declare_parameter<bool>(
+    sensor_prefix + ".publish_orientation_without_yaw_tf",
+    default_parameter.publish_orientation_without_yaw_tf);
   ros_node.declare_parameter<float>(
     sensor_prefix + ".fusion_weight", default_parameter.fusion_weight);
   ros_node.declare_parameter<float>(
@@ -31,9 +35,10 @@ SensorImu::Parameter SensorImu::get_parameter(
   ros_node.declare_parameter<std::string>(
     sensor_prefix + ".tf_frame_rotated", default_parameter.rotated_frame);
 
-  parameter.enable = ros_node.get_parameter(sensor_prefix + ".enable").as_bool();
   parameter.raw_data_mode = ros_node.get_parameter(sensor_prefix + ".raw_data_mode").as_bool();
-  parameter.publish_tf = ros_node.get_parameter(sensor_prefix + "publish_tf").as_bool();
+  parameter.publish_tf = ros_node.get_parameter(sensor_prefix + ".publish_tf").as_bool();
+  parameter.publish_orientation_without_yaw_tf = ros_node.get_parameter(
+    sensor_prefix + ".publish_orientation_without_yaw_tf").as_bool();
   parameter.fusion_weight = ros_node.get_parameter(sensor_prefix + ".fusion_weight").as_double();
   parameter.mount_orientation.roll = ros_node.get_parameter(
     sensor_prefix + ".mounting_orientation.roll").as_double();
@@ -101,6 +106,11 @@ void SensorImu::processMeasurementData(
   _pub_imu_message->publish(imu_msg);
 
   // TF
+  // Only publish tf if enabled.
+  if (_parameter.publish_tf == false) {
+    return;
+  }
+
   geometry_msgs::msg::TransformStamped tf_msg;
 
   tf_msg.header.frame_id = frameId();
@@ -111,18 +121,21 @@ void SensorImu::processMeasurementData(
   tf_msg.transform.translation.y = 0.0;
   tf_msg.transform.translation.z = 0.0;
 
-  if (_parameter.publish_tf) {
+  if (_parameter.publish_orientation_without_yaw_tf) {
+    // Estimate orientation from linear acceleration --> without yaw angle.
+    const Eigen::Vector3d ground_reference(0.0, 0.0, -9.81);
+    const Eigen::Quaterniond q_without_yaw = Eigen::Quaterniond::FromTwoVectors(linear_acceleration, ground_reference);
+
+    tf_msg.transform.rotation.x = q_without_yaw.x();
+    tf_msg.transform.rotation.y = q_without_yaw.y();
+    tf_msg.transform.rotation.z = q_without_yaw.z();
+    tf_msg.transform.rotation.w = q_without_yaw.w();
+  }
+  else {
     tf_msg.transform.rotation.x = orientation.x();
     tf_msg.transform.rotation.y = orientation.y();
     tf_msg.transform.rotation.z = orientation.z();
     tf_msg.transform.rotation.w = orientation.w();
-  }
-  else {
-    // publishing zero rotation to keep tf tree valid
-    tf_msg.transform.rotation.x = 0.0;
-    tf_msg.transform.rotation.y = 0.0;
-    tf_msg.transform.rotation.z = 0.0;
-    tf_msg.transform.rotation.w = 1.0;
   }
 
   _tf_broadcaster->sendTransform(tf_msg);

@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "edu_robot/hardware_component_interface.hpp"
+#include "edu_robot/hardware_component_interfaces.hpp"
 #include "edu_robot/sensor.hpp"
 #include "edu_robot/diagnostic/standard_deviation.hpp"
 
@@ -25,9 +25,9 @@ class SensorImu : public Sensor
 {
 public:
   struct Parameter {
-    bool enable = true;
     bool raw_data_mode = false;
     bool publish_tf = true;
+    bool publish_orientation_without_yaw_tf = true;
     float fusion_weight = 0.03f;
     struct {
       // Use mounting orientation from IoT Shield as default.
@@ -38,7 +38,9 @@ public:
     std::string rotated_frame = "imu/rotated";
   };
 
-  using SensorInterface = HardwareSensorInterface<Parameter, Eigen::Quaterniond, Eigen::Vector3d, Eigen::Vector3d>;
+  class SensorInterface : public HardwareComponent<Parameter>
+                        , public HardwareSensor<Eigen::Quaterniond, Eigen::Vector3d, Eigen::Vector3d>
+  { };
 
   SensorImu(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
             const tf2::Transform sensor_transform, const Parameter parameter,
@@ -48,6 +50,7 @@ public:
 
   static SensorImu::Parameter get_parameter(
     const std::string& name, const SensorImu::Parameter& default_parameter, rclcpp::Node& ros_node);
+  inline const Parameter& parameter() const { return _parameter; }
 
 protected:
   void processMeasurementData(

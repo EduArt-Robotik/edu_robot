@@ -19,7 +19,8 @@
         pitch: 0.0
         roll: 0.0
         yaw: 0.0 
-      raw_data_mode: false
+      publish_tf: true
+      publish_orientation_without_yaw_tf : true      
 
 # Motor Controller
     motor_a:

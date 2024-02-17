@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "edu_robot/hardware_component_interface.hpp"
+#include "edu_robot/hardware_component_interfaces.hpp"
 #include "edu_robot/sensor.hpp"
 #include "edu_robot/processing_component/processing_component.hpp"
 #include "edu_robot/diagnostic/standard_deviation.hpp"
@@ -42,7 +42,8 @@ public:
     float range_max = 5.0f;
   };
 
-  using SensorInterface = HardwareSensorInterface<Parameter, float>;
+  class SensorInterface : public HardwareComponent<Parameter>
+                        , public HardwareSensor<float> { };
 
   SensorRange(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
               const tf2::Transform sensor_transform, const Parameter parameter, rclcpp::Node& ros_node,
