@@ -5,8 +5,8 @@
  */
 #pragma once
 
-#include "edu_robot/hardware/can/message.hpp"
-#include "edu_robot/hardware/can/protocol.hpp"
+#include "edu_robot/hardware/can_gateway/can/message.hpp"
+#include "edu_robot/hardware/can_gateway/can/protocol.hpp"
 
 #include <edu_robot/rpm.hpp>
 
@@ -17,6 +17,7 @@
 namespace eduart {
 namespace robot {
 namespace hardware {
+namespace can_gateway {
 namespace can {
 namespace message {
 namespace sensor {
@@ -242,6 +243,7 @@ struct Response : public message::MessageFrame<element::Int16LE, // temperature 
 
 } // end namespace message
 } // end namespace can
+} // end namespace can_gateway
 } // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

@@ -7,12 +7,12 @@
 
 #include <edu_robot/sensor_imu.hpp>
 
-#include "edu_robot/hardware/can/can_gateway_device_interfaces.hpp"
+#include "edu_robot/hardware/can_gateway/can_gateway_device_interfaces.hpp"
 
 namespace eduart {
 namespace robot {
 namespace hardware {
-namespace can {
+namespace can_gateway {
 
 class ImuSensorHardware : public SensorImu::SensorInterface
                         , public CanGatewayTxRxDevice
@@ -28,7 +28,7 @@ private:
   std::uint32_t _can_id;
 };
 
-} // end namespace can
+} // end namespace can_gateway
 } // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

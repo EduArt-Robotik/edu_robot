@@ -1,9 +1,9 @@
-#include "edu_robot/hardware/can/hardware_component_factory.hpp"
-#include "edu_robot/hardware/can/sensor_point_cloud_hardware.hpp"
-#include "edu_robot/hardware/can/motor_controller_hardware.hpp"
-#include "edu_robot/hardware/can/imu_sensor_hardware.hpp"
+#include "edu_robot/hardware/can_gateway/hardware_component_factory.hpp"
+#include "edu_robot/hardware/can_gateway/sensor_tof_hardware.hpp"
+#include "edu_robot/hardware/can_gateway/motor_controller_hardware.hpp"
+#include "edu_robot/hardware/can_gateway/imu_sensor_hardware.hpp"
 
-#include <edu_robot/hardware/can/can_gateway_shield.hpp>
+#include <edu_robot/hardware/can_gateway/can_gateway_shield.hpp>
 
 #include <functional>
 #include <memory>
@@ -12,7 +12,7 @@
 namespace eduart {
 namespace robot {
 namespace hardware {
-namespace can {
+namespace can_gateway {
 
 HardwareComponentFactory& HardwareComponentFactory::addLighting(const std::string& lighting_name)
 {
@@ -38,10 +38,10 @@ HardwareComponentFactory& HardwareComponentFactory::addMotorController(
   return *this;
 }
 
-HardwareComponentFactory& HardwareComponentFactory::addPointCloudSensor(
-  const std::string& sensor_name, const SensorPointCloudHardware::Parameter& parameter, rclcpp::Node& ros_node)
+HardwareComponentFactory& HardwareComponentFactory::addTofSensor(
+  const std::string& sensor_name, const SensorTofHardware::Parameter& parameter, rclcpp::Node& ros_node)
 {
-  _hardware[sensor_name] = std::make_shared<SensorPointCloudHardware>(
+  _hardware[sensor_name] = std::make_shared<SensorTofHardware>(
     sensor_name, parameter, ros_node, _shield->getCommunicator(1)
   );
 
@@ -58,7 +58,7 @@ HardwareComponentFactory& HardwareComponentFactory::addImuSensor(
   return *this;
 }
 
-} // end namespace can
+} // end namespace can_gateway
 } // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "edu_robot/hardware/igus/can/message.hpp"
+#include "edu_robot/hardware/can_gateway/can/message.hpp"
 
 #include <memory>
 
@@ -15,7 +15,7 @@ namespace hardware {
 
 class Communicator;
 
-namespace can {
+namespace can_gateway {
 
 class CanGatewayTxDevice
 {
@@ -50,7 +50,7 @@ public:
   ~CanGatewayTxRxDevice() override = default;
 };
 
-} // end namespace can
+} // end namespace can_gateway
 } // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

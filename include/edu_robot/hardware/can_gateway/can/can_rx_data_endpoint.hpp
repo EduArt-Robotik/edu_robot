@@ -10,6 +10,7 @@
 namespace eduart {
 namespace robot {
 namespace hardware {
+namespace can_gateway {
 namespace can {
 
 class CanRxDataEndPoint : public hardware::RxDataEndPoint
@@ -39,6 +40,7 @@ private:
 };  
 
 } // end namespace can
-} // end namespace igus
+} // end namespace can_gateway
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

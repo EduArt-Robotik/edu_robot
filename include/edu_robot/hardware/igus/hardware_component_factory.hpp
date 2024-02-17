@@ -7,7 +7,7 @@
 
 #include <edu_robot/hardware_component_factory.hpp>
 
-#include <edu_robot/hardware/can/sensor_point_cloud_hardware.hpp>
+#include <edu_robot/hardware/can_gateway/sensor_tof_hardware.hpp>
 
 #include <cstdint>
 #include <memory>
@@ -33,8 +33,9 @@ public:
     const std::string& sensor_name, const std::uint8_t id, rclcpp::Node& ros_node);
   HardwareComponentFactory& addImuSensor(
     const std::string& sensor_name, rclcpp::Node& ros_node);
-  HardwareComponentFactory& addPointCloudSensor(
-    const std::string& sensor_name, const hardware::can::SensorPointCloudHardware::Parameter& parameter, rclcpp::Node& ros_node);
+  HardwareComponentFactory& addTofSensor(
+    const std::string& sensor_name, const hardware::can_gateway::SensorTofHardware::Parameter& parameter,
+    rclcpp::Node& ros_node);
 
 private:
   std::shared_ptr<CanGatewayShield> _shield;

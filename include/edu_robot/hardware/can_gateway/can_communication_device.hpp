@@ -10,7 +10,7 @@
 namespace eduart {
 namespace robot {
 namespace hardware {
-namespace can {
+namespace can_gateway {
 
 class CanCommunicationDevice : public hardware::CommunicationDevice
 {
@@ -25,7 +25,7 @@ private:
   int _socket_fd = -1;
 };
 
-} // end namespace can
+} // end namespace can_gateway
 } // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

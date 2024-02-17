@@ -5,15 +5,15 @@
  */
 #include <edu_robot/bot/universal_bot/universal_bot.hpp>
 
-#include <edu_robot/hardware/can/can_gateway_shield.hpp>
-#include <edu_robot/hardware/can/hardware_component_factory.hpp>
+#include <edu_robot/hardware/can_gateway/can_gateway_shield.hpp>
+#include <edu_robot/hardware/can_gateway/hardware_component_factory.hpp>
 
 #include <rclcpp/executors.hpp>
 #include <rclcpp/rclcpp.hpp>
 
-using eduart::robot::hardware::can::CanGatewayShield;
-using eduart::robot::hardware::can::HardwareComponentFactory;
-using eduart::robot::hardware::can::SensorPointCloudHardware;
+using eduart::robot::hardware::can_gateway::CanGatewayShield;
+using eduart::robot::hardware::can_gateway::HardwareComponentFactory;
+using eduart::robot::hardware::can_gateway::SensorTofHardware;
 
 class CanGatewayUniversalBot : public eduart::robot::universal_bot::UniversalBot
 {
@@ -43,10 +43,10 @@ public:
     factory.addImuSensor("imu", 0x381, *this);
 
     // Pointcloud Sensor
-    auto point_cloud_parameter = SensorPointCloudHardware::get_parameter(
+    auto point_cloud_parameter = SensorTofHardware::get_parameter(
       "pointcloud_left", {}, *this
     );
-    factory.addPointCloudSensor("pointcloud_left", point_cloud_parameter, *this);
+    factory.addTofSensor("pointcloud_left", point_cloud_parameter, *this);
 
     // Initialize
     initialize(factory);

@@ -17,6 +17,7 @@
 namespace eduart {
 namespace robot {
 namespace hardware {
+namespace can_gateway {
 namespace can {
 namespace message {
 
@@ -271,26 +272,9 @@ struct NoResponseMessageFrame : public MessageFrame<Elements...>
   }
 };
 
-// template <class MeasurementId, class ...Elements>
-// struct MeasurementFrame : public Message<element::StartByte, MeasurementId, Elements..., element::StopByte>
-// {
-// protected:
-//   using MessageType = Message<element::StartByte, MeasurementId, Elements..., element::StopByte>;
-
-// public:
-//   using MessageType::size;
-
-//   inline constexpr static auto makeSearchPattern() {
-//     return element::impl::make_message_search_pattern<0, 1>(MessageType{});
-//   }
-//   template <std::size_t Index>
-//   inline constexpr static auto deserialize(const RxMessageDataBuffer& rx_buffer) {
-//     return MessageType::template deserialize<Index + 2>(rx_buffer);
-//   }
-// };
-
 } // end namespace message
 } // end namespace can
+} // end namespace can_gateway
 } // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

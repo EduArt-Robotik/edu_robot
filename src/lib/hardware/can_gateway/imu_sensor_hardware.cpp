@@ -1,16 +1,17 @@
-#include "edu_robot/hardware/can/imu_sensor_hardware.hpp"
-#include "edu_robot/hardware/can/message_definition.hpp"
-#include "edu_robot/hardware/can/can_request.hpp"
-#include "edu_robot/hardware/can/can_rx_data_endpoint.hpp"
+#include "edu_robot/hardware/can_gateway/imu_sensor_hardware.hpp"
+#include "edu_robot/hardware/can_gateway/can/message_definition.hpp"
+#include "edu_robot/hardware/can_gateway/can/can_request.hpp"
+#include "edu_robot/hardware/can_gateway/can/can_rx_data_endpoint.hpp"
 
 namespace eduart {
 namespace robot {
 namespace hardware {
-namespace can {
+namespace can_gateway {
 
 using namespace std::chrono_literals;
 
-using message::sensor::imu::Response;
+using can::CanRxDataEndPoint;
+using can::message::sensor::imu::Response;
 
 ImuSensorHardware::ImuSensorHardware(rclcpp::Node& ros_node, const std::uint32_t can_id, std::shared_ptr<Communicator> communicator)
   : CanGatewayTxRxDevice(communicator)
@@ -40,7 +41,7 @@ void ImuSensorHardware::initialize(const SensorImu::Parameter& parameter)
   (void)parameter;
 }
 
-} // end namespace can
+} // end namespace can_gateway
 } // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

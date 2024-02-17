@@ -15,4 +15,4 @@ target_include_directories(eduart-hardware PUBLIC
 add_subdirectory(ethernet_gateway)
 add_subdirectory(iotbot_shield)
 add_subdirectory(igus)
-add_subdirectory(can)
+add_subdirectory(can_gateway)

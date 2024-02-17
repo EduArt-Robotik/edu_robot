@@ -31,7 +31,7 @@ public:
           //  .addMotorController("motor_controller_b", 0x30)
           //  .addMotorController("motor_controller_c", 0x40)
           //  .addMotorController("motor_controller_d", 0x50)
-           .addPointCloudSensor("pointcloud_left", {}, *this);
+           .addTofSensor("pointcloud_left", {}, *this);
 
     initialize(factory);
     _mode_state_machine.switchToMode(eduart::robot::RobotMode::INACTIVE);

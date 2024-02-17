@@ -7,7 +7,7 @@
 
 #include <edu_robot/hardware_component_factory.hpp>
 
-#include "edu_robot/hardware/can/sensor_point_cloud_hardware.hpp"
+#include "edu_robot/hardware/can_gateway/sensor_tof_hardware.hpp"
 
 #include <cstdint>
 #include <memory>
@@ -16,7 +16,7 @@
 namespace eduart {
 namespace robot {
 namespace hardware {
-namespace can {
+namespace can_gateway {
 
 class CanGatewayShield;
 
@@ -33,14 +33,14 @@ public:
     const std::string& sensor_name, const std::uint8_t id, rclcpp::Node& ros_node);
   HardwareComponentFactory& addImuSensor(
     const std::string& sensor_name, const std::uint32_t can_id, rclcpp::Node& ros_node);
-  HardwareComponentFactory& addPointCloudSensor(
-    const std::string& sensor_name, const SensorPointCloudHardware::Parameter& parameter, rclcpp::Node& ros_node);
+  HardwareComponentFactory& addTofSensor(
+    const std::string& sensor_name, const SensorTofHardware::Parameter& parameter, rclcpp::Node& ros_node);
 
 protected:
   std::shared_ptr<CanGatewayShield> _shield;
 };
 
-} // end namespace can
+} // end namespace can_gateway
 } // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

@@ -1,8 +1,8 @@
-#include "edu_robot/hardware/can/can_gateway_shield.hpp"
-#include "edu_robot/hardware/can/can_communication_device.hpp"
-#include "edu_robot/hardware/can/motor_controller_hardware.hpp"
-#include "edu_robot/hardware/can/message_definition.hpp"
-#include "edu_robot/hardware/can/can_rx_data_endpoint.hpp"
+#include "edu_robot/hardware/can_gateway/can_gateway_shield.hpp"
+#include "edu_robot/hardware/can_gateway/can_communication_device.hpp"
+#include "edu_robot/hardware/can_gateway/motor_controller_hardware.hpp"
+#include "edu_robot/hardware/can_gateway/can/message_definition.hpp"
+#include "edu_robot/hardware/can_gateway/can/can_rx_data_endpoint.hpp"
 
 #include <memory>
 #include <stdexcept>
@@ -10,14 +10,17 @@
 namespace eduart {
 namespace robot {
 namespace hardware {
-namespace can {
+namespace can_gateway {
 
 using namespace std::chrono_literals;
+
+using hardware::can_gateway::CanCommunicationDevice;
+using hardware::can_gateway::can::CanRxDataEndPoint;
 
 CanGatewayShield::CanGatewayShield(char const* const can_device)
   : processing::ProcessingComponentOutput<float>("can_gateway_shield")
 {
-  _communicator[0] = std::make_shared<Communicator>(std::make_shared<hardware::can::CanCommunicationDevice>(can_device), 10ms);
+  _communicator[0] = std::make_shared<Communicator>(std::make_shared<CanCommunicationDevice>(can_device), 10ms);
 
   // Configuring Diagnostic
   _clock = std::make_shared<rclcpp::Clock>();
@@ -39,16 +42,16 @@ CanGatewayShield::CanGatewayShield(char const* const can_device)
 CanGatewayShield::CanGatewayShield(char const* const can_device_0, char const* const can_device_1, char const* const can_device_2)
   : CanGatewayShield(can_device_0)
 {
-  _communicator[1] = std::make_shared<Communicator>(std::make_shared<hardware::can::CanCommunicationDevice>(can_device_1), 10ms);
-  _communicator[2] = std::make_shared<Communicator>(std::make_shared<hardware::can::CanCommunicationDevice>(can_device_2), 10ms);
+  _communicator[1] = std::make_shared<Communicator>(std::make_shared<CanCommunicationDevice>(can_device_1), 10ms);
+  _communicator[2] = std::make_shared<Communicator>(std::make_shared<CanCommunicationDevice>(can_device_2), 10ms);
 
   // Creating Data Endpoints for Measurements
-  auto endpoint_power = CanRxDataEndPoint::make_data_endpoint<message::power_management::Response>(
+  auto endpoint_power = CanRxDataEndPoint::make_data_endpoint<can::message::power_management::Response>(
     0x580, std::bind(&CanGatewayShield::processPowerManagementBoardResponse, this, std::placeholders::_1)
   );
   _communicator[2]->registerRxDataEndpoint(std::move(endpoint_power));
 
-  auto endpoint_shield = CanRxDataEndPoint::make_data_endpoint<message::can_gateway_shield::Response>(
+  auto endpoint_shield = CanRxDataEndPoint::make_data_endpoint<can::message::can_gateway_shield::Response>(
     0x381, std::bind(&CanGatewayShield::processCanGatewayShieldResponse, this, std::placeholders::_1)
   );
   _communicator[2]->registerRxDataEndpoint(std::move(endpoint_shield));
@@ -75,7 +78,7 @@ void CanGatewayShield::disable()
 
 void CanGatewayShield::processPowerManagementBoardResponse(const message::RxMessageDataBuffer &data)
 {
-  using message::power_management::Response;
+  using can::message::power_management::Response;
 
   if (Response::isCurrent(data)) {
     _status_report.current.mcu = Response::value(data);
@@ -98,7 +101,7 @@ void CanGatewayShield::processPowerManagementBoardResponse(const message::RxMess
 
 void CanGatewayShield::processCanGatewayShieldResponse(const message::RxMessageDataBuffer &data)
 {
-  using message::can_gateway_shield::Response;
+  using can::message::can_gateway_shield::Response;
 
   if (Response::hasCorrectLength(data) == false) {
     // wrong message
@@ -146,7 +149,7 @@ diagnostic::Diagnostic CanGatewayShield::processDiagnosticsImpl()
   return diagnostic;
 }
 
-} // end namespace can
+} // end namespace can_gateway
 } // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

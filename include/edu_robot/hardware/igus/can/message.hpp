@@ -7,7 +7,7 @@
 
 #include "edu_robot/hardware/igus/can/protocol.hpp"
 
-#include <edu_robot/hardware/can/message.hpp>
+#include <edu_robot/hardware/can_gateway/can/message.hpp>
 #include <edu_robot/rpm.hpp>
 
 namespace eduart {
@@ -20,27 +20,29 @@ namespace message {
 namespace element {
 
 // Specialize 
-using hardware::can::message::element::impl::DataField;
-using hardware::can::message::element::Command;
+
+using hardware::can_gateway::can::message::element::impl::DataField;
+using hardware::can_gateway::can::message::element::Command;
+using hardware::can_gateway::can::message::Byte;
 
 struct Velocity : public DataField<std::uint8_t> {
-  inline static constexpr std::array<hardware::can::message::Byte, size()> serialize(const Rpm value) {
-    return hardware::can::message::element::impl::DataField<std::uint8_t>::serialize(
+  inline static constexpr std::array<Byte, size()> serialize(const Rpm value) {
+    return hardware::can_gateway::can::message::element::impl::DataField<std::uint8_t>::serialize(
       static_cast<std::uint8_t>(value + 127.0)
     ); // 127 is zero
   }
-  inline static constexpr Rpm deserialize(const hardware::can::message::Byte data[size()]) {
-    return Rpm(hardware::can::message::element::impl::DataField<std::uint8_t>::deserialize(data) - 127); // 127 is zero
+  inline static constexpr Rpm deserialize(const Byte data[size()]) {
+    return Rpm(hardware::can_gateway::can::message::element::impl::DataField<std::uint8_t>::deserialize(data) - 127); // 127 is zero
   }
 };
 
-struct VelocityCanAddress : public hardware::can::message::element::CanAddress {
+struct VelocityCanAddress : public hardware::can_gateway::can::message::element::CanAddress {
   inline static constexpr std::array<Byte, CanAddress::size()> makeSearchPattern(const std::uint32_t can_address) {
     return DataField<std::uint32_t>::serialize(can_address | 0x01);
   }
 };
 
-struct CommandCanAddress : public hardware::can::message::element::CanAddress {
+struct CommandCanAddress : public hardware::can_gateway::can::message::element::CanAddress {
   inline static constexpr std::array<Byte, CanAddress::size()> makeSearchPattern(const std::uint32_t can_address) {
     return DataField<std::uint32_t>::serialize(can_address | 0x02);
   }
@@ -48,10 +50,10 @@ struct CommandCanAddress : public hardware::can::message::element::CanAddress {
 
 } // end namespace element
 
-using hardware::can::message::Message;
+using hardware::can_gateway::can::message::Message;
 using hardware::message::TxMessageDataBuffer;
 using hardware::message::RxMessageDataBuffer;
-using hardware::can::message::element::impl::make_message_search_pattern;
+using hardware::can_gateway::can::message::element::impl::make_message_search_pattern;
 
 template <class CanAddress, Byte CommandByte, class ...Elements>
 struct MessageFrame : public Message<CanAddress, element::Command<CommandByte>, Elements...>

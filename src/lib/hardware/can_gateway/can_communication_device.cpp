@@ -1,4 +1,4 @@
-#include "edu_robot/hardware/can/can_communication_device.hpp"
+#include "edu_robot/hardware/can_gateway/can_communication_device.hpp"
 
 #include <edu_robot/hardware_error.hpp>
 
@@ -18,7 +18,7 @@
 namespace eduart {
 namespace robot {
 namespace hardware {
-namespace can {
+namespace can_gateway {
 
 CanCommunicationDevice::CanCommunicationDevice(char const* const device_name)
 {
@@ -114,7 +114,7 @@ message::RxMessageDataBuffer CanCommunicationDevice::receive()
   return rx_buffer;
 }
 
-} // end namespace can
+} // end namespace can_gateway
 } // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

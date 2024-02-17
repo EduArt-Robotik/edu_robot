@@ -12,6 +12,7 @@
 namespace eduart {
 namespace robot {
 namespace hardware {
+namespace can_gateway {
 namespace can {
 namespace message {
 
@@ -49,6 +50,7 @@ struct PROTOCOL {
 
 } // end namespace message
 } // end namespace can
+} // end namespace can_gateway
 } // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

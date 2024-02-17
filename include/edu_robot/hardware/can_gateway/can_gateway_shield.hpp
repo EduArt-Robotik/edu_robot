@@ -20,7 +20,7 @@
 namespace eduart {
 namespace robot {
 namespace hardware {
-namespace can {
+namespace can_gateway {
 
 class MotorControllerHardware;
 
@@ -65,7 +65,7 @@ private:
   } _diagnostic;
 };
 
-} // end namespace can
+} // end namespace can_gateway
 } // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

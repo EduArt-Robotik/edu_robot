@@ -9,7 +9,7 @@
 #include <edu_robot/rpm.hpp>
 
 #include <edu_robot/hardware/communicator.hpp>
-#include <edu_robot/hardware/can/can_gateway_device_interfaces.hpp>
+#include <edu_robot/hardware/can_gateway/can_gateway_device_interfaces.hpp>
 
 #include <memory>
 
@@ -19,13 +19,13 @@ namespace hardware {
 namespace igus {
 
 class MotorControllerHardware : public MotorController::HardwareInterface
-                              , public hardware::can::CanGatewayTxRxDevice
+                              , public hardware::can_gateway::CanGatewayTxRxDevice
 {
 public:
   MotorControllerHardware(
     const std::string& name, const std::uint8_t can_id, std::shared_ptr<Communicator> communicator)
     : MotorController::HardwareInterface(name, 1)
-    , hardware::can::CanGatewayTxRxDevice(communicator)
+    , hardware::can_gateway::CanGatewayTxRxDevice(communicator)
     , _can_id(can_id)
     , _measured_rpm(1, 0.0)
   { }

@@ -5,18 +5,18 @@
  */
 #pragma once
 
-#include "edu_robot/hardware/can/can_gateway_device_interfaces.hpp"
-#include "edu_robot/hardware/can/can_request.hpp"
+#include "edu_robot/hardware/can_gateway/can_gateway_device_interfaces.hpp"
+#include "edu_robot/hardware/can_gateway/can/can_request.hpp"
 
 #include <edu_robot/sensor_point_cloud.hpp>
 
 namespace eduart {
 namespace robot {
 namespace hardware {
-namespace can {
+namespace can_gateway {
 
-class SensorPointCloudHardware : public SensorPointCloud::SensorInterface
-                               , public CanGatewayTxRxDevice
+class SensorTofHardware : public SensorPointCloud::SensorInterface
+                        , public CanGatewayTxRxDevice
 {
 public:
   struct Parameter {
@@ -35,12 +35,13 @@ public:
       std::uint32_t measurement = 0x309;
     } can_id;
     std::uint8_t sensor_id = 1;
+    bool trigger_measurement = true;
   };
 
-  SensorPointCloudHardware(
+  SensorTofHardware(
     const std::string& name, const Parameter& parameter, rclcpp::Node& ros_node,
     std::shared_ptr<Communicator> communicator);
-  ~SensorPointCloudHardware() override = default;
+  ~SensorTofHardware() override = default;
 
   void processRxData(const message::RxMessageDataBuffer& data) override;
   void initialize(const SensorPointCloud::Parameter& parameter) override;
@@ -65,7 +66,7 @@ private:
   } _processing_data;
 };                              
 
-} // end namespace can
+} // end namespace can_gateway
 } // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

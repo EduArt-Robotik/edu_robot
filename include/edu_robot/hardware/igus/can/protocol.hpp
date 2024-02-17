@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include <edu_robot/hardware/can/message.hpp>
+#include <edu_robot/hardware/can_gateway/can/message.hpp>
 
 namespace eduart {
 namespace robot {
@@ -14,7 +14,7 @@ namespace igus {
 namespace can {
 namespace message {
 
-using hardware::can::message::Byte;
+using hardware::can_gateway::can::message::Byte;
 
 struct PROTOCOL {
   struct BUFFER {

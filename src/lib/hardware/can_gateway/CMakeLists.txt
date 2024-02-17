@@ -2,7 +2,7 @@
 add_library(eduart-hardware-can
   can_communication_device.cpp
   can_gateway_shield.cpp
-  sensor_point_cloud_hardware.cpp
+  sensor_tof_hardware.cpp
   hardware_component_factory.cpp
   motor_controller_hardware.cpp
   imu_sensor_hardware.cpp

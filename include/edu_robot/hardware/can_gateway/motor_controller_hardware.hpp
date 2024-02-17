@@ -7,7 +7,7 @@
 
 #include <edu_robot/motor_controller.hpp>
 
-#include "edu_robot/hardware/can/can_gateway_device_interfaces.hpp"
+#include "edu_robot/hardware/can_gateway/can_gateway_device_interfaces.hpp"
 #include "edu_robot/rpm.hpp"
 
 #include <memory>
@@ -15,7 +15,7 @@
 namespace eduart {
 namespace robot {
 namespace hardware {
-namespace can {
+namespace can_gateway {
 
 class MotorControllerHardware : public MotorController::HardwareInterface
                               , public CanGatewayTxRxDevice
@@ -50,7 +50,7 @@ private:
   std::vector<Rpm> _measured_rpm;
 };
 
-} // end namespace can
+} // end namespace can_gateway
 } // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

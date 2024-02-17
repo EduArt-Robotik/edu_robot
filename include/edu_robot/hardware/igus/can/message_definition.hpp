@@ -17,9 +17,9 @@ namespace igus {
 namespace can {
 namespace message {
 
-using hardware::can::message::RxMessageDataBuffer;
-using hardware::can::message::element::Uint8;
-using hardware::can::message::element::Command;
+using hardware::can_gateway::can::message::RxMessageDataBuffer;
+using hardware::can_gateway::can::message::element::Uint8;
+using hardware::can_gateway::can::message::element::Command;
 using hardware::igus::can::message::element::VelocityCanAddress;
 using hardware::igus::can::message::element::CommandCanAddress;
 

@@ -1,7 +1,7 @@
-#include "edu_robot/hardware/can/motor_controller_hardware.hpp"
-#include "edu_robot/hardware/can/message_definition.hpp"
-#include "edu_robot/hardware/can/can_request.hpp"
-#include "edu_robot/hardware/can/can_rx_data_endpoint.hpp"
+#include "edu_robot/hardware/can_gateway/motor_controller_hardware.hpp"
+#include "edu_robot/hardware/can_gateway/can/message_definition.hpp"
+#include "edu_robot/hardware/can_gateway/can/can_request.hpp"
+#include "edu_robot/hardware/can_gateway/can/can_rx_data_endpoint.hpp"
 
 #include <edu_robot/component_error.hpp>
 #include <edu_robot/rpm.hpp>
@@ -15,28 +15,31 @@
 namespace eduart {
 namespace robot {
 namespace hardware {
-namespace can {
+namespace can_gateway {
 
 using namespace std::chrono_literals;
 
-using message::motor_controller::Enable;
-using message::motor_controller::Disable;
-using message::motor_controller::SetTimeout;
-using message::motor_controller::SetInvertedEncoder;
-using message::motor_controller::SetPwm;
-using message::motor_controller::SetRpm;
-using message::motor_controller::SetOpenLoop;
-using message::motor_controller::SetClosedLoop;
-using message::motor_controller::SetFrequency;
-using message::motor_controller::SetCtlKp;
-using message::motor_controller::SetCtlKi;
-using message::motor_controller::SetCtlKd;
-using message::motor_controller::SetCtlAntiWindUp;
-using message::motor_controller::SetCtlInputFilter;
-using message::motor_controller::SetGearRatio;
-using message::motor_controller::SetTicksPerRevision;
-using message::motor_controller::SetRpmMax;
-using message::motor_controller::Response;
+using can::Request;
+using can::CanRxDataEndPoint;
+
+using can::message::motor_controller::Enable;
+using can::message::motor_controller::Disable;
+using can::message::motor_controller::SetTimeout;
+using can::message::motor_controller::SetInvertedEncoder;
+using can::message::motor_controller::SetPwm;
+using can::message::motor_controller::SetRpm;
+using can::message::motor_controller::SetOpenLoop;
+using can::message::motor_controller::SetClosedLoop;
+using can::message::motor_controller::SetFrequency;
+using can::message::motor_controller::SetCtlKp;
+using can::message::motor_controller::SetCtlKi;
+using can::message::motor_controller::SetCtlKd;
+using can::message::motor_controller::SetCtlAntiWindUp;
+using can::message::motor_controller::SetCtlInputFilter;
+using can::message::motor_controller::SetGearRatio;
+using can::message::motor_controller::SetTicksPerRevision;
+using can::message::motor_controller::SetRpmMax;
+using can::message::motor_controller::Response;
 
 MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
   const std::string& name, const Parameter& default_parameter, rclcpp::Node& ros_node)
@@ -226,7 +229,7 @@ void MotorControllerHardware::disable()
   auto got = future_response.get();  
 }
 
-} // end namespace can
+} // end namespace can_gateway
 } // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

@@ -5,8 +5,6 @@
  */
 #pragma once
 
-#include "edu_robot/hardware/can/message.hpp"
-
 #include <edu_robot/state.hpp>
 #include <edu_robot/hardware_error.hpp>
 
@@ -19,6 +17,7 @@
 namespace eduart {
 namespace robot {
 namespace hardware {
+namespace can_gateway {
 namespace can {
 
 class Request : public hardware::Request
@@ -52,6 +51,7 @@ private:
 };
 
 } // end namespace can
+} // end namespace can_gateway
 } // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

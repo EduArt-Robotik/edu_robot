@@ -1,20 +1,21 @@
-#include "edu_robot/hardware/can/sensor_point_cloud_hardware.hpp"
-#include "edu_robot/hardware/can/message_definition.hpp"
-#include "edu_robot/hardware/can/can_rx_data_endpoint.hpp"
+#include "edu_robot/hardware/can_gateway/sensor_tof_hardware.hpp"
+#include "edu_robot/hardware/can_gateway/can/message_definition.hpp"
+#include "edu_robot/hardware/can_gateway/can/can_rx_data_endpoint.hpp"
 
 
 namespace eduart {
 namespace robot {
 namespace hardware {
-namespace can {
+namespace can_gateway {
 
 using can::CanRxDataEndPoint;
+using can::Request;
 using can::message::sensor::tof::StartMeasurement;
 using can::message::sensor::tof::MeasurementComplete;
 using can::message::sensor::tof::ZoneMeasurement;
 
 static std::shared_ptr<sensor_msgs::msg::PointCloud2> create_point_cloud(
-  const SensorPointCloudHardware::Parameter& parameter)
+  const SensorTofHardware::Parameter& parameter)
 {
   // Preparing Point Cloud
   auto point_cloud = std::make_shared<sensor_msgs::msg::PointCloud2>();
@@ -48,10 +49,10 @@ static std::shared_ptr<sensor_msgs::msg::PointCloud2> create_point_cloud(
   return point_cloud;
 }
 
-SensorPointCloudHardware::Parameter
-SensorPointCloudHardware::get_parameter(const std::string& name, const Parameter& default_parameter, rclcpp::Node& ros_node)
+SensorTofHardware::Parameter
+SensorTofHardware::get_parameter(const std::string& name, const Parameter& default_parameter, rclcpp::Node& ros_node)
 {
-  SensorPointCloudHardware::Parameter parameter;
+  SensorTofHardware::Parameter parameter;
 
   ros_node.declare_parameter<int>(name + ".can_id.trigger", default_parameter.can_id.trigger);
   ros_node.declare_parameter<int>(name + ".can_id.complete", default_parameter.can_id.complete);
@@ -83,7 +84,7 @@ SensorPointCloudHardware::get_parameter(const std::string& name, const Parameter
   return parameter;
 }
 
-SensorPointCloudHardware::SensorPointCloudHardware(
+SensorTofHardware::SensorTofHardware(
   const std::string& name, const Parameter& parameter, rclcpp::Node& ros_node, std::shared_ptr<Communicator> communicator)
   : SensorPointCloud::SensorInterface()
   , CanGatewayTxRxDevice(communicator)
@@ -93,11 +94,11 @@ SensorPointCloudHardware::SensorPointCloudHardware(
   (void)name;
   auto measurement_end_point = CanRxDataEndPoint::make_data_endpoint<ZoneMeasurement>(
     _parameter.can_id.measurement,
-    std::bind(&SensorPointCloudHardware::processRxData, this, std::placeholders::_1));
+    std::bind(&SensorTofHardware::processRxData, this, std::placeholders::_1));
   _communicator->registerRxDataEndpoint(std::move(measurement_end_point));
 }
 
-void SensorPointCloudHardware::processRxData(const message::RxMessageDataBuffer& data)
+void SensorTofHardware::processRxData(const message::RxMessageDataBuffer& data)
 {
   if (_callback_process_measurement == nullptr) {
     return;
@@ -143,7 +144,7 @@ void SensorPointCloudHardware::processRxData(const message::RxMessageDataBuffer&
   }
 }
 
-void SensorPointCloudHardware::initialize(const SensorPointCloud::Parameter& parameter)
+void SensorTofHardware::initialize(const SensorPointCloud::Parameter& parameter)
 {
   (void)parameter;
 
@@ -172,12 +173,14 @@ void SensorPointCloudHardware::initialize(const SensorPointCloud::Parameter& par
   _processing_data.point_cloud = create_point_cloud(_parameter);
   _processing_data.frame_number = 0;
 
-  _timer_get_measurement = _ros_node.create_wall_timer(
-    _parameter.measurement_interval, std::bind(&SensorPointCloudHardware::processMeasurement, this)
-  );
+  if (_parameter.trigger_measurement) {
+    _timer_get_measurement = _ros_node.create_wall_timer(
+      _parameter.measurement_interval, std::bind(&SensorTofHardware::processMeasurement, this)
+    );
+  }
 }
 
-void SensorPointCloudHardware::processMeasurement()
+void SensorTofHardware::processMeasurement()
 {
   try {
     // Get measurement data from can gateway and parse it to processing pipeline.
@@ -191,13 +194,13 @@ void SensorPointCloudHardware::processMeasurement()
   }
   catch (std::exception& ex) {
     RCLCPP_ERROR(
-      rclcpp::get_logger("SensorPointCloudHardware"),
+      rclcpp::get_logger("SensorTofHardware"),
       "error occurred during processing measurement. what = %s.", ex.what()
     );
   }
 }
 
-} // end namespace can
+} // end namespace can_gateway
 } // end namespace hardware
 } // end namespace eduart
 } // end namespace robot
