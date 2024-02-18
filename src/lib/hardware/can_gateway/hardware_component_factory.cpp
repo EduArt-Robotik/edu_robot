@@ -48,6 +48,16 @@ HardwareComponentFactory& HardwareComponentFactory::addTofSensor(
   return *this;
 }
 
+HardwareComponentFactory& HardwareComponentFactory::addTofRingSensor(
+  const std::string& sensor_name, const SensorTofRingHardware::Parameter& parameter, rclcpp::Node& ros_node)
+{
+  _hardware[sensor_name] = std::make_shared<SensorTofRingHardware>(
+    sensor_name, parameter, ros_node, _shield->getCommunicator(1)
+  );
+
+  return *this;
+}
+
 HardwareComponentFactory& HardwareComponentFactory::addImuSensor(
   const std::string& sensor_name, const std::uint32_t can_id, rclcpp::Node& ros_node)
 {

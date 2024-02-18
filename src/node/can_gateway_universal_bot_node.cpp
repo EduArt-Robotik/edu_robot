@@ -14,6 +14,7 @@
 using eduart::robot::hardware::can_gateway::CanGatewayShield;
 using eduart::robot::hardware::can_gateway::HardwareComponentFactory;
 using eduart::robot::hardware::can_gateway::SensorTofHardware;
+using eduart::robot::hardware::can_gateway::SensorTofRingHardware;
 
 class CanGatewayUniversalBot : public eduart::robot::universal_bot::UniversalBot
 {
@@ -43,10 +44,16 @@ public:
     factory.addImuSensor("imu", 0x381, *this);
 
     // Pointcloud Sensor
-    auto point_cloud_parameter = SensorTofHardware::get_parameter(
-      "pointcloud_left", {}, *this
+    // auto point_cloud_parameter = SensorTofHardware::get_parameter(
+    //   "pointcloud_left", {}, *this
+    // );
+    // factory.addTofSensor("pointcloud_left", point_cloud_parameter, *this);
+    auto point_cloud_parameter = SensorTofRingHardware::get_parameter(
+      "pointcloud_left",
+      {"pointcloud_left_a", "pointcloud_left_b"},
+      *this
     );
-    factory.addTofSensor("pointcloud_left", point_cloud_parameter, *this);
+    factory.addTofRingSensor("pointcloud_left", point_cloud_parameter, *this);
 
     // Initialize
     initialize(factory);

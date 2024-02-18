@@ -29,11 +29,6 @@ public:
       Angle horizontal = Angle::createFromDegree(45);
     } fov;
     std::chrono::milliseconds measurement_interval{100};    
-    struct {
-      std::uint32_t trigger = 0x388;
-      std::uint32_t complete = 0x308;
-      std::uint32_t measurement = 0x309;
-    } can_id;
     std::uint8_t sensor_id = 1;
     bool trigger_measurement = true;
   };
@@ -55,6 +50,12 @@ private:
   rclcpp::Node& _ros_node;
 
   struct {
+    std::uint32_t trigger = 0x388;
+    std::uint32_t complete = 0x308;
+    std::uint32_t measurement = 0x309;
+  } _can_id;   
+
+  struct { 
     std::size_t number_of_zones;
     std::size_t current_zone;
     std::size_t next_expected_zone;

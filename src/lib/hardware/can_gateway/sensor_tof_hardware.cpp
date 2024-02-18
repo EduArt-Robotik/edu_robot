@@ -54,9 +54,9 @@ SensorTofHardware::get_parameter(const std::string& name, const Parameter& defau
 {
   SensorTofHardware::Parameter parameter;
 
-  ros_node.declare_parameter<int>(name + ".can_id.trigger", default_parameter.can_id.trigger);
-  ros_node.declare_parameter<int>(name + ".can_id.complete", default_parameter.can_id.complete);
-  ros_node.declare_parameter<int>(name + ".can_id.measurement", default_parameter.can_id.measurement);
+  // ros_node.declare_parameter<int>(name + ".can_id.trigger", default_parameter.can_id.trigger);
+  // ros_node.declare_parameter<int>(name + ".can_id.complete", default_parameter.can_id.complete);
+  // ros_node.declare_parameter<int>(name + ".can_id.measurement", default_parameter.can_id.measurement);
   ros_node.declare_parameter<int>(name + ".sensor_id", default_parameter.sensor_id);
 
   ros_node.declare_parameter<int>(
@@ -68,9 +68,9 @@ SensorTofHardware::get_parameter(const std::string& name, const Parameter& defau
   ros_node.declare_parameter<int>(
     name + ".measurement_interval_ms", default_parameter.measurement_interval.count());
 
-  parameter.can_id.trigger = ros_node.get_parameter(name + ".can_id.trigger").as_int();
-  parameter.can_id.complete = ros_node.get_parameter(name + ".can_id.complete").as_int();
-  parameter.can_id.measurement = ros_node.get_parameter(name + ".can_id.measurement").as_int();
+  // parameter.can_id.trigger = ros_node.get_parameter(name + ".can_id.trigger").as_int();
+  // parameter.can_id.complete = ros_node.get_parameter(name + ".can_id.complete").as_int();
+  // parameter.can_id.measurement = ros_node.get_parameter(name + ".can_id.measurement").as_int();
   parameter.sensor_id = ros_node.get_parameter(name + ".sensor_id").as_int();
 
   parameter.number_of_zones.vertical = ros_node.get_parameter(name + ".number_of_zones.vertical").as_int();
@@ -92,8 +92,11 @@ SensorTofHardware::SensorTofHardware(
   , _ros_node(ros_node)
 {
   (void)name;
+
+  _can_id.measurement = 0x308 + _parameter.sensor_id;
+
   auto measurement_end_point = CanRxDataEndPoint::make_data_endpoint<ZoneMeasurement>(
-    _parameter.can_id.measurement,
+    _can_id.measurement,
     std::bind(&SensorTofHardware::processRxData, this, std::placeholders::_1));
   _communicator->registerRxDataEndpoint(std::move(measurement_end_point));
 }
@@ -186,7 +189,7 @@ void SensorTofHardware::processMeasurement()
   try {
     // Get measurement data from can gateway and parse it to processing pipeline.
     auto request = Request::make_request<StartMeasurement>(
-      _parameter.can_id.trigger, _processing_data.frame_number, _parameter.sensor_id
+      _can_id.trigger, _processing_data.frame_number, _parameter.sensor_id
     );
 
     _processing_data.future_response = _communicator->sendRequest(std::move(request));
@@ -195,7 +198,8 @@ void SensorTofHardware::processMeasurement()
 
     _processing_data.point_cloud->header.stamp = _ros_node.get_clock()->now();
     _processing_data.frame_number++;
-
+    _processing_data.current_zone = 0;
+    _processing_data.next_expected_zone = 0;
   }
   catch (std::exception& ex) {
     RCLCPP_ERROR(

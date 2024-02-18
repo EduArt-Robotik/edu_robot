@@ -8,6 +8,7 @@
 #include <edu_robot/hardware_component_factory.hpp>
 
 #include "edu_robot/hardware/can_gateway/sensor_tof_hardware.hpp"
+#include "edu_robot/hardware/can_gateway/sensor_tof_ring_hardware.hpp"
 
 #include <cstdint>
 #include <memory>
@@ -35,6 +36,8 @@ public:
     const std::string& sensor_name, const std::uint32_t can_id, rclcpp::Node& ros_node);
   HardwareComponentFactory& addTofSensor(
     const std::string& sensor_name, const SensorTofHardware::Parameter& parameter, rclcpp::Node& ros_node);
+  HardwareComponentFactory& addTofRingSensor(
+    const std::string& sensor_name, const SensorTofRingHardware::Parameter& parameter, rclcpp::Node& ros_node);
 
 protected:
   std::shared_ptr<CanGatewayShield> _shield;

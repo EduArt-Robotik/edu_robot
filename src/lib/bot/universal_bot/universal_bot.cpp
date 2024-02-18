@@ -42,6 +42,19 @@ static UniversalBot::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
     parameter.axis[i].wheel_diameter = ros_node.get_parameter(prefix + ".skid.wheel_diameter").as_double();
   }
 
+  // Requesting Number of Pointcloud Sensors
+  ros_node.declare_parameter<int>("point_cloud_sensor.number_of", parameter.number_of_point_cloud_sensors());
+  parameter.point_cloud_sensor.resize(ros_node.get_parameter("point_cloud_sensor.number_of").as_int());
+
+  for (std::size_t i = 0; i < parameter.number_of_point_cloud_sensors(); ++i) {
+    // Declaring of Parameters
+    const std::string prefix = std::string("point_cloud_sensor_") + std::to_string(i);
+    ros_node.declare_parameter<std::string>(prefix + ".name", prefix);
+
+    parameter.point_cloud_sensor[i].name = ros_node.get_parameter(prefix + ".name").as_string();
+    parameter.point_cloud_sensor[i].transform = Sensor::get_transform_from_parameter(prefix, ros_node);
+  }
+
   return parameter;
 }
 
