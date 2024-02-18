@@ -87,6 +87,9 @@ struct ZoneMeasurement : public MessageFrame<> // use empty message frame as bas
   inline static float sigma(const RxMessageDataBuffer& rx_buffer, const std::size_t index) {
     return Measurement::sigma(selectDataElement(rx_buffer, index));
   }
+  inline static std::size_t elements(const RxMessageDataBuffer& rx_buffer) {
+    return (rx_buffer.size() - element::CanAddress::size()) / Measurement::size();
+  }
 
 private:
   static std::array<RxMessageDataBuffer::value_type, Measurement::size()> selectDataElement(

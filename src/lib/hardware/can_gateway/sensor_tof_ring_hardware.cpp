@@ -107,6 +107,7 @@ void SensorTofRingHardware::initialize(const SensorPointCloud::Parameter& parame
   _processing_data.next_expected_sensor = _parameter.number_sensors() == 1 ? 0 : 1;
   _processing_data.frame_number = 0;
   _processing_data.point_cloud = create_point_cloud(_parameter);
+  _processing_data.current_data_address = _processing_data.point_cloud->data.data();
 
   _timer_get_measurement = _ros_node.create_wall_timer(
     _parameter.measurement_interval, std::bind(&SensorTofRingHardware::processStartMeasurement, this)
@@ -121,11 +122,15 @@ void SensorTofRingHardware::processStartMeasurement()
       _parameter.can_id_trigger, _processing_data.frame_number, _processing_data.sensor_activation_bits
     );
 
-    _processing_data.point_cloud->header.stamp = _ros_node.get_clock()->now();
     auto future_response = _communicator->sendRequest(std::move(request));
     wait_for_future(future_response, 100ms);
     auto got = future_response.get();
+
+    _processing_data.point_cloud->header.stamp = _ros_node.get_clock()->now();
     _processing_data.frame_number++;
+    _processing_data.current_data_address = _processing_data.point_cloud->data.data();
+    _processing_data.current_sensor = 0;
+    _processing_data.next_expected_sensor = 0;
   }
   catch (std::exception& ex) {
     RCLCPP_ERROR(
@@ -138,13 +143,37 @@ void SensorTofRingHardware::processStartMeasurement()
 void SensorTofRingHardware::processPointcloudMeasurement(
   sensor_msgs::msg::PointCloud2& point_cloud, const std::size_t sensor_index)
 {
+  // Note: expect the given point cloud is of exact same type as sensor point cloud.
+
+  // Plausibility Check
+  if (sensor_index != _processing_data.next_expected_sensor) {
+    RCLCPP_ERROR(
+      rclcpp::get_logger("SensorTofRingHardware"),
+      "sensor_index %u is not the expected one (%u). The point cloud will contain corrupted data.",
+      static_cast<unsigned int>(sensor_index),
+      static_cast<unsigned int>(_processing_data.next_expected_sensor)
+    );
+  }
+
+  // Transform given point cloud into sensor frame.
   geometry_msgs::msg::TransformStamped transform;
   transform.transform = tf2::toMsg(_parameter.tof_sensor[sensor_index].transform);
   sensor_msgs::msg::PointCloud2 point_cloud_transformed;
   tf2::doTransform(point_cloud, point_cloud_transformed, transform);
 
-  const auto start_address = _processing_data.point_cloud->data.begin() + sensor_index * point_cloud_transformed.data.size();
+  // Copy given point cloud into sensor point cloud.
+  std::memcpy(_processing_data.current_data_address, point_cloud.data.data(), point_cloud.data.size());
 
+  // Prepare next iteration if measurement not finished.
+  if (sensor_index + 1 < _parameter.number_sensors()) {
+    // Measurement not completed yet.
+    _processing_data.current_sensor = sensor_index;
+    _processing_data.next_expected_sensor = sensor_index + 1;
+    _processing_data.current_data_address += point_cloud.data.size();
+    return;
+  }
+
+  // Measurement finished --> publish point cloud.
   _callback_process_measurement(*_processing_data.point_cloud);
 }
 

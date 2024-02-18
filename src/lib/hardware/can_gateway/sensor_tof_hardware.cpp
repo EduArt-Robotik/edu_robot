@@ -103,8 +103,11 @@ void SensorTofHardware::processRxData(const message::RxMessageDataBuffer& data)
   if (_callback_process_measurement == nullptr) {
     return;
   }
-
-  for (std::size_t element = 0; element < 2; ++element) {
+  RCLCPP_INFO(
+    rclcpp::get_logger("SensorPointCloud"), "data contains %u elements.",
+    static_cast<unsigned int>(ZoneMeasurement::elements(data))
+  );
+  for (std::size_t element = 0; element < ZoneMeasurement::elements(data); ++element) {
     const std::size_t zone_index = ZoneMeasurement::zone(data, element);
     const auto distance = ZoneMeasurement::distance(data, element);
     const auto sigma = ZoneMeasurement::sigma(data, element);
@@ -112,7 +115,7 @@ void SensorTofHardware::processRxData(const message::RxMessageDataBuffer& data)
     if (zone_index != _processing_data.next_expected_zone) {
       RCLCPP_WARN(
         rclcpp::get_logger("SensorPointCloud"),
-        "zone_index %u is not expected one %u.",
+        "zone_index %u is not expected the one (%u). The point cloud will contain corrupted data.",
         static_cast<unsigned int>(zone_index),
         static_cast<unsigned int>(_processing_data.next_expected_zone)
       );
@@ -138,8 +141,6 @@ void SensorTofHardware::processRxData(const message::RxMessageDataBuffer& data)
     }
 
     // measurement finished --> publish point cloud
-    _processing_data.next_expected_zone = 0;
-
     _callback_process_measurement(*point_cloud);
   }
 }
@@ -152,6 +153,8 @@ void SensorTofHardware::initialize(const SensorPointCloud::Parameter& parameter)
   _processing_data.number_of_zones = _parameter.number_of_zones.horizontal * _parameter.number_of_zones.vertical;
   _processing_data.current_zone = 0;
   _processing_data.next_expected_zone = 0;
+  _processing_data.point_cloud = create_point_cloud(_parameter);
+  _processing_data.frame_number = 0;  
   _processing_data.tan_x_lookup.resize(_processing_data.number_of_zones);
   _processing_data.tan_y_lookup.resize(_processing_data.number_of_zones);
 
@@ -170,8 +173,6 @@ void SensorTofHardware::initialize(const SensorPointCloud::Parameter& parameter)
       _processing_data.tan_y_lookup[idx_zone] = std::tan(idx_beam_y * alpha_increment_vertical);
     }
   }
-  _processing_data.point_cloud = create_point_cloud(_parameter);
-  _processing_data.frame_number = 0;
 
   if (_parameter.trigger_measurement) {
     _timer_get_measurement = _ros_node.create_wall_timer(
@@ -188,9 +189,13 @@ void SensorTofHardware::processMeasurement()
       _parameter.can_id.trigger, _processing_data.frame_number, _parameter.sensor_id
     );
 
-    _processing_data.point_cloud->header.stamp = _ros_node.get_clock()->now();
     _processing_data.future_response = _communicator->sendRequest(std::move(request));
+    wait_for_future(_processing_data.future_response, 100ms);
+    auto got = _processing_data.future_response.get();
+
+    _processing_data.point_cloud->header.stamp = _ros_node.get_clock()->now();
     _processing_data.frame_number++;
+
   }
   catch (std::exception& ex) {
     RCLCPP_ERROR(
