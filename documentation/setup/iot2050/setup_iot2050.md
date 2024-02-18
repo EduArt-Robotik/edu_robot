@@ -171,7 +171,14 @@ Now define the variable. Here in this example 'eduard/blue' was chosen. This nam
 EDU_ROBOT_NAMESPACE=eduard/blue
 ```
 
+**For nano beginners:** to leave nano press *Strg+x* followed by *y* followed by *Return*.
+
 You have to log out and log in again for the setting to take effect.
+
+```bash
+sudo reboot
+```
+
 
 ### Get Control Software and Launch it
 
