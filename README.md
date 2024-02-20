@@ -54,6 +54,10 @@ Setup your System native and in Virtual machine.
 
 > **Note**: will be updated soon
 
+### Applications
+
+* [SLAM and Nav2](documentation/nav2/setup_nav2.md)
+
 # Controlling the Robot
 
 ## Controller
