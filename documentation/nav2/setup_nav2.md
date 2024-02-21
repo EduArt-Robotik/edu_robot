@@ -71,3 +71,39 @@ EDU_ROBOT_NAMESPACE=eduard ros2 launch navigation.launch.py
 ```
 
 > **Note**: adapt the edu robot namespace "eduard" to the one used by your robot.
+
+## Controlling and Visualizing Map and Navigation
+
+An Rviz configuration is provided for controlling the navigation. This can be found in the [edu_robot_control](https://github.com/EduArt-Robotik/edu_robot_control) package
+
+### Native ROS2 Installation
+
+If ROS is natively installed the "edu_robot_control" package can be installed into an ROS workspace. As first step clone the package into the workspace by:
+
+```bash
+git clone https://github.com/EduArt-Robotik/edu_robot_control.git
+```
+
+Please make sure the package will be cloned into the "src" folder in the workspace. If no knowledge about ROS is present please see [docs.ros.org](https://docs.ros.org/en/galactic/Tutorials/Beginner-Client-Libraries/Creating-A-Workspace/Creating-A-Workspace.html) for further information. 
+
+After the package was cloned it needs to be installed. First leave the "src" folder:
+
+```bash
+cd ..
+```
+
+Then build it by:
+
+```bash
+colcon build --packages-select edu_robot_control --symlink-install
+```
+
+### Launching RViz
+
+The edu robot namespace can be set by using an environment variable. Either set it via the system or define it in front of the ros command:
+
+```bash
+EDU_ROBOT_NAMESPACE=eduard/red ros2 launch edu_robot_control eduard_monitor.launch.py
+```
+
+After RViz is launched the costmap should be displayed after a short while. Now a goal can be set by using the **2D Goal Pose** tool in RViz. A green path should be displayed if the goal is reachable. The robot will follow the path when it is switched into the mode **autonomous**. This can be done by pressing the **L2** button on the PS5 controller. The robot indicates this mode by flashing white LEDs.
