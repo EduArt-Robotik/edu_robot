@@ -80,7 +80,7 @@ public:
     _running = false;
     _executer.join();
   }
-  
+
   /**
    * \brief Creates an data endpoint that processes incoming data from the ethernet gateway.
    * \param callback The callback function that is been called when the message search pattern matches.
@@ -88,10 +88,12 @@ public:
    * \return Return an data endpoint ready to use by the ethernet communicator.
    */
   template <class Message>
-  inline static RxDataEndPoint make_data_endpoint(const CallbackProcessData& callback) {
+  inline static RxDataEndPoint make_data_endpoint(
+    const CallbackProcessData& callback, std::shared_ptr<CommunicatorRxDevice> data_receiver)
+  {
     const auto search_pattern = Message::makeSearchPattern();
     std::vector<message::Byte> search_pattern_vector(search_pattern.begin(), search_pattern.end());
-    return RxDataEndPoint(search_pattern_vector, callback);
+    return RxDataEndPoint(search_pattern_vector, callback, data_receiver);
   }
 
   inline void call(message::RxMessageDataBuffer&& data) {
@@ -108,9 +110,11 @@ public:
 protected:
   RxDataEndPoint(
     std::vector<message::Byte>& search_pattern,
-    const std::function<void(const message::RxMessageDataBuffer&)>& callback_process_data)
+    const std::function<void(const message::RxMessageDataBuffer&)>& callback_process_data,
+    std::shared_ptr<CommunicatorRxDevice> data_receiver)
     : _response_search_pattern(std::move(search_pattern))
     , _callback_process_data(callback_process_data)
+    , _data_receiver(data_receiver)
   {
     _executer = std::thread(&RxDataEndPoint::processDataJob, this);
   }

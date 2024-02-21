@@ -26,6 +26,8 @@ class MotorControllerHardware;
 
 class CanGatewayShield : public HardwareRobotInterface
                        , public processing::ProcessingComponentOutput<float>
+                       , public CommunicatorRxDevice
+                       , public std::enable_shared_from_this<CanGatewayShield>
 {
 public:
   CanGatewayShield(char const* const can_device);
@@ -45,6 +47,8 @@ public:
   void registerMotorControllerHardware(std::shared_ptr<MotorControllerHardware> motor_controller_hardware);
 
 private:
+  void processRxData(const message::RxMessageDataBuffer&) override { } 
+
   diagnostic::Diagnostic processDiagnosticsImpl() override;
   void processPowerManagementBoardResponse(const message::RxMessageDataBuffer &data);
   void processCanGatewayShieldResponse(const message::RxMessageDataBuffer &data);
