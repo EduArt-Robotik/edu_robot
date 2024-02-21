@@ -16,7 +16,7 @@ using udp::message::AcknowledgedDistanceMeasurement;
 
 RangeSensorHardware::RangeSensorHardware(
   const std::uint8_t id, rclcpp::Node& ros_node, std::shared_ptr<Communicator> communicator)
-  : EthernetGatewayTxRxDevice(communicator)
+  : CommunicatorTxRxDevice(communicator)
   , _id(id)
   , _timer_get_measurement(
       ros_node.create_wall_timer(100ms, std::bind(&RangeSensorHardware::processMeasurement, this))

@@ -7,7 +7,7 @@
 
 #include <edu_robot/motor_controller.hpp>
 
-#include "edu_robot/hardware/ethernet_gateway/ethernet_gateway_device_interfaces.hpp"
+#include "edu_robot/hardware/communicator_device_interfaces.hpp"
 #include "edu_robot/rpm.hpp"
 
 #include <memory>
@@ -19,13 +19,13 @@ namespace ethernet {
 
 template <std::size_t NUM_CHANNELS>
 class MotorControllerHardware : public MotorController::HardwareInterface
-                              , public EthernetGatewayTxRxDevice
+                              , public CommunicatorTxRxDevice
 {
 public:
   MotorControllerHardware(
     const std::string& name, const std::uint8_t can_id, std::shared_ptr<Communicator> communicator)
     : MotorController::HardwareInterface(name, NUM_CHANNELS)
-    , EthernetGatewayTxRxDevice(communicator)
+    , CommunicatorTxRxDevice(communicator)
     , _can_id(can_id)
     , _measured_rpm(NUM_CHANNELS, 0.0)
   { }

@@ -79,7 +79,7 @@ SensorTofRingHardware::Parameter SensorTofRingHardware::get_parameter(
 SensorTofRingHardware::SensorTofRingHardware(
   const std::string& name, const Parameter& parameter, rclcpp::Node& ros_node,
   std::shared_ptr<Communicator> communicator)
-  : CanGatewayTxDevice(communicator)
+  : CommunicatorTxDevice(communicator)
   , _parameter(parameter)
   , _ros_node(ros_node)
 {
@@ -134,8 +134,8 @@ void SensorTofRingHardware::processStartMeasurement()
   }
   catch (std::exception& ex) {
     RCLCPP_ERROR(
-      rclcpp::get_logger("SensorTofHardware"),
-      "error occurred during processing measurement. what = %s.", ex.what()
+      rclcpp::get_logger("SensorTofRingHardware"),
+      "error occurred during start measurement. what = %s.", ex.what()
     );
   }
 }

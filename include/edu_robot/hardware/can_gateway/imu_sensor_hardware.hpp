@@ -7,7 +7,7 @@
 
 #include <edu_robot/sensor_imu.hpp>
 
-#include "edu_robot/hardware/can_gateway/can_gateway_device_interfaces.hpp"
+#include "edu_robot/hardware/communicator_device_interfaces.hpp"
 
 namespace eduart {
 namespace robot {
@@ -15,7 +15,7 @@ namespace hardware {
 namespace can_gateway {
 
 class ImuSensorHardware : public SensorImu::SensorInterface
-                        , public CanGatewayTxRxDevice
+                        , public CommunicatorTxRxDevice
 {
 public:
   ImuSensorHardware(rclcpp::Node& ros_node, const std::uint32_t can_id, std::shared_ptr<Communicator> communicator);

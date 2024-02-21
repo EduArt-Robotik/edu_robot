@@ -14,7 +14,7 @@ using can::CanRxDataEndPoint;
 using can::message::sensor::imu::Response;
 
 ImuSensorHardware::ImuSensorHardware(rclcpp::Node& ros_node, const std::uint32_t can_id, std::shared_ptr<Communicator> communicator)
-  : CanGatewayTxRxDevice(communicator)
+  : CommunicatorTxRxDevice(communicator)
   , _can_id(can_id)
 {
   (void)ros_node;

@@ -7,7 +7,7 @@
 
 #include <edu_robot/motor_controller.hpp>
 
-#include "edu_robot/hardware/can_gateway/can_gateway_device_interfaces.hpp"
+#include "edu_robot/hardware/communicator_device_interfaces.hpp"
 #include "edu_robot/rpm.hpp"
 
 #include <memory>
@@ -18,7 +18,7 @@ namespace hardware {
 namespace can_gateway {
 
 class MotorControllerHardware : public MotorController::HardwareInterface
-                              , public CanGatewayTxRxDevice
+                              , public CommunicatorTxRxDevice
 {
 public:
   struct Parameter {
@@ -31,7 +31,7 @@ public:
   MotorControllerHardware(
     const std::string& name, const Parameter& parameter, std::shared_ptr<Communicator> communicator)
     : MotorController::HardwareInterface(name, 2)
-    , CanGatewayTxRxDevice(communicator)
+    , CommunicatorTxRxDevice(communicator)
     , _parameter(parameter)
     , _measured_rpm(2, 0.0)
   { }

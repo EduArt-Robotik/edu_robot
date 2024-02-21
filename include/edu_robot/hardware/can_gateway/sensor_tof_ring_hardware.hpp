@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "edu_robot/hardware/can_gateway/can_gateway_device_interfaces.hpp"
+#include "edu_robot/hardware/communicator_device_interfaces.hpp"
 #include "edu_robot/hardware/can_gateway/sensor_tof_hardware.hpp"
 
 #include <edu_robot/sensor_point_cloud.hpp>
@@ -18,7 +18,7 @@ namespace hardware {
 namespace can_gateway {
 
 class SensorTofRingHardware : public SensorPointCloud::SensorInterface
-                            , public CanGatewayTxDevice
+                            , public CommunicatorTxDevice
 {
 public:
   struct Parameter {

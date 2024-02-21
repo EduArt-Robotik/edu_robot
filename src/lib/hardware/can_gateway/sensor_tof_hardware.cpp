@@ -87,7 +87,7 @@ SensorTofHardware::get_parameter(const std::string& name, const Parameter& defau
 SensorTofHardware::SensorTofHardware(
   const std::string& name, const Parameter& parameter, rclcpp::Node& ros_node, std::shared_ptr<Communicator> communicator)
   : SensorPointCloud::SensorInterface()
-  , CanGatewayTxRxDevice(communicator)
+  , CommunicatorTxRxDevice(communicator)
   , _parameter(parameter)
   , _ros_node(ros_node)
 {

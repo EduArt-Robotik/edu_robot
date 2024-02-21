@@ -126,7 +126,7 @@ message::RxMessageDataBuffer CanCommunicationDevice::receive()
       throw HardwareError(State::CAN_SOCKET_ERROR, "Can't read data from interface.");
     }
     else if (bytes != sizeof(can_frame)) {
-      throw HardwareError(State::CAN_SOCKET_ERROR, "Received frame has wrong size.");
+      throw HardwareError(State::CAN_SOCKET_ERROR, "Received can frame has wrong size.");
     }
     // else
     rx_buffer.resize(frame.len + sizeof(can_frame::can_id)); // need memory for data + address
@@ -136,13 +136,13 @@ message::RxMessageDataBuffer CanCommunicationDevice::receive()
   else if (_can_type == CanType::CAN_FD) {
     canfd_frame frame;
 
-    const auto bytes = ::recv(_socket_fd, &frame, sizeof(can_frame), 0);
+    const auto bytes = ::recv(_socket_fd, &frame, sizeof(canfd_frame), 0);
 
     if (bytes < 0) {
       throw HardwareError(State::CAN_SOCKET_ERROR, "Can't read data from interface.");
     }
     else if (bytes != sizeof(canfd_frame)) {
-      throw HardwareError(State::CAN_SOCKET_ERROR, "Received frame has wrong size.");
+      throw HardwareError(State::CAN_SOCKET_ERROR, "Received canfd frame has wrong size.");
     }
     // else
     rx_buffer.resize(frame.len + sizeof(canfd_frame::can_id)); // need memory for data + address

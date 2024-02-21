@@ -55,12 +55,12 @@ CanGatewayShield::CanGatewayShield(char const* const can_device_0, char const* c
   auto endpoint_power = CanRxDataEndPoint::make_data_endpoint<can::message::power_management::Response>(
     0x580, std::bind(&CanGatewayShield::processPowerManagementBoardResponse, this, std::placeholders::_1)
   );
-  _communicator[2]->registerRxDataEndpoint(std::move(endpoint_power));
+  _communicator[0]->registerRxDataEndpoint(std::move(endpoint_power));
 
   auto endpoint_shield = CanRxDataEndPoint::make_data_endpoint<can::message::can_gateway_shield::Response>(
     0x381, std::bind(&CanGatewayShield::processCanGatewayShieldResponse, this, std::placeholders::_1)
   );
-  _communicator[2]->registerRxDataEndpoint(std::move(endpoint_shield));
+  _communicator[0]->registerRxDataEndpoint(std::move(endpoint_shield));
 }
 
 CanGatewayShield::~CanGatewayShield()

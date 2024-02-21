@@ -7,6 +7,7 @@
 
 #include "edu_robot/hardware/message_buffer.hpp"
 #include "edu_robot/hardware/communication_device.hpp"
+#include "edu_robot/hardware/communicator_device_interfaces.hpp"
 
 #include <cstddef>
 #include <edu_robot/state.hpp>
@@ -89,6 +90,7 @@ protected:
 
   std::vector<message::Byte> _response_search_pattern;
   std::function<void(const message::RxMessageDataBuffer&)> _callback_process_data;
+  std::shared_ptr<CommunicatorRxDevice> _data_receiver;
 };
 
 template <typename Request, typename Duration>
