@@ -20,7 +20,9 @@ using hardware::can_gateway::can::CanRxDataEndPoint;
 CanGatewayShield::CanGatewayShield(char const* const can_device)
   : processing::ProcessingComponentOutput<float>("can_gateway_shield")
 {
-  _communicator[0] = std::make_shared<Communicator>(std::make_shared<CanCommunicationDevice>(can_device), 10ms);
+  _communicator[0] = std::make_shared<Communicator>(
+    std::make_shared<CanCommunicationDevice>(can_device, CanCommunicationDevice::CanType::CAN), 1ms
+  );
 
   // Configuring Diagnostic
   _clock = std::make_shared<rclcpp::Clock>();
@@ -42,8 +44,12 @@ CanGatewayShield::CanGatewayShield(char const* const can_device)
 CanGatewayShield::CanGatewayShield(char const* const can_device_0, char const* const can_device_1, char const* const can_device_2)
   : CanGatewayShield(can_device_0)
 {
-  _communicator[1] = std::make_shared<Communicator>(std::make_shared<CanCommunicationDevice>(can_device_1), 10ms);
-  _communicator[2] = std::make_shared<Communicator>(std::make_shared<CanCommunicationDevice>(can_device_2), 10ms);
+  _communicator[1] = std::make_shared<Communicator>(
+    std::make_shared<CanCommunicationDevice>(can_device_1, CanCommunicationDevice::CanType::CAN_FD), 1ms
+  );
+  _communicator[2] = std::make_shared<Communicator>(
+    std::make_shared<CanCommunicationDevice>(can_device_2, CanCommunicationDevice::CanType::CAN_FD), 1ms
+  );
 
   // Creating Data Endpoints for Measurements
   auto endpoint_power = CanRxDataEndPoint::make_data_endpoint<can::message::power_management::Response>(

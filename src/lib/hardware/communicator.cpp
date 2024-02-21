@@ -268,6 +268,17 @@ void Communicator::processReceiving()
         std::unique_lock lock(_mutex_receiving_data);
 
         if (_rx_buffer_queue.size() >= _max_rx_buffer_queue_size) {
+while (_rx_buffer_queue.empty() == false) {
+  std::stringstream debug_out;
+  debug_out << "rx_buffer: " << std::hex;
+
+  for (const auto byte : _rx_buffer_queue.front()) {
+    debug_out << static_cast<int>(byte) << " ";
+  }
+
+  _rx_buffer_queue.pop();
+  RCLCPP_INFO_STREAM(rclcpp::get_logger("Communicator"), debug_out.str());
+}
           throw ComponentError(State::FUNCTIONAL_ERROR, "Max rx buffer queue size is reached.");
         }
 

@@ -30,7 +30,7 @@ HardwareComponentFactory& HardwareComponentFactory::addMotorController(
   // \todo maybe make it configurable via ROS parameter
   MotorControllerHardware::Parameter parameter = {{can_id_input, can_id_output}};
   auto compound_motor = std::make_shared<MotorControllerHardware>(
-    controller_name, parameter, _shield->getCommunicator(2)
+    controller_name, parameter, _shield->getCommunicator(0)
   );
   _motor_controller_hardware.push_back(compound_motor);
   _shield->registerMotorControllerHardware(compound_motor);
@@ -62,7 +62,7 @@ HardwareComponentFactory& HardwareComponentFactory::addImuSensor(
   const std::string& sensor_name, const std::uint32_t can_id, rclcpp::Node& ros_node)
 {
   _hardware[sensor_name] = std::make_shared<ImuSensorHardware>(
-    ros_node, can_id, _shield->getCommunicator(2)
+    ros_node, can_id, _shield->getCommunicator(0)
   );
 
   return *this;

@@ -15,7 +15,12 @@ namespace can_gateway {
 class CanCommunicationDevice : public hardware::CommunicationDevice
 {
 public:
-  CanCommunicationDevice(char const* const device_name);
+  enum class CanType {
+    CAN,
+    CAN_FD
+  };
+
+  CanCommunicationDevice(char const* const device_name, const CanType can_type);
   ~CanCommunicationDevice() override;
 
   void send(message::Byte const *const tx_buffer, const std::size_t length) override;
@@ -23,6 +28,7 @@ public:
 
 private:
   int _socket_fd = -1;
+  const CanType _can_type;
 };
 
 } // end namespace can_gateway

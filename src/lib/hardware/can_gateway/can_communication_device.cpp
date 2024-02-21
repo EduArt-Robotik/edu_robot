@@ -20,13 +20,24 @@ namespace robot {
 namespace hardware {
 namespace can_gateway {
 
-CanCommunicationDevice::CanCommunicationDevice(char const* const device_name)
+CanCommunicationDevice::CanCommunicationDevice(char const* const device_name, const CanType can_type)
+  : _can_type(can_type)
 {
   // Creating Socket CAN Instance
   _socket_fd = ::socket(PF_CAN, SOCK_RAW, CAN_RAW);
 
   if (_socket_fd < 0) {
     throw HardwareError(State::CAN_SOCKET_ERROR, "Error occurred during opening CAN socket.");
+  }
+
+  // Enable CAN FD if needed
+  if (_can_type == CanType::CAN_FD) {
+    int option = 1;
+
+    if (setsockopt(
+      _socket_fd, SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &option, sizeof(option)) < 0) {
+      throw HardwareError(State::CAN_SOCKET_ERROR, "Can't set can device to CAN FD.");
+    }
   }
 
   // Binding CAN Interface
@@ -36,7 +47,7 @@ CanCommunicationDevice::CanCommunicationDevice(char const* const device_name)
   strcpy(ifr.ifr_name, device_name);
 
   if (::ioctl(_socket_fd, SIOCGIFINDEX, &ifr) < 0) {
-    throw HardwareError(State::CAN_SOCKET_ERROR, "Can't configure CAN socket.");
+    throw HardwareError(State::CAN_SOCKET_ERROR, "Can't get CAN socket index.");
   }
 
   addr.can_family = AF_CAN;
@@ -69,37 +80,75 @@ void CanCommunicationDevice::send(message::Byte const *const tx_buffer, const st
   RCLCPP_DEBUG_STREAM(rclcpp::get_logger("CanCommunicationDevice"), debug_out.str());
 
   // Sending Given Data
-  can_frame frame;
+  if (_can_type == CanType::CAN) {
+    can_frame frame;
 
-  frame.can_id = static_cast<int>(*reinterpret_cast<const std::uint32_t*>(&tx_buffer[0])); // first 4 bytes are the address
-  frame.can_dlc = length - 4;
+    frame.can_id = static_cast<int>(*reinterpret_cast<const std::uint32_t*>(&tx_buffer[0])); // first 4 bytes are the address
+    frame.len = length - 4;
 
-  for (std::size_t i = 4; i < length; ++i) {
-    frame.data[i - 4] = tx_buffer[i];
+    for (std::size_t i = 4; i < length; ++i) {
+      frame.data[i - 4] = tx_buffer[i];
+    }
+
+    if (::write(_socket_fd, &frame, sizeof(can_frame)) != sizeof(can_frame)) {
+      throw HardwareError(State::CAN_SOCKET_ERROR, "Can't write data to interface.");
+    }
   }
+  else if (_can_type == CanType::CAN_FD) {
+    canfd_frame frame;
 
-  if (::write(_socket_fd, &frame, sizeof(can_frame)) != sizeof(can_frame)) {
-    throw HardwareError(State::CAN_SOCKET_ERROR, "Can't write data to interface.");
+    frame.can_id = static_cast<int>(*reinterpret_cast<const std::uint32_t*>(&tx_buffer[0])); // first 4 bytes are the address
+    frame.len = length - 4;
+    frame.flags = 0;
+
+    for (std::size_t i = 4; i < length; ++i) {
+      frame.data[i - 4] = tx_buffer[i];
+    }
+
+    if (::send(_socket_fd, &frame, sizeof(canfd_frame), 0) != sizeof(canfd_frame)) {
+      throw HardwareError(State::CAN_SOCKET_ERROR, "Can't write data to interface.");
+    }
   }
+  // else: do nothing
 }
 
 message::RxMessageDataBuffer CanCommunicationDevice::receive()
 {
   // Receiving Data from Interface
-  can_frame frame;
+  message::RxMessageDataBuffer rx_buffer;
 
-  const auto bytes = ::read(_socket_fd, &frame, sizeof(can_frame));
+  if (_can_type == CanType::CAN) {
+    can_frame frame;
 
-  if (bytes < 0) {
-    throw HardwareError(State::CAN_SOCKET_ERROR, "Can't read data from interface.");
+    const auto bytes = ::recv(_socket_fd, &frame, sizeof(can_frame), 0);
+
+    if (bytes < 0) {
+      throw HardwareError(State::CAN_SOCKET_ERROR, "Can't read data from interface.");
+    }
+    else if (bytes != sizeof(can_frame)) {
+      throw HardwareError(State::CAN_SOCKET_ERROR, "Received frame has wrong size.");
+    }
+    // else
+    rx_buffer.resize(frame.len + sizeof(can_frame::can_id)); // need memory for data + address
+    std::memcpy(&rx_buffer[0], &frame.can_id, sizeof(can_frame::can_id));
+    std::memcpy(&rx_buffer[sizeof(can_frame::can_id)], frame.data, frame.len);
   }
-  else if (bytes != sizeof(can_frame)) {
-    throw HardwareError(State::CAN_SOCKET_ERROR, "Received frame has wrong size.");
+  else if (_can_type == CanType::CAN_FD) {
+    canfd_frame frame;
+
+    const auto bytes = ::recv(_socket_fd, &frame, sizeof(can_frame), 0);
+
+    if (bytes < 0) {
+      throw HardwareError(State::CAN_SOCKET_ERROR, "Can't read data from interface.");
+    }
+    else if (bytes != sizeof(canfd_frame)) {
+      throw HardwareError(State::CAN_SOCKET_ERROR, "Received frame has wrong size.");
+    }
+    // else
+    rx_buffer.resize(frame.len + sizeof(canfd_frame::can_id)); // need memory for data + address
+    std::memcpy(&rx_buffer[0], &frame.can_id, sizeof(canfd_frame::can_id));
+    std::memcpy(&rx_buffer[sizeof(canfd_frame::can_id)], frame.data, frame.len);    
   }
-  // else
-  message::RxMessageDataBuffer rx_buffer(frame.can_dlc + sizeof(can_frame::can_id)); // need memory for data + address
-  std::memcpy(&rx_buffer[0], &frame.can_id, sizeof(can_frame::can_id));
-  std::memcpy(&rx_buffer[sizeof(can_frame::can_id)], frame.data, frame.can_dlc);
 
   // Debugging
   std::stringstream debug_out;
@@ -109,7 +158,7 @@ message::RxMessageDataBuffer CanCommunicationDevice::receive()
     debug_out << static_cast<int>(byte) << " ";
   }
 
-  RCLCPP_DEBUG_STREAM(rclcpp::get_logger("CanCommunicationDevice"), debug_out.str());
+  RCLCPP_INFO_STREAM(rclcpp::get_logger("CanCommunicationDevice"), debug_out.str());
 
   return rx_buffer;
 }
