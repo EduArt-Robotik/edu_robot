@@ -190,8 +190,8 @@ void Communicator::processing()
           std::lock_guard guard(_mutex_rx_data_endpoint);
 
           for (auto& endpoint : _rx_data_endpoint) {
-            if (is_same(endpoint._response_search_pattern, rx_buffer)) {
-              endpoint._callback_process_data(rx_buffer);
+            if (is_same(endpoint.searchPattern(), rx_buffer)) {
+              endpoint.call(std::move(rx_buffer));
             }
           }
         }

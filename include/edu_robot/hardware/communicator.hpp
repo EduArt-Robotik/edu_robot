@@ -9,15 +9,18 @@
 #include "edu_robot/hardware/communication_device.hpp"
 #include "edu_robot/hardware/communicator_device_interfaces.hpp"
 
-#include <cstddef>
 #include <edu_robot/state.hpp>
 #include <edu_robot/hardware_error.hpp>
+
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 
 #include <atomic>
 #include <list>
 #include <mutex>
 #include <functional>
 #include <chrono>
+#include <cstddef>
 #include <thread>
 #include <future>
 #include <queue>
@@ -60,13 +63,24 @@ protected:
 
 class RxDataEndPoint
 {
-  friend class Communicator;
-
 public:
   using CallbackProcessData = std::function<void(const message::RxMessageDataBuffer&)>;
 
-  RxDataEndPoint(RxDataEndPoint&&) = default;
+  RxDataEndPoint(RxDataEndPoint&& rhs) {
+    _data_buffer = std::move(rhs._data_buffer);
+    _response_search_pattern = std::move(rhs._response_search_pattern);
+    _callback_process_data = std::move(rhs._callback_process_data);
+    _data_receiver = std::move(rhs._data_receiver);
 
+    _running = true;
+    _executer = std::thread(&RxDataEndPoint::processDataJob, this);
+  }
+  ~RxDataEndPoint()
+  {
+    _running = false;
+    _executer.join();
+  }
+  
   /**
    * \brief Creates an data endpoint that processes incoming data from the ethernet gateway.
    * \param callback The callback function that is been called when the message search pattern matches.
@@ -80,13 +94,53 @@ public:
     return RxDataEndPoint(search_pattern_vector, callback);
   }
 
+  inline void call(message::RxMessageDataBuffer&& data) {
+    if (_mutex.try_lock() == false) {
+      RCLCPP_INFO(rclcpp::get_logger("RxDataEndPoint"), "data receiver is still busy. Drop data.");
+      return;
+    }
+
+    _data_buffer = std::move(data);
+    _mutex.unlock();
+  }
+  inline const std::vector<message::Byte>& searchPattern() const { return _response_search_pattern; }
+
 protected:
   RxDataEndPoint(
     std::vector<message::Byte>& search_pattern,
     const std::function<void(const message::RxMessageDataBuffer&)>& callback_process_data)
     : _response_search_pattern(std::move(search_pattern))
     , _callback_process_data(callback_process_data)
-  { }
+  {
+    _executer = std::thread(&RxDataEndPoint::processDataJob, this);
+  }
+
+  void processDataJob()
+  {
+    while (_running) {
+      if (_data_receiver == nullptr) {
+        RCLCPP_ERROR(rclcpp::get_logger("RxDataEndPoint"), "data receiver does not longer exist.");
+      }
+
+      _mutex.lock();
+
+      if (_data_buffer.empty()) {
+        // no data to process --> sleep and try again
+        _mutex.unlock();
+        std::this_thread::sleep_for(1ms);
+        continue;
+      }
+
+      std::scoped_lock lock_receiver(_data_receiver->rxDataMutex());
+      _callback_process_data(_data_buffer);
+      _mutex.unlock();
+    }
+  }
+
+  message::RxMessageDataBuffer _data_buffer;
+  std::atomic_bool _running{true};
+  std::thread _executer;
+  std::mutex _mutex;
 
   std::vector<message::Byte> _response_search_pattern;
   std::function<void(const message::RxMessageDataBuffer&)> _callback_process_data;
