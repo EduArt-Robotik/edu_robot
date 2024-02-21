@@ -98,7 +98,7 @@ SensorTofHardware::SensorTofHardware(
   auto measurement_end_point = CanRxDataEndPoint::make_data_endpoint<ZoneMeasurement>(
     _can_id.measurement,
     std::bind(&SensorTofHardware::processRxData, this, std::placeholders::_1),
-    std::dynamic_pointer_cast<SensorTofHardware>(shared_from_this())
+    this
   );
   _communicator->registerRxDataEndpoint(std::move(measurement_end_point));
 }

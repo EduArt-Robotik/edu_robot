@@ -89,7 +89,7 @@ public:
    */
   template <class Message>
   inline static RxDataEndPoint make_data_endpoint(
-    const CallbackProcessData& callback, std::shared_ptr<CommunicatorRxDevice> data_receiver)
+    const CallbackProcessData& callback, CommunicatorRxDevice* data_receiver)
   {
     const auto search_pattern = Message::makeSearchPattern();
     std::vector<message::Byte> search_pattern_vector(search_pattern.begin(), search_pattern.end());
@@ -111,7 +111,7 @@ protected:
   RxDataEndPoint(
     std::vector<message::Byte>& search_pattern,
     const std::function<void(const message::RxMessageDataBuffer&)>& callback_process_data,
-    std::shared_ptr<CommunicatorRxDevice> data_receiver)
+    CommunicatorRxDevice* data_receiver)
     : _response_search_pattern(std::move(search_pattern))
     , _callback_process_data(callback_process_data)
     , _data_receiver(data_receiver)
@@ -148,7 +148,7 @@ protected:
 
   std::vector<message::Byte> _response_search_pattern;
   std::function<void(const message::RxMessageDataBuffer&)> _callback_process_data;
-  std::shared_ptr<CommunicatorRxDevice> _data_receiver;
+  CommunicatorRxDevice* _data_receiver;
 };
 
 template <typename Request, typename Duration>

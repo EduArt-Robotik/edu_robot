@@ -174,7 +174,7 @@ void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
   auto measurement_end_point = CanRxDataEndPoint::make_data_endpoint<Response>(
     _parameter.can_id.output,
     std::bind(&MotorControllerHardware::processRxData, this, std::placeholders::_1),
-    std::dynamic_pointer_cast<MotorControllerHardware>(shared_from_this())
+    this
   );
   _communicator->registerRxDataEndpoint(std::move(measurement_end_point));  
 }

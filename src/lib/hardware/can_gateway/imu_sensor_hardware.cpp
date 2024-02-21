@@ -22,7 +22,7 @@ ImuSensorHardware::ImuSensorHardware(rclcpp::Node& ros_node, const std::uint32_t
   auto data_endpoint = CanRxDataEndPoint::make_data_endpoint<Response>(
     can_id,
     std::bind(&ImuSensorHardware::processRxData, this, std::placeholders::_1),
-    std::dynamic_pointer_cast<ImuSensorHardware>(shared_from_this())
+    this
   );
   _communicator->registerRxDataEndpoint(std::move(data_endpoint));
 }

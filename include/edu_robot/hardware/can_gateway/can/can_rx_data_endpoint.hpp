@@ -26,7 +26,7 @@ public:
    */
   template <class Message>
   inline static RxDataEndPoint make_data_endpoint(
-    const std::uint32_t can_id, const CallbackProcessData& callback, std::shared_ptr<CommunicatorRxDevice> data_receiver)
+    const std::uint32_t can_id, const CallbackProcessData& callback, CommunicatorRxDevice* data_receiver)
   {
     const auto search_pattern = Message::makeSearchPattern(can_id);
     std::vector<message::Byte> search_pattern_vector(search_pattern.begin(), search_pattern.end());
@@ -37,7 +37,7 @@ private:
   CanRxDataEndPoint(
     std::vector<message::Byte>& search_pattern,
     const std::function<void(const message::RxMessageDataBuffer&)>& callback_process_data,
-    std::shared_ptr<CommunicatorRxDevice> data_receiver)
+    CommunicatorRxDevice* data_receiver)
   : hardware::RxDataEndPoint(search_pattern, callback_process_data, data_receiver)
   { }
 };  
