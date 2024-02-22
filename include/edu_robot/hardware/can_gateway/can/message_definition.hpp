@@ -26,14 +26,14 @@ namespace sensor {
 namespace tof {
 using message::MessageFrame;
 
-struct ActivationBitfield : public element::Uint8 {
-  inline static constexpr std::array<Byte, size()> serialize(const std::uint8_t sensor_id) {
-    return element::Uint8::serialize(static_cast<std::uint8_t>(1 << (sensor_id - 1)));
-  }
-};
+// struct ActivationBitfield : public element::Uint8 {
+//   inline static constexpr std::array<Byte, size()> serialize(const std::uint8_t sensor_id) {
+//     return element::Uint8::serialize(static_cast<std::uint8_t>(1 << (sensor_id - 1)));
+//   }
+// };
 
-using StartMeasurement = NoResponseMessageFrame<element::Uint8,      // frame no.
-                                                ActivationBitfield>; // sensor activation bits
+using StartMeasurement = NoResponseMessageFrame<element::Uint8,  // frame no.
+                                                element::Uint8>; // sensor activation bits
 
 struct MeasurementComplete : public MessageFrame<element::Uint8,  // sensor no.
                                                  element::Uint8,  // resolution

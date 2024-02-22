@@ -79,6 +79,7 @@ SensorTofHardware::get_parameter(const std::string& name, const Parameter& defau
   parameter.fov.horizontal = ros_node.get_parameter(name + ".fov.horizontal").as_double();
   parameter.measurement_interval = std::chrono::milliseconds(
     ros_node.get_parameter(name + ".measurement_interval_ms").as_int());
+  parameter.trigger_measurement = default_parameter.trigger_measurement;
 
 
   return parameter;
@@ -192,7 +193,7 @@ void SensorTofHardware::processMeasurement()
   try {
     // Get measurement data from can gateway and parse it to processing pipeline.
     auto request = Request::make_request<StartMeasurement>(
-      _can_id.trigger, _processing_data.frame_number, _parameter.sensor_id
+      _can_id.trigger, _processing_data.frame_number, (1 << (_parameter.sensor_id - 1))
     );
 
     _processing_data.future_response = _communicator->sendRequest(std::move(request));
