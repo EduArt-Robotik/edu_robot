@@ -57,10 +57,14 @@ SensorTofRingHardware::Parameter SensorTofRingHardware::get_parameter(
   const std::string& name, const std::vector<std::string>& sensor_names, rclcpp::Node& ros_node)
 {
   Parameter parameter;
+  SensorTofHardware::Parameter sensor_parameter;
+  sensor_parameter.trigger_measurement = false; // disable triggering of new measurement in sub sensor
 
   for (const auto& sensor_name : sensor_names) {
     parameter.tof_sensor.push_back({
-      SensorTofHardware::get_parameter(name + '.' + sensor_name, {}, ros_node),
+      SensorTofHardware::get_parameter(
+        name + '.' + sensor_name, sensor_parameter, ros_node
+      ),
       sensor_name,
       Sensor::get_transform_from_parameter(name + '.' + sensor_name, ros_node),
     });
