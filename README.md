@@ -67,8 +67,8 @@ A controller can be requested to connect by pressing a specific button once. For
 
 | Axis  | DS5                       | Idle position | Value range | function          | 
 |-------|---------------------------|---------------|-------------|-------------------|
-| [0]   | Joystick L: left & right  | 0.0           | 1.0 to -1.0 | Moving Forward/Backwards
-| [1]   | Joystick L: up & down     | 0.0           | 1.0 to -1.0 | Moving Sidewards
+| [0]   | Joystick L: left & right  | 0.0           | 1.0 to -1.0 | Moving Sidewards
+| [1]   | Joystick L: up & down     | 0.0           | 1.0 to -1.0 | Moving Forward/Backwards
 | [2]   | L2                        | 1.0           | 1.0 to -1.0 | not in use
 | [3]   | Joystick R: left & right  | 0.0           | 1.0 to -1.0 | Steering
 | [4]   | Joystick R: up & down     | 0.0           | 1.0 to -1.0 | not in use
