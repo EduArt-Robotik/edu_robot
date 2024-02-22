@@ -103,7 +103,7 @@ colcon build --packages-select edu_robot_control --symlink-install
 The edu robot namespace can be set by using an environment variable. Either set it via the system or define it in front of the ros command:
 
 ```bash
-EDU_ROBOT_NAMESPACE=eduard/red ros2 launch edu_robot_control eduard_monitor.launch.py
+EDU_ROBOT_NAMESPACE=eduard/red ros2 launch edu_robot_control eduard_monitor_nav2.launch.py
 ```
 
 After RViz is launched the costmap should be displayed after a short while. Now a goal can be set by using the **2D Goal Pose** tool in RViz. A green path should be displayed if the goal is reachable. The robot will follow the path when it is switched into the mode **autonomous**. This can be done by pressing the **L2** button on the PS5 controller. The robot indicates this mode by flashing white LEDs.
