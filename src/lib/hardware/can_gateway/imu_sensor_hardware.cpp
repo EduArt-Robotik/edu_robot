@@ -24,7 +24,8 @@ ImuSensorHardware::ImuSensorHardware(rclcpp::Node& ros_node, const std::uint32_t
     std::bind(&ImuSensorHardware::processRxData, this, std::placeholders::_1),
     this
   );
-  _communicator->registerRxDataEndpoint(std::move(data_endpoint));
+  _communicator->registerRxDataEndpoint(data_endpoint);
+  registerRxDataEndpoint(data_endpoint);
 }
  
 void ImuSensorHardware::processRxData(const message::RxMessageDataBuffer& data)

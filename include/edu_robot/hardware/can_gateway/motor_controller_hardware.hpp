@@ -39,13 +39,14 @@ public:
 
   void processSetValue(const std::vector<Rpm>& rpm) override;
   void initialize(const Motor::Parameter& parameter) override;
-  void processRxData(const message::RxMessageDataBuffer& data) override;
   void enable();
   void disable();
 
   static Parameter get_parameter(const std::string& name, const Parameter& default_parameter, rclcpp::Node& ros_node);
 
 private:
+  void processRxData(const message::RxMessageDataBuffer& data);
+
   const Parameter _parameter;
   std::vector<Rpm> _measured_rpm;
 };

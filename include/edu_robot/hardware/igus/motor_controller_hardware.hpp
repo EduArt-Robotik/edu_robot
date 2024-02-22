@@ -1,5 +1,5 @@
 /**
- * Copyright EduArt Robotik GmbH 2022
+ * Copyright EduArt Robotik GmbH 2023
  *
  * Author: Christian Wendt (christian.wendt@eduart-robotik.com)
  */
@@ -33,12 +33,12 @@ public:
 
   void processSetValue(const std::vector<Rpm>& rpm) override;
   void initialize(const Motor::Parameter& parameter) override;
-  void processRxData(const message::RxMessageDataBuffer& data) override;
   void enable();
   void disable();
   void reset();
 
 private:
+  void processRxData(const message::RxMessageDataBuffer& data);
   std::uint8_t getTimeStamp();
 
   std::uint8_t _can_id;

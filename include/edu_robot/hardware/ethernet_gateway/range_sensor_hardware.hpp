@@ -23,10 +23,10 @@ public:
   RangeSensorHardware(const std::uint8_t id, rclcpp::Node& ros_node, std::shared_ptr<Communicator> communicator);
   ~RangeSensorHardware() override = default;
 
-  void processRxData(const message::RxMessageDataBuffer& data) override;
   void initialize(const SensorRange::Parameter& parameter) override;
 
 private:
+  void processRxData(const message::RxMessageDataBuffer& data);
   void processMeasurement();
 
   std::uint8_t _id;

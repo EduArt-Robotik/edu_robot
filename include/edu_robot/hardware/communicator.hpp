@@ -8,6 +8,7 @@
 #include "edu_robot/hardware/message_buffer.hpp"
 #include "edu_robot/hardware/communication_device.hpp"
 #include "edu_robot/hardware/communicator_device_interfaces.hpp"
+#include "edu_robot/hardware/rx_data_endpoint.hpp"
 
 #include <edu_robot/state.hpp>
 #include <edu_robot/hardware_error.hpp>
@@ -18,7 +19,6 @@
 #include <atomic>
 #include <list>
 #include <mutex>
-#include <functional>
 #include <chrono>
 #include <cstddef>
 #include <thread>
@@ -61,95 +61,7 @@ protected:
   std::vector<message::Byte> _response_search_pattern;
 };
 
-class RxDataEndPoint
-{
-public:
-  using CallbackProcessData = std::function<void(const message::RxMessageDataBuffer&)>;
 
-  RxDataEndPoint(RxDataEndPoint&& rhs) {
-    _data_buffer = std::move(rhs._data_buffer);
-    _response_search_pattern = std::move(rhs._response_search_pattern);
-    _callback_process_data = std::move(rhs._callback_process_data);
-    _data_receiver = std::move(rhs._data_receiver);
-
-    _running = true;
-    _executer = std::thread(&RxDataEndPoint::processDataJob, this);
-  }
-  ~RxDataEndPoint()
-  {
-    _running = false;
-    _executer.join();
-  }
-
-  /**
-   * \brief Creates an data endpoint that processes incoming data from the ethernet gateway.
-   * \param callback The callback function that is been called when the message search pattern matches.
-   *                 Note: the callback must be threadsafe!
-   * \return Return an data endpoint ready to use by the ethernet communicator.
-   */
-  template <class Message>
-  inline static RxDataEndPoint make_data_endpoint(
-    const CallbackProcessData& callback, CommunicatorRxDevice* data_receiver)
-  {
-    const auto search_pattern = Message::makeSearchPattern();
-    std::vector<message::Byte> search_pattern_vector(search_pattern.begin(), search_pattern.end());
-    return RxDataEndPoint(search_pattern_vector, callback, data_receiver);
-  }
-
-  inline void call(message::RxMessageDataBuffer&& data) {
-    if (_mutex.try_lock() == false) {
-      RCLCPP_INFO(rclcpp::get_logger("RxDataEndPoint"), "data receiver is still busy. Drop data.");
-      return;
-    }
-
-    _data_buffer = std::move(data);
-    _mutex.unlock();
-  }
-  inline const std::vector<message::Byte>& searchPattern() const { return _response_search_pattern; }
-
-protected:
-  RxDataEndPoint(
-    std::vector<message::Byte>& search_pattern,
-    const std::function<void(const message::RxMessageDataBuffer&)>& callback_process_data,
-    CommunicatorRxDevice* data_receiver)
-    : _response_search_pattern(std::move(search_pattern))
-    , _callback_process_data(callback_process_data)
-    , _data_receiver(data_receiver)
-  {
-    _executer = std::thread(&RxDataEndPoint::processDataJob, this);
-  }
-
-  void processDataJob()
-  {
-    while (_running) {
-      if (_data_receiver == nullptr) {
-        RCLCPP_ERROR(rclcpp::get_logger("RxDataEndPoint"), "data receiver does not longer exist.");
-      }
-
-      _mutex.lock();
-
-      if (_data_buffer.empty()) {
-        // no data to process --> sleep and try again
-        _mutex.unlock();
-        std::this_thread::sleep_for(1ms);
-        continue;
-      }
-
-      std::scoped_lock lock_receiver(_data_receiver->rxDataMutex());
-      _callback_process_data(_data_buffer);
-      _mutex.unlock();
-    }
-  }
-
-  message::RxMessageDataBuffer _data_buffer;
-  std::atomic_bool _running{true};
-  std::thread _executer;
-  std::mutex _mutex;
-
-  std::vector<message::Byte> _response_search_pattern;
-  std::function<void(const message::RxMessageDataBuffer&)> _callback_process_data;
-  CommunicatorRxDevice* _data_receiver;
-};
 
 template <typename Request, typename Duration>
 inline void wait_for_future(std::future<Request>& future, const Duration& timeout) {
@@ -173,7 +85,7 @@ public:
   ~Communicator();
 
   std::future<Request> sendRequest(Request request);
-  void registerRxDataEndpoint(RxDataEndPoint&& endpoint);
+  void registerRxDataEndpoint(std::shared_ptr<RxDataEndPoint> endpoint);
   message::RxMessageDataBuffer getRxBuffer();
 
 private:
@@ -193,7 +105,7 @@ private:
   std::queue<std::pair<Request, std::promise<Request>>> _incoming_requests;
   std::queue<std::pair<std::pair<Request, std::promise<Request>>, std::future<void>>> _is_being_send;
   std::list<std::pair<Request, std::promise<Request>>> _open_request;
-  std::vector<RxDataEndPoint> _rx_data_endpoint;
+  std::vector<std::shared_ptr<RxDataEndPoint>> _rx_data_endpoint;
 
   // Sending Thread
   std::chrono::milliseconds _wait_time_after_sending;

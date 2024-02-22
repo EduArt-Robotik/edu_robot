@@ -66,10 +66,10 @@ std::future<Request> Communicator::sendRequest(Request request)
   return future;
 }
 
-void Communicator::registerRxDataEndpoint(RxDataEndPoint&& endpoint)
+void Communicator::registerRxDataEndpoint(std::shared_ptr<RxDataEndPoint> endpoint)
 {
   std::lock_guard guard(_mutex_rx_data_endpoint);
-  _rx_data_endpoint.emplace_back(std::move(endpoint));
+  _rx_data_endpoint.push_back(endpoint);
 }
 
 message::RxMessageDataBuffer Communicator::getRxBuffer()
@@ -190,8 +190,8 @@ void Communicator::processing()
           std::lock_guard guard(_mutex_rx_data_endpoint);
 
           for (auto& endpoint : _rx_data_endpoint) {
-            if (is_same(endpoint.searchPattern(), rx_buffer)) {
-              endpoint.call(std::move(rx_buffer));
+            if (is_same(endpoint->searchPattern(), rx_buffer)) {
+              endpoint->call(rx_buffer);
             }
           }
         }

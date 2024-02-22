@@ -6,6 +6,7 @@
 #pragma once
 
 #include "edu_robot/hardware/message_buffer.hpp"
+#include "edu_robot/hardware/rx_data_endpoint.hpp"
 
 #include <memory>
 #include <mutex>
@@ -34,13 +35,21 @@ class CommunicatorRxDevice
 public:
   CommunicatorRxDevice()
   { }
-  virtual ~CommunicatorRxDevice() = default;
+  virtual ~CommunicatorRxDevice() {
+    // Deactivate all data endpoints.
+    for (auto & endpoint : _data_endpoint) {
+      endpoint->deactivate();
+    }
+  }
 
-  virtual void processRxData(const message::RxMessageDataBuffer& data) = 0;
   inline std::mutex& rxDataMutex() { return _data_mutex; }
+  void registerRxDataEndpoint(std::shared_ptr<RxDataEndPoint> data_endpoint) {
+    _data_endpoint.push_back(data_endpoint);
+  }
 
 private:
   std::mutex _data_mutex;
+  std::vector<std::shared_ptr<RxDataEndPoint>> _data_endpoint;
 };
 
 class CommunicatorTxRxDevice : public CommunicatorTxDevice

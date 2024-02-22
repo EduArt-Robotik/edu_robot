@@ -25,12 +25,14 @@ public:
    * \return Return an data endpoint ready to use by the ethernet communicator.
    */
   template <class Message>
-  inline static RxDataEndPoint make_data_endpoint(
+  inline static std::shared_ptr<RxDataEndPoint> make_data_endpoint(
     const std::uint32_t can_id, const CallbackProcessData& callback, CommunicatorRxDevice* data_receiver)
   {
     const auto search_pattern = Message::makeSearchPattern(can_id);
     std::vector<message::Byte> search_pattern_vector(search_pattern.begin(), search_pattern.end());
-    return CanRxDataEndPoint(search_pattern_vector, callback, data_receiver);
+    return std::shared_ptr<CanRxDataEndPoint>(
+      new CanRxDataEndPoint(search_pattern_vector, callback, data_receiver)
+    );
   }
 
 private:

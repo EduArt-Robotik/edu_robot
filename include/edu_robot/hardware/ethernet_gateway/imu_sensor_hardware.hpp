@@ -21,10 +21,10 @@ public:
   ImuSensorHardware(rclcpp::Node& ros_node, std::shared_ptr<Communicator> communicator);
   ~ImuSensorHardware() override = default;
 
-  void processRxData(const message::RxMessageDataBuffer& data) override;
   void initialize(const SensorImu::Parameter& parameter) override;
 
 private:
+  void processRxData(const message::RxMessageDataBuffer& data);
   void processMeasurement();
 
   std::shared_ptr<rclcpp::TimerBase> _timer_get_measurement;

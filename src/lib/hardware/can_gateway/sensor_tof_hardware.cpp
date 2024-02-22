@@ -100,7 +100,8 @@ SensorTofHardware::SensorTofHardware(
     std::bind(&SensorTofHardware::processRxData, this, std::placeholders::_1),
     this
   );
-  _communicator->registerRxDataEndpoint(std::move(measurement_end_point));
+  _communicator->registerRxDataEndpoint(measurement_end_point);
+  registerRxDataEndpoint(measurement_end_point);
 }
 
 void SensorTofHardware::processRxData(const message::RxMessageDataBuffer& data)

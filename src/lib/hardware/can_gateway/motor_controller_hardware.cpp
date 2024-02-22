@@ -176,7 +176,8 @@ void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
     std::bind(&MotorControllerHardware::processRxData, this, std::placeholders::_1),
     this
   );
-  _communicator->registerRxDataEndpoint(std::move(measurement_end_point));  
+  _communicator->registerRxDataEndpoint(measurement_end_point);
+  registerRxDataEndpoint(measurement_end_point);
 }
 
 // template <>

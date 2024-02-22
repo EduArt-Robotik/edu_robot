@@ -47,8 +47,6 @@ public:
   void registerMotorControllerHardware(std::shared_ptr<MotorControllerHardware> motor_controller_hardware);
 
 private:
-  void processRxData(const message::RxMessageDataBuffer&) override { } 
-
   diagnostic::Diagnostic processDiagnosticsImpl() override;
   void processPowerManagementBoardResponse(const message::RxMessageDataBuffer &data);
   void processCanGatewayShieldResponse(const message::RxMessageDataBuffer &data);

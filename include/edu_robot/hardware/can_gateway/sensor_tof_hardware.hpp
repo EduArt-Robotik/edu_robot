@@ -38,11 +38,11 @@ public:
     std::shared_ptr<Communicator> communicator);
   ~SensorTofHardware() override = default;
 
-  void processRxData(const message::RxMessageDataBuffer& data) override;
   void initialize(const SensorPointCloud::Parameter& parameter) override;
   static Parameter get_parameter(const std::string& name, const Parameter& default_parameter, rclcpp::Node& ros_node);
 
 private:
+  void processRxData(const message::RxMessageDataBuffer& data);
   void processMeasurement();
 
   const Parameter _parameter;
