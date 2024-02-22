@@ -91,14 +91,45 @@
       weight_low_pass_set_point: 0.2
 
 # Sensors
+    point_cloud_sensor:
+      number_of: 2
     pointcloud_left:
-      fov:
-        horizontal: 0.7853981852531433
-        vertical: 0.7853981852531433
-      measurement_interval_ms: 100
-      number_of_zones:
-        horizontal: 8
-        vertical: 8
+      can_id_trigger: 904
+      measurement_interval: 100
+      pointcloud_left_a:
+        fov:
+          horizontal: 0.7853981852531433
+          vertical: 0.7853981852531433
+        number_of_zones:
+          horizontal: 8
+          vertical: 8
+        sensor_id: 1
+        transform:
+          orientation:
+            pitch: 0.0
+            roll: 0.0
+            yaw: 0.0
+          translation:
+            x: 0.0
+            y: 0.0
+            z: 0.0
+      pointcloud_left_b:
+        fov:
+          horizontal: 0.7853981852531433
+          vertical: 0.7853981852531433
+        number_of_zones:
+          horizontal: 8
+          vertical: 8
+        sensor_id: 2
+        transform:
+          orientation:
+            pitch: 0.0
+            roll: 0.0
+            yaw: 0.0
+          translation:
+            x: 0.0
+            y: 0.0
+            z: 0.0
 
 # TF Settings
     publish_tf_odom: true
