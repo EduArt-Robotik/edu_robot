@@ -38,12 +38,12 @@ public:
    */
   template <class Message>
   inline static std::shared_ptr<RxDataEndPoint> make_data_endpoint(
-    const CallbackProcessData& callback, CommunicatorRxDevice* data_receiver)
+    const CallbackProcessData& callback, CommunicatorRxDevice* data_receiver, const std::uint8_t buffer_size = 1)
   {
     const auto search_pattern = Message::makeSearchPattern();
     std::vector<message::Byte> search_pattern_vector(search_pattern.begin(), search_pattern.end());
     return std::shared_ptr<RxDataEndPoint>(
-      new RxDataEndPoint(search_pattern_vector, callback, data_receiver)
+      new RxDataEndPoint(search_pattern_vector, callback, data_receiver, buffer_size)
     );
   }
 
@@ -55,11 +55,14 @@ protected:
   RxDataEndPoint(
     std::vector<message::Byte>& search_pattern,
     const std::function<void(const message::RxMessageDataBuffer&)>& callback_process_data,
-    CommunicatorRxDevice* data_receiver);
+    CommunicatorRxDevice* data_receiver,
+    const std::uint8_t buffer_size);
 
   void processDataJob();
 
-  message::RxMessageDataBuffer _data_buffer;
+  std::vector<message::RxMessageDataBuffer> _data_buffer;
+  std::atomic_uint8_t _index_input = 0;
+  std::atomic_uint8_t _index_output = 0;
   std::atomic_bool _running{true};
   std::thread _executer;
   std::mutex _mutex;

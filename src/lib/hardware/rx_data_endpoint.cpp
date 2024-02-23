@@ -1,7 +1,9 @@
 #include "edu_robot/hardware/rx_data_endpoint.hpp"
 #include "edu_robot/hardware/communicator_device_interfaces.hpp"
 
+#include <cstdint>
 #include <iostream>
+#include <mutex>
 
 namespace eduart {
 namespace robot {
@@ -12,12 +14,19 @@ using namespace std::chrono_literals;
 RxDataEndPoint::RxDataEndPoint(
   std::vector<message::Byte>& search_pattern,
   const std::function<void(const message::RxMessageDataBuffer&)>& callback_process_data,
-  CommunicatorRxDevice* data_receiver)
-  : _response_search_pattern(std::move(search_pattern))
+  CommunicatorRxDevice* data_receiver,
+  const std::uint8_t buffer_size)
+  : _data_buffer(buffer_size)
+  , _response_search_pattern(std::move(search_pattern))
   , _callback_process_data(callback_process_data)
   , _data_receiver(data_receiver)
 {
-  _data_buffer.reserve(100);
+  // Preallocate memory.
+  for (auto& buffer : _data_buffer) {
+    buffer.reserve(100);
+  }
+
+  // Start executer.
   _executer = std::thread(&RxDataEndPoint::processDataJob, this);
 }
 
@@ -32,7 +41,14 @@ void RxDataEndPoint::call(const message::RxMessageDataBuffer& data)
     // Data endpoint not active --> do nothing
     return;
   }
-  if (_mutex.try_lock() == false) {
+
+  _mutex.lock();
+  // Copy input data to next index
+  const std::uint8_t next_index = _index_input + 1 >= _data_buffer.size() ? 0 : _index_input + 1;
+
+  if (next_index == _index_output) {
+    // No data slot left --> buffer is full --> cancel
+    _mutex.unlock();
     RCLCPP_ERROR(rclcpp::get_logger("RxDataEndPoint"), "data receiver is still busy. Drop data.");
 
     std::stringstream debug_out;
@@ -44,33 +60,38 @@ void RxDataEndPoint::call(const message::RxMessageDataBuffer& data)
     RCLCPP_ERROR_STREAM(rclcpp::get_logger("RxDataEndPoint"), debug_out.str());
     return;
   }
+  // else:
+  // Room for new input data --> copy data
 
-  std::cout << "capacity before copy = " << _data_buffer.capacity() << std::endl;
-  _data_buffer = data;
-  std::cout << "capacity after copy = " << _data_buffer.capacity() << std::endl;
-  _mutex.unlock();  
+  _index_input = next_index;
+  _data_buffer[_index_input] = data;
+  _mutex.unlock();
 }
 
 void RxDataEndPoint::processDataJob()
 {
   while (_running) {
-    if (_data_receiver == nullptr) {
-      RCLCPP_ERROR(rclcpp::get_logger("RxDataEndPoint"), "data receiver does not longer exist.");
-    }
-
     _mutex.lock();
 
-    if (_data_buffer.empty()) {
+    if (_index_input == _index_output && _data_buffer[_index_output].empty()) {
       // no data to process --> sleep and try again
       _mutex.unlock();
       std::this_thread::sleep_for(1ms);
       continue;
     }
 
+    _mutex.unlock();
     std::scoped_lock lock_receiver(_data_receiver->rxDataMutex());
-    _callback_process_data(_data_buffer);
-    _data_buffer.clear();
-    std::cout << "capacity after clear = " << _data_buffer.capacity() << std::endl;
+    _callback_process_data(_data_buffer[_index_output]);
+    _data_buffer[_index_output].clear();
+
+    _mutex.lock();
+    if (_index_input != _index_output) {
+      // still work to do --> iterate to next index
+      _index_output = _index_output + 1 >= _data_buffer.size() ? 0 : _index_output + 1;
+    }
+    // else:
+    // nothing to do --> stay on index
     _mutex.unlock();
   }
 }
