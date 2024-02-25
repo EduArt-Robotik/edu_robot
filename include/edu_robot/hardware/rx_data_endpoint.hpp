@@ -9,6 +9,7 @@
 
 #include <atomic>
 #include <functional>
+#include <queue>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <thread>
@@ -60,9 +61,8 @@ protected:
 
   void processDataJob();
 
-  std::vector<message::RxMessageDataBuffer> _data_buffer;
-  std::atomic_uint8_t _index_input = 0;
-  std::atomic_uint8_t _index_output = 0;
+  std::vector<std::shared_ptr<message::RxMessageDataBuffer>> _input_data_buffer;
+  std::queue<std::shared_ptr<message::RxMessageDataBuffer>> _output_data_buffer;
   std::atomic_bool _running{true};
   std::thread _executer;
   std::mutex _mutex;
