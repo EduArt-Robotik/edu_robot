@@ -44,9 +44,7 @@ void RxDataEndPoint::call(const message::RxMessageDataBuffer& data)
   }
 
   // Get next index and check if there is room for new input data. Input index must stay in front of output index.
-  std::cout << __PRETTY_FUNCTION__ << std::endl;
   _mutex.lock();
-  std::cout << "input buffer size = " << static_cast<int>(_input_data_buffer.size()) << std::endl;
 
   if (_input_data_buffer.empty()) {
     // No data slot left --> buffer is full --> cancel
@@ -69,7 +67,6 @@ void RxDataEndPoint::call(const message::RxMessageDataBuffer& data)
   auto buffer = _input_data_buffer.back();
   _input_data_buffer.pop_back();
   _mutex.unlock();
-  std::cout << "copy data..." << std::endl;
   *buffer = data;
 
   // Add data to output queue.
@@ -93,7 +90,6 @@ void RxDataEndPoint::processDataJob()
     // Take data buffer from queue.
     auto buffer = _output_data_buffer.front();
     _output_data_buffer.pop();
-    std::cout << "output buffer size = " << static_cast<int>(_output_data_buffer.size()) << std::endl;
     _mutex.unlock();
 
     // Process data buffer.

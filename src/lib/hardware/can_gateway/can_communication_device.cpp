@@ -158,7 +158,7 @@ message::RxMessageDataBuffer CanCommunicationDevice::receive()
     debug_out << static_cast<int>(byte) << " ";
   }
 
-  RCLCPP_INFO_STREAM(rclcpp::get_logger("CanCommunicationDevice"), debug_out.str());
+  RCLCPP_DEBUG_STREAM(rclcpp::get_logger("CanCommunicationDevice"), debug_out.str());
 
   return rx_buffer;
 }
