@@ -166,18 +166,19 @@ void SensorTofRingHardware::processPointcloudMeasurement(
   tf2::doTransform(point_cloud, point_cloud_transformed, transform);
 
   // Copy given point cloud into sensor point cloud.
+  _processing_data.current_sensor = sensor_index;
   std::memcpy(_processing_data.current_data_address, point_cloud.data.data(), point_cloud.data.size());
 
   // Prepare next iteration if measurement not finished.
   if (sensor_index + 1 < _parameter.number_sensors()) {
     // Measurement not completed yet.
-    _processing_data.current_sensor = sensor_index;
     _processing_data.next_expected_sensor = sensor_index + 1;
     _processing_data.current_data_address += point_cloud.data.size();
     return;
   }
 
   // Measurement finished --> publish point cloud.
+  _processing_data.next_expected_sensor = 0;
   _callback_process_measurement(*_processing_data.point_cloud);
 }
 

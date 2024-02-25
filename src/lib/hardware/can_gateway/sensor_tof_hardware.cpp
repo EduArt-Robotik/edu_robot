@@ -110,10 +110,7 @@ void SensorTofHardware::processRxData(const message::RxMessageDataBuffer& data)
   if (_callback_process_measurement == nullptr) {
     return;
   }
-  RCLCPP_INFO(
-    rclcpp::get_logger("SensorPointCloud"), "data contains %u elements.",
-    static_cast<unsigned int>(ZoneMeasurement::elements(data))
-  );
+
   for (std::size_t element = 0; element < ZoneMeasurement::elements(data); ++element) {
     const std::size_t zone_index = ZoneMeasurement::zone(data, element);
     const auto distance = ZoneMeasurement::distance(data, element);
@@ -148,6 +145,7 @@ void SensorTofHardware::processRxData(const message::RxMessageDataBuffer& data)
     }
 
     // measurement finished --> publish point cloud
+    _processing_data.next_expected_zone = 0;
     _callback_process_measurement(*point_cloud);
   }
 }
