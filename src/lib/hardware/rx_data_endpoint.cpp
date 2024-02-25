@@ -42,9 +42,11 @@ void RxDataEndPoint::call(const message::RxMessageDataBuffer& data)
     return;
   }
 
+  // Get next index and check if there is room for new input data. Input index must stay in front of output index.
   _mutex.lock();
-  // Copy input data to next index
   const std::uint8_t next_index = _index_input + 1 >= _data_buffer.size() ? 0 : _index_input + 1;
+  std::cout << __PRETTY_FUNCTION__ << std::endl;
+  std::cout << "next index = " << next_index << std::endl;
 
   if (next_index == _index_output) {
     // No data slot left --> buffer is full --> cancel
@@ -63,8 +65,13 @@ void RxDataEndPoint::call(const message::RxMessageDataBuffer& data)
   // else:
   // Room for new input data --> copy data
 
+  // Copy input data to next index
+  std::cout << "copy data..." << std::endl;
+  _data_buffer[next_index] = data;
+
+  // Take over new index --> new input data we be active/valid.
+  _mutex.lock();
   _index_input = next_index;
-  _data_buffer[_index_input] = data;
   _mutex.unlock();
 }
 
@@ -80,6 +87,7 @@ void RxDataEndPoint::processDataJob()
       continue;
     }
 
+    std::cout << "process output index = " << _index_output << std::endl;
     _mutex.unlock();
     std::scoped_lock lock_receiver(_data_receiver->rxDataMutex());
     _callback_process_data(_data_buffer[_index_output]);
@@ -89,9 +97,11 @@ void RxDataEndPoint::processDataJob()
     if (_index_input != _index_output) {
       // still work to do --> iterate to next index
       _index_output = _index_output + 1 >= _data_buffer.size() ? 0 : _index_output + 1;
+      std::cout << "new output index = " << _index_output << std::endl;
     }
     // else:
-    // nothing to do --> stay on index
+    // nothing to do --> stay on index, output index must not overtake input index
+    std::cout << "stay on output index = " << _index_output << std::endl;
     _mutex.unlock();
   }
 }
