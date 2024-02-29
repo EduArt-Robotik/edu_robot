@@ -90,6 +90,9 @@ void CanGatewayShield::processPowerManagementBoardResponse(const message::RxMess
 {
   using can::message::power_management::Response;
 
+  if (Response::hasCorrectLength(data) == false) {
+    return;
+  }
   if (Response::isCurrent(data)) {
     _status_report.current.mcu = Response::value(data);
   }

@@ -33,7 +33,10 @@ void ImuSensorHardware::processRxData(const message::RxMessageDataBuffer& data)
   if (_callback_process_measurement == nullptr) {
     return;
   }
-  
+  if (Response::hasCorrectLength(data) == false) {
+    return;
+  }
+
   _callback_process_measurement(
     Response::orientation(data), Eigen::Vector3d::Zero(), Eigen::Vector3d::Zero()
   );
