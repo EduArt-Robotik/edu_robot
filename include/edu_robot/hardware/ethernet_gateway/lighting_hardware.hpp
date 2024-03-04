@@ -6,7 +6,7 @@
 #pragma once
 
 #include "edu_robot/lighting.hpp"
-#include "edu_robot/hardware/ethernet_gateway/ethernet_gateway_device_interfaces.hpp"
+#include "edu_robot/hardware/communicator_device_interfaces.hpp"
 
 namespace eduart {
 namespace robot {
@@ -14,7 +14,7 @@ namespace hardware {
 namespace ethernet {
   
 class LightingHardware : public Lighting::ComponentInterface
-                       , public EthernetGatewayTxDevice
+                       , public CommunicatorTxDevice
 {
 public:
   LightingHardware(const std::string& name, std::shared_ptr<Communicator> communicator);

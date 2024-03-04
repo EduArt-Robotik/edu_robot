@@ -18,7 +18,7 @@ using udp::message::AcknowledgedImuMeasurement;
 using udp::message::PROTOCOL;
 
 ImuSensorHardware::ImuSensorHardware(rclcpp::Node& ros_node, std::shared_ptr<Communicator> communicator)
-  : EthernetGatewayTxRxDevice(communicator)
+  : CommunicatorTxRxDevice(communicator)
   , _timer_get_measurement(
       ros_node.create_wall_timer(100ms, std::bind(&ImuSensorHardware::processMeasurement, this))
     )

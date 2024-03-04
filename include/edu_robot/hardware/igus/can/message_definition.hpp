@@ -17,9 +17,9 @@ namespace igus {
 namespace can {
 namespace message {
 
-using hardware::can::message::RxMessageDataBuffer;
-using hardware::can::message::element::Uint8;
-using hardware::can::message::element::Command;
+using hardware::can_gateway::can::message::RxMessageDataBuffer;
+using hardware::can_gateway::can::message::element::Uint8;
+using hardware::can_gateway::can::message::element::Command;
 using hardware::igus::can::message::element::VelocityCanAddress;
 using hardware::igus::can::message::element::CommandCanAddress;
 
@@ -45,9 +45,6 @@ struct AcknowledgedVelocity : public MessageFrame<VelocityCanAddress,
                                                   Uint8,    // shunt in ?
                                                   Uint8>    // digital input
 {
-  inline static constexpr std::uint8_t canId(const RxMessageDataBuffer& rx_buffer) {
-    return deserialize<0>(rx_buffer);
-  }
   inline static constexpr std::uint8_t errorCode(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<1>(rx_buffer);
   }

@@ -16,7 +16,7 @@ namespace ethernet {
 
 HardwareComponentFactory& HardwareComponentFactory::addLighting(const std::string& lighting_name)
 {
-  _lighting_hardware[lighting_name] = std::make_unique<ethernet::LightingHardware>(
+  _hardware[lighting_name] = std::make_unique<ethernet::LightingHardware>(
     lighting_name, _shield->getCommunicator()
   );
 
@@ -48,7 +48,7 @@ HardwareComponentFactory& HardwareComponentFactory::addRangeSensor(
     id, ros_node, _shield->getCommunicator()
   );
   // _shield->registerIotShieldRxDevice(range_sensor_hardware);
-  _range_sensor_hardware[sensor_name] = range_sensor_hardware;
+  _hardware[sensor_name] = range_sensor_hardware;
   return *this;
 }                                               
   
@@ -59,7 +59,7 @@ HardwareComponentFactory& HardwareComponentFactory::addImuSensor(
     ros_node, _shield->getCommunicator()
   );
   // _shield->registerIotShieldRxDevice(imu_hardware);
-  _imu_sensor_hardware[sensor_name] = imu_hardware;
+  _hardware[sensor_name] = imu_hardware;
   return *this;
 }
 

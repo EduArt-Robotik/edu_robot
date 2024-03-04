@@ -1,5 +1,5 @@
 /**
- * Copyright EduArt Robotik GmbH 2022
+ * Copyright EduArt Robotik GmbH 2023
  *
  * Author: Christian Wendt (christian.wendt@eduart-robotik.com)
  */
@@ -9,7 +9,7 @@
 #include <edu_robot/rpm.hpp>
 
 #include <edu_robot/hardware/communicator.hpp>
-#include <edu_robot/hardware/can/can_gateway_device_interfaces.hpp>
+#include <edu_robot/hardware/communicator_device_interfaces.hpp>
 
 #include <memory>
 
@@ -19,13 +19,13 @@ namespace hardware {
 namespace igus {
 
 class MotorControllerHardware : public MotorController::HardwareInterface
-                              , public hardware::can::CanGatewayTxRxDevice
+                              , public CommunicatorTxRxDevice
 {
 public:
   MotorControllerHardware(
     const std::string& name, const std::uint8_t can_id, std::shared_ptr<Communicator> communicator)
     : MotorController::HardwareInterface(name, 1)
-    , hardware::can::CanGatewayTxRxDevice(communicator)
+    , CommunicatorTxRxDevice(communicator)
     , _can_id(can_id)
     , _measured_rpm(1, 0.0)
   { }
@@ -33,12 +33,12 @@ public:
 
   void processSetValue(const std::vector<Rpm>& rpm) override;
   void initialize(const Motor::Parameter& parameter) override;
-  void processRxData(const message::RxMessageDataBuffer& data) override;
   void enable();
   void disable();
   void reset();
 
 private:
+  void processRxData(const message::RxMessageDataBuffer& data);
   std::uint8_t getTimeStamp();
 
   std::uint8_t _can_id;

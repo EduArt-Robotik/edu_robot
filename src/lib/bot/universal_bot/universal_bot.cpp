@@ -6,6 +6,7 @@
 #include <edu_robot/robot.hpp>
 #include <edu_robot/sensor_range.hpp>
 #include <edu_robot/sensor_imu.hpp>
+#include <edu_robot/sensor_point_cloud.hpp>
 
 #include <memory>
 #include <stdexcept>
@@ -41,6 +42,19 @@ static UniversalBot::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
     parameter.axis[i].wheel_diameter = ros_node.get_parameter(prefix + ".skid.wheel_diameter").as_double();
   }
 
+  // Requesting Number of Pointcloud Sensors
+  ros_node.declare_parameter<int>("point_cloud_sensor.number_of", parameter.number_of_point_cloud_sensors());
+  parameter.point_cloud_sensor.resize(ros_node.get_parameter("point_cloud_sensor.number_of").as_int());
+
+  for (std::size_t i = 0; i < parameter.number_of_point_cloud_sensors(); ++i) {
+    // Declaring of Parameters
+    const std::string prefix = std::string("point_cloud_sensor_") + std::to_string(i);
+    ros_node.declare_parameter<std::string>(prefix + ".name", prefix);
+
+    parameter.point_cloud_sensor[i].name = ros_node.get_parameter(prefix + ".name").as_string();
+    parameter.point_cloud_sensor[i].transform = Sensor::get_transform_from_parameter(prefix, ros_node);
+  }
+
   return parameter;
 }
 
@@ -54,18 +68,45 @@ void UniversalBot::initialize(eduart::robot::HardwareComponentFactory& factory)
   // Motor Controllers
   std::vector<std::string> motor_name = {
     "motor_a", "motor_b", "motor_c", "motor_d", "motor_e", "motor_f", "motor_g", "motor_h"};
-  // \todo fix the wrong order of joints!
   std::vector<std::string> motor_joint_name = {
     "base_to_motor_1", "base_to_motor_2", "base_to_motor_3", "base_to_motor_4",
     "base_to_motor_5", "base_to_motor_6", "base_to_motor_7", "base_to_motor_8"};
   
   // Create motors and motor controllers.
+  RCLCPP_INFO(get_logger(), "creating %u motors", static_cast<unsigned int>(_parameter.axis.size()));
+  motor_name.resize(_parameter.axis.size() * 2);
+  motor_joint_name.resize(_parameter.axis.size() * 2);
+
   auto motor_controllers = helper_create_motor_controller(
     factory, motor_name, motor_joint_name, getFrameIdPrefix(), *this
   );
 
   for (auto& motor_controller : motor_controllers) {
     registerMotorController(motor_controller);
+  }
+
+  // Point Cloud Sensors
+  constexpr std::array<const char*, 1> point_cloud_name = { "pointcloud_left" };
+  constexpr std::array<const char*, 1> point_cloud_tf = { "pointcloud/left" };
+  const std::array<tf2::Transform, 1> point_cloud_pose = {
+    tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.0, 0.0, 0.0))
+  };
+  
+  for (std::size_t i = 0; i < point_cloud_name.size(); ++i) {
+    const auto parameter = robot::SensorPointCloud::get_parameter(
+      point_cloud_name[i], {}, *this);
+    auto hardware_interface = factory.hardware().at("pointcloud_left")->cast<robot::SensorPointCloud::SensorInterface>();
+    auto point_cloud_sensor = std::make_shared<robot::SensorPointCloud>(
+      point_cloud_name[i],
+      getFrameIdPrefix() + point_cloud_tf[i],
+      getFrameIdPrefix() + Robot::_parameter.tf_base_frame,
+      point_cloud_pose[i],
+      parameter,
+      *this,
+      hardware_interface
+    );
+    registerSensor(point_cloud_sensor);
+    hardware_interface->initialize(parameter);
   }
 
   // IMU Sensor
@@ -82,10 +123,10 @@ void UniversalBot::initialize(eduart::robot::HardwareComponentFactory& factory)
     imu_parameter,
     getTfBroadcaster(),
     *this,
-    factory.imuSensorHardware().at("imu")
+    factory.hardware().at("imu")->cast<robot::SensorImu::SensorInterface>()
   );
   registerSensor(imu_sensor);
-  factory.imuSensorHardware().at("imu")->initialize(imu_parameter);
+  factory.hardware().at("imu")->cast<robot::SensorImu::SensorInterface>()->initialize(imu_parameter);
 
   // Set Up Default Drive Kinematic. Needs to be done here, because method can't be called in constructor 
   // of robot base class.

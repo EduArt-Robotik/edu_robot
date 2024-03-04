@@ -21,7 +21,7 @@ namespace can {
 
 using hardware::igus::can::message::MessageFrame;
 using hardware::igus::can::message::Byte;
-using hardware::can::message::element::Command;
+using hardware::can_gateway::can::message::element::Command;
 
 class CanRequest : public hardware::Request
 {

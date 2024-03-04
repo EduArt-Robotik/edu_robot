@@ -1,7 +1,8 @@
 #include "edu_robot/hardware/igus/hardware_component_factory.hpp"
 #include "edu_robot/hardware/igus/motor_controller_hardware.hpp"
+#include "edu_robot/hardware/igus/can_gateway_shield.hpp"
 
-#include <edu_robot/hardware/igus/can_gateway_shield.hpp>
+#include <edu_robot/hardware/can_gateway/sensor_tof_hardware.hpp>
 
 #include <functional>
 #include <memory>
@@ -25,7 +26,7 @@ HardwareComponentFactory& HardwareComponentFactory::addLighting(const std::strin
 HardwareComponentFactory& HardwareComponentFactory::addMotorController(
   const std::string& controller_name, const std::size_t can_id)
 {
-  auto compound_motor = std::make_shared<MotorControllerHardware>(controller_name, can_id, _shield->getCommunicator());
+  auto compound_motor = std::make_shared<MotorControllerHardware>(controller_name, can_id, _shield->getCommunicator(0));
   _motor_controller_hardware.push_back(compound_motor);
   _shield->registerMotorControllerHardware(compound_motor);
 
@@ -56,6 +57,16 @@ HardwareComponentFactory& HardwareComponentFactory::addImuSensor(
   // );
   // // _shield->registerIotShieldRxDevice(imu_hardware);
   // _imu_sensor_hardware[sensor_name] = imu_hardware;
+  return *this;
+}
+
+HardwareComponentFactory& HardwareComponentFactory::addTofSensor(
+  const std::string& sensor_name, const hardware::can_gateway::SensorTofHardware::Parameter& parameter,
+  rclcpp::Node& ros_node)
+{
+  _hardware[sensor_name] = std::make_shared<hardware::can_gateway::SensorTofHardware>(
+    sensor_name, parameter, ros_node, _shield->getCommunicator(1));
+
   return *this;
 }
 

@@ -5,10 +5,11 @@
  */
 #pragma once
 
-#include "edu_robot/hardware_component_interfaces.hpp"
-#include "edu_robot/sensor.hpp"
-#include "edu_robot/processing_component/processing_component.hpp"
-#include "edu_robot/diagnostic/standard_deviation.hpp"
+#include <edu_robot/hardware_component_interfaces.hpp>
+#include <edu_robot/sensor.hpp>
+#include <edu_robot/processing_component/processing_component.hpp>
+#include <edu_robot/diagnostic/standard_deviation.hpp>
+#include <edu_robot/hardware_interface.hpp>
 
 #include <rclcpp/clock.hpp>
 #include <rclcpp/node.hpp>
@@ -29,8 +30,6 @@ namespace robot {
  * \brief Represents a range sensor without a concrete hardware realization, that has to be implemented. This class
  *        creates an publisher for publishing its measurements. This class needs to be realized by a specific
  *        hardware layer.
- *
- * \todo below is only a draft, a first try --> please review concept after first release
  */
 class SensorRange : public Sensor
                   , public processing::ProcessingComponentOutput<float>
@@ -42,8 +41,11 @@ public:
     float range_max = 5.0f;
   };
 
-  class SensorInterface : public HardwareComponent<Parameter>
-                        , public HardwareSensor<float> { };
+  struct SensorInterface : public HardwareInterface
+                         , public HardwareComponent<Parameter>
+                         , public HardwareSensor<const float> {
+    SensorInterface() : HardwareInterface(HardwareInterface::Type::SENOR_IMU) { }
+  };
 
   SensorRange(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
               const tf2::Transform sensor_transform, const Parameter parameter, rclcpp::Node& ros_node,

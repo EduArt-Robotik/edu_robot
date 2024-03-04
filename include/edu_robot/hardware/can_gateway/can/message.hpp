@@ -17,6 +17,7 @@
 namespace eduart {
 namespace robot {
 namespace hardware {
+namespace can_gateway {
 namespace can {
 namespace message {
 
@@ -31,7 +32,7 @@ struct CanAddress;
 
 namespace impl {
 
-template <typename DataType>
+template <typename DataType, bool BigEndian = true>
 struct DataField {
   inline static constexpr std::size_t size() { return sizeof(DataType); }
   using type = DataType;
@@ -39,25 +40,47 @@ struct DataField {
   // It is a default serialization. On demand customization should take place in derived classes.
   inline static constexpr std::array<Byte, size()> serialize(const DataType value)
   {
-    // Serialization of 1, 2 and 4 bytes sized data types are supported.
-    // Do implementation for ARM only at the moment.
     std::array<Byte, size()> serialized_bytes = { 0 };
-    void* data_address = static_cast<void*>(serialized_bytes.data());
-    *static_cast<DataType*>(data_address) = value;
+
+    // Serialization of 1, 2 and 4 bytes sized data types are supported.
+    if constexpr (BigEndian) {
+      const std::uint8_t* value_address = reinterpret_cast<const std::uint8_t*>(&value);
+
+      for (std::size_t i = 0, j = size() - 1; i < size(); ++i, --j) {
+        serialized_bytes[i] = value_address[j];
+      }
+    }
+    else {
+      // Do implementation for ARM only at the moment.
+      void* data_address = static_cast<void*>(serialized_bytes.data());
+      *static_cast<DataType*>(data_address) = value;
+    }
 
     return serialized_bytes;
   }
   inline static constexpr DataType deserialize(const Byte data[size()])
   {
-    // Do implementation for ARM only at the moment.    
-    const void* data_address = static_cast<const void*>(data);
-    return *static_cast<const DataType*>(data_address);
+    if constexpr (BigEndian) {
+      DataType value;
+      std::uint8_t* value_address = reinterpret_cast<std::uint8_t*>(&value);
+
+      for (std::size_t i = 0, j = size() - 1; i < size(); ++i, --j) {
+        value_address[i] = data[j];
+      }
+
+      return value;
+    }
+    else {
+      // Do implementation for ARM only at the moment.    
+      const void* data_address = static_cast<const void*>(data);
+      return *static_cast<const DataType*>(data_address);
+    }
   }
   inline static constexpr bool isElementValid(const Byte[size()]) { return true; }
 };
 
 // (Partial-)Specialized Data Fields
-template <typename DataType, DataType Value>
+template <typename DataType, DataType Value, bool BigEndian = true>
 struct ConstDataField : public DataField<DataType> {
   using DataField<DataType>::size;
   using type = typename DataField<DataType>::type;
@@ -160,9 +183,9 @@ inline constexpr auto make_message_search_pattern(const std::tuple<Elements...>)
 template <Byte CommandByte>
 struct Command : public impl::ConstDataField<Byte, CommandByte> { };
 
-struct CanAddress : public impl::DataField<std::uint32_t> {
+struct CanAddress : public impl::DataField<std::uint32_t, false> {
   inline static constexpr std::array<Byte, CanAddress::size()> makeSearchPattern(const std::uint32_t can_address) {
-    return impl::DataField<std::uint32_t>::serialize(can_address);
+    return impl::DataField<std::uint32_t, false>::serialize(can_address);
   }
 };
 
@@ -174,8 +197,20 @@ struct Uint8  : public impl::DataField<std::uint8_t> {
     return impl::DataField<std::uint8_t>::serialize(value);
   }
 };
-struct Uint16 : public impl::DataField<std::uint16_t> { };
-struct Uint32 : public impl::DataField<std::uint32_t> { };
+
+// Big Endian
+using Int8 = impl::DataField<std::int8_t>;
+using Int16 = impl::DataField<std::int16_t>;
+using Uint16 = impl::DataField<std::uint16_t>;
+using Uint24 = impl::DataField<std::array<unsigned char, 3>>;
+using Uint32 = impl::DataField<std::uint32_t>;
+using Float = impl::DataField<float>;
+
+// Little Endian
+using Int16LE = impl::DataField<std::int16_t, false>;
+using Uint16LE = impl::DataField<std::uint16_t, false>;
+using Uint24LE = impl::DataField<std::array<unsigned char, 3>, false>;
+using FloatLE = impl::DataField<float, false>;
 
 } // end namespace element
 
@@ -187,58 +222,59 @@ struct Message : public std::tuple<Elements...>
   static TxMessageDataBuffer serialize(const typename Elements::type&... element_value) {
     return element::impl::serialize<Elements...>(element_value..., std::tuple<Elements...>{});
   }
-  template <std::size_t Index>
+  template <std::size_t Index, class DataBuffer>
   inline constexpr static typename std::tuple_element<Index, std::tuple<Elements...>>::type::type deserialize(
-    const RxMessageDataBuffer& rx_buffer) {
-      return std::tuple_element<Index, std::tuple<Elements...>>::type::deserialize(
-        rx_buffer.data() + element::impl::element_byte_index<Index, std::tuple<Elements...>>::value
-      );
+    const DataBuffer& rx_buffer)
+  {
+    return std::tuple_element<Index, std::tuple<Elements...>>::type::deserialize(
+      rx_buffer.data() + element::impl::element_byte_index<Index, std::tuple<Elements...>>::value
+    );
   }
+  template <class DataBuffer>
+  inline static constexpr bool hasCorrectLength(const DataBuffer& buffer) {
+    return buffer.size() == size();
+  } 
 };
 
-template <Byte CommandByte, class ...Elements>
-struct MessageFrame : public Message<element::CanAddress, element::Command<CommandByte>, Elements...>
+template <class... Elements>
+struct MessageFrame : public Message<element::CanAddress, Elements...>
 {
-private:
-  using MessageType = Message<element::CanAddress, element::Command<CommandByte>, Elements...>;
+protected:
+  using MessageType = Message<element::CanAddress, Elements...>;
 
 public:
   using MessageType::size;
 
   inline static TxMessageDataBuffer serialize(
-    const Byte can_address, const typename Elements::type&... element_value)
+    const std::uint32_t can_address, const typename Elements::type&... element_value)
   {
-    return MessageType::serialize(can_address, 0, element_value...);
+    return MessageType::serialize(can_address, element_value...);
   }
-  inline constexpr static auto makeSearchPattern(const Byte can_address) {
+  inline constexpr static auto makeSearchPattern(const std::uint32_t can_address) {
     return element::impl::make_message_search_pattern<0>(can_address, MessageType{});
   }
   template <std::size_t Index>
   inline constexpr static auto deserialize(const RxMessageDataBuffer& rx_buffer) {
     return MessageType::template deserialize<Index>(rx_buffer);
   }
+  inline static constexpr std::uint32_t canId(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<0>(rx_buffer);
+  }
 };
 
-// template <class MeasurementId, class ...Elements>
-// struct MeasurementFrame : public Message<element::StartByte, MeasurementId, Elements..., element::StopByte>
-// {
-// protected:
-//   using MessageType = Message<element::StartByte, MeasurementId, Elements..., element::StopByte>;
-
-// public:
-//   using MessageType::size;
-
-//   inline constexpr static auto makeSearchPattern() {
-//     return element::impl::make_message_search_pattern<0, 1>(MessageType{});
-//   }
-//   template <std::size_t Index>
-//   inline constexpr static auto deserialize(const RxMessageDataBuffer& rx_buffer) {
-//     return MessageType::template deserialize<Index + 2>(rx_buffer);
-//   }
-// };
+template <class... Elements>
+struct NoResponseMessageFrame : public MessageFrame<Elements...>
+{
+  // make a empty search pattern to indicate there is no response
+  inline constexpr static auto makeSearchPattern(const std::uint32_t can_address) {
+    (void)can_address;
+    return std::array<Byte, 0>();
+  }
+};
 
 } // end namespace message
 } // end namespace can
+} // end namespace can_gateway
 } // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

@@ -8,6 +8,7 @@
 #include "edu_robot/hardware_component_interfaces.hpp"
 #include "edu_robot/sensor.hpp"
 #include "edu_robot/diagnostic/standard_deviation.hpp"
+#include "edu_robot/hardware_interface.hpp"
 
 #include <Eigen/Dense>
 
@@ -38,10 +39,15 @@ public:
     std::string rotated_frame = "imu/rotated";
   };
 
-  class SensorInterface : public HardwareComponent<Parameter>
-                        , public HardwareSensor<Eigen::Quaterniond, Eigen::Vector3d, Eigen::Vector3d>
-  { };
+  // Defining Sensor Hardware Interface
+  struct SensorInterface : public HardwareInterface
+                         , public HardwareComponent<Parameter>
+                         , public HardwareSensor<const Eigen::Quaterniond, const Eigen::Vector3d, const Eigen::Vector3d>
+  {
+    SensorInterface() : HardwareInterface(HardwareInterface::Type::SENOR_IMU) { }
+  };
 
+  // Methods
   SensorImu(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
             const tf2::Transform sensor_transform, const Parameter parameter,
             std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster, rclcpp::Node& ros_node,

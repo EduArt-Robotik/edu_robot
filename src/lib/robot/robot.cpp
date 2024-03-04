@@ -70,7 +70,7 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<HardwareRobotInterfa
   );
   auto hardware_name = getFrameIdPrefix();
   hardware_name.pop_back(); // remove '/' at the end
-  _diagnostic_updater->setHardwareID(hardware_name);
+  _diagnostic_updater->setHardwareID(hardware_name.empty() ? robot_name : hardware_name);
   _diagnostic_updater->add(
     "power_management",
     std::static_pointer_cast<diagnostic::DiagnosticComponent>(_hardware_interface).get(),

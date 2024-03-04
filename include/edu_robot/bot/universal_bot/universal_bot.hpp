@@ -36,6 +36,14 @@ public:
     };
 
     std::vector<Axis> axis;
+    inline std::size_t number_of_axis() const { return axis.size(); }
+
+    struct SensorPointCloud {
+      std::string name;
+      tf2::Transform transform;
+    };
+    std::vector<SensorPointCloud> point_cloud_sensor;
+    inline std::size_t number_of_point_cloud_sensors() const { return point_cloud_sensor.size(); }
   };
 
   UniversalBot(const std::string& robot_name, std::unique_ptr<HardwareRobotInterface> hardware_interface);

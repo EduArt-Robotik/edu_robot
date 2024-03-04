@@ -19,16 +19,19 @@ class IgusCanTurtleBot : public eduart::robot::turtle::Turtle
 public:
   IgusCanTurtleBot()
     : eduart::robot::turtle::Turtle(
-        "turtle", std::make_unique<CanGatewayShield>("can0")
+        "turtle", std::make_unique<CanGatewayShield>(
+          "eduart-can2", "eduart-can1", "eduart-can0"
+        )
       )
   {
     auto shield = std::dynamic_pointer_cast<CanGatewayShield>(_hardware_interface);
     auto factory = HardwareComponentFactory(shield);
 
-    factory.addMotorController("motor_controller_a", 0x10);
+    factory//.addMotorController("motor_controller_a", 0x10)
           //  .addMotorController("motor_controller_b", 0x30)
           //  .addMotorController("motor_controller_c", 0x40)
-          //  .addMotorController("motor_controller_d", 0x50);
+          //  .addMotorController("motor_controller_d", 0x50)
+           .addTofSensor("pointcloud_left", {}, *this);
 
     initialize(factory);
     _mode_state_machine.switchToMode(eduart::robot::RobotMode::INACTIVE);

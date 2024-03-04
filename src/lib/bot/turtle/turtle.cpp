@@ -6,6 +6,7 @@
 #include <edu_robot/robot.hpp>
 #include <edu_robot/sensor_range.hpp>
 #include <edu_robot/sensor_imu.hpp>
+#include <edu_robot/sensor_point_cloud.hpp>
 
 #include <tf2/LinearMath/Transform.h>
 #include <rclcpp/logging.hpp>
@@ -66,6 +67,31 @@ void Turtle::initialize(eduart::robot::HardwareComponentFactory& factory)
   for (auto& motor_controller : motor_controllers) {
     registerMotorController(motor_controller);
   }
+
+  // Point Cloud Sensors
+  constexpr std::array<const char*, 1> point_cloud_name = { "pointcloud_left" };
+  constexpr std::array<const char*, 1> point_cloud_tf = { "pointcloud/left" };
+  const std::array<tf2::Transform, 1> point_cloud_pose = {
+    tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.0, 0.0, 0.0))
+  };
+  
+  for (std::size_t i = 0; i < point_cloud_name.size(); ++i) {
+    const auto parameter = robot::SensorPointCloud::get_parameter(
+      point_cloud_name[i], {}, *this);
+    auto hardware_interface = factory.hardware().at("pointcloud_left")->cast<robot::SensorPointCloud::SensorInterface>();
+    auto point_cloud_sensor = std::make_shared<robot::SensorPointCloud>(
+      point_cloud_name[i],
+      getFrameIdPrefix() + point_cloud_tf[i],
+      getFrameIdPrefix() + Robot::_parameter.tf_base_frame,
+      point_cloud_pose[i],
+      parameter,
+      *this,
+      hardware_interface
+    );
+    registerSensor(point_cloud_sensor);
+    hardware_interface->initialize(parameter);
+  }
+
 
   // Set Up Default Drive Kinematic. Needs to be done here, because method can't be called in constructor 
   // of robot base class.

@@ -10,7 +10,6 @@
 #include <cstddef>
 #include <exception>
 #include <future>
-#include <iostream>
 #include <mutex>
 #include <sys/socket.h>
 #include <thread>
@@ -25,11 +24,12 @@ namespace hardware {
 
 using namespace std::chrono_literals;
 
-Communicator::Communicator(std::shared_ptr<CommunicationDevice> device)
+Communicator::Communicator(
+  std::shared_ptr<CommunicationDevice> device, const std::chrono::milliseconds wait_time_sending)
   : _device(device)
   , _is_running(true)
   , _new_incoming_requests(false)
-  , _wait_time_after_sending(20ms) // \todo check if wait time is still needed.
+  , _wait_time_after_sending(wait_time_sending)
   , _new_received_data(false)
 {
   _tcp_sending_thread = std::thread([this]{
@@ -66,10 +66,10 @@ std::future<Request> Communicator::sendRequest(Request request)
   return future;
 }
 
-void Communicator::registerRxDataEndpoint(RxDataEndPoint&& endpoint)
+void Communicator::registerRxDataEndpoint(std::shared_ptr<RxDataEndPoint> endpoint)
 {
   std::lock_guard guard(_mutex_rx_data_endpoint);
-  _rx_data_endpoint.emplace_back(std::move(endpoint));
+  _rx_data_endpoint.push_back(endpoint);
 }
 
 message::RxMessageDataBuffer Communicator::getRxBuffer()
@@ -129,7 +129,15 @@ void Communicator::processing()
         future.get();
         // Request was successfully sent to the shield.
         request.first._state = Request::State::SENT;
-        _open_request.emplace_back(std::move(request));
+
+        if (request.first._response_search_pattern.empty()) {
+          // no response search pattern available --> request is finished
+          request.second.set_value(std::move(request.first));
+        }
+        else {
+          // response search pattern available --> move request to open requests
+          _open_request.emplace_back(std::move(request));
+        }
       }
       catch (...) {
         // Forward exception to original requester.
@@ -167,6 +175,7 @@ void Communicator::processing()
             auto request = std::move(*it);
             it = _open_request.erase(it);
 
+            // Add received message to request, update state and send it back to sender using promise.
             request.first._state = Request::State::RECEIVED;
             request.first._response_message = std::move(rx_buffer);
             request.second.set_value(std::move(request.first));
@@ -181,8 +190,8 @@ void Communicator::processing()
           std::lock_guard guard(_mutex_rx_data_endpoint);
 
           for (auto& endpoint : _rx_data_endpoint) {
-            if (is_same(endpoint._response_search_pattern, rx_buffer)) {
-              endpoint._callback_process_data(rx_buffer);
+            if (is_same(endpoint->searchPattern(), rx_buffer)) {
+              endpoint->call(rx_buffer);
             }
           }
         }
@@ -195,45 +204,15 @@ void Communicator::processing()
       }
     }
 
-    // Make a period of 1ms
-    // \todo fix lines below. Its a bit nasty.
-    if (std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - start) < 1ms) {
-      const auto diff = 1ms - std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - start);
-      std::this_thread::sleep_for(diff);      
+    // Make a period of 1ms if nothing to do.
+    if (_rx_buffer_queue.empty()) {
+      if (std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - start) < 1ms) {
+        const auto diff = 1ms - std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - start);
+        std::this_thread::sleep_for(diff);      
+      }
     }
   }
 }
-
-// void Communicator::sendingData(tcp::message::Byte const *const tx_buffer, const std::size_t length)
-// {
-//   // \todo think about it! If there is only one line here remove the sending method.
-//   ::send(_socket_fd, tx_buffer, length, 0);
-// }
-
-// tcp::message::RxMessageDataBuffer Communicator::receivingData()
-// {
-//   std::uint8_t buffer[_max_rx_buffer_queue_size];
-
-//   const int received_bytes = ::recv(_socket_fd, buffer, _max_rx_buffer_queue_size, MSG_DONTWAIT);
-
-//   if (received_bytes < 0) {
-//     return { };
-//   }
-
-//   // Set correct size to rx buffer.
-//   tcp::message::RxMessageDataBuffer rx_buffer;
-
-//   rx_buffer.resize(received_bytes);
-//   std::copy(std::begin(buffer), std::begin(buffer) + received_bytes, rx_buffer.begin());
-  
-//   std::cout << std::hex;
-//   for (const auto byte : rx_buffer) {
-//     std::cout << static_cast<int>(byte) << " ";
-//   }
-//   std::cout << std::dec << std::endl;
-
-//   return rx_buffer;
-// }
 
 void Communicator::processSending(const std::chrono::milliseconds wait_time_after_sending)
 {
@@ -289,6 +268,17 @@ void Communicator::processReceiving()
         std::unique_lock lock(_mutex_receiving_data);
 
         if (_rx_buffer_queue.size() >= _max_rx_buffer_queue_size) {
+while (_rx_buffer_queue.empty() == false) {
+  std::stringstream debug_out;
+  debug_out << "rx_buffer: " << std::hex;
+
+  for (const auto byte : _rx_buffer_queue.front()) {
+    debug_out << static_cast<int>(byte) << " ";
+  }
+
+  _rx_buffer_queue.pop();
+  RCLCPP_INFO_STREAM(rclcpp::get_logger("Communicator"), debug_out.str());
+}
           throw ComponentError(State::FUNCTIONAL_ERROR, "Max rx buffer queue size is reached.");
         }
 
