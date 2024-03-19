@@ -2,8 +2,8 @@ version: "2.4"
 
 services:
     eduard-ipc127e:
-        image: eduartrobotik/eduard-ipc127e:0.3.3
-        container_name: eduard-ipc127e-ie-app-0.3.3
+        image: eduartrobotik/eduard-ipc127e:0.4.1
+        container_name: eduard-ipc127e-ie-app-0.4.1
         # debugging command for level 2 network access.
         # command: bash -c "sudo apt-get update && sudo apt-get install -y iproute2 net-tools && ip addr && ip route list && printenv && source /home/user/ros/install/setup.bash && export RMW_IMPLEMENTATION=rmw_fastrtps_cpp && ros2 topic list && ros2 daemon start && sudo netstat -gn &&  ros2 launch edu_robot eduard-ipc127e.launch.py"
         command: bash -c 'ros2 launch edu_robot eduard-ipc127e.launch.py'
