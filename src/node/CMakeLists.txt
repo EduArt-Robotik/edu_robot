@@ -35,6 +35,18 @@ ament_target_dependencies(ethernet-gateway-universal-bot
   "rclcpp"
 )
 
+### Can Gateway Bot
+add_executable(can-gateway-bot
+  can_gateway_bot_node.cpp
+)
+target_link_libraries(can-gateway-bot
+  eduart-robot-eduard
+  eduart-hardware-can
+)
+ament_target_dependencies(can-gateway-bot
+  "rclcpp"
+)
+
 ### Can Gateway Universal Bot
 add_executable(can-gateway-universal-bot
   can_gateway_universal_bot_node.cpp

@@ -18,7 +18,7 @@ def generate_launch_description():
 
     pi_bot = Node(
       package='edu_robot',
-      executable='can-gateway-universal-bot',
+      executable='can-gateway-bot',
       name='pi_bot',
       parameters=[parameter_file],
       namespace=EnvironmentVariable('EDU_ROBOT_NAMESPACE', default_value="eduard"),      
