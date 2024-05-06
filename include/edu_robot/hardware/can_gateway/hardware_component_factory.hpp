@@ -31,9 +31,9 @@ public:
   HardwareComponentFactory& addMotorController(
     const std::string& controller_name, const std::uint32_t can_id_input, const std::uint32_t can_id_output);
   HardwareComponentFactory& addRangeSensor(
-    const std::string& sensor_name, const std::uint8_t id, rclcpp::Node& ros_node);
+    const std::string& sensor_name, const std::uint8_t id);
   HardwareComponentFactory& addImuSensor(
-    const std::string& sensor_name, const std::uint32_t can_id, rclcpp::Node& ros_node);
+    const std::string& sensor_name, const std::uint32_t can_id);
   HardwareComponentFactory& addTofSensor(
     const std::string& sensor_name, const SensorTofHardware::Parameter& parameter, rclcpp::Node& ros_node);
   HardwareComponentFactory& addTofRingSensor(

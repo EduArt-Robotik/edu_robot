@@ -41,7 +41,7 @@ public:
     }
 
     // IMU Sensor
-    factory.addImuSensor("imu", 0x381, *this);
+    factory.addImuSensor("imu", 0x381);
 
     // Pointcloud Sensor
     // auto point_cloud_parameter = SensorTofHardware::get_parameter(

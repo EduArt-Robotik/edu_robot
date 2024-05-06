@@ -13,12 +13,10 @@ using namespace std::chrono_literals;
 using can::CanRxDataEndPoint;
 using can::message::sensor::imu::Response;
 
-ImuSensorHardware::ImuSensorHardware(rclcpp::Node& ros_node, const std::uint32_t can_id, std::shared_ptr<Communicator> communicator)
+ImuSensorHardware::ImuSensorHardware(const std::uint32_t can_id, std::shared_ptr<Communicator> communicator)
   : CommunicatorTxRxDevice(communicator)
   , _can_id(can_id)
 {
-  (void)ros_node;
-
   auto data_endpoint = CanRxDataEndPoint::make_data_endpoint<Response>(
     can_id,
     std::bind(&ImuSensorHardware::processRxData, this, std::placeholders::_1),

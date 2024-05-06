@@ -18,7 +18,7 @@ class ImuSensorHardware : public SensorImu::SensorInterface
                         , public CommunicatorTxRxDevice
 {
 public:
-  ImuSensorHardware(rclcpp::Node& ros_node, const std::uint32_t can_id, std::shared_ptr<Communicator> communicator);
+  ImuSensorHardware(const std::uint32_t can_id, std::shared_ptr<Communicator> communicator);
   ~ImuSensorHardware() override = default;
 
   void initialize(const SensorImu::Parameter& parameter) override;

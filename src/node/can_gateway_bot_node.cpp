@@ -29,12 +29,22 @@ public:
     auto factory = HardwareComponentFactory(shield);
     // _timer_process_status_report = create_wall_timer(100ms, [shield]{ shield->processStatusReport(); });
 
-    // Motor Controller
-    factory.addMotorController("motor_controller_0", 0 | 0x400, 0 | 0x480);
-    factory.addMotorController("motor_controller_1", 1 | 0x400, 1 | 0x480);
-
-    // IMU Sensor
-    factory.addImuSensor("imu", 0x381, *this);
+            // Lightings
+    factory.addLighting("head")
+           .addLighting("right_side")
+           .addLighting("left_side")
+           .addLighting("back")
+           .addLighting("all")
+           // Motor Controller
+           .addMotorController("motor_controller_0", 0 | 0x400, 0 | 0x480)
+           .addMotorController("motor_controller_1", 1 | 0x400, 1 | 0x480)
+           // Range Sensor
+           .addRangeSensor("range/front/left", 0u)
+           .addRangeSensor("range/front/right", 1u)
+           .addRangeSensor("range/rear/left", 2u)
+           .addRangeSensor("range/rear/right", 3u)
+           // IMU Sensor
+           .addImuSensor("imu", 0x381);
 
     // Initialize
     initialize(factory);

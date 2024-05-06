@@ -7,6 +7,8 @@ add_library(eduart-hardware-can
   hardware_component_factory.cpp
   motor_controller_hardware.cpp
   imu_sensor_hardware.cpp
+  lighting_hardware.cpp
+  range_sensor_hardware.cpp
 )
 target_link_libraries(eduart-hardware-can
   eduart-robot
