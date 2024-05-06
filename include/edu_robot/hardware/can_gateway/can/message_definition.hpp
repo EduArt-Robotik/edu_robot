@@ -214,7 +214,8 @@ struct Response : public message::MessageFrame<element::Uint8, // command
 namespace power_management {
 
 struct Response : public message::MessageFrame<element::Uint8, // measurement type indicator
-                                               element::Float> // measurement value
+                                               element::Float, // measurement value
+                                               element::Uint8> // enable state
 {
   inline static constexpr bool isCurrent(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<1>(rx_buffer) == PROTOCOL::POWER_MANAGEMENT::MEASUREMENT::CURRENT;
@@ -224,6 +225,9 @@ struct Response : public message::MessageFrame<element::Uint8, // measurement ty
   }
   inline static constexpr float value(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<2>(rx_buffer);
+  }
+  inline static constexpr bool isEnabled(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<3>(rx_buffer);
   }
 };
 
