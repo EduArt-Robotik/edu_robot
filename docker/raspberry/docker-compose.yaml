@@ -1,0 +1,37 @@
+version: "3.0"
+
+services:
+    eduard-raspberry-pi:
+        image: eduartrobotik/eduard-ipc127e:0.5.0
+        container_name: eduard-ipcbot-0.5.0
+        user: user
+        restart: always
+        privileged: true
+        ipc: host
+        pid: host
+        mem_limit: 300mb
+        environment:
+            - EDU_ROBOT_NAMESPACE=${EDU_ROBOT_NAMESPACE}
+        network_mode: "host"
+        command: bash -c 'cd /home/user/ros/launch_content; ros2 launch eduard-raspberry-pi.launch.py'
+        volumes:
+            - './launch_content:/home/user/ros/launch_content:r'
+        devices:
+            - '/dev:/dev'
+
+    eduard-robot-control:
+        image: eduartrobotik/eduard-robot-control-ipcbot:0.3.1
+        container_name: eduard-robot-control-ipcbot-0.3.1
+        user: user
+        restart: always
+        privileged: true
+        ipc: host
+        pid: host
+        mem_limit: 300mb
+        environment:
+            - EDU_ROBOT_NAMESPACE=${EDU_ROBOT_NAMESPACE}
+        network_mode: "host"
+        devices:
+            - '/dev:/dev'
+        volumes:
+            - '/dev:/dev'
