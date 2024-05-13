@@ -28,11 +28,11 @@ def generate_launch_description():
       namespace=EnvironmentVariable('EDU_ROBOT_NAMESPACE', default_value="eduard"),
       # prefix=['gdbserver localhost:3000'],
       output='screen',
-      arguments=[
-        "--ros-args",
-        "--log-level",
-        "edu_robot:=debug"
-      ]    
+      # arguments=[
+      #   "--ros-args",
+      #   "--log-level",
+      #   "edu_robot:=debug"
+      # ]    
     )
 
     aggregator = IncludeLaunchDescription(

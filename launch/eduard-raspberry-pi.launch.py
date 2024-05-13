@@ -17,7 +17,7 @@ def generate_launch_description():
     parameter_file = PathJoinSubstitution([
       package_path,
       'parameter',
-      'eduard-ipc127e.yaml'
+      'eduard-raspberry-pi.yaml'
     ])
 
     eduard_ipc = Node(
@@ -27,12 +27,7 @@ def generate_launch_description():
       parameters=[parameter_file],
       namespace=EnvironmentVariable('EDU_ROBOT_NAMESPACE', default_value="eduard"),
       # prefix=['gdbserver localhost:3000'],
-      output='screen',
-      # arguments=[
-      #   "--ros-args",
-      #   "--log-level",
-      #   "edu_robot:=debug"
-      # ]
+      output='screen'
     )
 
     aggregator = IncludeLaunchDescription(
