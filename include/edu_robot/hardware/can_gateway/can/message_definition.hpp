@@ -114,7 +114,7 @@ struct MeasurementOrientation : public message::MessageFrame<element::Int16, // 
                                                              element::Int16> // orientation z
 {
   inline static Eigen::Quaterniond orientation(const RxMessageDataBuffer& rx_buffer) {
-    Eigen::Quaterniond(
+    return Eigen::Quaterniond(
       static_cast<double>(deserialize<1>(rx_buffer)) / 10000.0,
       static_cast<double>(deserialize<2>(rx_buffer)) / 10000.0,
       static_cast<double>(deserialize<3>(rx_buffer)) / 10000.0,
@@ -134,18 +134,18 @@ struct MeasurementRaw : public message::MessageFrame<element::Uint8, // measurem
   inline static constexpr bool isAngularVelocity(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<1>(rx_buffer) == 2;
   }
-  inline static Eigen::Vector3f linearAcceleration(const RxMessageDataBuffer& rx_buffer) {
-    return Eigen::Vector3f(
-      static_cast<float>(deserialize<2>(rx_buffer)) / 1000.0f,
-      static_cast<float>(deserialize<3>(rx_buffer)) / 1000.0f,
-      static_cast<float>(deserialize<4>(rx_buffer)) / 1000.0f
+  inline static Eigen::Vector3d linearAcceleration(const RxMessageDataBuffer& rx_buffer) {
+    return Eigen::Vector3d(
+      static_cast<double>(deserialize<2>(rx_buffer)) / 1000.0f,
+      static_cast<double>(deserialize<3>(rx_buffer)) / 1000.0f,
+      static_cast<double>(deserialize<4>(rx_buffer)) / 1000.0f
     );
   }
-  inline static Eigen::Vector3f angularVelocity(const RxMessageDataBuffer& rx_buffer) {
-    return Eigen::Vector3f(
-      static_cast<float>(deserialize<2>(rx_buffer)) / 1000.0f,
-      static_cast<float>(deserialize<3>(rx_buffer)) / 1000.0f,
-      static_cast<float>(deserialize<4>(rx_buffer)) / 1000.0f    
+  inline static Eigen::Vector3d angularVelocity(const RxMessageDataBuffer& rx_buffer) {
+    return Eigen::Vector3d(
+      static_cast<double>(deserialize<2>(rx_buffer)) / 1000.0f,
+      static_cast<double>(deserialize<3>(rx_buffer)) / 1000.0f,
+      static_cast<double>(deserialize<4>(rx_buffer)) / 1000.0f    
     );
   }
 };

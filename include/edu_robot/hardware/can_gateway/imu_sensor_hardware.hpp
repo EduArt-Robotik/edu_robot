@@ -27,6 +27,23 @@ private:
   void processRxData(const message::RxMessageDataBuffer& data);
 
   std::uint32_t _can_id;
+  
+  struct {
+    Eigen::Quaterniond orientation;
+    Eigen::Vector3d linear_acceleration;
+    Eigen::Vector3d angular_velocity;
+    std::array<bool, 3> valid_element;
+
+    inline void gotOrientation() { valid_element[0] = true; }
+    inline void gotLinearAcceleration() { valid_element[1] = true; }
+    inline void gotAngularVelocity() { valid_element[2] = true; }
+    inline void clear() {
+      valid_element = { false, false, false };
+    }
+    inline bool complete() {
+      return valid_element[0] && valid_element[1] && valid_element[2];
+    }
+  } _processing_data;  
 };
 
 } // end namespace can_gateway
