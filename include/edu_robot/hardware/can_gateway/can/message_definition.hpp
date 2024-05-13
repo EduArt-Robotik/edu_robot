@@ -108,17 +108,44 @@ private:
 
 namespace imu {
 
-struct Response : public message::MessageFrame<element::Int16LE, // orientation w
-                                               element::Int16LE, // orientation x
-                                               element::Int16LE, // orientation y
-                                               element::Int16LE> // orientation z
+struct MeasurementOrientation : public message::MessageFrame<element::Int16, // orientation w
+                                                             element::Int16, // orientation x
+                                                             element::Int16, // orientation y
+                                                             element::Int16> // orientation z
 {
   inline static Eigen::Quaterniond orientation(const RxMessageDataBuffer& rx_buffer) {
-    return Eigen::Quaterniond(
+    Eigen::Quaterniond(
       static_cast<double>(deserialize<1>(rx_buffer)) / 10000.0,
       static_cast<double>(deserialize<2>(rx_buffer)) / 10000.0,
       static_cast<double>(deserialize<3>(rx_buffer)) / 10000.0,
       static_cast<double>(deserialize<4>(rx_buffer)) / 10000.0
+    );
+  }
+};
+
+struct MeasurementRaw : public message::MessageFrame<element::Uint8, // measurement type indicator
+                                                     element::Int16, // measurement 0
+                                                     element::Int16, // measurement 1
+                                                     element::Int16> // measurement 2
+{
+  inline static constexpr bool isLinearAcceleration(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<1>(rx_buffer) == 1;
+  }
+  inline static constexpr bool isAngularVelocity(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<1>(rx_buffer) == 2;
+  }
+  inline static Eigen::Vector3f linearAcceleration(const RxMessageDataBuffer& rx_buffer) {
+    return Eigen::Vector3f(
+      static_cast<float>(deserialize<2>(rx_buffer)) / 1000.0f,
+      static_cast<float>(deserialize<3>(rx_buffer)) / 1000.0f,
+      static_cast<float>(deserialize<4>(rx_buffer)) / 1000.0f
+    );
+  }
+  inline static Eigen::Vector3f angularVelocity(const RxMessageDataBuffer& rx_buffer) {
+    return Eigen::Vector3f(
+      static_cast<float>(deserialize<2>(rx_buffer)) / 1000.0f,
+      static_cast<float>(deserialize<3>(rx_buffer)) / 1000.0f,
+      static_cast<float>(deserialize<4>(rx_buffer)) / 1000.0f    
     );
   }
 };
@@ -235,8 +262,8 @@ struct Response : public message::MessageFrame<element::Uint8, // measurement ty
 
 namespace can_gateway_shield {
 
-struct Response : public message::MessageFrame<element::Int16LE, // temperature measurement
-                                               element::Int16LE> // voltage measurement
+struct Response : public message::MessageFrame<element::Int16, // temperature measurement
+                                               element::Int16> // voltage measurement
 {
   inline static constexpr float temperature(const RxMessageDataBuffer& rx_buffer) {
     return static_cast<float>(deserialize<1>(rx_buffer)) / 100.0f;
