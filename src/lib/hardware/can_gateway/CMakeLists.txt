@@ -19,3 +19,8 @@ target_include_directories(eduart-hardware-can PUBLIC
   $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
+ament_target_dependencies(eduart-hardware-can
+  "tf2"
+  "tf2_ros"
+  "tf2_sensor_msgs"
+)
