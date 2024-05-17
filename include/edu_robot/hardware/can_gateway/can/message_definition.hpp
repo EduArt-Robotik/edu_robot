@@ -114,7 +114,7 @@ struct MeasurementOrientation : public message::MessageFrame<element::Int16, // 
                                                              element::Int16> // orientation z
 {
   inline static Eigen::Quaterniond orientation(const RxMessageDataBuffer& rx_buffer) {
-    return Eigen::Quaterniond(
+    Eigen::Quaterniond(
       static_cast<double>(deserialize<1>(rx_buffer)) / 10000.0,
       static_cast<double>(deserialize<2>(rx_buffer)) / 10000.0,
       static_cast<double>(deserialize<3>(rx_buffer)) / 10000.0,
