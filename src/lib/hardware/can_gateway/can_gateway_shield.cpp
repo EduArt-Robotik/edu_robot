@@ -100,6 +100,9 @@ void CanGatewayShield::processPowerManagementBoardResponse(const message::RxMess
     _status_report.voltage.mcu = Response::value(data);
     sendInputValue(_status_report.voltage.mcu);
   }
+  else {
+    throw HardwareError(State::CAN_SOCKET_ERROR, "wrong message received");
+  }
 
   // Do Diagnostics
   const auto now = _clock->now();
