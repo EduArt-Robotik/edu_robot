@@ -13,12 +13,12 @@ def generate_launch_description():
     parameter_file = PathJoinSubstitution([
       package_path,
       'parameter',
-      'pi-bot.yaml'
+      'eduard2-raspberry-pi.yaml'
     ])
 
     pi_bot = Node(
       package='edu_robot',
-      executable='can-gateway-bot',
+      executable='can-gateway-universal-bot',
       name='pi_bot',
       parameters=[parameter_file],
       namespace=EnvironmentVariable('EDU_ROBOT_NAMESPACE', default_value="eduard"),      
