@@ -29,3 +29,8 @@ WORKDIR /home/$USER/ros
 RUN source /opt/ros/$ROS_DISTRO/setup.bash \
     && source /home/$USER/.bashrc \
     && colcon build --symlink-install --executor sequential --event-handlers console_direct+ --cmake-args -DCMAKE_BUILD_TYPE=Release
+
+# add entry point
+COPY --chown=$USER ./entrypoint /home/$USER/
+RUN chmod a+x /home/$USER/entrypoint
+ENTRYPOINT [ "/home/user/entrypoint" ]
