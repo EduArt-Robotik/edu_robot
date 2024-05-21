@@ -1,6 +1,6 @@
-#include <edu_robot/bot/eduard/eduard.hpp>
-#include <edu_robot/hardware_component_factory.hpp>
+#include "edu_robot/bot/eduard.hpp"
 
+#include <edu_robot/hardware_component_factory.hpp>
 #include <edu_robot/hardware_component_interfaces.hpp>
 #include <edu_robot/motor_controller.hpp>
 #include <edu_robot/robot.hpp>
@@ -19,7 +19,7 @@
 
 namespace eduart {
 namespace robot {
-namespace eduard {
+namespace bot {
 
 static Eduard::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
 {
@@ -196,6 +196,6 @@ Eigen::MatrixXf Eduard::getKinematicMatrix(const DriveKinematic kinematic) const
   return kinematic_matrix;
 }
 
-} // end namespace eduard
+} // end namespace bot
 } // end namespace robot
 } // end namespace eduart

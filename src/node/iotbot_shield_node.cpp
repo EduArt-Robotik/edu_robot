@@ -3,7 +3,7 @@
  *
  * Author: Christian Wendt (christian.wendt@eduart-robotik.com)
  */
-#include <edu_robot/bot/eduard/eduard.hpp>
+#include "edu_robot/bot/eduard.hpp"
 
 #include <edu_robot/hardware/iot_shield/iot_shield.hpp>
 #include <edu_robot/hardware/iot_shield/iotbot_hardware_component_factory.hpp>
@@ -11,16 +11,17 @@
 #include <rclcpp/executors.hpp>
 #include <rclcpp/rclcpp.hpp>
 
+using eduart::robot::bot::Eduard;
 using eduart::robot::iotbot::IotShield;
 using eduart::robot::iotbot::IotBotHardwareComponentFactory;
 
 using namespace std::chrono_literals;
 
-class IotBot : public eduart::robot::eduard::Eduard
+class IotBot : public Eduard
 {
 public:
   IotBot()
-    : eduart::robot::eduard::Eduard(
+    : Eduard(
         "eduard",
         std::make_unique<IotShield>("/dev/ttyS1")
     )

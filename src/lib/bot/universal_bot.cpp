@@ -1,6 +1,6 @@
-#include <edu_robot/bot/universal_bot/universal_bot.hpp>
-#include <edu_robot/hardware_component_factory.hpp>
+#include "edu_robot/bot/universal_bot.hpp"
 
+#include <edu_robot/hardware_component_factory.hpp>
 #include <edu_robot/hardware_component_interfaces.hpp>
 #include <edu_robot/motor_controller.hpp>
 #include <edu_robot/robot.hpp>
@@ -19,7 +19,7 @@
 
 namespace eduart {
 namespace robot {
-namespace universal_bot {
+namespace bot {
 
 static UniversalBot::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
 {
@@ -164,6 +164,6 @@ Eigen::MatrixXf UniversalBot::getKinematicMatrix(const DriveKinematic kinematic)
   return kinematic_matrix;
 }
 
-} // end namespace universal_bot
+} // end namespace bot
 } // end namespace robot
 } // end namespace eduart

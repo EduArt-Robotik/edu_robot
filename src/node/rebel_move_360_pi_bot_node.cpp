@@ -3,27 +3,30 @@
  *
  * Author: Christian Wendt (christian.wendt@eduart-robotik.com)
  */
-#include "edu_robot/hardware/can_gateway/sensor_tof_ring_hardware.hpp"
-#include "edu_robot/hardware/igus/motor_controller_hardware.hpp"
-#include <array>
-#include <edu_robot/bot/turtle/turtle.hpp>
+
+#include <edu_robot/bot/rebel_move.hpp>
 
 #include <edu_robot/hardware/igus/hardware_component_factory.hpp>
 #include <edu_robot/hardware/igus/can_gateway_shield.hpp>
+#include <edu_robot/hardware/can_gateway/sensor_tof_ring_hardware.hpp>
+#include <edu_robot/hardware/igus/motor_controller_hardware.hpp>
 
 #include <rclcpp/executors.hpp>
 #include <rclcpp/rclcpp.hpp>
 
+#include <array>
+
+using eduart::robot::bot::RebelMove;
 using eduart::robot::hardware::igus::CanGatewayShield;
 using eduart::robot::hardware::igus::HardwareComponentFactory;
 using eduart::robot::hardware::igus::MotorControllerHardware;
 using eduart::robot::hardware::can_gateway::SensorTofRingHardware;
 
-class IgusCanTurtleBot : public eduart::robot::turtle::Turtle
+class RebelMove360Bot : public RebelMove
 {
 public:
-  IgusCanTurtleBot()
-    : eduart::robot::turtle::Turtle(
+  RebelMove360Bot()
+    : RebelMove(
         "turtle", std::make_unique<CanGatewayShield>(
           "eduart-can2", "eduart-can1", "eduart-can0"
         )
@@ -61,7 +64,7 @@ public:
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<IgusCanTurtleBot>());
+  rclcpp::spin(std::make_shared<RebelMove360Bot>());
   rclcpp::shutdown();
 
   return 0;

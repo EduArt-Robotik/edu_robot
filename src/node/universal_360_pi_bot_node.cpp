@@ -3,7 +3,7 @@
  *
  * Author: Christian Wendt (christian.wendt@eduart-robotik.com)
  */
-#include <edu_robot/bot/universal_bot/universal_bot.hpp>
+#include <edu_robot/bot/universal_bot.hpp>
 
 #include <edu_robot/hardware/can_gateway/can_gateway_shield.hpp>
 #include <edu_robot/hardware/can_gateway/hardware_component_factory.hpp>
@@ -11,16 +11,17 @@
 #include <rclcpp/executors.hpp>
 #include <rclcpp/rclcpp.hpp>
 
+using eduart::robot::bot::UniversalBot;
 using eduart::robot::hardware::can_gateway::CanGatewayShield;
 using eduart::robot::hardware::can_gateway::HardwareComponentFactory;
 using eduart::robot::hardware::can_gateway::SensorTofHardware;
 using eduart::robot::hardware::can_gateway::SensorTofRingHardware;
 
-class CanGatewayUniversalBot : public eduart::robot::universal_bot::UniversalBot
+class CanGatewayUniversalBot : public UniversalBot
 {
 public:
   CanGatewayUniversalBot()
-    : eduart::robot::universal_bot::UniversalBot(
+    : UniversalBot(
         "universal_bot",
         std::make_unique<CanGatewayShield>(
           "eduart-can2", "eduart-can1", "eduart-can0"

@@ -3,7 +3,7 @@
  *
  * Author: Christian Wendt (christian.wendt@eduart-robotik.com)
  */
-#include <edu_robot/bot/universal_bot/universal_bot.hpp>
+#include "edu_robot/bot/universal_bot.hpp"
 
 #include <edu_robot/hardware/ethernet_gateway/ethernet_gateway_shield.hpp>
 #include <edu_robot/hardware/ethernet_gateway/hardware_component_factory.hpp>
@@ -11,14 +11,15 @@
 #include <rclcpp/executors.hpp>
 #include <rclcpp/rclcpp.hpp>
 
+using eduart::robot::bot::UniversalBot;
 using eduart::robot::hardware::ethernet::EthernetGatewayShield;
 using eduart::robot::hardware::ethernet::HardwareComponentFactory;
 
-class EthernetGatewayUniversalBot : public eduart::robot::universal_bot::UniversalBot
+class EthernetGatewayUniversalBot : public UniversalBot
 {
 public:
   EthernetGatewayUniversalBot()
-    : eduart::robot::universal_bot::UniversalBot(
+    : UniversalBot(
         "universal_bot",
         std::make_unique<EthernetGatewayShield>("192.168.2.20", 1234)
       )

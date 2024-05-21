@@ -12,14 +12,14 @@ if(HAVE_MRAA) ## TODO: use string for dependencies, so onyl one target_link_libr
   message("MRAA library found")
   target_link_libraries(eduart-iotbot-shield
     "${cpp_typesupport_target}"
-    eduart-robot-eduard
+    eduart-bot
     mraa
   )
 else()
   message("MRAA library not found")
   target_link_libraries(eduart-iotbot-shield
     "${cpp_typesupport_target}"
-    eduart-robot-eduard
+    eduart-bot
   )
 endif()
 target_compile_features(eduart-iotbot-shield PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17

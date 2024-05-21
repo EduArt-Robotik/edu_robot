@@ -5,6 +5,7 @@ add_executable(iotbot-shield
 )
 target_link_libraries(iotbot-shield
   eduart-iotbot-shield
+  eduart-bot
 )
 ament_target_dependencies(iotbot-shield
   "rclcpp"
@@ -16,7 +17,7 @@ add_executable(ethernet-gateway
 )
 target_link_libraries(ethernet-gateway
   eduart-ethernet-gateway
-  eduart-robot-eduard
+  eduart-bot
 )
 ament_target_dependencies(ethernet-gateway
   "rclcpp"
@@ -28,58 +29,45 @@ add_executable(ethernet-gateway-universal-bot
 )
 target_link_libraries(ethernet-gateway-universal-bot
   eduart-ethernet-gateway
-  eduart-robot-universal-bot
-  eduart-robot-eduard
+  eduart-bot
 )
 ament_target_dependencies(ethernet-gateway-universal-bot
   "rclcpp"
 )
 
-### Can Gateway Bot
-add_executable(can-gateway-bot
-  can_gateway_bot_node.cpp
+### Eduard 360 Pi Bot
+add_executable(eduard-360-pi-bot
+  eduard_360_pi_node.cpp
 )
-target_link_libraries(can-gateway-bot
-  eduart-robot-eduard
+target_link_libraries(eduard-360-pi-bot
+  eduart-bot
   eduart-hardware-can
 )
-ament_target_dependencies(can-gateway-bot
+ament_target_dependencies(eduard-360-pi-bot
   "rclcpp"
 )
 
-### Can Gateway Universal Bot
-add_executable(can-gateway-universal-bot
-  can_gateway_universal_bot_node.cpp
+### Universal Bot 360
+add_executable(universal-360-pi-bot
+  universal_360_pi_bot_node.cpp
 )
-target_link_libraries(can-gateway-universal-bot
-  eduart-robot-universal-bot
+target_link_libraries(universal-360-pi-bot
+  eduart-bot
   eduart-hardware-can
 )
-ament_target_dependencies(can-gateway-universal-bot
-  "rclcpp"
-)
-
-### Ehternet Gateway Ohmni Bot
-add_executable(ethernet-gateway-ohmni-bot
-  ohmni_bot_node.cpp
-)
-target_link_libraries(ethernet-gateway-ohmni-bot
-  eduart-ethernet-gateway
-  ohmni-bot
-)
-ament_target_dependencies(ethernet-gateway-ohmni-bot
+ament_target_dependencies(universal-360-pi-bot
   "rclcpp"
 )
 
 ### Rebel Move Bot
-add_executable(rebel-move-bot
-  rebel_move_bot_node.cpp
+add_executable(rebel-move-360-pi-bot
+  rebel_move_360_pi_bot_node.cpp
 )
-target_link_libraries(rebel-move-bot
+target_link_libraries(rebel-move-360-pi-bot
   igus
-  eduart-turtle
+  eduart-bot
   eduart-hardware-can
 )
-ament_target_dependencies(rebel-move-bot
+ament_target_dependencies(rebel-move-360-pi-bot
   "rclcpp"
 )

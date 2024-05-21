@@ -1,4 +1,5 @@
-#include <edu_robot/bot/turtle/turtle.hpp>
+#include "edu_robot/bot/rebel_move.hpp"
+
 #include <edu_robot/hardware_component_factory.hpp>
 
 #include <edu_robot/hardware_component_interfaces.hpp>
@@ -20,11 +21,11 @@
 
 namespace eduart {
 namespace robot {
-namespace turtle {
+namespace bot {
 
-static Turtle::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
+static RebelMove::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
 {
-  Turtle::Parameter parameter;
+  RebelMove::Parameter parameter;
 
   // Declaring of Parameters
   ros_node.declare_parameter<float>("skid.length.x", parameter.skid.length.x);
@@ -47,13 +48,13 @@ static Turtle::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
   return parameter;
 }
 
-Turtle::Turtle(
+RebelMove::RebelMove(
   const std::string& robot_name, std::unique_ptr<HardwareRobotInterface> hardware_interface, const std::string& ns)
   : robot::Robot(robot_name, std::move(hardware_interface), ns)
   , _parameter(get_robot_ros_parameter(*this))
 { }
 
-void Turtle::initialize(eduart::robot::HardwareComponentFactory& factory)
+void RebelMove::initialize(eduart::robot::HardwareComponentFactory& factory)
 {
   // Motor Controllers
   const std::vector<std::string> motor_name = {
@@ -98,12 +99,12 @@ void Turtle::initialize(eduart::robot::HardwareComponentFactory& factory)
   switchKinematic(DriveKinematic::MECANUM_DRIVE);
 }
 
-Turtle::~Turtle()
+RebelMove::~RebelMove()
 {
 
 }
 
-Eigen::MatrixXf Turtle::getKinematicMatrix(const DriveKinematic kinematic) const
+Eigen::MatrixXf RebelMove::getKinematicMatrix(const DriveKinematic kinematic) const
 {
   Eigen::MatrixXf kinematic_matrix;
 
@@ -120,12 +121,12 @@ Eigen::MatrixXf Turtle::getKinematicMatrix(const DriveKinematic kinematic) const
     kinematic_matrix *= 1.0f / wheel_radius;    
   }
   else {
-    throw std::invalid_argument("Turtle: given kinematic is not supported.");
+    throw std::invalid_argument("RebelMove: given kinematic is not supported.");
   }
 
   return kinematic_matrix;
 }
 
-} // end namespace turtle
+} // end namespace bot
 } // end namespace robot
 } // end namespace eduart

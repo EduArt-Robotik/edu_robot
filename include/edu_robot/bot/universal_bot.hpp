@@ -14,7 +14,7 @@
 
 namespace eduart {
 namespace robot {
-namespace universal_bot {
+namespace bot {
 
 struct COLOR {
   struct DEFAULT {
@@ -57,6 +57,6 @@ protected:
   Parameter _parameter;
 };
 
-} // end namespace universal_bot
+} // end namespace bot
 } // end namespace robot
 } // end namespace eduart

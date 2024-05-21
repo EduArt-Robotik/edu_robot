@@ -14,9 +14,9 @@
 
 namespace eduart {
 namespace robot {
-namespace turtle {
+namespace bot {
 
-class Turtle : public robot::Robot
+class RebelMove : public robot::Robot
 {
 public:
   struct Parameter {
@@ -36,9 +36,9 @@ public:
     } mecanum;    
   };
 
-  Turtle(
+  RebelMove(
     const std::string& robot_name, std::unique_ptr<HardwareRobotInterface> hardware_interface, const std::string& ns = "");
-  ~Turtle() override;
+  ~RebelMove() override;
 
 protected:
   Eigen::MatrixXf getKinematicMatrix(const DriveKinematic kinematic) const override;
@@ -48,6 +48,6 @@ protected:
   Parameter _parameter;
 };
 
-} // end namespace turtle
+} // end namespace bot
 } // end namespace robot
 } // end namespace eduart
