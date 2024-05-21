@@ -11,6 +11,8 @@
 #include <edu_robot/hardware/communicator.hpp>
 #include <edu_robot/hardware/communicator_device_interfaces.hpp>
 
+#include <rclcpp/node.hpp>
+
 #include <memory>
 
 namespace eduart {
@@ -22,11 +24,16 @@ class MotorControllerHardware : public MotorController::HardwareInterface
                               , public CommunicatorTxRxDevice
 {
 public:
+  struct Parameter {
+    bool set_parameter = false; //> sets and flashes parameter to motor controller hardware (EEPROM)
+    std::uint32_t can_id; //> can id used by this controller
+  };
+
   MotorControllerHardware(
-    const std::string& name, const std::uint8_t can_id, std::shared_ptr<Communicator> communicator)
+    const std::string& name, const Parameter& parameter, std::shared_ptr<Communicator> communicator)
     : MotorController::HardwareInterface(name, 1)
     , CommunicatorTxRxDevice(communicator)
-    , _can_id(can_id)
+    , _parameter(parameter)
     , _measured_rpm(1, 0.0)
   { }
   ~MotorControllerHardware() override = default;
@@ -37,11 +44,14 @@ public:
   void disable();
   void reset();
 
+  static Parameter get_parameter(
+    const std::string& motor_controller_name, const Parameter& default_parameter, rclcpp::Node& ros_node);
+
 private:
   void processRxData(const message::RxMessageDataBuffer& data);
   std::uint8_t getTimeStamp();
 
-  std::uint8_t _can_id;
+  const Parameter _parameter;
   std::vector<Rpm> _measured_rpm;
 };
 

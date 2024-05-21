@@ -25,9 +25,27 @@ using can::message::SetEnableMotor;
 using can::message::SetDisableMotor;
 using can::message::SetReset;
 
+MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
+    const std::string& motor_controller_name, const Parameter& default_parameter, rclcpp::Node& ros_node)
+{
+  Parameter parameter;
+
+  ros_node.declare_parameter<bool>(
+    motor_controller_name + ".set_parameter", default_parameter.set_parameter);
+  // ros_node.declare_parameter<int>(motor_controller_name + ".can_id", default_parameter.can_id);
+
+  parameter.set_parameter = ros_node.get_parameter(motor_controller_name + ".set_parameter").as_bool();
+  // parameter.can_id = ros_node.get_parameter(motor_controller_name + ".can_id").as_int();
+
+  return parameter;
+}
+
 void MotorControllerHardware::processRxData(const can::message::RxMessageDataBuffer &data)
 {
-  if (_callback_process_measurement == nullptr || can::message::AcknowledgedVelocity::canId(data) != _can_id) {
+  if (_callback_process_measurement == nullptr
+      ||
+      can::message::AcknowledgedVelocity::canId(data) != _parameter.can_id)
+  {
     return;
   }
 }
@@ -37,6 +55,10 @@ void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
   // Initial Motor Controller Hardware
   if (false == parameter.isValid()) {
     throw std::invalid_argument("Given parameter are not valid. Cancel initialization of motor controller.");
+  }
+  if (_parameter.set_parameter == false) {
+    // do not flash set and flash the parameter to the EEPROM
+    return;
   }
 
   // Motor Controller Parameter
@@ -49,7 +71,7 @@ void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
   }
 
   auto request = CanRequest::make_request<SetVelocity>(
-    _can_id,
+    _parameter.can_id,
     rpm[0],
     getTimeStamp()
   );
@@ -71,7 +93,7 @@ void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
 
 void MotorControllerHardware::enable()
 {
-  auto request = CanRequest::make_request<SetEnableMotor>(_can_id);
+  auto request = CanRequest::make_request<SetEnableMotor>(_parameter.can_id);
   auto future_response = _communicator->sendRequest(std::move(request));
   wait_for_future(future_response, 200ms);
   auto got = future_response.get();
@@ -79,7 +101,7 @@ void MotorControllerHardware::enable()
   
 void MotorControllerHardware::disable()
 {
-  auto request = CanRequest::make_request<SetDisableMotor>(_can_id);
+  auto request = CanRequest::make_request<SetDisableMotor>(_parameter.can_id);
   auto future_response = _communicator->sendRequest(std::move(request));
   wait_for_future(future_response, 200ms);
   auto got = future_response.get();
@@ -87,7 +109,7 @@ void MotorControllerHardware::disable()
 
 void MotorControllerHardware::reset()
 {
-  auto request = CanRequest::make_request<SetReset>(_can_id);
+  auto request = CanRequest::make_request<SetReset>(_parameter.can_id);
   auto future_response = _communicator->sendRequest(std::move(request));
   wait_for_future(future_response, 200ms);
   auto got = future_response.get();

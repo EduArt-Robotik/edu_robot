@@ -3,6 +3,9 @@
  *
  * Author: Christian Wendt (christian.wendt@eduart-robotik.com)
  */
+#include "edu_robot/hardware/can_gateway/sensor_tof_ring_hardware.hpp"
+#include "edu_robot/hardware/igus/motor_controller_hardware.hpp"
+#include <array>
 #include <edu_robot/bot/turtle/turtle.hpp>
 
 #include <edu_robot/hardware/igus/hardware_component_factory.hpp>
@@ -13,6 +16,8 @@
 
 using eduart::robot::hardware::igus::CanGatewayShield;
 using eduart::robot::hardware::igus::HardwareComponentFactory;
+using eduart::robot::hardware::igus::MotorControllerHardware;
+using eduart::robot::hardware::can_gateway::SensorTofRingHardware;
 
 class IgusCanTurtleBot : public eduart::robot::turtle::Turtle
 {
@@ -27,11 +32,26 @@ public:
     auto shield = std::dynamic_pointer_cast<CanGatewayShield>(_hardware_interface);
     auto factory = HardwareComponentFactory(shield);
 
-    factory//.addMotorController("motor_controller_a", 0x10)
-          //  .addMotorController("motor_controller_b", 0x30)
-          //  .addMotorController("motor_controller_c", 0x40)
-          //  .addMotorController("motor_controller_d", 0x50)
-           .addTofSensor("pointcloud_left", {}, *this);
+    // Motor Controller
+    std::array<char const *const, 4> motor_controller_name = {
+      "motor_controller_a", "motor_controller_a", "motor_controller_a", "motor_controller_a"};
+
+    for (const auto& name : motor_controller_name) {
+      const auto parameter = MotorControllerHardware::get_parameter(
+        name, {}, *this);
+      factory.addMotorController(name, parameter);
+    }
+
+    // ToF Sensor Ring
+    auto point_cloud_parameter = SensorTofRingHardware::get_parameter(
+      "pointcloud_left",
+      {"pointcloud_left_a", "pointcloud_left_b"},
+      *this
+    );
+    factory.addTofRingSensor("pointcloud_left", point_cloud_parameter, *this);
+    
+    // IMU Sensor
+    factory.addImuSensor("imu", 0x381);           
 
     initialize(factory);
     _mode_state_machine.switchToMode(eduart::robot::RobotMode::INACTIVE);

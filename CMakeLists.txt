@@ -79,7 +79,7 @@ install(
     ethernet-gateway
     ethernet-gateway-universal-bot
     ethernet-gateway-ohmni-bot
-    igus-can-turtle-bot
+    rebel-move-bot
     can-gateway-universal-bot
     can-gateway-bot
   LIBRARY DESTINATION lib

@@ -71,15 +71,15 @@ ament_target_dependencies(ethernet-gateway-ohmni-bot
   "rclcpp"
 )
 
-### Igus Can Turtle Bot
-add_executable(igus-can-turtle-bot
-  igus_can_turtle_bot_node.cpp
+### Rebel Move Bot
+add_executable(rebel-move-bot
+  rebel_move_bot_node.cpp
 )
-target_link_libraries(igus-can-turtle-bot
+target_link_libraries(rebel-move-bot
   igus
   eduart-turtle
   eduart-hardware-can
 )
-ament_target_dependencies(igus-can-turtle-bot
+ament_target_dependencies(rebel-move-bot
   "rclcpp"
 )
