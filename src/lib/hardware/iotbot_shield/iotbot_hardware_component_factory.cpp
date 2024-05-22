@@ -5,7 +5,6 @@
 #include "edu_robot/hardware/iot_shield/motor_controller_hardware.hpp"
 #include "edu_robot/hardware/iot_shield/range_sensor_hardware.hpp"
 
-#include <functional>
 #include <memory>
 
 namespace eduart {
@@ -21,9 +20,11 @@ IotBotHardwareComponentFactory& IotBotHardwareComponentFactory::addLighting(cons
   return *this;
 } 
 
-IotBotHardwareComponentFactory& IotBotHardwareComponentFactory::addMotorController(const std::string& controller_name)
+IotBotHardwareComponentFactory& IotBotHardwareComponentFactory::addMotorController(
+  const std::string& controller_name, const MotorControllerHardware::Parameter& parameter)
 {
-  auto compound_motor = std::make_shared<MotorControllerHardware>(controller_name, _shield->getCommunicator());
+  auto compound_motor = std::make_shared<MotorControllerHardware>(
+    controller_name, parameter, _shield->getCommunicator());
 
   _motor_controller_hardware.push_back(compound_motor);
   _shield->registerIotShieldRxDevice(compound_motor);
@@ -40,7 +41,7 @@ IotBotHardwareComponentFactory::addRangeSensor(const std::string& sensor_name, c
 
   return *this;
 }                                               
-  
+
 IotBotHardwareComponentFactory& IotBotHardwareComponentFactory::addImuSensor(const std::string& sensor_name)
 {
   auto imu_hardware = std::make_shared<ImuSensorHardware>(_shield->getCommunicator());

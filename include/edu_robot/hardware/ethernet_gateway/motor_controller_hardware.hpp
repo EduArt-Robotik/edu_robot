@@ -70,7 +70,6 @@ public:
       name + ".encoder_inverted", default_parameter.encoder_inverted);
 
     parameter.can_id = ros_node.get_parameter(name + ".can_id").as_int();
-    parameter.can_id.output = ros_node.get_parameter(name + ".can_id.output").as_int();
 
     parameter.gear_ratio = ros_node.get_parameter(name + ".gear_ratio").as_double();
     parameter.encoder_ratio = ros_node.get_parameter(name + ".encoder_ratio").as_double();

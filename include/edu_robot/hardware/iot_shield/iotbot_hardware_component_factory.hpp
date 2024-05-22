@@ -6,6 +6,7 @@
 #pragma once
 
 #include "edu_robot/hardware/iot_shield/iot_shield.hpp"
+#include "edu_robot/hardware/iot_shield/motor_controller_hardware.hpp"
 
 #include <edu_robot/hardware_component_factory.hpp>
 
@@ -23,7 +24,8 @@ public:
   ~IotBotHardwareComponentFactory() override = default;
 
   IotBotHardwareComponentFactory& addLighting(const std::string& lighting_name);
-  IotBotHardwareComponentFactory& addMotorController(const std::string& controller_name);
+  IotBotHardwareComponentFactory& addMotorController(
+    const std::string& controller_name, const MotorControllerHardware::Parameter& parameter);
   IotBotHardwareComponentFactory& addRangeSensor(const std::string& sensor_name, const std::uint8_t id);
   IotBotHardwareComponentFactory& addImuSensor(const std::string& sensor_name);
 

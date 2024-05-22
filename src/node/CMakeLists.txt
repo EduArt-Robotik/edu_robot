@@ -1,25 +1,25 @@
 ## Build Nodes
-### IotBot
-add_executable(iotbot-shield
-  iotbot_shield_node.cpp
+### Eduard IotBot
+add_executable(eduard-iot-bot
+  eduard_iot_bot_node.cpp
 )
-target_link_libraries(iotbot-shield
+target_link_libraries(eduard-iot-bot
   eduart-iotbot-shield
   eduart-bot
 )
-ament_target_dependencies(iotbot-shield
+ament_target_dependencies(eduard-iot-bot
   "rclcpp"
 )
 
 ### Eduard Ehternet Gateway
-add_executable(eduard-ethernet-gateway
+add_executable(eduard-ethernet-gateway-bot
   eduard_ethernet_gateway_bot_node.cpp
 )
-target_link_libraries(eduard-ethernet-gateway
+target_link_libraries(eduard-ethernet-gateway-bot
   eduart-ethernet-gateway
   eduart-bot
 )
-ament_target_dependencies(eduard-ethernet-gateway
+ament_target_dependencies(eduard-ethernet-gateway-bot
   "rclcpp"
 )
 
