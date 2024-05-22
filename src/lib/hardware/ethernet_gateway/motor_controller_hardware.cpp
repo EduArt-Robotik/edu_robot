@@ -3,6 +3,7 @@
 #include "edu_robot/hardware/ethernet_gateway/udp/protocol.hpp"
 #include "edu_robot/hardware/ethernet_gateway/ethernet_request.hpp"
 
+#include <cstddef>
 #include <edu_robot/component_error.hpp>
 #include <edu_robot/rpm.hpp>
 #include <edu_robot/state.hpp>
@@ -28,8 +29,10 @@ using udp::message::SetMotorRpm;
 using udp::message::SetMotorMeasurement;
 using udp::message::AcknowledgedMotorRpm;
 
+template <std::size_t NUM_CHANNELS>
 void initialize_controller(
-  const Motor::Parameter& parameter, const std::uint8_t can_id, std::shared_ptr<Communicator> communicator)
+  const Motor::Parameter& parameter, const typename MotorControllerHardware<NUM_CHANNELS>::Parameter& hardware_parameter,
+  std::shared_ptr<Communicator> communicator)
 {
   // Initial Motor Controller Hardware
   if (false == parameter.isValid()) {
@@ -40,13 +43,13 @@ void initialize_controller(
   {
     auto request = EthernetRequest::make_request<SetMotorControllerParameter>(
       0,
-      can_id,
-      parameter.gear_ratio,
+      hardware_parameter.can_id,
+      hardware_parameter.gear_ratio,
       parameter.max_rpm,
-      parameter.threshold_stall_check,
-      parameter.weight_low_pass_set_point,
-      parameter.control_frequency,
-      parameter.timeout_ms
+      hardware_parameter.threshold_stall_check,
+      hardware_parameter.weight_low_pass_set_point,
+      hardware_parameter.control_frequency,
+      hardware_parameter.timeout_ms
     );
     auto future_response = communicator->sendRequest(std::move(request));
     wait_for_future(future_response, 200ms);
@@ -60,10 +63,10 @@ void initialize_controller(
   {
     auto request = EthernetRequest::make_request<SetEncoderParameter>(
       0,
-      can_id,
-      parameter.encoder_ratio,
-      parameter.weight_low_pass_encoder,
-      parameter.encoder_inverted
+      hardware_parameter.can_id,
+      hardware_parameter.encoder_ratio,
+      hardware_parameter.weight_low_pass_encoder,
+      hardware_parameter.encoder_inverted
     );
     auto future_response = communicator->sendRequest(std::move(request));
     wait_for_future(future_response, 200ms);
@@ -77,13 +80,13 @@ void initialize_controller(
   {
     auto request = EthernetRequest::make_request<SetPidControllerParameter>(
       0,
-      can_id,
+      hardware_parameter.can_id,
       parameter.kp,
       parameter.ki,
       parameter.kd,
      -parameter.max_rpm,
       parameter.max_rpm,
-      parameter.weight_low_pass_set_point,
+      hardware_parameter.weight_low_pass_set_point,
       true
     );
     auto future_response = communicator->sendRequest(std::move(request));
@@ -135,13 +138,13 @@ void MotorControllerHardware<2>::processRxData(const message::RxMessageDataBuffe
 template <>
 void MotorControllerHardware<1>::initialize(const Motor::Parameter& parameter)
 {
-  initialize_controller(parameter, _can_id, _communicator);
+  initialize_controller<1>(parameter, _parameter, _communicator);
 }
 
 template <>
 void MotorControllerHardware<2>::initialize(const Motor::Parameter& parameter)
 {
-  initialize_controller(parameter, _can_id, _communicator);
+  initialize_controller<2>(parameter, _parameter, _communicator);
 }
 
 template <>
@@ -154,7 +157,7 @@ void MotorControllerHardware<1>::processSetValue(const std::vector<Rpm>& rpm)
   auto request = EthernetRequest::make_request<udp::message::SetMotorRpm>(
     _can_id,
     rpm[0],
-    0.0
+    0.0f
   );
 
   auto future_response = _communicator->sendRequest(std::move(request));

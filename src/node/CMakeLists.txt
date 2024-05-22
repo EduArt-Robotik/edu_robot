@@ -11,27 +11,27 @@ ament_target_dependencies(iotbot-shield
   "rclcpp"
 )
 
-### Ehternet Gateway
-add_executable(ethernet-gateway
-  ethernet_gateway_bot_node.cpp
+### Eduard Ehternet Gateway
+add_executable(eduard-ethernet-gateway
+  eduard_ethernet_gateway_bot_node.cpp
 )
-target_link_libraries(ethernet-gateway
+target_link_libraries(eduard-ethernet-gateway
   eduart-ethernet-gateway
   eduart-bot
 )
-ament_target_dependencies(ethernet-gateway
+ament_target_dependencies(eduard-ethernet-gateway
   "rclcpp"
 )
 
-### Ehternet Gateway Universal Bot
-add_executable(ethernet-gateway-universal-bot
-  ethernet_gateway_universal_bot_node.cpp
+### Universal Ehternet Gateway Bot
+add_executable(universal-ethernet-gateway-bot
+  universal_ethernet_gateway_bot_node.cpp
 )
-target_link_libraries(ethernet-gateway-universal-bot
+target_link_libraries(universal-ethernet-gateway-bot
   eduart-ethernet-gateway
   eduart-bot
 )
-ament_target_dependencies(ethernet-gateway-universal-bot
+ament_target_dependencies(universal-ethernet-gateway-bot
   "rclcpp"
 )
 

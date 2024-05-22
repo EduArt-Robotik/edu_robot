@@ -7,6 +7,7 @@
 
 #include <edu_robot/hardware/ethernet_gateway/ethernet_gateway_shield.hpp>
 #include <edu_robot/hardware/ethernet_gateway/hardware_component_factory.hpp>
+#include <edu_robot/hardware/ethernet_gateway/motor_controller_hardware.hpp>
 
 #include <rclcpp/executors.hpp>
 #include <rclcpp/rclcpp.hpp>
@@ -14,11 +15,12 @@
 using eduart::robot::bot::UniversalBot;
 using eduart::robot::hardware::ethernet::EthernetGatewayShield;
 using eduart::robot::hardware::ethernet::HardwareComponentFactory;
+using eduart::robot::hardware::ethernet::MotorControllerHardware;
 
-class EthernetGatewayUniversalBot : public UniversalBot
+class UniversalEthernetGatewayBot : public UniversalBot
 {
 public:
-  EthernetGatewayUniversalBot()
+  UniversalEthernetGatewayBot()
     : UniversalBot(
         "universal_bot",
         std::make_unique<EthernetGatewayShield>("192.168.2.20", 1234)
@@ -30,7 +32,10 @@ public:
 
     // Motor Controller
     for (std::size_t i = 0; i < _parameter.axis.size(); ++i) {
-      factory.addMotorController(std::string("motor_controller_") + std::to_string(i), i);
+      const std::string motor_controller_name = "motor_controller_" + std::to_string(i);
+      const auto hardware_parameter = MotorControllerHardware<2>::get_parameter(
+        motor_controller_name, {}, *this);
+      factory.addMotorController(motor_controller_name, hardware_parameter);
     }
 
     // IMU Sensor
@@ -45,7 +50,7 @@ public:
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<EthernetGatewayUniversalBot>());
+  rclcpp::spin(std::make_shared<UniversalEthernetGatewayBot>());
   rclcpp::shutdown();
 
   return 0;

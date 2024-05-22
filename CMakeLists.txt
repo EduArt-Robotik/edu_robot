@@ -76,8 +76,8 @@ install(
 install(
   TARGETS
     iotbot-shield
-    ethernet-gateway
-    ethernet-gateway-universal-bot
+    eduard-ethernet-gateway
+    universal-ethernet-gateway-bot
     rebel-move-360-pi-bot
     universal-360-pi-bot
     eduard-360-pi-bot

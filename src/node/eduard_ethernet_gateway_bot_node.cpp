@@ -7,6 +7,7 @@
 
 #include <edu_robot/hardware/ethernet_gateway/hardware_component_factory.hpp>
 #include <edu_robot/hardware/ethernet_gateway/ethernet_gateway_shield.hpp>
+#include <edu_robot/hardware/ethernet_gateway/motor_controller_hardware.hpp>
 
 #include <rclcpp/executors.hpp>
 #include <rclcpp/rclcpp.hpp>
@@ -14,11 +15,12 @@
 using eduart::robot::bot::Eduard;
 using eduart::robot::hardware::ethernet::EthernetGatewayShield;
 using eduart::robot::hardware::ethernet::HardwareComponentFactory;
+using eduart::robot::hardware::ethernet::MotorControllerHardware;
 
-class EthernetGatewayBot : public Eduard
+class EduardEthernetGatewayBot : public Eduard
 {
 public:
-  EthernetGatewayBot()
+  EduardEthernetGatewayBot()
     : Eduard(
         "eduard",
         std::make_unique<EthernetGatewayShield>("192.168.2.20", 1234)
@@ -26,24 +28,30 @@ public:
   {
     auto shield = std::dynamic_pointer_cast<EthernetGatewayShield>(_hardware_interface);
     auto factory = HardwareComponentFactory(shield);
-    // _timer_process_status_report = create_wall_timer(100ms, [shield]{ shield->processStatusReport(); });
 
-            // Lightings
+    // Lightings
     factory.addLighting("head")
            .addLighting("right_side")
            .addLighting("left_side")
            .addLighting("back")
-           .addLighting("all")
-           // Motor Controller
-           .addMotorController("motor_controller_0", 0)
-           .addMotorController("motor_controller_1", 1)
-           // Range Sensor
-           .addRangeSensor("range/front/left", 0u, *this)
+           .addLighting("all");
+
+    // Motor Controller
+    for (std::size_t i = 0; i < 2; ++i) {
+      const std::string motor_controller_name = "motor_controller_" + std::to_string(i);
+      const auto hardware_parameter = MotorControllerHardware<2>::get_parameter(
+        motor_controller_name, {}, *this);
+      factory.addMotorController(motor_controller_name, hardware_parameter);
+    }
+
+    // Range Sensor
+    factory.addRangeSensor("range/front/left", 0u, *this)
            .addRangeSensor("range/front/right", 1u, *this)
            .addRangeSensor("range/rear/left", 2u, *this)
-           .addRangeSensor("range/rear/right", 3u, *this)
-           // IMU Sensor
-           .addImuSensor("imu", *this);
+           .addRangeSensor("range/rear/right", 3u, *this);
+
+    // IMU Sensor
+    factory.addImuSensor("imu", *this);
 
     initialize(factory);
     shield->registerComponentInput(_detect_charging_component);
@@ -54,7 +62,7 @@ public:
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<EthernetGatewayBot>());
+  rclcpp::spin(std::make_shared<EduardEthernetGatewayBot>());
   rclcpp::shutdown();
 
   return 0;

@@ -84,7 +84,7 @@ MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
 
 void initialize_controller(
   const Motor::Parameter& parameter, const MotorControllerHardware::Parameter& hardware_parameter,
-  const std::uint32_t can_id, std::shared_ptr<Communicator> communicator)
+  std::shared_ptr<Communicator> communicator)
 {
   // Initial Motor Controller Hardware
   if (false == parameter.isValid()) {
@@ -92,27 +92,28 @@ void initialize_controller(
   }
 
   {
-    auto request = Request::make_request<SetTimeout>(can_id, hardware_parameter.timeout_ms);
+    auto request = Request::make_request<SetTimeout>(
+      hardware_parameter.can_id.input, hardware_parameter.timeout_ms);
     auto future_response = communicator->sendRequest(std::move(request));
     wait_for_future(future_response, 100ms);
     auto got = future_response.get();
   }
   {
     auto request = Request::make_request<SetInvertedEncoder>(
-      can_id, hardware_parameter.encoder_inverted);
+      hardware_parameter.can_id.input, hardware_parameter.encoder_inverted);
     auto future_response = communicator->sendRequest(std::move(request));
     wait_for_future(future_response, 100ms);
     auto got = future_response.get();
   }  
   {
     if (parameter.closed_loop) {
-      auto request = Request::make_request<SetClosedLoop>(can_id);
+      auto request = Request::make_request<SetClosedLoop>(hardware_parameter.can_id.input);
       auto future_response = communicator->sendRequest(std::move(request));
       wait_for_future(future_response, 100ms);
       auto got = future_response.get();
     }
     else {
-      auto request = Request::make_request<SetOpenLoop>(can_id);
+      auto request = Request::make_request<SetOpenLoop>(hardware_parameter.can_id.input);
       auto future_response = communicator->sendRequest(std::move(request));
       wait_for_future(future_response, 100ms);
       auto got = future_response.get();      
@@ -120,74 +121,63 @@ void initialize_controller(
   }
   {
     auto request = Request::make_request<SetFrequency>(
-      can_id, hardware_parameter.control_frequency);
+      hardware_parameter.can_id.input, hardware_parameter.control_frequency);
     auto future_response = communicator->sendRequest(std::move(request));
     wait_for_future(future_response, 100ms);
     auto got = future_response.get();
   }
   {
-    auto request = Request::make_request<SetCtlKp>(can_id, parameter.kp);
+    auto request = Request::make_request<SetCtlKp>(hardware_parameter.can_id.input, parameter.kp);
     auto future_response = communicator->sendRequest(std::move(request));
     wait_for_future(future_response, 100ms);
     auto got = future_response.get();
   }
   {
-    auto request = Request::make_request<SetCtlKi>(can_id, parameter.ki);
+    auto request = Request::make_request<SetCtlKi>(hardware_parameter.can_id.input, parameter.ki);
     auto future_response = communicator->sendRequest(std::move(request));
     wait_for_future(future_response, 100ms);
     auto got = future_response.get();
   }
   {
-    auto request = Request::make_request<SetCtlKd>(can_id, parameter.kd);
+    auto request = Request::make_request<SetCtlKd>(hardware_parameter.can_id.input, parameter.kd);
     auto future_response = communicator->sendRequest(std::move(request));
     wait_for_future(future_response, 100ms);
     auto got = future_response.get();
   }
   {
-    auto request = Request::make_request<SetCtlAntiWindUp>(can_id, true);
+    auto request = Request::make_request<SetCtlAntiWindUp>(hardware_parameter.can_id.input, true);
     auto future_response = communicator->sendRequest(std::move(request));
     wait_for_future(future_response, 100ms);
     auto got = future_response.get();
   }
   {
     auto request = Request::make_request<SetCtlInputFilter>(
-      can_id, hardware_parameter.weight_low_pass_set_point);
+      hardware_parameter.can_id.input, hardware_parameter.weight_low_pass_set_point);
     auto future_response = communicator->sendRequest(std::move(request));
     wait_for_future(future_response, 100ms);
     auto got = future_response.get();
   }
   {
     auto request = Request::make_request<SetGearRatio>(
-      can_id, hardware_parameter.gear_ratio);
+      hardware_parameter.can_id.input, hardware_parameter.gear_ratio);
     auto future_response = communicator->sendRequest(std::move(request));
     wait_for_future(future_response, 100ms);
     auto got = future_response.get();
   }
   {
     auto request = Request::make_request<SetTicksPerRevision>(
-      can_id, hardware_parameter.encoder_ratio);
+      hardware_parameter.can_id.input, hardware_parameter.encoder_ratio);
     auto future_response = communicator->sendRequest(std::move(request));
     wait_for_future(future_response, 100ms);
     auto got = future_response.get();
   }
   {
-    auto request = Request::make_request<SetRpmMax>(can_id, parameter.max_rpm);
+    auto request = Request::make_request<SetRpmMax>(hardware_parameter.can_id.input, parameter.max_rpm);
     auto future_response = communicator->sendRequest(std::move(request));
     wait_for_future(future_response, 100ms);
     auto got = future_response.get();
   }
 }
-
-// template <>
-// void MotorControllerHardware<1>::processRxData(const message::RxMessageDataBuffer &data)
-// {
-//   if (_callback_process_measurement == nullptr || Response::canId(data) != _can_id.output) {
-//     return;
-//   }
-  
-//   _measured_rpm[0] = Response::rpm0(data);
-//   _callback_process_measurement(_measured_rpm, Response::enabled(data));
-// }
 
 void MotorControllerHardware::processRxData(const message::RxMessageDataBuffer &data)
 {
@@ -202,9 +192,7 @@ void MotorControllerHardware::processRxData(const message::RxMessageDataBuffer &
 
 void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
 {
-  initialize_controller(
-    parameter, _parameter, _parameter.can_id.input, _communicator
-  );
+  initialize_controller(parameter, _parameter, _communicator);
 
   auto measurement_end_point = CanRxDataEndPoint::make_data_endpoint<Response>(
     _parameter.can_id.output,
@@ -214,24 +202,6 @@ void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
   _communicator->registerRxDataEndpoint(measurement_end_point);
   registerRxDataEndpoint(measurement_end_point);
 }
-
-// template <>
-// void MotorControllerHardware<1>::processSetValue(const std::vector<Rpm>& rpm)
-// {
-//   if (rpm.size() < 1) {
-//     throw std::runtime_error("Given RPM vector is too small.");
-//   }
-
-//   auto request = Request::make_request<SetRpm>(
-//     _can_id.input,
-//     rpm[0],
-//     0.0
-//   );
-
-//   auto future_response = _communicator->sendRequest(std::move(request));
-//   wait_for_future(future_response, 200ms);
-//   auto got = future_response.get();
-// }
 
 void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
 {

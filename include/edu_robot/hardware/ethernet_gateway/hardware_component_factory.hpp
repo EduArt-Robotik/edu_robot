@@ -7,8 +7,9 @@
 
 #include <edu_robot/hardware_component_factory.hpp>
 
+#include "edu_robot/hardware/ethernet_gateway/motor_controller_hardware.hpp"
+
 #include <cstdint>
-#include <map>
 #include <memory>
 #include <string>
 
@@ -26,9 +27,10 @@ public:
   ~HardwareComponentFactory() override = default;
 
   HardwareComponentFactory& addLighting(const std::string& lighting_name);
-  HardwareComponentFactory& addMotorController(const std::string& controller_name, const std::size_t can_id);
+  HardwareComponentFactory& addMotorController(
+    const std::string& controller_name, const MotorControllerHardware<2>::Parameter& parameter);
   HardwareComponentFactory& addSingleChannelMotorController(
-    const std::string& controller_name, const std::size_t can_id);
+    const std::string& controller_name, const MotorControllerHardware<1>::Parameter& parameter);
   HardwareComponentFactory& addRangeSensor(
     const std::string& sensor_name, const std::uint8_t id, rclcpp::Node& ros_node);
   HardwareComponentFactory& addImuSensor(
