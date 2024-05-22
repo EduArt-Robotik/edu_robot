@@ -20,6 +20,8 @@ RangeSensorHardware::RangeSensorHardware(
 
 void RangeSensorHardware::processRxData(const message::RxMessageDataBuffer& data)
 {
+  (void)data;
+
   if (_callback_process_measurement == nullptr) {
     return;
   }

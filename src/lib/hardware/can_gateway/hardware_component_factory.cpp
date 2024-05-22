@@ -25,10 +25,9 @@ HardwareComponentFactory& HardwareComponentFactory::addLighting(const std::strin
 } 
 
 HardwareComponentFactory& HardwareComponentFactory::addMotorController(
-  const std::string& controller_name, const std::uint32_t can_id_input, const std::uint32_t can_id_output)
+  const std::string& controller_name, const MotorControllerHardware::Parameter& parameter)
 {
   // \todo maybe make it configurable via ROS parameter
-  MotorControllerHardware::Parameter parameter = {{can_id_input, can_id_output}};
   auto compound_motor = std::make_shared<MotorControllerHardware>(
     controller_name, parameter, _shield->getCommunicator(0)
   );

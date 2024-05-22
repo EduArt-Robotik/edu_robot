@@ -25,7 +25,9 @@ LightingHardware::~LightingHardware()
 
 void LightingHardware::processSetValue(const Color& color, const robot::Lighting::Mode& mode)
 {
-  using Mode = robot::Lighting::Mode;
+  (void)color;
+  (void)mode;
+  // using Mode = robot::Lighting::Mode;
 
   // HACK! At the moment each light can't controlled separately.
   // switch (mode) {

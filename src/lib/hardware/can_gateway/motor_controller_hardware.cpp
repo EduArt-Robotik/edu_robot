@@ -46,17 +46,45 @@ MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
 {
   MotorControllerHardware::Parameter parameter;
 
-  ros_node.declare_parameter<int>(name + ".can_id.input", default_parameter.can_id.input);
-  ros_node.declare_parameter<int>(name + ".can_id.output", default_parameter.can_id.output);
+  ros_node.declare_parameter<int>(
+    name + ".can_id.input", default_parameter.can_id.input);
+  ros_node.declare_parameter<int>(
+    name + ".can_id.output", default_parameter.can_id.output);
+
+  ros_node.declare_parameter<float>(
+    name + ".gear_ratio", default_parameter.gear_ratio);
+  ros_node.declare_parameter<float>(
+    name + ".encoder_ratio", default_parameter.encoder_ratio);
+  ros_node.declare_parameter<int>(
+    name + ".control_frequency", default_parameter.control_frequency);
+  ros_node.declare_parameter<int>(
+    name + ".timeout_ms", default_parameter.timeout_ms);  
+
+  ros_node.declare_parameter<float>(
+    name + ".weight_low_pass_set_point", default_parameter.weight_low_pass_set_point);
+  ros_node.declare_parameter<float>(
+    name + ".weight_low_pass_encoder", default_parameter.weight_low_pass_encoder);
+  ros_node.declare_parameter<bool>(
+    name + ".encoder_inverted", default_parameter.encoder_inverted);
 
   parameter.can_id.input = ros_node.get_parameter(name + ".can_id.input").as_int();
   parameter.can_id.output = ros_node.get_parameter(name + ".can_id.output").as_int();
+
+  parameter.gear_ratio = ros_node.get_parameter(name + ".gear_ratio").as_double();
+  parameter.encoder_ratio = ros_node.get_parameter(name + ".encoder_ratio").as_double();
+  parameter.control_frequency = ros_node.get_parameter(name + ".control_frequency").as_int();
+  parameter.timeout_ms = ros_node.get_parameter(name + ".timeout_ms").as_int();
+
+  parameter.weight_low_pass_set_point = ros_node.get_parameter(name + ".weight_low_pass_set_point").as_double();
+  parameter.weight_low_pass_encoder = ros_node.get_parameter(name + ".weight_low_pass_encoder").as_double();
+  parameter.encoder_inverted = ros_node.get_parameter(name + ".encoder_inverted").as_bool();
 
   return parameter;
 }
 
 void initialize_controller(
-  const Motor::Parameter& parameter, const std::uint32_t can_id, std::shared_ptr<Communicator> communicator)
+  const Motor::Parameter& parameter, const MotorControllerHardware::Parameter& hardware_parameter,
+  const std::uint32_t can_id, std::shared_ptr<Communicator> communicator)
 {
   // Initial Motor Controller Hardware
   if (false == parameter.isValid()) {
@@ -64,13 +92,14 @@ void initialize_controller(
   }
 
   {
-    auto request = Request::make_request<SetTimeout>(can_id, parameter.timeout_ms);
+    auto request = Request::make_request<SetTimeout>(can_id, hardware_parameter.timeout_ms);
     auto future_response = communicator->sendRequest(std::move(request));
     wait_for_future(future_response, 100ms);
     auto got = future_response.get();
   }
   {
-    auto request = Request::make_request<SetInvertedEncoder>(can_id, parameter.encoder_inverted);
+    auto request = Request::make_request<SetInvertedEncoder>(
+      can_id, hardware_parameter.encoder_inverted);
     auto future_response = communicator->sendRequest(std::move(request));
     wait_for_future(future_response, 100ms);
     auto got = future_response.get();
@@ -90,7 +119,8 @@ void initialize_controller(
     }
   }
   {
-    auto request = Request::make_request<SetFrequency>(can_id, parameter.control_frequency);
+    auto request = Request::make_request<SetFrequency>(
+      can_id, hardware_parameter.control_frequency);
     auto future_response = communicator->sendRequest(std::move(request));
     wait_for_future(future_response, 100ms);
     auto got = future_response.get();
@@ -120,19 +150,22 @@ void initialize_controller(
     auto got = future_response.get();
   }
   {
-    auto request = Request::make_request<SetCtlInputFilter>(can_id, parameter.weight_low_pass_set_point);
+    auto request = Request::make_request<SetCtlInputFilter>(
+      can_id, hardware_parameter.weight_low_pass_set_point);
     auto future_response = communicator->sendRequest(std::move(request));
     wait_for_future(future_response, 100ms);
     auto got = future_response.get();
   }
   {
-    auto request = Request::make_request<SetGearRatio>(can_id, parameter.gear_ratio);
+    auto request = Request::make_request<SetGearRatio>(
+      can_id, hardware_parameter.gear_ratio);
     auto future_response = communicator->sendRequest(std::move(request));
     wait_for_future(future_response, 100ms);
     auto got = future_response.get();
   }
   {
-    auto request = Request::make_request<SetTicksPerRevision>(can_id, parameter.encoder_ratio);
+    auto request = Request::make_request<SetTicksPerRevision>(
+      can_id, hardware_parameter.encoder_ratio);
     auto future_response = communicator->sendRequest(std::move(request));
     wait_for_future(future_response, 100ms);
     auto got = future_response.get();
@@ -169,7 +202,9 @@ void MotorControllerHardware::processRxData(const message::RxMessageDataBuffer &
 
 void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
 {
-  initialize_controller(parameter, _parameter.can_id.input, _communicator);
+  initialize_controller(
+    parameter, _parameter, _parameter.can_id.input, _communicator
+  );
 
   auto measurement_end_point = CanRxDataEndPoint::make_data_endpoint<Response>(
     _parameter.can_id.output,

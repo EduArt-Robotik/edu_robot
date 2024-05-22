@@ -78,6 +78,8 @@ SensorImu::SensorImu(const std::string& name, const std::string& frame_id, const
 void SensorImu::processMeasurementData(
   const Eigen::Quaterniond& orientation, const Eigen::Vector3d& angular_velocity, const Eigen::Vector3d& linear_acceleration)
 {
+  // Note: this method should be thread safe.
+
   // Do statistics for diagnostic
   const auto now = _clock->now();
   const std::uint64_t dt = (now - _last_processing).nanoseconds();

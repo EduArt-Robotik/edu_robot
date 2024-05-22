@@ -23,9 +23,19 @@ class MotorControllerHardware : public MotorController::HardwareInterface
 public:
   struct Parameter {
     struct {
-      std::uint32_t input;
-      std::uint32_t output;
+      std::uint32_t input  = 0x400;
+      std::uint32_t output = 0x480;
     } can_id;
+
+    float gear_ratio = 89.0f;
+    float encoder_ratio = 2048.0f;
+    float threshold_stall_check = 0.25f;
+    std::uint32_t control_frequency = 16000;
+    bool encoder_inverted = false;
+    std::uint32_t timeout_ms = 1000;
+  
+    float weight_low_pass_set_point = 0.2f;
+    float weight_low_pass_encoder   = 0.3f;    
   };
 
   MotorControllerHardware(

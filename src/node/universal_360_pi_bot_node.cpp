@@ -7,6 +7,7 @@
 
 #include <edu_robot/hardware/can_gateway/can_gateway_shield.hpp>
 #include <edu_robot/hardware/can_gateway/hardware_component_factory.hpp>
+#include <edu_robot/hardware/can_gateway/motor_controller_hardware.hpp>
 
 #include <rclcpp/executors.hpp>
 #include <rclcpp/rclcpp.hpp>
@@ -14,8 +15,8 @@
 using eduart::robot::bot::UniversalBot;
 using eduart::robot::hardware::can_gateway::CanGatewayShield;
 using eduart::robot::hardware::can_gateway::HardwareComponentFactory;
-using eduart::robot::hardware::can_gateway::SensorTofHardware;
 using eduart::robot::hardware::can_gateway::SensorTofRingHardware;
+using eduart::robot::hardware::can_gateway::MotorControllerHardware;
 
 class CanGatewayUniversalBot : public UniversalBot
 {
@@ -34,11 +35,10 @@ public:
 
     // Motor Controller
     for (std::size_t i = 0; i < _parameter.axis.size(); ++i) {
-      factory.addMotorController(
-        std::string("motor_controller_") + std::to_string(i),
-        i | 0x400,
-        i | 0x480
-      );
+      const std::string motor_controller_name = std::string("motor_controller_") + std::to_string(i);
+      const auto hardware_parameter = MotorControllerHardware::get_parameter(
+        motor_controller_name, {}, *this);
+      factory.addMotorController(motor_controller_name, hardware_parameter);
     }
 
     // IMU Sensor

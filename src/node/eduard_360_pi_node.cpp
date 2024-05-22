@@ -3,6 +3,8 @@
  *
  * Author: Christian Wendt (christian.wendt@eduart-robotik.com)
  */
+#include "edu_robot/hardware/can_gateway/motor_controller_hardware.hpp"
+
 #include <edu_robot/bot/eduard.hpp>
 
 #include <edu_robot/hardware/can_gateway/can_gateway_shield.hpp>
@@ -11,9 +13,13 @@
 #include <rclcpp/executors.hpp>
 #include <rclcpp/rclcpp.hpp>
 
+#include <string>
+#include <cstddef>
+
 using eduart::robot::bot::Eduard;
 using eduart::robot::hardware::can_gateway::CanGatewayShield;
 using eduart::robot::hardware::can_gateway::HardwareComponentFactory;
+using eduart::robot::hardware::can_gateway::MotorControllerHardware;
 
 class CanGatewayBot : public Eduard
 {
@@ -30,22 +36,29 @@ public:
     auto factory = HardwareComponentFactory(shield);
     // _timer_process_status_report = create_wall_timer(100ms, [shield]{ shield->processStatusReport(); });
 
-            // Lightings
+    // Lightings
     factory.addLighting("head")
            .addLighting("right_side")
            .addLighting("left_side")
            .addLighting("back")
-           .addLighting("all")
-           // Motor Controller
-           .addMotorController("motor_controller_0", 0 | 0x400, 0 | 0x480)
-           .addMotorController("motor_controller_1", 1 | 0x400, 1 | 0x480)
-           // Range Sensor
-           .addRangeSensor("range/front/left", 0u)
+           .addLighting("all");
+
+    // Motor Controller
+    for (std::size_t i = 0; i < 2; ++i) {
+      const std::string motor_controller_name = "motor_controller_" + std::to_string(i);
+      const auto hardware_parameter = MotorControllerHardware::get_parameter(
+        motor_controller_name, {}, *this);
+      factory.addMotorController(motor_controller_name, hardware_parameter);
+    }
+
+    // Range Sensor
+    factory.addRangeSensor("range/front/left", 0u)
            .addRangeSensor("range/front/right", 1u)
            .addRangeSensor("range/rear/left", 2u)
-           .addRangeSensor("range/rear/right", 3u)
-           // IMU Sensor
-           .addImuSensor("imu", 0x381);
+           .addRangeSensor("range/rear/right", 3u); 
+
+    // IMU Sensor
+    factory.addImuSensor("imu", 0x381);
 
     // Initialize
     initialize(factory);
