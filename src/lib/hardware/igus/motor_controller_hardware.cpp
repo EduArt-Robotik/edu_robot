@@ -32,10 +32,10 @@ MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
 
   ros_node.declare_parameter<bool>(
     motor_controller_name + ".set_parameter", default_parameter.set_parameter);
-  // ros_node.declare_parameter<int>(motor_controller_name + ".can_id", default_parameter.can_id);
+  ros_node.declare_parameter<int>(motor_controller_name + ".can_id", default_parameter.can_id);
 
   parameter.set_parameter = ros_node.get_parameter(motor_controller_name + ".set_parameter").as_bool();
-  // parameter.can_id = ros_node.get_parameter(motor_controller_name + ".can_id").as_int();
+  parameter.can_id = ros_node.get_parameter(motor_controller_name + ".can_id").as_int();
 
   return parameter;
 }

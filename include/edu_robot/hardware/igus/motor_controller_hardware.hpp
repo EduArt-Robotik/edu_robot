@@ -25,8 +25,8 @@ class MotorControllerHardware : public MotorController::HardwareInterface
 {
 public:
   struct Parameter {
-    bool set_parameter = false; //> sets and flashes parameter to motor controller hardware (EEPROM)
-    std::uint32_t can_id; //> can id used by this controller
+    bool set_parameter = false;  //> sets and flashes parameter to motor controller hardware (EEPROM)
+    std::uint32_t can_id = 0x18; //> can id used by this controller
   };
 
   MotorControllerHardware(

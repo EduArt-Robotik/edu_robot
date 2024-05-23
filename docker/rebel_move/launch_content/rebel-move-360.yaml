@@ -10,6 +10,13 @@
     diagnostic_updater:
       period: 1.0
 
+# Kinematic
+    skid:
+      length:
+        x: 0.25
+        y: 0.3199999928474426
+      wheel_diameter: 0.17000000178813934
+
 # Axes and Motors
     number_of_axes: 2
     axis_1:
@@ -27,68 +34,49 @@
 
     motor_a:
       closed_loop: true
-      control_frequency: 16000
-      encoder_inverted: false
-      encoder_ratio: 2048.0
-      gear_ratio: 89.0
       index: 0
-      inverted: false
       max_rpm: 100.0
       pid:
         kd: 0.0
         ki: 5.0
         kp: 0.5
-      timeout_ms: 500
-      weight_low_pass_encoder: 0.3
-      weight_low_pass_set_point: 0.2
     motor_b:
       closed_loop: true
-      control_frequency: 16000
-      encoder_inverted: false
-      encoder_ratio: 2048.0
-      gear_ratio: 89.0
       index: 0
-      inverted: false
       max_rpm: 100.0
       pid:
         kd: 0.0
         ki: 5.0
         kp: 0.5
-      timeout_ms: 500
-      weight_low_pass_encoder: 0.3
-      weight_low_pass_set_point: 0.2
     motor_c:
       closed_loop: true
-      control_frequency: 16000
-      encoder_inverted: false
-      encoder_ratio: 2048.0
-      gear_ratio: 89.0
       index: 0
-      inverted: false
       max_rpm: 100.0
       pid:
         kd: 0.0
         ki: 5.0
         kp: 0.5
-      timeout_ms: 500
-      weight_low_pass_encoder: 0.3
-      weight_low_pass_set_point: 0.2
     motor_d:
       closed_loop: true
-      control_frequency: 16000
-      encoder_inverted: false
-      encoder_ratio: 2048.0
-      gear_ratio: 89.0
       index: 0
-      inverted: false
       max_rpm: 100.0
       pid:
         kd: 0.0
         ki: 5.0
         kp: 0.5
-      timeout_ms: 500
-      weight_low_pass_encoder: 0.3
-      weight_low_pass_set_point: 0.2
+      
+    motor_controller_a:
+      set_parameter: false
+      can_id: 0x18    
+    motor_controller_b:
+      set_parameter: false
+      can_id: 0x48      
+    motor_controller_c:
+      set_parameter: false
+      can_id: 0x38
+    motor_controller_d:
+      set_parameter: false
+      can_id: 0x28
 
 # Sensors
     point_cloud_sensor:
