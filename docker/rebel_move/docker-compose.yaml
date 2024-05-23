@@ -3,7 +3,7 @@ version: "3.0"
 services:
     eduard-ipc127e:
         image: eduartrobotik/eduart-robot:0.5.0
-        container_name: eduard-ipcbot-0.5.0
+        container_name: rebel-move-0.5.0
         user: user
         restart: always
         privileged: true

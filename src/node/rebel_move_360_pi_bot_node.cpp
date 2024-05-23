@@ -37,7 +37,7 @@ public:
 
     // Motor Controller
     std::array<char const *const, 4> motor_controller_name = {
-      "motor_controller_a", "motor_controller_a", "motor_controller_a", "motor_controller_a"};
+      "motor_controller_a", "motor_controller_b", "motor_controller_c", "motor_controller_d"};
 
     for (const auto& name : motor_controller_name) {
       const auto parameter = MotorControllerHardware::get_parameter(

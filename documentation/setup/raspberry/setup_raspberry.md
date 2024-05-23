@@ -37,8 +37,8 @@ sudo nano /etc/udev/rules.d/42-mcp251xfd.rules
 and add the following content:
 
 ```console
-KERNELS=="spi0.1", SUBSYSTEMS=="spi", DRIVERS=="mcp251xfd", ACTION=="add", NAME="eduart-can0", TAG+="systemd", ENV{SYSTEMD_WANTS}="can0-attach.service"
-KERNELS=="spi0.0", SUBSYSTEMS=="spi", DRIVERS=="mcp251xfd", ACTION=="add", NAME="eduart-can1", TAG+="systemd", ENV{SYSTEMD_WANTS}="can1-attach.service"
+KERNELS=="spi0.0", SUBSYSTEMS=="spi", DRIVERS=="mcp251xfd", ACTION=="add", NAME="eduart-can0", TAG+="systemd", ENV{SYSTEMD_WANTS}="can0-attach.service"
+KERNELS=="spi0.1", SUBSYSTEMS=="spi", DRIVERS=="mcp251xfd", ACTION=="add", NAME="eduart-can1", TAG+="systemd", ENV{SYSTEMD_WANTS}="can1-attach.service"
 KERNELS=="spi1.0", SUBSYSTEMS=="spi", DRIVERS=="mcp251xfd", ACTION=="add", NAME="eduart-can2", TAG+="systemd", ENV{SYSTEMD_WANTS}="can2-attach.service"
 ```
 
