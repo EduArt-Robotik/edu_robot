@@ -27,7 +27,7 @@ class RebelMove360Bot : public RebelMove
 public:
   RebelMove360Bot()
     : RebelMove(
-        "turtle", std::make_unique<CanGatewayShield>(
+        "rebel_move", std::make_unique<CanGatewayShield>(
           "eduart-can2", "eduart-can1", "eduart-can0"
         )
       )

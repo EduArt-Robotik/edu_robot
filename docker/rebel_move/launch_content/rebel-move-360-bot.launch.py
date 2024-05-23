@@ -11,14 +11,13 @@ from launch_ros.substitutions import FindPackageShare
 def generate_launch_description():
     package_path = FindPackageShare('edu_robot')
     parameter_file = PathJoinSubstitution([
-      package_path,
-      'parameter',
+      './',
       'rebel-move-360-bot.yaml'
     ])
 
     pi_bot = Node(
       package='edu_robot',
-      executable='rebel-move-360-bot',
+      executable='rebel-move-360-pi-bot',
       name='rebel_move_360',
       parameters=[parameter_file],
       namespace=EnvironmentVariable('EDU_ROBOT_NAMESPACE', default_value="rebel_move"),      

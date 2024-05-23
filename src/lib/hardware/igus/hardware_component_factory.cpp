@@ -28,11 +28,11 @@ HardwareComponentFactory& HardwareComponentFactory::addLighting(const std::strin
 HardwareComponentFactory& HardwareComponentFactory::addMotorController(
   const std::string& controller_name, const MotorControllerHardware::Parameter& parameter)
 {
-  auto compound_motor = std::make_shared<MotorControllerHardware>(
+  auto motor_controller = std::make_shared<MotorControllerHardware>(
     controller_name, parameter, _shield->getCommunicator(0)
   );
-  _motor_controller_hardware.push_back(compound_motor);
-  _shield->registerMotorControllerHardware(compound_motor);
+  _motor_controller_hardware.push_back(motor_controller);
+  _shield->registerMotorControllerHardware(motor_controller);
 
   return *this;
 }
