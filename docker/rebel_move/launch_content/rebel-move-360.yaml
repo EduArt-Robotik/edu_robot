@@ -1,0 +1,153 @@
+/**:
+  ros__parameters:
+    use_sim_time: false
+
+    collision_avoidance:
+      distance_reduce_velocity: 0.40
+      distance_velocity_zero: 0.05
+      enable: true
+
+    diagnostic_updater:
+      period: 1.0
+
+# Axes and Motors
+    number_of_axes: 2
+    axis_1:
+      skid:
+        length:
+          x: 0.0
+          y: 0.32
+        wheel_diameter: 0.17
+    axis_2:
+      skid:
+        length:
+          x: 0.0
+          y: 0.32
+        wheel_diameter: 0.17
+
+    motor_a:
+      closed_loop: true
+      control_frequency: 16000
+      encoder_inverted: false
+      encoder_ratio: 2048.0
+      gear_ratio: 89.0
+      index: 0
+      inverted: false
+      max_rpm: 100.0
+      pid:
+        kd: 0.0
+        ki: 5.0
+        kp: 0.5
+      timeout_ms: 500
+      weight_low_pass_encoder: 0.3
+      weight_low_pass_set_point: 0.2
+    motor_b:
+      closed_loop: true
+      control_frequency: 16000
+      encoder_inverted: false
+      encoder_ratio: 2048.0
+      gear_ratio: 89.0
+      index: 0
+      inverted: false
+      max_rpm: 100.0
+      pid:
+        kd: 0.0
+        ki: 5.0
+        kp: 0.5
+      timeout_ms: 500
+      weight_low_pass_encoder: 0.3
+      weight_low_pass_set_point: 0.2
+    motor_c:
+      closed_loop: true
+      control_frequency: 16000
+      encoder_inverted: false
+      encoder_ratio: 2048.0
+      gear_ratio: 89.0
+      index: 0
+      inverted: false
+      max_rpm: 100.0
+      pid:
+        kd: 0.0
+        ki: 5.0
+        kp: 0.5
+      timeout_ms: 500
+      weight_low_pass_encoder: 0.3
+      weight_low_pass_set_point: 0.2
+    motor_d:
+      closed_loop: true
+      control_frequency: 16000
+      encoder_inverted: false
+      encoder_ratio: 2048.0
+      gear_ratio: 89.0
+      index: 0
+      inverted: false
+      max_rpm: 100.0
+      pid:
+        kd: 0.0
+        ki: 5.0
+        kp: 0.5
+      timeout_ms: 500
+      weight_low_pass_encoder: 0.3
+      weight_low_pass_set_point: 0.2
+
+# Sensors
+    point_cloud_sensor:
+      number_of: 2
+    pointcloud_left:
+      can_id_trigger: 904
+      measurement_interval: 100
+      pointcloud_left_a:
+        fov:
+          horizontal: 0.7853981852531433
+          vertical: 0.7853981852531433
+        number_of_zones:
+          horizontal: 8
+          vertical: 8
+        sensor_id: 1
+        transform:
+          orientation:
+            pitch: 0.0
+            roll: 0.0
+            yaw: 0.0
+          translation:
+            x: 0.0
+            y: 0.0
+            z: 0.0
+      pointcloud_left_b:
+        fov:
+          horizontal: 0.7853981852531433
+          vertical: 0.7853981852531433
+        number_of_zones:
+          horizontal: 8
+          vertical: 8
+        sensor_id: 2
+        transform:
+          orientation:
+            pitch: 0.0
+            roll: 0.0
+            yaw: 0.0
+          translation:
+            x: 0.0
+            y: 0.183
+            z: 0.0
+
+# TF Settings
+    publish_tf_odom: true
+    tf_base_frame: base_link
+    tf_footprint_frame: base_footprint
+
+# QoS Overrides
+    qos_overrides:
+      /parameter_events:
+        publisher:
+          depth: 1000
+          durability: volatile
+          history: keep_last
+          reliability: reliable
+      /tf:
+        publisher:
+          depth: 100
+          durability: volatile
+          history: keep_last
+          reliability: reliable
+

@@ -5,6 +5,7 @@
  */
 #pragma once
 
+#include "edu_robot/hardware/can_gateway/can/message.hpp"
 #include "edu_robot/hardware/igus/can/protocol.hpp"
 #include "edu_robot/hardware/igus/can/message.hpp"
 
@@ -23,6 +24,17 @@ using hardware::can_gateway::can::message::element::Command;
 using hardware::igus::can::message::element::VelocityCanAddress;
 using hardware::igus::can::message::element::CommandCanAddress;
 
+template <Byte Data>
+using ConstDataField = hardware::can_gateway::can::message::element::impl::ConstDataField<Byte, Data>;
+
+// Parameters
+template <Byte Parameter, Byte Data>
+using SetParameterUint8 = MessageFrame<Command<PROTOCOL::COMMAND::SET::PARAMETER>,
+                                       Parameter,
+                                       ConstDataField<Data>,
+                                       ConstDataField<0x00>>;
+
+// Operations
 using SetEnableMotor = MessageFrame<CommandCanAddress,
                                     PROTOCOL::COMMAND::SET::COMMAND,
                                     Command<PROTOCOL::COMMAND::ENABLE_MOTOR>>;

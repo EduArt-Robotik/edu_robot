@@ -49,6 +49,28 @@ struct PROTOCOL {
     static constexpr Byte OVER_CURRENT = 6;
     static constexpr Byte CAN_ERROR = 7;
   };
+  struct PARAMETER {
+    static constexpr Byte MAX_MISSED_COMMUNICATION = 0x30;
+    static constexpr Byte MAX_LAG = 0x31;
+    static constexpr Byte MAX_CURRENT = 0x32;
+    static constexpr Byte ROLLOVER_FLAG = 0x66;
+    static constexpr Byte TIC_SCALE_FACTOR = 0x69;
+
+    struct PID {
+      struct POSITION {
+        static constexpr Byte KP = 0x40;
+        static constexpr Byte KI = 0x41;
+        static constexpr Byte KD = 0x42;
+        static constexpr Byte ANTI_WIND_UP = 0x43;
+      };
+      struct VELOCITY {
+        static constexpr Byte KP = 0x44;
+        static constexpr Byte KI = 0x45;
+        static constexpr Byte KD = 0x46;
+        static constexpr Byte ANTI_WIND_UP = 0x47;
+      };
+    };
+  };
 };
 
 } // end namespace message
