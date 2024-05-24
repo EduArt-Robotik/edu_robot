@@ -22,15 +22,15 @@ public:
   struct Parameter {
     struct {
       struct {
-        float x = 0.25f;
-        float y = 0.32f;
+        float x = 0.56f;
+        float y = 0.44f;
       } length;
-      float wheel_diameter = 0.17f;
+      float wheel_diameter = 0.1f;
     } skid;
     struct {
       struct {
-        float x = 0.25f;
-        float y = 0.36f;
+        float x = 0.56f;
+        float y = 0.44f;
       } length;
       float wheel_diameter = 0.1f;
     } mecanum;    

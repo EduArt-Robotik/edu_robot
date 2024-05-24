@@ -33,9 +33,14 @@ MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
   ros_node.declare_parameter<bool>(
     motor_controller_name + ".set_parameter", default_parameter.set_parameter);
   ros_node.declare_parameter<int>(motor_controller_name + ".can_id", default_parameter.can_id);
+  ros_node.declare_parameter<float>(
+    motor_controller_name + ".low_pass_set_point.filter_weight",
+    default_parameter.low_pass_set_point.filter_weight);
 
   parameter.set_parameter = ros_node.get_parameter(motor_controller_name + ".set_parameter").as_bool();
   parameter.can_id = ros_node.get_parameter(motor_controller_name + ".can_id").as_int();
+  parameter.low_pass_set_point.filter_weight = ros_node.get_parameter(
+    motor_controller_name + ".low_pass_set_point.filter_weight").as_double();
 
   return parameter;
 }
@@ -70,16 +75,17 @@ void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
     throw std::runtime_error("Given RPM vector is too small.");
   }
 
+  _low_pass_set_point(rpm[0]);
   auto request = CanRequest::make_request<SetVelocity>(
     _parameter.can_id,
-    rpm[0],
+    static_cast<std::uint8_t>(_low_pass_set_point.getValue() + 127.0f), // \todo move converting to message definition. CanRequest ist the problem!
     getTimeStamp()
   );
 
   auto future_response = _communicator->sendRequest(std::move(request));
   wait_for_future(future_response, 200ms);
   auto got = future_response.get();
-  _measured_rpm[0] = AcknowledgedVelocity::rpm(got.response());
+  _measured_rpm[0] = AcknowledgedVelocity::position(got.response());
 
   if (_callback_process_measurement == nullptr) {
     return;

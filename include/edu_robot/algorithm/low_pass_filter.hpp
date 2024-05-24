@@ -36,7 +36,7 @@ struct LowPassFilterOperation<DataType, std::enable_if_t<std::is_floating_point_
 };
 template <>
 struct LowPassFilterOperation<decltype(geometry_msgs::msg::Pose::position),
-                                     decltype(geometry_msgs::msg::Pose::position)> {
+                              decltype(geometry_msgs::msg::Pose::position)> {
   using DataType = decltype(geometry_msgs::msg::Pose::position);
 
   static inline DataType update(const DataType& input, const DataType& previous_value, const float filter_weight) {

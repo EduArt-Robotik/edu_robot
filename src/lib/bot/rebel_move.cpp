@@ -127,7 +127,20 @@ Eigen::MatrixXf RebelMove::getKinematicMatrix(const DriveKinematic kinematic) co
 {
   Eigen::MatrixXf kinematic_matrix;
 
-  if (kinematic == DriveKinematic::MECANUM_DRIVE) {
+  if (kinematic == DriveKinematic::SKID_DRIVE) {
+    const float l_x = _parameter.skid.length.x;
+    const float l_y = _parameter.skid.length.y;
+    const float wheel_radius = _parameter.skid.wheel_diameter * 0.5f;
+    const float l_squared = l_x * l_x + l_y * l_y;
+
+    kinematic_matrix.resize(4, 3);
+    kinematic_matrix <<  1.0f, 0.0f, l_squared / (2.0f * l_y),
+                         1.0f, 0.0f, l_squared / (2.0f * l_y),
+                        -1.0f, 0.0f, l_squared / (2.0f * l_y),
+                        -1.0f, 0.0f, l_squared / (2.0f * l_y);
+    kinematic_matrix *= 1.0f / wheel_radius;
+  }
+  else if (kinematic == DriveKinematic::MECANUM_DRIVE) {
     const float l_x = _parameter.mecanum.length.x;
     const float l_y = _parameter.mecanum.length.y;
     const float wheel_radius = _parameter.mecanum.wheel_diameter * 0.5f;

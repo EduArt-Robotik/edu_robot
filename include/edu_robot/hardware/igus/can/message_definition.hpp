@@ -22,6 +22,7 @@ namespace message {
 using hardware::can_gateway::can::message::RxMessageDataBuffer;
 using hardware::can_gateway::can::message::element::Uint8;
 using hardware::can_gateway::can::message::element::Uint16;
+using hardware::can_gateway::can::message::element::Int32;
 using hardware::can_gateway::can::message::element::Command;
 using hardware::igus::can::message::element::VelocityCanAddress;
 using hardware::igus::can::message::element::CommandCanAddress;
@@ -59,19 +60,20 @@ using SetVelocity = MessageFrame<VelocityCanAddress,
                                  element::Velocity,  // velocity in ?
                                  Uint8>;             // timestamp in ?
 
-struct AcknowledgedVelocity : public MessageFrame<VelocityCanAddress,
-                                                  PROTOCOL::COMMAND::SET::VELOCITY,
-                                                  Uint8,    // error code
-                                                  element::Velocity, // measured velocity ?
-                                                  Uint8,    // timestamp in ?
-                                                  Uint8,    // shunt in ?
-                                                  Uint8,    // digital input
-                                                  Uint8>    // dummy ?
+struct AcknowledgedVelocity : public Message<VelocityCanAddress,
+                                             Uint8, // error code
+                                             Int32, // measured velocity ?
+                                             Uint8, // timestamp in ?
+                                             Uint8, // shunt in ?
+                                             Uint8> // digital input
 {
+  inline static constexpr std::uint32_t canId(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<0>(rx_buffer);
+  }
   inline static constexpr std::uint8_t errorCode(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<1>(rx_buffer);
   }
-  inline static constexpr Rpm rpm(const RxMessageDataBuffer& rx_buffer) {
+  inline static constexpr std::int32_t position(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<2>(rx_buffer);
   }
   inline static constexpr std::uint8_t timestamp(const RxMessageDataBuffer &rx_buffer) {
