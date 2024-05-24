@@ -38,13 +38,13 @@ struct Velocity : public DataField<std::uint8_t> {
 
 struct VelocityCanAddress : public hardware::can_gateway::can::message::element::CanAddress {
   inline static constexpr std::array<Byte, CanAddress::size()> makeSearchPattern(const std::uint32_t can_address) {
-    return DataField<std::uint32_t>::serialize(can_address | 0x01);
+    return DataField<std::uint32_t, false>::serialize(can_address | 0x01);
   }
 };
 
 struct CommandCanAddress : public hardware::can_gateway::can::message::element::CanAddress {
   inline static constexpr std::array<Byte, CanAddress::size()> makeSearchPattern(const std::uint32_t can_address) {
-    return DataField<std::uint32_t>::serialize(can_address | 0x02);
+    return DataField<std::uint32_t, false>::serialize(can_address | 0x02);
   }
 };
 
