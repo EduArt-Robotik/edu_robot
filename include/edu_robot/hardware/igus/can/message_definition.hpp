@@ -9,6 +9,7 @@
 #include "edu_robot/hardware/igus/can/protocol.hpp"
 #include "edu_robot/hardware/igus/can/message.hpp"
 
+#include <cstdint>
 #include <edu_robot/rpm.hpp>
 
 namespace eduart {
@@ -20,19 +21,28 @@ namespace message {
 
 using hardware::can_gateway::can::message::RxMessageDataBuffer;
 using hardware::can_gateway::can::message::element::Uint8;
+using hardware::can_gateway::can::message::element::Uint16;
 using hardware::can_gateway::can::message::element::Command;
 using hardware::igus::can::message::element::VelocityCanAddress;
 using hardware::igus::can::message::element::CommandCanAddress;
 
-template <Byte Data>
-using ConstDataField = hardware::can_gateway::can::message::element::impl::ConstDataField<Byte, Data>;
+template <typename Type, Type Data>
+using ConstDataField = hardware::can_gateway::can::message::element::impl::ConstDataField<Type, Data>;
 
 // Parameters
-template <Byte Parameter, Byte Data>
+template <Byte Parameter>
 using SetParameterUint8 = MessageFrame<Command<PROTOCOL::COMMAND::SET::PARAMETER>,
                                        Parameter,
-                                       ConstDataField<Data>,
-                                       ConstDataField<0x00>>;
+                                       Uint8,
+                                       ConstDataField<Byte, 0x00>>;
+
+template <Byte Parameter>
+using SetParameterUint16 = MessageFrame<Command<PROTOCOL::COMMAND::SET::PARAMETER>,
+                                        Parameter,
+                                        Uint16>;
+
+using SetMaxMissCommunication = SetParameterUint16<PROTOCOL::PARAMETER::MAX_MISSED_COMMUNICATION>;
+using SetMaxLag = SetParameterUint16<PROTOCOL::PARAMETER::MAX_LAG>;
 
 // Operations
 using SetEnableMotor = MessageFrame<CommandCanAddress,
@@ -55,7 +65,8 @@ struct AcknowledgedVelocity : public MessageFrame<VelocityCanAddress,
                                                   element::Velocity, // measured velocity ?
                                                   Uint8,    // timestamp in ?
                                                   Uint8,    // shunt in ?
-                                                  Uint8>    // digital input
+                                                  Uint8,    // digital input
+                                                  Uint8>    // dummy ?
 {
   inline static constexpr std::uint8_t errorCode(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<1>(rx_buffer);
