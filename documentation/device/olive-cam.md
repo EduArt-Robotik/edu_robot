@@ -45,7 +45,7 @@ to check the available interfaces. On the IOT2050 device (IoT Bot) the print out
 * **eno1**: first lan network
 * **eno2**: second lan network (usually it is connected to the Wifi access point on the robot)
 * **docker0**: docker network interface
-* **enxa8f2fb1fa7d4**: the interface coming with the Olive camera.
+* **enxa8f2fb1fa7d4**: the interface coming with the Olive camera. **Note:** The number will vary from camera to camera. However, the beginning 'enx' remains the same.
 
 As you can see the Olive cam uses the subnet 10.42.0.0/24. Execute following command to get the camera's ip address:
 
@@ -91,3 +91,74 @@ This device is powered by Olive Robotics GmbH - OLIX-OS version 2.2.1!
 For more information please contact [support@olive-robotics.com].
 ```
 
+## Bring Up the Network Bridge for ROS Topic Forwarding
+
+If the robot has been ordered from EduArt with the Olive Cam, it comes with a pre-installed configuration for the network bridge. However, this is currently not set up automatically, for example when the camera is plugged in or when it is plugged in during start-up.
+
+The bridge is provided via systemd service. This makes it convenient to switch the bridge on and off. The command activates the bridge:
+
+```bash
+sudo systemctl start olive-cam-network.service
+```
+
+The command can be used to check whether the bridge is running correctly:
+
+```bash
+ip address
+```
+
+This should print out following:
+
+```bash
+...
+2: eno2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq master br0 state UP group default qlen 1000
+    link/ether 8c:f3:19:6c:87:50 brd ff:ff:ff:ff:ff:ff
+...
+5: enxa8f2fb1fa7d4: <BROADCAST,MULTICAST> mtu 1500 qdisc noop master br0 state DOWN group default qlen 1000
+    link/ether a8:f2:fb:1f:a7:d4 brd ff:ff:ff:ff:ff:ff
+6: br0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
+    link/ether c6:58:c1:9b:4d:db brd ff:ff:ff:ff:ff:ff
+    inet 192.168.0.100/24 scope global br0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::3c0b:beff:fea0:9c21/64 scope link 
+       valid_lft forever preferred_lft forever
+```
+
+The **eno2** network interface has no ip assigned to it. Also the **enx** network interface. The IP address of the **eno2** now has the network bridge **br0**, which was created with the Systemd service. At this point all ROS2 topics should be accessible on the network outside the robot.
+
+The command deactivates the network bridge:
+
+```bash
+sudo systemctl stop olive-cam-network.service
+```
+
+## Setting Up Systemd Service
+
+>**Note**: This is only necessary if you have not purchased the robot and Olive camera together from EduArt!
+
+At first some files has to be copied. It is assumed that the **edu_robot** repository is already on the robot. Please navigate to this repository (We assume here that it is below "~/edu_robot"). 
+
+Copy following files by:
+
+```bash
+# create new folder
+sudo mkdir -p /opt/eduart
+# copy files
+cd ~/edu_robot
+sudo cp docker/iot2050/config/olive_camera/olive-cam-network-setup.sh /opt/eduart/
+sudo cp docker/iot2050/config/olive_camera/olive-cam-disconnect.sh /opt/eduart/
+sudo cp docker/iot2050/config/olive_camera/olive-cam-network.service /etc/systemd/system/
+```
+
+Now two parameter has to be modified to make the bridge work properly. Both parameter are located in the **olive-cam-network-setup.sh** file. Open it with the **nano** text editor:
+
+```bash
+sudo nano /opt/eduart/olive-cam-network-setup.sh
+```
+
+Change the Olive camera network interface name. If you need help to discover it, please take a lock at the **connect the camera** section. In case your robot is integrated in a custom network or the factory ip was changed, please adapt the robot's ip address, too. These two parameter can be changed by changing following lines:
+
+```bash
+OLIVE_CAM_INTERFACE=enxa8f2fb1fa7d4
+ROBOT_IP_ADDRESS=192.168.0.100/24
+```
