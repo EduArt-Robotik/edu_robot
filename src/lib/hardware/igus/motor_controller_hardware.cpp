@@ -1,4 +1,5 @@
 #include "edu_robot/hardware/igus/motor_controller_hardware.hpp"
+#include "edu_robot/diagnostic/diagnostic_level.hpp"
 #include "edu_robot/hardware/igus/can/can_request.hpp"
 #include "edu_robot/hardware/igus/can/message_definition.hpp"
 #include "edu_robot/hardware/igus/can/protocol.hpp"
@@ -8,7 +9,10 @@
 #include <edu_robot/state.hpp>
 #include <edu_robot/hardware_error.hpp>
 
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <stdexcept>
+#include <chrono>
 
 namespace eduart {
 namespace robot {
@@ -24,6 +28,71 @@ using can::message::AcknowledgedVelocity;
 using can::message::SetEnableMotor;
 using can::message::SetDisableMotor;
 using can::message::SetReset;
+
+static void log_error_code(const std::uint8_t error_code)
+{
+  if (error_code & (1 << PROTOCOL::ERROR::BROWN_OUT_OR_WATCH_DOG_BIT)) {
+    RCLCPP_ERROR(rclcpp::get_logger("Igus Motor Controller"), "brown out or watch dog");
+  }
+  else if (error_code & (1 << PROTOCOL::ERROR::VELOCITY_LAG_BIT)) {
+    RCLCPP_ERROR(rclcpp::get_logger("Igus Motor Controller"), "velocity lag");    
+  }
+  else if (error_code & (1 << PROTOCOL::ERROR::MOTOR_NOT_ENABLED)) {
+    RCLCPP_ERROR(rclcpp::get_logger("Igus Motor Controller"), "motor not enabled");    
+  }
+  else if (error_code & (1 << PROTOCOL::ERROR::COMM_WATCH_DOG)) {
+    RCLCPP_ERROR(rclcpp::get_logger("Igus Motor Controller"), "communication watch dog");    
+  }
+  else if (error_code & (1 << PROTOCOL::ERROR::POSITION_LAG)) {
+    RCLCPP_ERROR(rclcpp::get_logger("Igus Motor Controller"), "position lag");    
+  }
+  else if (error_code & (1 << PROTOCOL::ERROR::ENCODER_ERROR)) {
+    RCLCPP_ERROR(rclcpp::get_logger("Igus Motor Controller"), "encoder error");    
+  }
+  else if (error_code & (1 << PROTOCOL::ERROR::OVER_CURRENT)) {
+    RCLCPP_ERROR(rclcpp::get_logger("Igus Motor Controller"), "over current");    
+  }
+  else if (error_code & (1 << PROTOCOL::ERROR::CAN_ERROR)) {
+    RCLCPP_ERROR(rclcpp::get_logger("Igus Motor Controller"), "can error");    
+  }
+}
+
+static std::string get_error_string(const std::uint8_t error_code)
+{
+  std::string error_string;
+
+  if (error_code & (1 << PROTOCOL::ERROR::BROWN_OUT_OR_WATCH_DOG_BIT)) {
+    error_string += "|brown out or watch dog";
+  }
+  else if (error_code & (1 << PROTOCOL::ERROR::VELOCITY_LAG_BIT)) {
+    error_string += "|velocity lag";
+  }
+  else if (error_code & (1 << PROTOCOL::ERROR::MOTOR_NOT_ENABLED)) {
+    error_string += "|motor not enabled";
+  }
+  else if (error_code & (1 << PROTOCOL::ERROR::COMM_WATCH_DOG)) {
+    error_string += "|communication watch dog";
+  }
+  else if (error_code & (1 << PROTOCOL::ERROR::POSITION_LAG)) {
+    error_string += "|position lag";    
+  }
+  else if (error_code & (1 << PROTOCOL::ERROR::ENCODER_ERROR)) {
+    error_string += "|encoder error";
+  }
+  else if (error_code & (1 << PROTOCOL::ERROR::OVER_CURRENT)) {
+    error_string += "|over current";
+  }
+  else if (error_code & (1 << PROTOCOL::ERROR::CAN_ERROR)) {
+    error_string += "|can error";    
+  }
+  else {
+    // no error or not handled --> return empty error string
+    return error_string;
+  }
+
+  // remove first pipe character
+  return std::string(error_string.begin() + 1, error_string.end());
+}
 
 MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
     const std::string& motor_controller_name, const Parameter& default_parameter, rclcpp::Node& ros_node)
@@ -67,6 +136,8 @@ void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
   }
 
   // Motor Controller Parameter
+  // First check if parameter differ from stored parameter on motor controller hardware.
+  
 }
 
 void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
@@ -75,26 +146,46 @@ void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
     throw std::runtime_error("Given RPM vector is too small.");
   }
 
-  _low_pass_set_point(rpm[0]);
+  // Processing Setting new Set Point
+  _processing_data.low_pass_set_point(rpm[0]);
   auto request = CanRequest::make_request<SetVelocity>(
     _parameter.can_id,
-    static_cast<std::uint8_t>(_low_pass_set_point.getValue() + 127.0f), // \todo move converting to message definition. CanRequest ist the problem!
+    static_cast<std::uint8_t>(_processing_data.low_pass_set_point.getValue() + 127.0f), // \todo move converting to message definition. CanRequest ist the problem!
     getTimeStamp()
   );
 
   auto future_response = _communicator->sendRequest(std::move(request));
+
+  // Processing Received Feedback
   wait_for_future(future_response, 200ms);
   auto got = future_response.get();
-  _measured_rpm[0] = AcknowledgedVelocity::position(got.response());
+  
+  const auto stamp_received = std::chrono::system_clock::now();
+  const float dt = std::chrono::duration_cast<std::chrono::milliseconds>(
+    _processing_data.stamp_last_received - stamp_received).count() * 1000.0f;
+  const auto current_position = AcknowledgedVelocity::position(got.response());
 
+  _processing_data.measured_rpm[0] = static_cast<float>(_processing_data.last_position - current_position) * dt;
+  _processing_data.last_position = current_position;
+  _processing_data.stamp_last_received = stamp_received;
+
+  // Sending Feedback to Layer above
   if (_callback_process_measurement == nullptr) {
     return;
   }
-  if (AcknowledgedVelocity::errorCode(got.response()) & ~PROTOCOL::ERROR::MOTOR_NOT_ENABLED) {
-    // \todo do some error handling here
-  }
 
-  _callback_process_measurement(_measured_rpm, AcknowledgedVelocity::enabled(got.response()));
+  _callback_process_measurement(_processing_data.measured_rpm, AcknowledgedVelocity::enabled(got.response()));
+
+  // Handling Error
+  _processing_data.error_code = AcknowledgedVelocity::errorCode(got.response());
+
+  if (_processing_data.error_code != 0) {
+    RCLCPP_ERROR(
+      rclcpp::get_logger("Igus Motor Controller"),
+      "Received error code from hardware with can id = %u", _parameter.can_id
+    );
+    log_error_code(_processing_data.error_code);
+  }
 }
 
 void MotorControllerHardware::enable()
@@ -104,7 +195,7 @@ void MotorControllerHardware::enable()
   wait_for_future(future_response, 200ms);
   auto got = future_response.get();
 }
-  
+
 void MotorControllerHardware::disable()
 {
   auto request = CanRequest::make_request<SetDisableMotor>(_parameter.can_id);
@@ -119,6 +210,24 @@ void MotorControllerHardware::reset()
   auto future_response = _communicator->sendRequest(std::move(request));
   wait_for_future(future_response, 200ms);
   auto got = future_response.get();
+
+  _processing_data.error_code = 0;
+}
+
+diagnostic::Diagnostic MotorControllerHardware::diagnostic()
+{
+  diagnostic::Diagnostic diagnostic;
+
+  if (_processing_data.error_code != 0) {
+    diagnostic.add(
+      "hardware", get_error_string(_processing_data.error_code), diagnostic::Level::ERROR
+    );  
+  }
+  else {
+    diagnostic.add("hardware", "working properly", diagnostic::Level::OK);
+  }
+
+  return diagnostic;
 }
 
 std::uint8_t MotorControllerHardware::getTimeStamp()

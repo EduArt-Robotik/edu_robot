@@ -14,8 +14,10 @@
 #include <edu_robot/algorithm/low_pass_filter.hpp>
 
 #include <rclcpp/node.hpp>
+#include <rclcpp/time.hpp>
 
 #include <memory>
+#include <cstdint>
 
 namespace eduart {
 namespace robot {
@@ -30,6 +32,11 @@ public:
     bool set_parameter = false;  //> sets and flashes parameter to motor controller hardware (EEPROM)
     std::uint32_t can_id = 0x18; //> can id used by this controller
     algorithm::LowPassFiler<float>::Parameter low_pass_set_point = {0.5f};
+    std::uint16_t max_missed_communications = 1000;
+    std::uint16_t max_lag = 1200;
+    std::uint8_t max_current = 0x80; //> max current unit unkown
+    bool rollover_flag = false;
+    std::uint8_t tic_scaling_factor = 1; //> Tic scaling factor scales the encoder tics before CAN communication 
   };
 
   MotorControllerHardware(
@@ -37,8 +44,13 @@ public:
     : MotorController::HardwareInterface(name, 1)
     , CommunicatorTxRxDevice(communicator)
     , _parameter(parameter)
-    , _measured_rpm(1, 0.0)
-    , _low_pass_set_point(parameter.low_pass_set_point)
+    , _processing_data{
+        std::vector<Rpm>(1, 0.0),
+        algorithm::LowPassFiler<float>(parameter.low_pass_set_point),
+        std::chrono::system_clock::now(),
+        0,
+        0
+      }
   { }
   ~MotorControllerHardware() override = default;
 
@@ -53,11 +65,18 @@ public:
 
 private:
   void processRxData(const message::RxMessageDataBuffer& data);
+  diagnostic::Diagnostic diagnostic() override;
   std::uint8_t getTimeStamp();
 
   const Parameter _parameter;
-  std::vector<Rpm> _measured_rpm;
-  algorithm::LowPassFiler<float> _low_pass_set_point;
+  
+  struct {
+    std::vector<Rpm> measured_rpm;
+    algorithm::LowPassFiler<float> low_pass_set_point;
+    std::chrono::time_point<std::chrono::system_clock> stamp_last_received;
+    std::int32_t last_position;
+    std::uint8_t error_code;
+  } _processing_data;
 };
 
 } // end namespace igus

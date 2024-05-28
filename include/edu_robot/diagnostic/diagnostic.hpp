@@ -39,6 +39,20 @@ public:
     check.addToLevelList(_diagnostic_level);
     check.addToEntryList(_diagnostic_entry);
 
+    // determine new top level
+    for (const auto& level : _diagnostic_level) {
+      if (level.second > _level) {
+        _level = level.second;
+      }
+    }
+  }
+
+  void add(const Diagnostic& diagnostic)
+  {
+    _diagnostic_entry.insert(diagnostic._diagnostic_entry.begin(), diagnostic._diagnostic_entry.end());
+    _diagnostic_level.insert(diagnostic._diagnostic_level.begin(), diagnostic._diagnostic_level.end());
+
+    // determine new top level
     for (const auto& level : _diagnostic_level) {
       if (level.second > _level) {
         _level = level.second;
@@ -111,6 +125,12 @@ public:
     }
 
     return result;
+  }
+
+  void clear() {
+    _level = Level::OK;
+    _diagnostic_entry.clear();
+    _diagnostic_level.clear();
   }
 
 private:

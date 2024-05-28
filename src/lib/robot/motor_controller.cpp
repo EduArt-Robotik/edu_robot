@@ -1,4 +1,6 @@
 #include "edu_robot/motor_controller.hpp"
+#include "edu_robot/diagnostic/diagnostic_level.hpp"
+#include "edu_robot/hardware_error.hpp"
 #include "edu_robot/rpm.hpp"
 #include "edu_robot/hardware_component_factory.hpp"
 
@@ -59,6 +61,7 @@ void MotorController::processMeasurementData(const std::vector<Rpm>& rpm, const 
     all_enabled &= _motor[i].isEnabled();
   }
 
+  // reset lost enable flag when all motors are enabled
   if (all_enabled) {
     _lost_enable = false;
   }
@@ -80,6 +83,9 @@ diagnostic::Diagnostic MotorController::processDiagnosticsImpl()
   diagnostic.add(
     "lost enable", _lost_enable, _lost_enable ? diagnostic::Level::ERROR : diagnostic::Level::OK
   );
+
+  // hardware
+  diagnostic.add(_hardware_interface->diagnostic());
 
   return diagnostic;
 }

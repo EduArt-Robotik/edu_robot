@@ -35,7 +35,7 @@ public:
     std::uint32_t timeout_ms = 1000;
   
     float weight_low_pass_set_point = 0.2f;
-    float weight_low_pass_encoder   = 0.3f;    
+    float weight_low_pass_encoder   = 0.3f;
   };
 
   MotorControllerHardware(
