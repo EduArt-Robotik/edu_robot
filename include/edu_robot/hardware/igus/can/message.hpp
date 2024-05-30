@@ -25,21 +25,31 @@ using hardware::can_gateway::can::message::element::impl::DataField;
 using hardware::can_gateway::can::message::element::Command;
 using hardware::can_gateway::can::message::Byte;
 using hardware::can_gateway::can::message::element::Uint8;
+using hardware::can_gateway::can::message::element::Uint16;
 using hardware::can_gateway::can::message::element::Int32;
 
 struct Velocity : public Uint8 {
-  // inline static constexpr std::array<Byte, size()> serialize(const Rpm value) {
-  //   return Uint8::serialize(
-  //     static_cast<std::uint8_t>(value + 127.0f)
-  //   ); // 127 is zero
-  // }
-  // inline static constexpr Rpm deserialize(const Byte data[size()]) {
-  //   return Rpm(Uint8::deserialize(data) - 127); // 127 is zero
-  // }
+  inline static constexpr std::array<Byte, size()> serialize(const Rpm value) {
+    return Uint8::serialize(
+      static_cast<std::uint8_t>(value + 127.0f)
+    ); // 127 is zero
+  }
+  inline static constexpr Rpm deserialize(const Byte data[size()]) {
+    return Rpm(Uint8::deserialize(data) - 127); // 127 is zero
+  }
 };
 
 struct Position : public Int32 {
 
+};
+
+struct ControllerParameter : public Uint16 {
+  inline static constexpr std::array<Byte, size()> serialize(const float value) {
+    return Uint16::serialize(static_cast<Uint16::type>(value * 1000.0f));
+  }
+  inline static constexpr float deserialize(const Byte data[size()]) {
+    return static_cast<float>(Uint16::deserialize(data)) / 1000.0f;
+  }
 };
 
 struct VelocityCanAddress : public hardware::can_gateway::can::message::element::CanAddress {

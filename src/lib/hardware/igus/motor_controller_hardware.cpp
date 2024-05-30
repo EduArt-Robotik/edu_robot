@@ -21,7 +21,7 @@ namespace igus {
 
 using namespace std::chrono_literals;
 
-using hardware::igus::can::CanRequest;
+using hardware::igus::can::Request;
 using can::message::PROTOCOL;
 using can::message::SetVelocity;
 using can::message::AcknowledgedVelocity;
@@ -148,9 +148,10 @@ void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
 
   // Processing Setting new Set Point
   _processing_data.low_pass_set_point(rpm[0]);
-  auto request = CanRequest::make_request<SetVelocity>(
+  auto request = Request::make_request<SetVelocity>(
     _parameter.can_id,
-    static_cast<std::uint8_t>(_processing_data.low_pass_set_point.getValue() + 127.0f), // \todo move converting to message definition. CanRequest ist the problem!
+    // static_cast<std::uint8_t>(_processing_data.low_pass_set_point.getValue() + 127.0f), // \todo move converting to message definition. CanRequest ist the problem!
+    Rpm(_processing_data.low_pass_set_point.getValue()),
     getTimeStamp()
   );
 
@@ -190,7 +191,7 @@ void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
 
 void MotorControllerHardware::enable()
 {
-  auto request = CanRequest::make_request<SetEnableMotor>(_parameter.can_id);
+  auto request = Request::make_request<SetEnableMotor>(_parameter.can_id);
   auto future_response = _communicator->sendRequest(std::move(request));
   wait_for_future(future_response, 200ms);
   auto got = future_response.get();
@@ -198,7 +199,7 @@ void MotorControllerHardware::enable()
 
 void MotorControllerHardware::disable()
 {
-  auto request = CanRequest::make_request<SetDisableMotor>(_parameter.can_id);
+  auto request = Request::make_request<SetDisableMotor>(_parameter.can_id);
   auto future_response = _communicator->sendRequest(std::move(request));
   wait_for_future(future_response, 200ms);
   auto got = future_response.get();
@@ -206,7 +207,7 @@ void MotorControllerHardware::disable()
 
 void MotorControllerHardware::reset()
 {
-  auto request = CanRequest::make_request<SetReset>(_parameter.can_id);
+  auto request = Request::make_request<SetReset>(_parameter.can_id);
   auto future_response = _communicator->sendRequest(std::move(request));
   wait_for_future(future_response, 200ms);
   auto got = future_response.get();

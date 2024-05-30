@@ -5,6 +5,7 @@
  */
 #pragma once
 
+#include "edu_robot/hardware/message_buffer.hpp"
 #include <edu_robot/hardware/can_gateway/can/message.hpp>
 
 namespace eduart {
@@ -50,11 +51,20 @@ struct PROTOCOL {
     static constexpr Byte CAN_ERROR = 7;
   };
   struct PARAMETER {
+    // constants for setting parameter
     static constexpr Byte MAX_MISSED_COMMUNICATION = 0x30;
     static constexpr Byte MAX_LAG = 0x31;
     static constexpr Byte MAX_CURRENT = 0x32;
     static constexpr Byte ROLLOVER_FLAG = 0x66;
     static constexpr Byte TIC_SCALE_FACTOR = 0x69;
+
+    // constants for getting parameter
+    static constexpr Byte GENERAL = 0x50;
+    static constexpr Byte POSITION_CONTROL_LOOP = 0x51;
+    static constexpr Byte VELOCITY_CONTROL_LOOP = 0x52;
+    static constexpr Byte WORKING_HOURS = 0x54;
+    static constexpr Byte SUPPLY_VOLTAGE = 0x55;
+    static constexpr Byte FLAGS = 0x59;
 
     struct PID {
       struct POSITION {

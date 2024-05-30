@@ -121,6 +121,9 @@ protected:
   }
 };
 
+// Helper Functions for Building Serialization Function Signature
+
+
 // Helper Functions for Message Handling
 template <class... Elements>
 TxMessageDataBuffer serialize(const typename Elements::type&... element_value, const std::tuple<Elements...>)
