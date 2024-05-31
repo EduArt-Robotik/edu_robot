@@ -126,7 +126,27 @@ struct VelocityControlLoopParameter : public Message<CommandCanAddress,   // can
   inline static constexpr std::uint8_t parameterId(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<1>(rx_buffer);
   }
-  // inline static constexpr float velocityControllerKp
+  inline static constexpr float velocityControllerKp(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<2>(rx_buffer);
+  }
+  inline static constexpr float velocityControllerKi(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<3>(rx_buffer);
+  }
+  inline static constexpr float velocityControllerKd(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<4>(rx_buffer);
+  }
+};
+
+struct WorkingHours : public Message<CommandCanAddress, // can address
+                                     Uint8,             // parameter id
+                                     Uint16,            // working hours
+                                     Uint8,             // working minutes
+                                     Uint8,             // working seconds
+                                     Uint8,             // firmware version 1
+                                     Uint8,             // firmware version 2
+                                     Uint8>             // fill byte
+{
+
 };
 
 // Operations

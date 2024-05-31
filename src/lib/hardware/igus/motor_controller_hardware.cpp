@@ -191,7 +191,7 @@ void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
 
 void MotorControllerHardware::enable()
 {
-  auto request = Request::make_request<SetEnableMotor>(_parameter.can_id);
+  auto request = Request::make_request<SetEnableMotor>(_parameter.can_id, 0);
   auto future_response = _communicator->sendRequest(std::move(request));
   wait_for_future(future_response, 200ms);
   auto got = future_response.get();
@@ -199,7 +199,7 @@ void MotorControllerHardware::enable()
 
 void MotorControllerHardware::disable()
 {
-  auto request = Request::make_request<SetDisableMotor>(_parameter.can_id);
+  auto request = Request::make_request<SetDisableMotor>(_parameter.can_id, 0);
   auto future_response = _communicator->sendRequest(std::move(request));
   wait_for_future(future_response, 200ms);
   auto got = future_response.get();
@@ -207,7 +207,7 @@ void MotorControllerHardware::disable()
 
 void MotorControllerHardware::reset()
 {
-  auto request = Request::make_request<SetReset>(_parameter.can_id);
+  auto request = Request::make_request<SetReset>(_parameter.can_id, 0);
   auto future_response = _communicator->sendRequest(std::move(request));
   wait_for_future(future_response, 200ms);
   auto got = future_response.get();
