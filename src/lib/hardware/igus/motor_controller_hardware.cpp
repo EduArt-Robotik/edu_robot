@@ -150,8 +150,8 @@ void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
   _processing_data.low_pass_set_point(rpm[0]);
   auto request = Request::make_request<SetVelocity>(
     _parameter.can_id,
-    // static_cast<std::uint8_t>(_processing_data.low_pass_set_point.getValue() + 127.0f), // \todo move converting to message definition. CanRequest ist the problem!
-    Rpm(_processing_data.low_pass_set_point.getValue()),
+    static_cast<std::uint8_t>(_processing_data.low_pass_set_point.getValue() + 127.0f), // \todo move converting to message definition. CanRequest ist the problem!
+    // Rpm(_processing_data.low_pass_set_point.getValue()),
     getTimeStamp()
   );
 
@@ -195,6 +195,8 @@ void MotorControllerHardware::enable()
   auto future_response = _communicator->sendRequest(std::move(request));
   wait_for_future(future_response, 200ms);
   auto got = future_response.get();
+
+  _processing_data.low_pass_set_point.clear();  
 }
 
 void MotorControllerHardware::disable()
@@ -213,6 +215,7 @@ void MotorControllerHardware::reset()
   auto got = future_response.get();
 
   _processing_data.error_code = 0;
+  _processing_data.low_pass_set_point.clear();
 }
 
 diagnostic::Diagnostic MotorControllerHardware::diagnostic()
