@@ -32,6 +32,8 @@ public:
     bool set_parameter = false;  //> sets and flashes parameter to motor controller hardware (EEPROM)
     std::uint32_t can_id = 0x18; //> can id used by this controller
     algorithm::LowPassFiler<float>::Parameter low_pass_set_point = {0.5f};
+    float gear_ratio = 2.127659574;
+
     std::uint16_t max_missed_communications = 1000;
     std::uint16_t max_lag = 1200;
     std::uint8_t max_current = 0x80; //> max current unit unkown

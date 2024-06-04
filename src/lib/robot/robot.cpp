@@ -266,7 +266,9 @@ void Robot::callbackSetMotorRpm(std::shared_ptr<const std_msgs::msg::Float32Mult
       set_rpm.resize(_motor_controllers[c]->motors());
 
       for (std::size_t m = 0; m < _motor_controllers[c]->motors(); ++m, ++i) {
-        set_rpm[m] = rpm_msg->data[i];
+        const auto parameter = _motor_controllers[c]->motor(m).parameter();
+        const std::size_t index = parameter.index == 0 ? i : parameter.index - 1;        
+        set_rpm[m] = rpm_msg->data[index];
       }
 
       _motor_controllers[c]->setRpm(set_rpm);
@@ -278,7 +280,9 @@ void Robot::callbackSetMotorRpm(std::shared_ptr<const std_msgs::msg::Float32Mult
 
     for (std::size_t c = 0, row = 0; c < _motor_controllers.size(); ++c) {
       for (std::size_t m = 0; m < _motor_controllers[c]->motors(); ++m, ++row) {
-        radps_measured(row) = _motor_controllers[c]->getMeasuredRpm()[m].radps();
+        const auto parameter = _motor_controllers[c]->motor(m).parameter();
+        const std::size_t index = parameter.index == 0 ? row : parameter.index - 1;        
+        radps_measured(index) = _motor_controllers[c]->getMeasuredRpm()[m].radps();
       }
     }
 

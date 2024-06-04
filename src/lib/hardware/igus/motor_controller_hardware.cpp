@@ -1,8 +1,10 @@
 #include "edu_robot/hardware/igus/motor_controller_hardware.hpp"
 #include "edu_robot/diagnostic/diagnostic_level.hpp"
+#include "edu_robot/hardware/communicator.hpp"
 #include "edu_robot/hardware/igus/can/can_request.hpp"
 #include "edu_robot/hardware/igus/can/message_definition.hpp"
 #include "edu_robot/hardware/igus/can/protocol.hpp"
+#include "edu_robot/motor_controller.hpp"
 
 #include <edu_robot/component_error.hpp>
 #include <edu_robot/rpm.hpp>
@@ -28,6 +30,16 @@ using can::message::AcknowledgedVelocity;
 using can::message::SetEnableMotor;
 using can::message::SetDisableMotor;
 using can::message::SetReset;
+
+using can::message::GetGeneralParameter;
+using can::message::GetVelocityControlParameter;
+using can::message::GetFlags;
+using can::message::GetWorkingHours;
+
+using can::message::GeneralParameter;
+using can::message::VelocityControlLoopParameter;
+using can::message::Flags;
+using can::message::WorkingHours;
 
 static void log_error_code(const std::uint8_t error_code)
 {
@@ -94,6 +106,56 @@ static std::string get_error_string(const std::uint8_t error_code)
   return std::string(error_string.begin() + 1, error_string.end());
 }
 
+static MotorControllerHardware::Parameter read_hardware_parameter(
+  const std::uint16_t can_id, std::shared_ptr<Communicator> communicator)
+{
+  MotorControllerHardware::Parameter parameter;
+
+  // General Parameter
+  {
+    auto request = Request::make_request<GetGeneralParameter>(can_id);
+    auto future_response = communicator->sendRequest(std::move(request));
+    wait_for_future(future_response, 100ms);
+    const auto got = future_response.get();
+
+    parameter.can_id = can_id;
+    parameter.max_current = GeneralParameter::maxCurrent(got.response());
+    parameter.max_lag = GeneralParameter::maxLag(got.response());
+    parameter.max_missed_communications = GeneralParameter::maxMissedCommunication(got.response());
+  }
+
+  // Flags
+  {
+    auto request = Request::make_request<GetFlags>(can_id);
+    auto future_response = communicator->sendRequest(std::move(request));
+    wait_for_future(future_response, 100ms);
+    const auto got = future_response.get();
+
+    parameter.rollover_flag = Flags::roolOver(got.response());
+    parameter.tic_scaling_factor = Flags::ticScale(got.response());
+  }
+
+  return parameter;
+}
+
+static Motor::Parameter read_motor_parameter(const std::uint16_t can_id, std::shared_ptr<Communicator> communicator)
+{
+  Motor::Parameter parameter;
+
+  // PID
+  {
+    auto request = Request::make_request<GetVelocityControlParameter>(can_id);
+    auto future_response = communicator->sendRequest(std::move(request));
+    wait_for_future(future_response, 100ms);
+    const auto got = future_response.get();
+
+    parameter.kp = VelocityControlLoopParameter::velocityControllerKp(got.response());
+    parameter.ki = VelocityControlLoopParameter::velocityControllerKi(got.response());
+    parameter.kd = VelocityControlLoopParameter::velocityControllerKd(got.response());
+
+  }
+}
+
 MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
     const std::string& motor_controller_name, const Parameter& default_parameter, rclcpp::Node& ros_node)
 {
@@ -105,11 +167,13 @@ MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
   ros_node.declare_parameter<float>(
     motor_controller_name + ".low_pass_set_point.filter_weight",
     default_parameter.low_pass_set_point.filter_weight);
+  ros_node.declare_parameter<float>(motor_controller_name + ".gear_ratio", default_parameter.gear_ratio);
 
   parameter.set_parameter = ros_node.get_parameter(motor_controller_name + ".set_parameter").as_bool();
   parameter.can_id = ros_node.get_parameter(motor_controller_name + ".can_id").as_int();
   parameter.low_pass_set_point.filter_weight = ros_node.get_parameter(
     motor_controller_name + ".low_pass_set_point.filter_weight").as_double();
+  parameter.gear_ratio = ros_node.get_parameter(motor_controller_name + ".gear_ratio").as_double();
 
   return parameter;
 }
@@ -130,6 +194,26 @@ void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
   if (false == parameter.isValid()) {
     throw std::invalid_argument("Given parameter are not valid. Cancel initialization of motor controller.");
   }
+
+  auto request = Request::make_request<GetWorkingHours>(_parameter.can_id);
+  auto future_response = _communicator->sendRequest(std::move(request));
+  wait_for_future(future_response, 100ms);
+  const auto got = future_response.get();
+
+  RCLCPP_INFO(
+    rclcpp::get_logger("MotorControllerHardware(igus)"),
+    "Found motor controller hardware with firmware version %u.%u",
+    WorkingHours::firmwareVersion1(got.response()),
+    WorkingHours::firmwareVersion2(got.response())
+  );
+  RCLCPP_INFO(
+    rclcpp::get_logger("MotorControllerHardware(igus)"),
+    "Device's working hours are: %u:%u:%u",
+    WorkingHours::hours(got.response()),
+    WorkingHours::minutes(got.response()),
+    WorkingHours::seconds(got.response())
+  );
+
   if (_parameter.set_parameter == false) {
     // do not flash set and flash the parameter to the EEPROM
     return;
@@ -147,10 +231,10 @@ void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
   }
 
   // Processing Setting new Set Point
-  _processing_data.low_pass_set_point(rpm[0]);
+  _processing_data.low_pass_set_point(rpm[0].rps() * _parameter.gear_ratio);
   auto request = Request::make_request<SetVelocity>(
     _parameter.can_id,
-    static_cast<std::uint8_t>(_processing_data.low_pass_set_point.getValue() + 127.0f), // \todo move converting to message definition. CanRequest ist the problem!
+    static_cast<std::uint8_t>(_processing_data.low_pass_set_point.getValue() + 127.5f), // \todo move converting to message definition. CanRequest ist the problem!
     // Rpm(_processing_data.low_pass_set_point.getValue()),
     getTimeStamp()
   );
@@ -158,12 +242,12 @@ void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
   auto future_response = _communicator->sendRequest(std::move(request));
 
   // Processing Received Feedback
-  wait_for_future(future_response, 200ms);
+  wait_for_future(future_response, 100ms);
   auto got = future_response.get();
   
   const auto stamp_received = std::chrono::system_clock::now();
-  const float dt = std::chrono::duration_cast<std::chrono::milliseconds>(
-    _processing_data.stamp_last_received - stamp_received).count() * 1000.0f;
+  const float dt = static_cast<float>(
+    std::chrono::duration_cast<std::chrono::milliseconds>(stamp_received - _processing_data.stamp_last_received).count()) / 1000.0f;
   const auto current_position = AcknowledgedVelocity::position(got.response());
 
   _processing_data.measured_rpm[0] = static_cast<float>(_processing_data.last_position - current_position) * dt;

@@ -9,6 +9,7 @@
 #include "edu_robot/hardware/igus/can/protocol.hpp"
 #include "edu_robot/hardware/igus/can/message.hpp"
 #include "edu_robot/hardware/message_buffer.hpp"
+#include "edu_robot/hardware_error.hpp"
 
 #include <cstdint>
 #include <edu_robot/rpm.hpp>
@@ -23,6 +24,7 @@ namespace message {
 using hardware::can_gateway::can::message::RxMessageDataBuffer;
 using hardware::can_gateway::can::message::element::Uint8;
 using hardware::can_gateway::can::message::element::Uint16;
+using hardware::can_gateway::can::message::element::Uint32;
 using hardware::can_gateway::can::message::element::Int32;
 using hardware::can_gateway::can::message::element::Command;
 using hardware::can_gateway::can::message::element::CanAddress;
@@ -146,7 +148,78 @@ struct WorkingHours : public Message<CommandCanAddress, // can address
                                      Uint8,             // firmware version 2
                                      Uint8>             // fill byte
 {
+  inline static constexpr std::uint8_t parameterId(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<1>(rx_buffer);
+  }
+  inline static constexpr std::uint16_t hours(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<2>(rx_buffer);
+  }
+  inline static constexpr std::uint8_t minutes(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<3>(rx_buffer);
+  }
+  inline static constexpr std::uint8_t seconds(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<4>(rx_buffer);
+  }
+  inline static constexpr std::uint8_t firmwareVersion1(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<5>(rx_buffer);
+  }
+  inline static constexpr std::uint8_t firmwareVersion2(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<6>(rx_buffer);
+  }
+};
 
+struct SupplyVoltage : public Message<CommandCanAddress, // can address
+                                      Uint8,             // parameter id
+                                      Uint8,             // battery
+                                      Uint8,             // fill byte
+                                      Uint8,             // fill byte
+                                      Uint8,             // fill byte
+                                      Uint8,             // fill byte
+                                      Uint8,             // fill byte
+                                      Uint8>             // fill byte
+{
+  inline static constexpr std::uint8_t parameterId(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<1>(rx_buffer);
+  }
+  inline static constexpr std::uint8_t voltage(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<2>(rx_buffer);
+  }
+};
+
+struct Flags : public Message<CommandCanAddress, // can address
+                              Uint8,             // parameter id
+                              Uint8,             // flag active stop
+                              Uint8,             // flag roll over
+                              Uint8,             // flag swap encoder
+                              Uint8,             // flag herkulex
+                              Uint8,             // debug parameter
+                              Uint8,             // debug messages
+                              Uint8>             // tic scale
+{
+  inline static constexpr std::uint8_t parameterId(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<1>(rx_buffer);
+  }
+  inline static constexpr bool activeStop(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<2>(rx_buffer) != 0;
+  }
+  inline static constexpr bool roolOver(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<3>(rx_buffer) != 0;
+  }
+  inline static constexpr bool swapEncoder(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<4>(rx_buffer) != 0;
+  }
+  inline static constexpr bool herkulex(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<5>(rx_buffer) != 0;
+  }
+  inline static constexpr std::uint8_t debugParameter(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<6>(rx_buffer);
+  }
+  inline static constexpr std::uint8_t debugMessages(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<7>(rx_buffer);
+  }
+  inline static constexpr std::uint8_t ticScale(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<8>(rx_buffer);
+  }
 };
 
 // Operations
@@ -165,11 +238,11 @@ using SetVelocity = MessageFrame<VelocityCanAddress,
                                  Uint8>;             // timestamp in ?
 
 struct AcknowledgedVelocity : public Message<VelocityCanAddress,
-                                             Uint8, // error code
-                                             Int32, // measured position in ?
-                                             Uint8, // timestamp in ?
-                                             Uint8, // shunt in ?
-                                             Uint8> // digital input
+                                             Uint8,  // error code
+                                             Uint32, // measured position in ?
+                                             Uint8,  // timestamp in ?
+                                             Uint8,  // shunt in ?
+                                             Uint8>  // digital input
 {
   inline static constexpr std::uint32_t canId(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<0>(rx_buffer);
@@ -177,7 +250,7 @@ struct AcknowledgedVelocity : public Message<VelocityCanAddress,
   inline static constexpr std::uint8_t errorCode(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<1>(rx_buffer);
   }
-  inline static constexpr std::int32_t position(const RxMessageDataBuffer& rx_buffer) {
+  inline static constexpr std::uint32_t position(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<2>(rx_buffer);
   }
   inline static constexpr std::uint8_t timestamp(const RxMessageDataBuffer &rx_buffer) {
