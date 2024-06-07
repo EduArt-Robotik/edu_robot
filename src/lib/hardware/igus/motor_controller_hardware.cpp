@@ -252,9 +252,9 @@ void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
   const auto current_position = AcknowledgedVelocity::position(got.response());
   const float position_diff = static_cast<float>(current_position - _processing_data.last_position);
   const float position_per_seconds = position_diff / dt;
-  const float rotation_per_seconds = position_per_seconds / 13980.0f;
+  const float rotation_per_seconds = position_per_seconds / 13188.7f;
 
-  _processing_data.measured_rpm[0] = Rpm::fromRps(rotation_per_seconds / _parameter.gear_ratio);
+  _processing_data.measured_rpm[0] = Rpm::fromRps(rotation_per_seconds / _parameter.gear_ratio) * -1.0f;
   _processing_data.last_position = current_position;
   _processing_data.stamp_last_received = stamp_received;
 

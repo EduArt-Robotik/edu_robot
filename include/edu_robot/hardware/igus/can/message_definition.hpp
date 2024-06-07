@@ -84,9 +84,10 @@ public:
   inline static TxMessageDataBuffer serialize(const std::uint32_t can_address) {
     return MessageType::serialize(can_address, 0);
   }
-  inline constexpr static auto makeSearchPattern(const Byte can_address) {
-    return make_message_search_pattern<0, 2>(can_address, MessageType{});
-  }
+  // \todo fix me!
+  // inline constexpr static auto makeSearchPattern(const Byte can_address) {
+  //   return make_message_search_pattern<0, 2>(can_address, MessageType{});
+  // }
 };
 
 using GetGeneralParameter = GetParameter<PROTOCOL::PARAMETER::GENERAL>;
@@ -240,7 +241,7 @@ using SetVelocity = MessageFrame<VelocityCanAddress,
 
 struct AcknowledgedVelocity : public Message<VelocityCanAddress,
                                              Uint8,  // error code
-                                             Uint32, // measured position in ?
+                                             Int32, // measured position in ?
                                              Uint8,  // timestamp in ?
                                              Uint8,  // shunt in ?
                                              Uint8>  // digital input
@@ -251,7 +252,7 @@ struct AcknowledgedVelocity : public Message<VelocityCanAddress,
   inline static constexpr std::uint8_t errorCode(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<1>(rx_buffer);
   }
-  inline static constexpr std::uint32_t position(const RxMessageDataBuffer& rx_buffer) {
+  inline static constexpr std::int32_t position(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<2>(rx_buffer);
   }
   inline static constexpr std::uint8_t timestamp(const RxMessageDataBuffer &rx_buffer) {
