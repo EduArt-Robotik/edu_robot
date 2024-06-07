@@ -30,6 +30,7 @@ using hardware::can_gateway::can::message::element::Command;
 using hardware::can_gateway::can::message::element::CanAddress;
 using hardware::can_gateway::can::message::NoResponseMessageFrame;
 using hardware::igus::can::message::element::VelocityCanAddress;
+using hardware::igus::can::message::element::ParameterCanAddress;
 using hardware::igus::can::message::element::CommandCanAddress;
 using hardware::igus::can::message::element::ControllerParameter;
 
@@ -72,7 +73,7 @@ using SetTicScaleFactor = SetParameterUint8<PROTOCOL::PARAMETER::TIC_SCALE_FACTO
 
 // Get Parameter
 template <Byte Parameter>
-struct GetParameter : public MessageFrame<CommandCanAddress,
+struct GetParameter : public MessageFrame<ParameterCanAddress,
                                           PROTOCOL::COMMAND::GET::PARAMETER,
                                           ConstDataField<Byte, Parameter>>
 {

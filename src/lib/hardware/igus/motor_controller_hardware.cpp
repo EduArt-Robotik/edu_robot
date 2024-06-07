@@ -208,7 +208,7 @@ void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
   );
   RCLCPP_INFO(
     rclcpp::get_logger("MotorControllerHardware(igus)"),
-    "Device's working hours are: %u:%u:%u",
+    "Device's working hours are: %uh %um %us",
     WorkingHours::hours(got.response()),
     WorkingHours::minutes(got.response()),
     WorkingHours::seconds(got.response())
@@ -231,7 +231,8 @@ void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
   }
 
   // Processing Setting new Set Point
-  _processing_data.low_pass_set_point(rpm[0].rps() * _parameter.gear_ratio);
+  // Controller wants rotation per sections with one decimal number.
+  _processing_data.low_pass_set_point(rpm[0].rps() * 10.0f * _parameter.gear_ratio);
   auto request = Request::make_request<SetVelocity>(
     _parameter.can_id,
     static_cast<std::uint8_t>(_processing_data.low_pass_set_point.getValue() + 127.5f), // \todo move converting to message definition. CanRequest ist the problem!
@@ -249,8 +250,11 @@ void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
   const float dt = static_cast<float>(
     std::chrono::duration_cast<std::chrono::milliseconds>(stamp_received - _processing_data.stamp_last_received).count()) / 1000.0f;
   const auto current_position = AcknowledgedVelocity::position(got.response());
+  const float position_diff = static_cast<float>(current_position - _processing_data.last_position);
+  const float position_per_seconds = position_diff / dt;
+  const float rotation_per_seconds = position_per_seconds / 13980.0f;
 
-  _processing_data.measured_rpm[0] = static_cast<float>(_processing_data.last_position - current_position) * dt;
+  _processing_data.measured_rpm[0] = Rpm::fromRps(rotation_per_seconds / _parameter.gear_ratio);
   _processing_data.last_position = current_position;
   _processing_data.stamp_last_received = stamp_received;
 

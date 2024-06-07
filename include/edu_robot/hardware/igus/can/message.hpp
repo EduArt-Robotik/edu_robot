@@ -29,11 +29,11 @@ using hardware::can_gateway::can::message::element::Uint16;
 using hardware::can_gateway::can::message::element::Int32;
 
 struct Velocity : public Uint8 {
-  inline static constexpr std::array<Byte, size()> serialize(const Rpm value) {
-    return Uint8::serialize(
-      static_cast<std::uint8_t>(value + 127.0f)
-    ); // 127 is zero
-  }
+  // inline static constexpr std::array<Byte, size()> serialize(const Rpm value) {
+    // return Uint8::serialize(
+    //   static_cast<std::uint8_t>(value + 127.5f)
+    // ); // 127 is zero
+  // }
   inline static constexpr Rpm deserialize(const Byte data[size()]) {
     return Rpm(Uint8::deserialize(data) - 127); // 127 is zero
   }
@@ -53,6 +53,12 @@ struct ControllerParameter : public Uint16 {
 };
 
 struct VelocityCanAddress : public hardware::can_gateway::can::message::element::CanAddress {
+  inline static constexpr std::array<Byte, CanAddress::size()> makeSearchPattern(const std::uint32_t can_address) {
+    return DataField<std::uint32_t, false>::serialize(can_address | 0x01);
+  }
+};
+
+struct ParameterCanAddress : public hardware::can_gateway::can::message::element::CanAddress {
   inline static constexpr std::array<Byte, CanAddress::size()> makeSearchPattern(const std::uint32_t can_address) {
     return DataField<std::uint32_t, false>::serialize(can_address | 0x01);
   }

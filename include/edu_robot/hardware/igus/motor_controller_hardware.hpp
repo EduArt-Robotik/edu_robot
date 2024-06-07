@@ -76,7 +76,7 @@ private:
     std::vector<Rpm> measured_rpm;
     algorithm::LowPassFiler<float> low_pass_set_point;
     std::chrono::time_point<std::chrono::system_clock> stamp_last_received;
-    std::int32_t last_position;
+    std::uint32_t last_position;
     std::uint8_t error_code;
   } _processing_data;
 };
