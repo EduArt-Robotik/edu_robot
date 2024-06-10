@@ -134,10 +134,10 @@ Eigen::MatrixXf RebelMove::getKinematicMatrix(const DriveKinematic kinematic) co
     const float l_squared = l_x * l_x + l_y * l_y;
 
     kinematic_matrix.resize(4, 3);
-    kinematic_matrix << -1.0f, 0.0f, -l_squared / (2.0f * l_y),
-                        -1.0f, 0.0f, -l_squared / (2.0f * l_y),
-                         1.0f, 0.0f, -l_squared / (2.0f * l_y),
-                         1.0f, 0.0f, -l_squared / (2.0f * l_y);
+    kinematic_matrix <<  1.0f, 0.0f, l_squared / (2.0f * l_y),
+                         1.0f, 0.0f, l_squared / (2.0f * l_y),
+                        -1.0f, 0.0f, l_squared / (2.0f * l_y),
+                        -1.0f, 0.0f, l_squared / (2.0f * l_y);
     kinematic_matrix *= 1.0f / wheel_radius;
   }
   else if (kinematic == DriveKinematic::MECANUM_DRIVE) {
@@ -146,10 +146,10 @@ Eigen::MatrixXf RebelMove::getKinematicMatrix(const DriveKinematic kinematic) co
     const float wheel_radius = _parameter.mecanum.wheel_diameter * 0.5f;
 
     kinematic_matrix.resize(4, 3);
-    kinematic_matrix << -1.0f,  1.0f, -(l_x + l_y) * 0.5f,
-                        -1.0f, -1.0f, -(l_x + l_y) * 0.5f,
-                         1.0f, -1.0f, -(l_x + l_y) * 0.5f,
-                         1.0f,  1.0f, -(l_x + l_y) * 0.5f;
+    kinematic_matrix <<  1.0f, -1.0f, (l_x + l_y) * 0.5f,
+                         1.0f,  1.0f, (l_x + l_y) * 0.5f,
+                        -1.0f, -1.0f, (l_x + l_y) * 0.5f,
+                        -1.0f,  1.0f, (l_x + l_y) * 0.5f;
     kinematic_matrix *= 1.0f / wheel_radius;    
   }
   else {

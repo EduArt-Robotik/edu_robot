@@ -152,8 +152,9 @@ static Motor::Parameter read_motor_parameter(const std::uint16_t can_id, std::sh
     parameter.kp = VelocityControlLoopParameter::velocityControllerKp(got.response());
     parameter.ki = VelocityControlLoopParameter::velocityControllerKi(got.response());
     parameter.kd = VelocityControlLoopParameter::velocityControllerKd(got.response());
-
   }
+
+  return parameter;
 }
 
 MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
@@ -190,29 +191,42 @@ void MotorControllerHardware::processRxData(const can::message::RxMessageDataBuf
 
 void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
 {
-  // Initial Motor Controller Hardware
+  // Initialising Motor Controller Hardware
   if (false == parameter.isValid()) {
     throw std::invalid_argument("Given parameter are not valid. Cancel initialization of motor controller.");
   }
 
-  auto request = Request::make_request<GetWorkingHours>(_parameter.can_id);
-  auto future_response = _communicator->sendRequest(std::move(request));
-  wait_for_future(future_response, 100ms);
-  const auto got = future_response.get();
+  // Getting Firmware Version and Working Hours
+  {
+    auto request = Request::make_request<GetWorkingHours>(_parameter.can_id);
+    auto future_response = _communicator->sendRequest(std::move(request));
+    wait_for_future(future_response, 100ms);
+    const auto got = future_response.get();
 
-  RCLCPP_INFO(
-    rclcpp::get_logger("MotorControllerHardware(igus)"),
-    "Found motor controller hardware with firmware version %u.%u",
-    WorkingHours::firmwareVersion1(got.response()),
-    WorkingHours::firmwareVersion2(got.response())
-  );
-  RCLCPP_INFO(
-    rclcpp::get_logger("MotorControllerHardware(igus)"),
-    "Device's working hours are: %uh %um %us",
-    WorkingHours::hours(got.response()),
-    WorkingHours::minutes(got.response()),
-    WorkingHours::seconds(got.response())
-  );
+    RCLCPP_INFO(
+      rclcpp::get_logger("MotorControllerHardware(igus)"),
+      "Found motor controller hardware with firmware version %u.%u",
+      WorkingHours::firmwareVersion1(got.response()),
+      WorkingHours::firmwareVersion2(got.response())
+    );
+    RCLCPP_INFO(
+      rclcpp::get_logger("MotorControllerHardware(igus)"),
+      "Device's working hours are: %uh %um %us",
+      WorkingHours::hours(got.response()),
+      WorkingHours::minutes(got.response()),
+      WorkingHours::seconds(got.response())
+    );
+  }
+  // Getting Current Position
+  {
+    auto request = Request::make_request<SetVelocity>(_parameter.can_id, 0, getTimeStamp());
+    auto future_response = _communicator->sendRequest(std::move(request));
+    wait_for_future(future_response, 100ms);
+    const auto got = future_response.get();
+
+    _processing_data.last_position = AcknowledgedVelocity::position(got.response());
+    _processing_data.stamp_last_received = std::chrono::system_clock::now();
+  }
 
   if (_parameter.set_parameter == false) {
     // do not flash set and flash the parameter to the EEPROM
@@ -231,8 +245,9 @@ void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
   }
 
   // Processing Setting new Set Point
+  // RPM hast to be negated, because motor is turing left with positive rpm value.
   // Controller wants rotation per sections with one decimal number.
-  _processing_data.low_pass_set_point(rpm[0].rps() * 10.0f * _parameter.gear_ratio);
+  _processing_data.low_pass_set_point(-rpm[0].rps() * 10.0f * _parameter.gear_ratio);
   auto request = Request::make_request<SetVelocity>(
     _parameter.can_id,
     static_cast<std::uint8_t>(_processing_data.low_pass_set_point.getValue() + 127.5f), // \todo move converting to message definition. CanRequest ist the problem!
@@ -247,13 +262,14 @@ void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
   auto got = future_response.get();
   
   const auto stamp_received = std::chrono::system_clock::now();
-  const float dt = static_cast<float>(
-    std::chrono::duration_cast<std::chrono::milliseconds>(stamp_received - _processing_data.stamp_last_received).count()) / 1000.0f;
+  const auto stamp_diff = std::chrono::duration_cast<std::chrono::milliseconds>(stamp_received - _processing_data.stamp_last_received).count();
+  const float dt = std::min(static_cast<float>(stamp_diff) / 1000.0f, 0.5f); // limit dt to 0.5s
   const auto current_position = AcknowledgedVelocity::position(got.response());
   const float position_diff = static_cast<float>(current_position - _processing_data.last_position);
   const float position_per_seconds = position_diff / dt;
   const float rotation_per_seconds = position_per_seconds / 13188.7f;
 
+  // Measured rpm value has to be negated, because motor is turing left with positive rpm value.
   _processing_data.measured_rpm[0] = Rpm::fromRps(rotation_per_seconds / _parameter.gear_ratio) * -1.0f;
   _processing_data.last_position = current_position;
   _processing_data.stamp_last_received = stamp_received;
