@@ -26,7 +26,7 @@ public:
    */
   template <class Message>
   inline static std::shared_ptr<RxDataEndPoint> make_data_endpoint(
-    const std::uint32_t can_id, const CallbackProcessData& callback, CommunicatorRxDevice* data_receiver,
+    CommunicatorRxDevice* data_receiver, const std::uint32_t can_id, const CallbackProcessData& callback,
     const std::uint8_t buffer_size = 5)
   {
     const auto search_pattern = Message::makeSearchPattern(can_id);

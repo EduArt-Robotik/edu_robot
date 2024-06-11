@@ -39,7 +39,7 @@ public:
    */
   template <class Message>
   inline static std::shared_ptr<RxDataEndPoint> make_data_endpoint(
-    const CallbackProcessData& callback, CommunicatorRxDevice* data_receiver, const std::uint8_t buffer_size = 1)
+    CommunicatorRxDevice* data_receiver, const CallbackProcessData& callback, const std::uint8_t buffer_size = 1)
   {
     const auto search_pattern = Message::makeSearchPattern();
     std::vector<message::Byte> search_pattern_vector(search_pattern.begin(), search_pattern.end());

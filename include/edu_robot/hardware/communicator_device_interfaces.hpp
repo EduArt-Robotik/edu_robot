@@ -10,6 +10,7 @@
 
 #include <memory>
 #include <mutex>
+#include <utility>
 
 namespace eduart {
 namespace robot {
@@ -43,9 +44,17 @@ public:
   }
 
   inline std::mutex& rxDataMutex() { return _data_mutex; }
-  void registerRxDataEndpoint(std::shared_ptr<RxDataEndPoint> data_endpoint) {
-    _data_endpoint.push_back(data_endpoint);
+  template <class EndPointType, class Message, typename ...Args>
+  std::shared_ptr<RxDataEndPoint> createRxDataEndPoint(Args&& ...args)
+  {
+    auto end_point = EndPointType::template make_data_endpoint<Message>(this, std::forward<Args>(args)...);
+    _data_endpoint.push_back(end_point);
+
+    return end_point;
   }
+  // void registerRxDataEndpoint(std::shared_ptr<RxDataEndPoint> data_endpoint) {
+  //   _data_endpoint.push_back(data_endpoint);
+  // }
 
 private:
   std::mutex _data_mutex;

@@ -194,13 +194,11 @@ void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
 {
   initialize_controller(parameter, _parameter, _communicator);
 
-  auto measurement_end_point = CanRxDataEndPoint::make_data_endpoint<Response>(
+  auto measurement_end_point = createRxDataEndPoint<CanRxDataEndPoint, Response>(
     _parameter.can_id.output,
-    std::bind(&MotorControllerHardware::processRxData, this, std::placeholders::_1),
-    this
+    std::bind(&MotorControllerHardware::processRxData, this, std::placeholders::_1)
   );
   _communicator->registerRxDataEndpoint(measurement_end_point);
-  registerRxDataEndpoint(measurement_end_point);
 }
 
 void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)

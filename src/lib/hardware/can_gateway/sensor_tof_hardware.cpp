@@ -96,13 +96,11 @@ SensorTofHardware::SensorTofHardware(
 
   _can_id.measurement = 0x308 + _parameter.sensor_id;
 
-  auto measurement_end_point = CanRxDataEndPoint::make_data_endpoint<ZoneMeasurement>(
+  auto measurement_end_point = createRxDataEndPoint<CanRxDataEndPoint, ZoneMeasurement>(
     _can_id.measurement,
-    std::bind(&SensorTofHardware::processRxData, this, std::placeholders::_1),
-    this
+    std::bind(&SensorTofHardware::processRxData, this, std::placeholders::_1)
   );
   _communicator->registerRxDataEndpoint(measurement_end_point);
-  registerRxDataEndpoint(measurement_end_point);
 }
 
 void SensorTofHardware::processRxData(const message::RxMessageDataBuffer& data)

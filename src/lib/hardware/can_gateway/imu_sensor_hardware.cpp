@@ -19,13 +19,11 @@ ImuSensorHardware::ImuSensorHardware(const std::uint32_t can_id, std::shared_ptr
 {
   _processing_data.clear();
 
-  auto data_endpoint = CanRxDataEndPoint::make_data_endpoint<MeasurementOrientation>(
+  auto data_endpoint = createRxDataEndPoint<CanRxDataEndPoint, MeasurementOrientation>(
     can_id,
-    std::bind(&ImuSensorHardware::processRxData, this, std::placeholders::_1),
-    this
+    std::bind(&ImuSensorHardware::processRxData, this, std::placeholders::_1)
   );
   _communicator->registerRxDataEndpoint(data_endpoint);
-  registerRxDataEndpoint(data_endpoint);
 }
  
 void ImuSensorHardware::processRxData(const message::RxMessageDataBuffer& data)

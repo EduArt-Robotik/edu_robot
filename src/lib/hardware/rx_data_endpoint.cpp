@@ -97,7 +97,7 @@ void RxDataEndPoint::processDataJob()
     _callback_process_data(*buffer);
     buffer->clear();
 
-    // Move back empty data buffer to input buffer.
+    // Move back empty data buffer to input buffer. Buffer keeps allocated memory.
     _mutex.lock();
     _input_data_buffer.push_back(buffer);
     _mutex.unlock();
