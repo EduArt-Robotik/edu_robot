@@ -1,26 +1,33 @@
 #include "edu_robot/hardware/iot_shield/iot_shield.hpp"
-#include "edu_robot/hardware/iot_shield/iot_shield_communicator.hpp"
 #include "edu_robot/hardware/iot_shield/uart/message.hpp"
 #include "edu_robot/hardware/iot_shield/uart/message_definition.hpp"
+#include "edu_robot/hardware/iot_shield/uart/uart_request.hpp"
+#include "edu_robot/hardware/iot_shield/uart_communication_device.hpp"
+#include "edu_robot/hardware/rx_data_endpoint.hpp"
+
+#include <edu_robot/hardware/communicator.hpp>
 
 #include <edu_robot/robot_status_report.hpp>
 
 #include <algorithm>
 #include <memory>
 #include <functional>
-#include <iostream>
 #include <stdexcept>
 
 namespace eduart {
 namespace robot {
-namespace iotbot {
+namespace hardware {
+namespace iot_shield {
 
+using uart::Request;
+using uart::message::ShieldResponse;
 using uart::message::UART;
+
 using namespace std::chrono_literals;
 
 IotShield::IotShield(char const* const device_name)
   : processing::ProcessingComponentOutput<float>("iot_shield")
-  , _communicator(std::make_shared<IotShieldCommunicator>(device_name)) 
+  , CommunicatorRxNode(std::make_shared<Communicator>(std::make_shared<UartCommunicationDevice>(device_name)))
 {
   // Configuring Diagnostic
   _clock = std::make_shared<rclcpp::Clock>();
@@ -39,11 +46,16 @@ IotShield::IotShield(char const* const device_name)
   _diagnostic.last_processing = _clock->now();
 
   // set UART timeout
-  auto request = ShieldRequest::make_request<uart::message::SetValueF<UART::COMMAND::SET::UART_TIMEOUT>>(
+  auto request = Request::make_request<uart::message::SetValueF<UART::COMMAND::SET::UART_TIMEOUT>>(
     1.0f, 0);
   auto future_response = _communicator->sendRequest(std::move(request));
   wait_for_future(future_response, 100ms);
   future_response.get();
+
+  // create data endpoint for status report
+  createRxDataEndPoint<RxDataEndPoint, ShieldResponse>(
+    std::bind(&IotShield::processStatusReport, this, std::placeholders::_1)
+  );
 }
 
 IotShield::~IotShield()
@@ -53,7 +65,7 @@ IotShield::~IotShield()
 
 void IotShield::enable()
 {
-  auto request = ShieldRequest::make_request<uart::message::Enable>(0, 0);
+  auto request = Request::make_request<uart::message::Enable>(0, 0);
   auto future_response = _communicator->sendRequest(std::move(request));
   wait_for_future(future_response, 100ms);
   future_response.get();  
@@ -61,7 +73,7 @@ void IotShield::enable()
 
 void IotShield::disable()
 {
-  auto request = ShieldRequest::make_request<uart::message::Disable>(0, 0);
+  auto request = Request::make_request<uart::message::Disable>(0, 0);
   auto future_response = _communicator->sendRequest(std::move(request));
   wait_for_future(future_response, 100ms);
   future_response.get();    
@@ -73,34 +85,9 @@ RobotStatusReport IotShield::getStatusReport()
   return _report;
 }
 
-void IotShield::registerIotShieldRxDevice(std::shared_ptr<IotShieldRxDevice> device)
+void IotShield::processStatusReport(const message::RxMessageDataBuffer& data)
 {
-  if (std::find(_rx_devices.begin(), _rx_devices.end(), device) != _rx_devices.end()) {
-    throw std::invalid_argument("Given IotShieldRxDevice is already contained in rx device container.");
-  }
-
-  _rx_devices.push_back(device);
-}
-
-void IotShield::processStatusReport()
-{
-  // Do Status Report
-  const bool need_to_update = 
-    std::chrono::duration_cast<std::chrono::milliseconds>(
-      std::chrono::system_clock::now() - _communicator->getStampRxBuffer()) > 1500ms; // \todo make configurable!
-
-  if (need_to_update) {
-    auto request = ShieldRequest::make_request<uart::message::SetRpm>(0.0f, 0.0f, 0.0f, 0.0f);
-    auto future_response = _communicator->sendRequest(std::move(request));
-    wait_for_future(future_response, 100ms);
-    future_response.get();    
-  }
-
-  if (_communicator->isRxBufferNew() == false) {
-    return;
-  }
-
-  const auto buffer = _communicator->getRxBuffer();
+  const auto buffer = data;
   _report.voltage.mcu = uart::message::ShieldResponse::voltage(buffer);
   _report.current.mcu = uart::message::ShieldResponse::current(buffer);
   _report.rpm.resize(4u);
@@ -117,10 +104,6 @@ void IotShield::processStatusReport()
   }
 
   sendInputValue(_report.voltage.mcu);
-
-  for (auto& device : _rx_devices) {
-    device->processRxData(buffer);
-  }
 
   // Do Diagnostics
   const auto now = _clock->now();
@@ -145,6 +128,7 @@ diagnostic::Diagnostic IotShield::processDiagnosticsImpl()
   return diagnostic;
 }
 
-} // end namespace iotbot
+} // end namespace iot_shield
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

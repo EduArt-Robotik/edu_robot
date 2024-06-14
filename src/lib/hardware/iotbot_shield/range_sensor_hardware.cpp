@@ -1,5 +1,6 @@
 #include "edu_robot/hardware/iot_shield/range_sensor_hardware.hpp"
 #include "edu_robot/hardware/iot_shield/uart/message_definition.hpp"
+#include "edu_robot/hardware/rx_data_endpoint.hpp"
 
 #include <edu_robot/sensor_range.hpp>
 
@@ -9,10 +10,11 @@
 
 namespace eduart {
 namespace robot {
-namespace iotbot {
+namespace hardware {
+namespace iot_shield {
 
-RangeSensorHardware::RangeSensorHardware(const std::uint8_t id)
-  : IotShieldRxDevice()
+RangeSensorHardware::RangeSensorHardware(const std::uint8_t id, std::shared_ptr<Communicator> communicator)
+  : CommunicatorRxNode(communicator)
   , _id(id)
 {
 
@@ -51,6 +53,7 @@ void RangeSensorHardware::initialize(const SensorRange::Parameter& parameter)
   (void)parameter;
 }
 
-} // end namespace iotbot
+} // end namespace iot_shield
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

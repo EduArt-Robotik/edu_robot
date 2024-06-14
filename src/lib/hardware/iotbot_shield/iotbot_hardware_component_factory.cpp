@@ -9,11 +9,12 @@
 
 namespace eduart {
 namespace robot {
-namespace iotbot {
+namespace hardware {
+namespace iot_shield {
 
 IotBotHardwareComponentFactory& IotBotHardwareComponentFactory::addLighting(const std::string& lighting_name)
 {
-  _hardware[lighting_name] = std::make_unique<iotbot::LightingHardware>(
+  _hardware[lighting_name] = std::make_unique<LightingHardware>(
     lighting_name, _shield->getCommunicator()
   );
 
@@ -27,7 +28,6 @@ IotBotHardwareComponentFactory& IotBotHardwareComponentFactory::addMotorControll
     controller_name, parameter, _shield->getCommunicator());
 
   _motor_controller_hardware.push_back(compound_motor);
-  _shield->registerIotShieldRxDevice(compound_motor);
 
   return *this;
 }
@@ -35,8 +35,7 @@ IotBotHardwareComponentFactory& IotBotHardwareComponentFactory::addMotorControll
 IotBotHardwareComponentFactory& 
 IotBotHardwareComponentFactory::addRangeSensor(const std::string& sensor_name, const std::uint8_t id)
 {
-  auto range_sensor_hardware = std::make_shared<RangeSensorHardware>(id);
-  _shield->registerIotShieldRxDevice(range_sensor_hardware);
+  auto range_sensor_hardware = std::make_shared<RangeSensorHardware>(id, _shield->getCommunicator());
   _hardware[sensor_name] = range_sensor_hardware;
 
   return *this;
@@ -45,12 +44,12 @@ IotBotHardwareComponentFactory::addRangeSensor(const std::string& sensor_name, c
 IotBotHardwareComponentFactory& IotBotHardwareComponentFactory::addImuSensor(const std::string& sensor_name)
 {
   auto imu_hardware = std::make_shared<ImuSensorHardware>(_shield->getCommunicator());
-  _shield->registerIotShieldRxDevice(imu_hardware);
   _hardware[sensor_name] = imu_hardware;
 
   return *this;
 }
 
-} // end namespace iotbot
+} // end namespace iot_shield
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

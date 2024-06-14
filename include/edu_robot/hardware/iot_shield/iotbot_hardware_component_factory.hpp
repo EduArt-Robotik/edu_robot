@@ -15,7 +15,8 @@
 
 namespace eduart {
 namespace robot {
-namespace iotbot {
+namespace hardware {
+namespace iot_shield {
 
 class IotBotHardwareComponentFactory : public eduart::robot::HardwareComponentFactory
 {
@@ -33,6 +34,7 @@ private:
   std::shared_ptr<IotShield> _shield;
 };
 
-} // end namespace iotbot
+} // end namespace iot_shield
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

@@ -23,7 +23,6 @@ ImuSensorHardware::ImuSensorHardware(const std::uint32_t can_id, std::shared_ptr
     can_id,
     std::bind(&ImuSensorHardware::processRxData, this, std::placeholders::_1)
   );
-  _communicator->registerRxDataEndpoint(data_endpoint);
 }
  
 void ImuSensorHardware::processRxData(const message::RxMessageDataBuffer& data)

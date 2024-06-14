@@ -9,18 +9,19 @@
 #include <edu_robot/hardware_component_interfaces.hpp>
 #include <edu_robot/rpm.hpp>
 
-#include "edu_robot/hardware/iot_shield/iot_shield_communicator.hpp"
-#include "edu_robot/hardware/iot_shield/iot_shield_device_interfaces.hpp"
+#include <edu_robot/hardware/communicator_node.hpp>
+#include <edu_robot/hardware/communicator.hpp>
 
 #include <memory>
 #include <string>
 
 namespace eduart {
 namespace robot {
-namespace iotbot {
+namespace hardware {
+namespace iot_shield {
 
 class MotorControllerHardware : public MotorController::HardwareInterface
-                              , public eduart::robot::iotbot::IotShieldTxRxDevice
+                              , public CommunicatorTxRxNode
 {
 public:
   struct Parameter {
@@ -36,20 +37,23 @@ public:
   };
 
   MotorControllerHardware(
-    const std::string& name, const Parameter& parameter, std::shared_ptr<IotShieldCommunicator> communicator);
+    const std::string& name, const Parameter& parameter, std::shared_ptr<Communicator> communicator);
   ~MotorControllerHardware() override;
 
-  void processRxData(const uart::message::RxMessageDataBuffer& data) override;
   void processSetValue(const std::vector<Rpm>& rpm) override;
   void initialize(const Motor::Parameter& parameter) override;
 
   static Parameter get_parameter(const std::string& name, const Parameter& default_parameter, rclcpp::Node& ros_node);
 
 private:
+  void processRxData(const message::RxMessageDataBuffer& data);
+  void doCommunication() override;
+
   const Parameter& _parameter;
   std::vector<Rpm> _measured_rpm;
 };
 
-} // end namespace iotbot
+} // end namespace iot_shield
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

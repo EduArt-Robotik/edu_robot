@@ -1,6 +1,9 @@
 #include "edu_robot/hardware/iot_shield/lighting_hardware.hpp"
-#include "edu_robot/hardware/iot_shield/iot_shield_communicator.hpp"
+#include "edu_robot/hardware/iot_shield/uart/message.hpp"
 #include "edu_robot/hardware/iot_shield/uart/message_definition.hpp"
+
+#include <edu_robot/hardware/communicator_node.hpp>
+#include <edu_robot/hardware/iot_shield/uart/uart_request.hpp>
 
 #include <edu_robot/lighting.hpp>
 
@@ -9,13 +12,16 @@
 
 namespace eduart {
 namespace robot {
-namespace iotbot {
+namespace hardware {
+namespace iot_shield {
 
 using uart::message::UART;
+using uart::Request;
+
 using namespace std::chrono_literals;
 
-LightingHardware::LightingHardware(const std::string& name, std::shared_ptr<IotShieldCommunicator> communicator)
-  : IotShieldTxDevice(communicator)
+LightingHardware::LightingHardware(const std::string& name, std::shared_ptr<Communicator> communicator)
+  : CommunicatorTxNode(communicator)
   , _name(name)
 {
 
@@ -34,21 +40,21 @@ void LightingHardware::processSetValue(const Color& color, const robot::Lighting
   switch (mode) {
   case Mode::FLASH:
     if (_name.find("left") != std::string::npos) {
-      auto request = ShieldRequest::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::FLASH::LEFT>>(
+      auto request = Request::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::FLASH::LEFT>>(
       color.r, color.g, color.b, 0, 0);
       auto response = _communicator->sendRequest(std::move(request));
       wait_for_future(response, 100ms);
       response.get();
     }
     else if (_name.find("right") != std::string::npos) {
-      auto request = ShieldRequest::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::FLASH::RIGHT>>(
+      auto request = Request::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::FLASH::RIGHT>>(
       color.r, color.g, color.b, 0, 0);
       auto response = _communicator->sendRequest(std::move(request));
       wait_for_future(response, 100ms);
       response.get();
     }
     else if (_name.find("all") != std::string::npos) {
-      auto request = ShieldRequest::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::FLASH::ALL>>(
+      auto request = Request::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::FLASH::ALL>>(
       color.r, color.g, color.b, 0, 0);
       auto response = _communicator->sendRequest(std::move(request));
       wait_for_future(response, 100ms);
@@ -58,7 +64,7 @@ void LightingHardware::processSetValue(const Color& color, const robot::Lighting
 
     // all lightings are addressed
   case Mode::DIM: {
-    auto request = ShieldRequest::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::DIM>>(
+    auto request = Request::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::DIM>>(
       color.r, color.g, color.b, 0, 0);
     auto response = _communicator->sendRequest(std::move(request));
     wait_for_future(response, 100ms);
@@ -67,7 +73,7 @@ void LightingHardware::processSetValue(const Color& color, const robot::Lighting
   break;
 
   case Mode::OFF: {
-    auto request = ShieldRequest::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::OFF>>(
+    auto request = Request::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::OFF>>(
       color.r, color.g, color.b, 0, 0);
     auto response = _communicator->sendRequest(std::move(request));
     wait_for_future(response, 100ms);
@@ -76,7 +82,7 @@ void LightingHardware::processSetValue(const Color& color, const robot::Lighting
   break;
 
   case Mode::PULSATION: {
-    auto request = ShieldRequest::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::PULSATION>>(
+    auto request = Request::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::PULSATION>>(
       color.r, color.g, color.b, 0, 0);
     auto response = _communicator->sendRequest(std::move(request));
     wait_for_future(response, 100ms);
@@ -85,7 +91,7 @@ void LightingHardware::processSetValue(const Color& color, const robot::Lighting
   break;
 
   case Mode::ROTATION: {
-    auto request = ShieldRequest::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::ROTATION>>(
+    auto request = Request::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::ROTATION>>(
       color.r, color.g, color.b, 0, 0);
     auto response = _communicator->sendRequest(std::move(request));
     wait_for_future(response, 100ms);
@@ -94,7 +100,7 @@ void LightingHardware::processSetValue(const Color& color, const robot::Lighting
   break;
 
   case Mode::RUNNING: {
-    auto request = ShieldRequest::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::RUNNING>>(
+    auto request = Request::make_request<uart::message::SetLighting<UART::COMMAND::LIGHTING::RUNNING>>(
       color.r, color.g, color.b, 0, 0);
     auto response = _communicator->sendRequest(std::move(request));
     wait_for_future(response, 100ms);
@@ -112,6 +118,12 @@ void LightingHardware::initialize(const Lighting::Parameter& parameter)
   (void)parameter;
 }
 
-} // end namespace iotbot
+void LightingHardware::doCommunication()
+{
+  
+}
+
+} // end namespace iot_shield
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

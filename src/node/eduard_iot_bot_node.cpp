@@ -13,9 +13,9 @@
 #include <rclcpp/rclcpp.hpp>
 
 using eduart::robot::bot::Eduard;
-using eduart::robot::iotbot::IotShield;
-using eduart::robot::iotbot::IotBotHardwareComponentFactory;
-using eduart::robot::iotbot::MotorControllerHardware;
+using eduart::robot::hardware::iot_shield::IotShield;
+using eduart::robot::hardware::iot_shield::IotBotHardwareComponentFactory;
+using eduart::robot::hardware::iot_shield::MotorControllerHardware;
 
 using namespace std::chrono_literals;
 
@@ -62,11 +62,6 @@ public:
     
     // Start up with robot mode INACTIVE.
     _mode_state_machine.switchToMode(eduart::robot::RobotMode::INACTIVE);
-
-    // HACK! Timer should be in class IoTShield.
-    _timer_process_status_report = create_wall_timer(
-      20ms, std::bind(&IotShield::processStatusReport, iot_shield.get())
-    );
   }
 
 private:

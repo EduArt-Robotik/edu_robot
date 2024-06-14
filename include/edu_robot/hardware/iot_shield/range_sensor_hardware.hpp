@@ -8,28 +8,31 @@
 
 #include <edu_robot/sensor_range.hpp>
 #include <edu_robot/hardware_component_interfaces.hpp>
-#include <rclcpp/parameter.hpp>
 
-#include "edu_robot/hardware/iot_shield/iot_shield_device_interfaces.hpp"
+#include <edu_robot/hardware/communicator_node.hpp>
+
+#include <rclcpp/parameter.hpp>
 
 namespace eduart {
 namespace robot {
-namespace iotbot {
+namespace hardware {
+namespace iot_shield {
 
 class RangeSensorHardware : public SensorRange::SensorInterface
-                          , public IotShieldRxDevice
+                          , public CommunicatorRxNode
 {
 public:
-  RangeSensorHardware(const std::uint8_t id);
+  RangeSensorHardware(const std::uint8_t id, std::shared_ptr<Communicator> communicator);
   ~RangeSensorHardware() override = default;
 
-  void processRxData(const uart::message::RxMessageDataBuffer& data) override;
+  void processRxData(const message::RxMessageDataBuffer& data);
   void initialize(const SensorRange::Parameter& parameter) override;
 
 private:
   std::uint8_t _id;
 };               
 
-} // end namespace iotbot
+} // end namespace iot_shield
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot
