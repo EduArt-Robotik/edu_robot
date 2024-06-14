@@ -10,6 +10,7 @@ add_library(eduart-robot
   sensor_imu.cpp
   sensor_point_cloud.cpp
   motor.cpp
+  executer.cpp
 )
 target_link_libraries(eduart-robot
   Eigen3::Eigen
