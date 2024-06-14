@@ -16,7 +16,7 @@ using udp::message::SetLighting;
 using udp::message::PROTOCOL;
 
 LightingHardware::LightingHardware(const std::string& name, std::shared_ptr<Communicator> communicator)
-  : CommunicatorTxDevice(communicator)
+  : CommunicatorTxNode(communicator)
   , _name(name)
 {
 

@@ -7,7 +7,7 @@
 
 #include <edu_robot/sensor_imu.hpp>
 
-#include "edu_robot/hardware/communicator_device_interfaces.hpp"
+#include "edu_robot/hardware/communicator_node.hpp"
 
 namespace eduart {
 namespace robot {
@@ -15,7 +15,7 @@ namespace hardware {
 namespace ethernet {
 
 class ImuSensorHardware : public SensorImu::SensorInterface
-                        , public CommunicatorTxRxDevice
+                        , public CommunicatorTxRxNode
 {
 public:
   ImuSensorHardware(rclcpp::Node& ros_node, std::shared_ptr<Communicator> communicator);
@@ -26,6 +26,7 @@ public:
 private:
   void processRxData(const message::RxMessageDataBuffer& data);
   void processMeasurement();
+  void doCommunication() override;
 
   std::shared_ptr<rclcpp::TimerBase> _timer_get_measurement;
 };

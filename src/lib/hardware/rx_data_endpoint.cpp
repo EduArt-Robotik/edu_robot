@@ -1,5 +1,5 @@
 #include "edu_robot/hardware/rx_data_endpoint.hpp"
-#include "edu_robot/hardware/communicator_device_interfaces.hpp"
+#include "edu_robot/hardware/communicator_node.hpp"
 
 #include <cstdint>
 #include <iostream>
@@ -14,7 +14,7 @@ using namespace std::chrono_literals;
 RxDataEndPoint::RxDataEndPoint(
   std::vector<message::Byte>& search_pattern,
   const std::function<void(const message::RxMessageDataBuffer&)>& callback_process_data,
-  CommunicatorRxDevice* data_receiver,
+  CommunicatorRxNode* data_receiver,
   const std::uint8_t buffer_size)
   : _input_data_buffer(buffer_size)
   , _response_search_pattern(std::move(search_pattern))

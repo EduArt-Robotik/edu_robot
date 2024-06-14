@@ -18,7 +18,7 @@ namespace eduart {
 namespace robot {
 namespace hardware {
 
-class CommunicatorRxDevice;
+class CommunicatorRxNode;
 
 class RxDataEndPoint
 {
@@ -39,7 +39,7 @@ public:
    */
   template <class Message>
   inline static std::shared_ptr<RxDataEndPoint> make_data_endpoint(
-    CommunicatorRxDevice* data_receiver, const CallbackProcessData& callback, const std::uint8_t buffer_size = 1)
+    CommunicatorRxNode* data_receiver, const CallbackProcessData& callback, const std::uint8_t buffer_size = 1)
   {
     const auto search_pattern = Message::makeSearchPattern();
     std::vector<message::Byte> search_pattern_vector(search_pattern.begin(), search_pattern.end());
@@ -56,7 +56,7 @@ protected:
   RxDataEndPoint(
     std::vector<message::Byte>& search_pattern,
     const std::function<void(const message::RxMessageDataBuffer&)>& callback_process_data,
-    CommunicatorRxDevice* data_receiver,
+    CommunicatorRxNode* data_receiver,
     const std::uint8_t buffer_size);
 
   void processDataJob();
@@ -69,7 +69,7 @@ protected:
 
   std::vector<message::Byte> _response_search_pattern;
   std::function<void(const message::RxMessageDataBuffer&)> _callback_process_data;
-  CommunicatorRxDevice* _data_receiver;
+  CommunicatorRxNode* _data_receiver;
 };
 
 } // end namespace igus

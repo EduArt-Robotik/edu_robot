@@ -9,7 +9,7 @@
 #include <edu_robot/sensor_range.hpp>
 #include <edu_robot/hardware_component_interfaces.hpp>
 
-#include "edu_robot/hardware/communicator_device_interfaces.hpp"
+#include "edu_robot/hardware/communicator_node.hpp"
 
 namespace eduart {
 namespace robot {
@@ -17,7 +17,7 @@ namespace hardware {
 namespace ethernet {
 
 class RangeSensorHardware : public SensorRange::SensorInterface
-                          , public CommunicatorTxRxDevice
+                          , public CommunicatorTxRxNode
 {
 public:
   RangeSensorHardware(const std::uint8_t id, rclcpp::Node& ros_node, std::shared_ptr<Communicator> communicator);

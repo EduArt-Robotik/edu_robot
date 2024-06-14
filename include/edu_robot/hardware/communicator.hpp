@@ -7,7 +7,6 @@
 
 #include "edu_robot/hardware/message_buffer.hpp"
 #include "edu_robot/hardware/communication_device.hpp"
-#include "edu_robot/hardware/communicator_device_interfaces.hpp"
 #include "edu_robot/hardware/rx_data_endpoint.hpp"
 
 #include <edu_robot/state.hpp>
@@ -125,6 +124,6 @@ private:
   std::list<Request> _open_response_tasks;
 };
 
-} // end namespace igus
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

@@ -12,7 +12,7 @@ namespace can_gateway {
 using namespace std::chrono_literals;
 
 LightingHardware::LightingHardware(const std::string& name, std::shared_ptr<Communicator> communicator)
-  : CommunicatorTxDevice(communicator)
+  : CommunicatorTxNode(communicator)
   , _name(name)
 {
 
@@ -109,6 +109,11 @@ void LightingHardware::processSetValue(const Color& color, const robot::Lighting
 void LightingHardware::initialize(const Lighting::Parameter& parameter)
 {
   (void)parameter;
+}
+
+void LightingHardware::doCommunication()
+{
+  
 }
 
 } // end namespace can_gateway

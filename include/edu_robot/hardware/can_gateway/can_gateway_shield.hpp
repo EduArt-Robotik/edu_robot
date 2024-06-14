@@ -5,8 +5,8 @@
  */
 #pragma once
 
-#include "edu_robot/hardware/communicator.hpp"
-
+#include <edu_robot/hardware/communicator.hpp>
+#include <edu_robot/hardware/communicator_node.hpp>
 #include <edu_robot/hardware_robot_interface.hpp>
 #include <edu_robot/robot_status_report.hpp>
 
@@ -26,7 +26,7 @@ class MotorControllerHardware;
 
 class CanGatewayShield : public HardwareRobotInterface
                        , public processing::ProcessingComponentOutput<float>
-                       , public CommunicatorRxDevice
+                       , public CommunicatorRxNode
                        , public std::enable_shared_from_this<CanGatewayShield>
 {
 public:

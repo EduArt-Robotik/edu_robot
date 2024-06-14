@@ -3,6 +3,7 @@
 #include "edu_robot/hardware/can_gateway/motor_controller_hardware.hpp"
 #include "edu_robot/hardware/can_gateway/can/message_definition.hpp"
 #include "edu_robot/hardware/can_gateway/can/can_rx_data_endpoint.hpp"
+#include "edu_robot/hardware/communicator_node.hpp"
 
 #include <memory>
 #include <stdexcept>
@@ -19,10 +20,11 @@ using hardware::can_gateway::can::CanRxDataEndPoint;
 
 CanGatewayShield::CanGatewayShield(char const* const can_device)
   : processing::ProcessingComponentOutput<float>("can_gateway_shield")
+  , CommunicatorRxNode(std::make_shared<Communicator>(
+      std::make_shared<CanCommunicationDevice>(can_device, CanCommunicationDevice::CanType::CAN), 1ms
+    ))
 {
-  _communicator[0] = std::make_shared<Communicator>(
-    std::make_shared<CanCommunicationDevice>(can_device, CanCommunicationDevice::CanType::CAN), 1ms
-  );
+  _communicator[0] = CommunicatorNode::_communicator;
 
   // Configuring Diagnostic
   _clock = std::make_shared<rclcpp::Clock>();
@@ -44,6 +46,7 @@ CanGatewayShield::CanGatewayShield(char const* const can_device)
 CanGatewayShield::CanGatewayShield(char const* const can_device_0, char const* const can_device_1, char const* const can_device_2)
   : CanGatewayShield(can_device_0)
 {
+  // These two communicators are not part of this rx node!
   _communicator[1] = std::make_shared<Communicator>(
     std::make_shared<CanCommunicationDevice>(can_device_1, CanCommunicationDevice::CanType::CAN_FD), 1ms
   );

@@ -6,7 +6,7 @@
 #pragma once
 
 #include "edu_robot/lighting.hpp"
-#include "edu_robot/hardware/communicator_device_interfaces.hpp"
+#include "edu_robot/hardware/communicator_node.hpp"
 
 namespace eduart {
 namespace robot {
@@ -14,7 +14,7 @@ namespace hardware {
 namespace can_gateway {
   
 class LightingHardware : public Lighting::ComponentInterface
-                       , public CommunicatorTxDevice
+                       , public CommunicatorTxNode
 {
 public:
   LightingHardware(const std::string& name, std::shared_ptr<Communicator> communicator);
@@ -22,6 +22,7 @@ public:
 
   void processSetValue(const Color& color, const robot::Lighting::Mode& mode) override;
   void initialize(const Lighting::Parameter& parameter) override;
+  void doCommunication() override;
 
 private:
   std::string _name;
