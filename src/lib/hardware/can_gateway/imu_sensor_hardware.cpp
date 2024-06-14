@@ -14,7 +14,7 @@ using can::message::sensor::imu::MeasurementOrientation;
 using can::message::sensor::imu::MeasurementRaw;
 
 ImuSensorHardware::ImuSensorHardware(const std::uint32_t can_id, std::shared_ptr<Communicator> communicator)
-  : CommunicatorTxRxDevice(communicator)
+  : CommunicatorTxRxNode(communicator)
   , _can_id(can_id)
 {
   _processing_data.clear();
@@ -65,6 +65,11 @@ void ImuSensorHardware::processRxData(const message::RxMessageDataBuffer& data)
 void ImuSensorHardware::initialize(const SensorImu::Parameter& parameter)
 {
   (void)parameter;
+}
+
+void ImuSensorHardware::doCommunication()
+{
+  
 }
 
 } // end namespace can_gateway

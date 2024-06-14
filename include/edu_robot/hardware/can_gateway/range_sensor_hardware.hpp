@@ -28,6 +28,7 @@ public:
 private:
   void processRxData(const message::RxMessageDataBuffer& data);
   void processMeasurement();
+  void doCommunication() override;
 
   std::uint8_t _id;
 };               

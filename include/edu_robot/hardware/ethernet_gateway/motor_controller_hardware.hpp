@@ -85,6 +85,7 @@ public:
 
 private:
   void processRxData(const message::RxMessageDataBuffer& data);
+  void doCommunication() override;
 
   const Parameter _parameter;
   std::uint8_t _can_id;

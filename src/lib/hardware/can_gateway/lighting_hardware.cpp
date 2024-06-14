@@ -1,5 +1,6 @@
 #include "edu_robot/hardware/can_gateway/lighting_hardware.hpp"
 #include "edu_robot/hardware/can_gateway/can/can_request.hpp"
+#include "edu_robot/hardware/communicator_node.hpp"
 
 #include <stdexcept>
 #include <string>

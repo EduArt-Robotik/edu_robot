@@ -44,6 +44,7 @@ public:
 private:
   void processRxData(const message::RxMessageDataBuffer& data);
   void processMeasurement();
+  void doCommunication() override;  
 
   const Parameter _parameter;
   std::shared_ptr<rclcpp::TimerBase> _timer_get_measurement;

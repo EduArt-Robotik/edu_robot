@@ -22,9 +22,10 @@ public:
 
   void processSetValue(const Color& color, const robot::Lighting::Mode& mode) override;
   void initialize(const Lighting::Parameter& parameter) override;
-  void doCommunication() override;
 
 private:
+  void doCommunication() override;
+
   std::string _name;
 };
 

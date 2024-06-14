@@ -25,6 +25,7 @@ public:
 
 private:
   void processRxData(const message::RxMessageDataBuffer& data);
+  void doCommunication() override;
 
   std::uint32_t _can_id;
   

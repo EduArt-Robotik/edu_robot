@@ -46,6 +46,7 @@ public:
 private:
   void processStartMeasurement();
   void processPointcloudMeasurement(sensor_msgs::msg::PointCloud2& point_cloud, const std::size_t sensor_index);
+  void doCommunication() override;
 
   const Parameter _parameter;
   std::shared_ptr<rclcpp::TimerBase> _timer_get_measurement;

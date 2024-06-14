@@ -9,7 +9,7 @@
 #include <edu_robot/rpm.hpp>
 
 #include <edu_robot/hardware/communicator.hpp>
-#include <edu_robot/hardware/communicator_device_interfaces.hpp>
+#include <edu_robot/hardware/communicator_node.hpp>
 
 #include <edu_robot/algorithm/low_pass_filter.hpp>
 
@@ -25,7 +25,7 @@ namespace hardware {
 namespace igus {
 
 class MotorControllerHardware : public MotorController::HardwareInterface
-                              , public CommunicatorTxRxDevice
+                              , public CommunicatorTxRxNode
 {
 public:
   struct Parameter {
@@ -44,7 +44,7 @@ public:
   MotorControllerHardware(
     const std::string& name, const Parameter& parameter, std::shared_ptr<Communicator> communicator)
     : MotorController::HardwareInterface(name, 1)
-    , CommunicatorTxRxDevice(communicator)
+    , CommunicatorTxRxNode(communicator)
     , _parameter(parameter)
     , _processing_data{
         std::vector<Rpm>(1, 0.0),
@@ -69,6 +69,7 @@ private:
   void processRxData(const message::RxMessageDataBuffer& data);
   diagnostic::Diagnostic diagnostic() override;
   std::uint8_t getTimeStamp();
+  void doCommunication() override;
 
   const Parameter _parameter;
   

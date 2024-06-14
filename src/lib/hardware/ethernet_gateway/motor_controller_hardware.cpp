@@ -174,6 +174,12 @@ void MotorControllerHardware<1>::processSetValue(const std::vector<Rpm>& rpm)
 }
 
 template <>
+void MotorControllerHardware<1>::doCommunication()
+{
+  
+}
+
+template <>
 void MotorControllerHardware<2>::processSetValue(const std::vector<Rpm>& rpm)
 {
   if (rpm.size() < 2) {
@@ -197,6 +203,12 @@ void MotorControllerHardware<2>::processSetValue(const std::vector<Rpm>& rpm)
   }
 
   _callback_process_measurement(_measured_rpm, AcknowledgedMotorRpm::enabled(got.response()));
+}
+
+template <>
+void MotorControllerHardware<2>::doCommunication()
+{
+  
 }
 
 } // end namespace ethernet

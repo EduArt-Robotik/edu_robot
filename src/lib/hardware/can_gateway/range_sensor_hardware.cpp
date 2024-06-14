@@ -12,7 +12,7 @@ using namespace std::chrono_literals;
 
 RangeSensorHardware::RangeSensorHardware(
   const std::uint8_t id, std::shared_ptr<Communicator> communicator)
-  : CommunicatorTxRxDevice(communicator)
+  : CommunicatorTxRxNode(communicator)
   , _id(id)
 {
 
@@ -47,6 +47,11 @@ void RangeSensorHardware::processMeasurement()
   // catch (...) {
   //   // \todo handle error case!
   // }
+}
+
+void RangeSensorHardware::doCommunication()
+{
+  
 }
 
 } // end namespace can_gateway

@@ -113,6 +113,11 @@ void LightingHardware::initialize(const Lighting::Parameter& parameter)
   (void)parameter;
 }
 
+void LightingHardware::doCommunication()
+{
+  
+}
+
 } // end namespace ethernet
 } // end namespace hardware
 } // end namespace eduart

@@ -56,6 +56,7 @@ public:
 
 private:
   void processRxData(const message::RxMessageDataBuffer& data);
+  void doCommunication() override;
 
   const Parameter _parameter;
   std::vector<Rpm> _measured_rpm;

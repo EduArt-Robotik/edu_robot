@@ -293,6 +293,11 @@ void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
   }
 }
 
+void MotorControllerHardware::doCommunication()
+{
+  
+}
+
 void MotorControllerHardware::enable()
 {
   auto request = Request::make_request<SetEnableMotor>(_parameter.can_id, 0);

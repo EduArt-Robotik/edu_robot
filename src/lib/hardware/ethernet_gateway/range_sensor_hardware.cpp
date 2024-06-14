@@ -54,6 +54,11 @@ void RangeSensorHardware::processMeasurement()
   }
 }
 
+void RangeSensorHardware::doCommunication()
+{
+  
+}
+
 } // end namespace ethernet
 } // end namespace hardware
 } // end namespace eduart

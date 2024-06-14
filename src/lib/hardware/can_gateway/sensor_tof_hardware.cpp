@@ -88,7 +88,7 @@ SensorTofHardware::get_parameter(const std::string& name, const Parameter& defau
 SensorTofHardware::SensorTofHardware(
   const std::string& name, const Parameter& parameter, rclcpp::Node& ros_node, std::shared_ptr<Communicator> communicator)
   : SensorPointCloud::SensorInterface()
-  , CommunicatorTxRxDevice(communicator)
+  , CommunicatorTxRxNode(communicator)
   , _parameter(parameter)
   , _ros_node(ros_node)
 {
@@ -207,6 +207,11 @@ void SensorTofHardware::processMeasurement()
       "error occurred during processing measurement. what = %s.", ex.what()
     );
   }
+}
+
+void SensorTofHardware::doCommunication()
+{
+  
 }
 
 } // end namespace can_gateway

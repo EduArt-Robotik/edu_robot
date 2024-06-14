@@ -24,6 +24,8 @@ public:
   void initialize(const Lighting::Parameter& parameter) override;
 
 private:
+  void doCommunication() override;
+
   std::string _name;
 };
 

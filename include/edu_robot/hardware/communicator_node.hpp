@@ -9,6 +9,7 @@
 #include "edu_robot/hardware/rx_data_endpoint.hpp"
 #include "edu_robot/hardware/communicator.hpp"
 
+#include <cassert>
 #include <memory>
 #include <mutex>
 #include <utility>
@@ -20,7 +21,7 @@ namespace hardware {
 class CommunicatorNode
 {
 public:
-  CommunicatorNode(std::shared_ptr<Communicator> communicator)
+  CommunicatorNode(std::shared_ptr<Communicator> communicator = nullptr)
     : _communicator(communicator)
   { }
   virtual ~CommunicatorNode() = default;
@@ -34,7 +35,9 @@ class CommunicatorTxNode : virtual public CommunicatorNode
 public:
   CommunicatorTxNode(std::shared_ptr<Communicator> communicator)
     : CommunicatorNode(communicator)
-  { }
+  {
+    assert(_communicator == communicator);
+  }
   virtual ~CommunicatorTxNode() = default;
 
 protected:
@@ -49,7 +52,9 @@ class CommunicatorRxNode : virtual public CommunicatorNode
 public:
   CommunicatorRxNode(std::shared_ptr<Communicator> communicator)
     : CommunicatorNode(communicator)
-  { }
+  {
+    assert(_communicator == communicator);
+  }
   virtual ~CommunicatorRxNode() {
     // Deactivate all data endpoints.
     for (auto & endpoint : _data_endpoint) {
@@ -81,11 +86,10 @@ public:
     : CommunicatorNode(communicator)    
     , CommunicatorTxNode(communicator)
     , CommunicatorRxNode(communicator)
-  { }
+  {
+    assert(_communicator == communicator);
+  }
   ~CommunicatorTxRxNode() override = default;
-
-protected:
-  using CommunicatorTxNode::_communicator;
 };
 
 } // end namespace hardware
