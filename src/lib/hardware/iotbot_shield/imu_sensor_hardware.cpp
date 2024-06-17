@@ -22,8 +22,8 @@ using hardware::iot_shield::uart::Request;
 using hardware::iot_shield::uart::message::ShieldResponse;
 using hardware::iot_shield::uart::message::SetImuRawDataMode;
 
-ImuSensorHardware::ImuSensorHardware(std::shared_ptr<Communicator> communicator)
-  : _communication_node(std::make_shared<CommunicatorNode>(communicator))
+ImuSensorHardware::ImuSensorHardware(std::shared_ptr<Executer> executer, std::shared_ptr<Communicator> communicator)
+  : _communication_node(std::make_shared<CommunicatorNode>(executer, communicator))
 {
   _communication_node->createRxDataEndPoint<RxDataEndPoint, ShieldResponse>(
     std::bind(&ImuSensorHardware::processRxData, this, std::placeholders::_1)
@@ -54,9 +54,7 @@ void ImuSensorHardware::initialize(const SensorImu::Parameter& parameter)
 {
   // set IMU data mode
   auto request = Request::make_request<SetImuRawDataMode>(parameter.raw_data_mode, 0, 0, 0);
-  auto response = _communicator->sendRequest(std::move(request));
-  wait_for_future(response, 100ms);
-  response.get();
+  _communication_node->sendRequest(std::move(request), 100ms);
 
   _raw_mode = parameter.raw_data_mode;
 }

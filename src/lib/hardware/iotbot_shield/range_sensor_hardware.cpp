@@ -1,9 +1,12 @@
 #include "edu_robot/hardware/iot_shield/range_sensor_hardware.hpp"
+#include "edu_robot/hardware/communicator_node.hpp"
 #include "edu_robot/hardware/iot_shield/uart/message_definition.hpp"
 #include "edu_robot/hardware/rx_data_endpoint.hpp"
 
 #include <edu_robot/sensor_range.hpp>
 
+#include <functional>
+#include <memory>
 #include <rclcpp/node.hpp>
 #include <rclcpp/qos.hpp>
 #include <stdexcept>
@@ -13,13 +16,19 @@ namespace robot {
 namespace hardware {
 namespace iot_shield {
 
-RangeSensorHardware::RangeSensorHardware(const std::uint8_t id, std::shared_ptr<Communicator> communicator)
-  : CommunicatorRxNode(communicator)
-  , _id(id)
-{
+using uart::message::ShieldResponse;
 
+RangeSensorHardware::RangeSensorHardware(
+  const std::uint8_t id, std::shared_ptr<Executer> executer, std::shared_ptr<Communicator> communicator)
+  : _id(id)
+  , _communication_node(std::make_shared<CommunicatorNode>(executer, communicator))
+{
+  _communication_node->createRxDataEndPoint<RxDataEndPoint, ShieldResponse>(
+    std::bind(&RangeSensorHardware::processRxData, this, std::placeholders::_1)
+  );
 }
 
+// is called by the rx data endpoint thread
 void RangeSensorHardware::processRxData(const uart::message::RxMessageDataBuffer& data)
 {
   if (_callback_process_measurement == nullptr) {

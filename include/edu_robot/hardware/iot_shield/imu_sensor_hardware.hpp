@@ -19,7 +19,7 @@ namespace iot_shield {
 class ImuSensorHardware : public SensorImu::SensorInterface
 {
 public:
-  ImuSensorHardware(std::shared_ptr<Communicator> communicator);
+  ImuSensorHardware(std::shared_ptr<Executer> executer, std::shared_ptr<Communicator> communicator);
   ~ImuSensorHardware() override = default;
 
   void initialize(const SensorImu::Parameter& parameter) override;

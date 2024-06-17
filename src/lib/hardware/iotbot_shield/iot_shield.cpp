@@ -1,4 +1,6 @@
 #include "edu_robot/hardware/iot_shield/iot_shield.hpp"
+#include "edu_robot/executer.hpp"
+#include "edu_robot/hardware/communicator_node.hpp"
 #include "edu_robot/hardware/iot_shield/uart/message.hpp"
 #include "edu_robot/hardware/iot_shield/uart/message_definition.hpp"
 #include "edu_robot/hardware/iot_shield/uart/uart_request.hpp"
@@ -12,6 +14,7 @@
 #include <algorithm>
 #include <memory>
 #include <functional>
+#include <mutex>
 #include <stdexcept>
 
 namespace eduart {
@@ -27,7 +30,9 @@ using namespace std::chrono_literals;
 
 IotShield::IotShield(char const* const device_name)
   : processing::ProcessingComponentOutput<float>("iot_shield")
-  , CommunicatorRxNode(std::make_shared<Communicator>(std::make_shared<UartCommunicationDevice>(device_name)))
+  , _communicator(std::make_shared<Communicator>(std::make_shared<UartCommunicationDevice>(device_name)))
+  , _executer(std::make_shared<Executer>())
+  , _communication_node(std::make_shared<CommunicatorNode>(_executer, _communicator))
 {
   // Configuring Diagnostic
   _clock = std::make_shared<rclcpp::Clock>();
@@ -53,7 +58,7 @@ IotShield::IotShield(char const* const device_name)
   future_response.get();
 
   // create data endpoint for status report
-  createRxDataEndPoint<RxDataEndPoint, ShieldResponse>(
+  _communication_node->createRxDataEndPoint<RxDataEndPoint, ShieldResponse>(
     std::bind(&IotShield::processStatusReport, this, std::placeholders::_1)
   );
 }
@@ -66,27 +71,27 @@ IotShield::~IotShield()
 void IotShield::enable()
 {
   auto request = Request::make_request<uart::message::Enable>(0, 0);
-  auto future_response = _communicator->sendRequest(std::move(request));
-  wait_for_future(future_response, 100ms);
-  future_response.get();  
+  _communication_node->sendRequest(std::move(request), 100ms);
 }
 
 void IotShield::disable()
 {
   auto request = Request::make_request<uart::message::Disable>(0, 0);
-  auto future_response = _communicator->sendRequest(std::move(request));
-  wait_for_future(future_response, 100ms);
-  future_response.get();    
+  _communication_node->sendRequest(std::move(request), 100ms);
 }
 
+// is called by main thread
 RobotStatusReport IotShield::getStatusReport()
 {
-  // processStatusReport();
+  std::lock_guard lock(_data_mutex);  
   return _report;
 }
 
+// is called by rx data endpoint thread
 void IotShield::processStatusReport(const message::RxMessageDataBuffer& data)
 {
+  std::lock_guard lock(_data_mutex);
+
   const auto buffer = data;
   _report.voltage.mcu = uart::message::ShieldResponse::voltage(buffer);
   _report.current.mcu = uart::message::ShieldResponse::current(buffer);
@@ -116,8 +121,10 @@ void IotShield::processStatusReport(const message::RxMessageDataBuffer& data)
   _diagnostic.temperature->update(_report.temperature);
 }
 
+// is called by main thread
 diagnostic::Diagnostic IotShield::processDiagnosticsImpl()
 {
+  std::lock_guard lock(_data_mutex);
   diagnostic::Diagnostic diagnostic;
 
   diagnostic.add(*_diagnostic.voltage);

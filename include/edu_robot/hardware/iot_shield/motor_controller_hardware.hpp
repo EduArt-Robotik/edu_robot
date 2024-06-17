@@ -5,6 +5,7 @@
  */
 #pragma once
 
+#include "edu_robot/executer.hpp"
 #include <edu_robot/motor_controller.hpp>
 #include <edu_robot/hardware_component_interfaces.hpp>
 #include <edu_robot/rpm.hpp>
@@ -21,7 +22,6 @@ namespace hardware {
 namespace iot_shield {
 
 class MotorControllerHardware : public MotorController::HardwareInterface
-                              , public CommunicatorTxRxNode
 {
 public:
   struct Parameter {
@@ -37,7 +37,8 @@ public:
   };
 
   MotorControllerHardware(
-    const std::string& name, const Parameter& parameter, std::shared_ptr<Communicator> communicator);
+    const std::string& name, const Parameter& parameter, std::shared_ptr<Executer> executer,
+    std::shared_ptr<Communicator> communicator);
   ~MotorControllerHardware() override;
 
   void processSetValue(const std::vector<Rpm>& rpm) override;
@@ -47,10 +48,15 @@ public:
 
 private:
   void processRxData(const message::RxMessageDataBuffer& data);
-  void doCommunication() override;
+  void processSending();
 
   const Parameter& _parameter;
-  std::vector<Rpm> _measured_rpm;
+  std::shared_ptr<CommunicatorNode> _communication_node;
+  struct {
+    std::vector<Rpm> rpm;
+    std::vector<Rpm> measured_rpm;
+    std::mutex mutex;
+  } _data;
 };
 
 } // end namespace iot_shield
