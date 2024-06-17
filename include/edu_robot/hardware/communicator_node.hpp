@@ -21,41 +21,12 @@ namespace hardware {
 class CommunicatorNode
 {
 public:
-  CommunicatorNode(std::shared_ptr<Communicator> communicator = nullptr)
+  CommunicatorNode(std::shared_ptr<Communicator> communicator)
     : _communicator(communicator)
-  { }
-  virtual ~CommunicatorNode() = default;
-
-protected:
-  std::shared_ptr<Communicator> _communicator;  
-};
-
-class CommunicatorTxNode : virtual public CommunicatorNode
-{
-public:
-  CommunicatorTxNode(std::shared_ptr<Communicator> communicator)
-    : CommunicatorNode(communicator)
   {
     assert(_communicator == communicator);
   }
-  virtual ~CommunicatorTxNode() = default;
-
-protected:
-  virtual void doCommunication() = 0;
-
-  // message::TxMessageDataBuffer _tx_buffer;
-  std::chrono::time_point<std::chrono::system_clock> _stamp_sent;
-};
-
-class CommunicatorRxNode : virtual public CommunicatorNode
-{
-public:
-  CommunicatorRxNode(std::shared_ptr<Communicator> communicator)
-    : CommunicatorNode(communicator)
-  {
-    assert(_communicator == communicator);
-  }
-  virtual ~CommunicatorRxNode() {
+  virtual ~CommunicatorNode() {
     // Deactivate all data endpoints.
     for (auto & endpoint : _data_endpoint) {
       endpoint->deactivate();
@@ -63,6 +34,7 @@ public:
   }
 
   inline std::mutex& rxDataMutex() { return _data_mutex; }
+  
   template <class EndPointType, class Message, typename ...Args>
   std::shared_ptr<RxDataEndPoint> createRxDataEndPoint(Args&& ...args)
   {
@@ -73,23 +45,16 @@ public:
     return end_point;
   }
 
+  template <class Request>
+  auto sendRequest(Request&& request) {
+    
+  }
+
 private:
+  std::shared_ptr<Communicator> _communicator;
   std::mutex _data_mutex;
   std::vector<std::shared_ptr<RxDataEndPoint>> _data_endpoint;
-};
-
-class CommunicatorTxRxNode : public CommunicatorTxNode
-                           , public CommunicatorRxNode
-{
-public:
-  CommunicatorTxRxNode(std::shared_ptr<Communicator> communicator)
-    : CommunicatorNode(communicator)    
-    , CommunicatorTxNode(communicator)
-    , CommunicatorRxNode(communicator)
-  {
-    assert(_communicator == communicator);
-  }
-  ~CommunicatorTxRxNode() override = default;
+  std::chrono::time_point<std::chrono::system_clock> _stamp_sent;
 };
 
 } // end namespace hardware

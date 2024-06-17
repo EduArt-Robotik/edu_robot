@@ -9,6 +9,7 @@
 
 #include <Eigen/src/Core/Matrix.h>
 #include <functional>
+#include <memory>
 
 namespace eduart {
 namespace robot {
@@ -22,9 +23,9 @@ using hardware::iot_shield::uart::message::ShieldResponse;
 using hardware::iot_shield::uart::message::SetImuRawDataMode;
 
 ImuSensorHardware::ImuSensorHardware(std::shared_ptr<Communicator> communicator)
-  : CommunicatorRxNode(communicator)
+  : _communication_node(std::make_shared<CommunicatorNode>(communicator))
 {
-  auto end_point = createRxDataEndPoint<RxDataEndPoint, ShieldResponse>(
+  _communication_node->createRxDataEndPoint<RxDataEndPoint, ShieldResponse>(
     std::bind(&ImuSensorHardware::processRxData, this, std::placeholders::_1)
   );
 }

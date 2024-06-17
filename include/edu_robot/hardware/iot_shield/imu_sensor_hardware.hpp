@@ -9,6 +9,7 @@
 #include <edu_robot/sensor_imu.hpp>
 
 #include <edu_robot/hardware/communicator_node.hpp>
+#include <memory>
 
 namespace eduart {
 namespace robot {
@@ -16,7 +17,6 @@ namespace hardware {
 namespace iot_shield {
 
 class ImuSensorHardware : public SensorImu::SensorInterface
-                        , public hardware::CommunicatorRxNode
 {
 public:
   ImuSensorHardware(std::shared_ptr<Communicator> communicator);
@@ -27,6 +27,7 @@ public:
 private:
   void processRxData(const message::RxMessageDataBuffer& data);
 
+  std::shared_ptr<CommunicatorNode> _communication_node;
   bool _raw_mode = true;
 };
 
