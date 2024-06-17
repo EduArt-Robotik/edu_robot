@@ -5,10 +5,11 @@
  */
 #pragma once
 
-#include <edu_robot/motor_controller.hpp>
-
 #include "edu_robot/hardware/communicator_node.hpp"
-#include "edu_robot/rpm.hpp"
+
+#include <edu_robot/motor_controller.hpp>
+#include <edu_robot/executer.hpp>
+#include <edu_robot/rpm.hpp>
 
 #include <memory>
 
@@ -19,7 +20,6 @@ namespace ethernet {
 
 template <std::size_t NUM_CHANNELS>
 class MotorControllerHardware : public MotorController::HardwareInterface
-                              , public CommunicatorTxRxNode
 {
 public:
   struct Parameter {
@@ -36,15 +36,28 @@ public:
   };
 
   MotorControllerHardware(
-    const std::string& name, const Parameter& parameter, std::shared_ptr<Communicator> communicator)
+    const std::string& name, const Parameter& parameter, std::shared_ptr<Executer> executer, 
+    std::shared_ptr<Communicator> communicator)
     : MotorController::HardwareInterface(name, NUM_CHANNELS)
-    , CommunicatorTxRxNode(communicator)
     , _parameter(parameter)
-    , _measured_rpm(NUM_CHANNELS, 0.0)
+    , _communication_node(std::make_shared<CommunicatorNode>(executer, communicator))
+    , _data{
+        { NUM_CHANNELS, 0.0 },
+        { NUM_CHANNELS, 0.0 },
+        { }
+      }
   { }
   ~MotorControllerHardware() override = default;
 
-  void processSetValue(const std::vector<Rpm>& rpm) override;
+  void processSetValue(const std::vector<Rpm>& rpm) override
+  {
+    if (rpm.size() < 1) {
+      throw std::runtime_error("Given RPM vector is too small.");
+    }
+
+    std::lock_guard lock(_data.mutex);
+    _data.rpm = rpm;    
+  }
   void initialize(const Motor::Parameter& parameter) override;
 
   static Parameter get_parameter(const std::string& name, const Parameter& default_parameter, rclcpp::Node& ros_node)
@@ -85,11 +98,17 @@ public:
 
 private:
   void processRxData(const message::RxMessageDataBuffer& data);
-  void doCommunication() override;
+  void processSending();
 
   const Parameter _parameter;
   std::uint8_t _can_id;
-  std::vector<Rpm> _measured_rpm;
+  std::shared_ptr<CommunicatorNode> _communication_node;
+
+  struct {
+    std::vector<Rpm> rpm;
+    std::vector<Rpm> measured_rpm;
+    std::mutex mutex;
+  } _data;
 };
 
 } // end namespace ethernet

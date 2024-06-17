@@ -6,6 +6,7 @@
 #pragma once
 
 #include <edu_robot/sensor_imu.hpp>
+#include <memory>
 
 #include "edu_robot/hardware/communicator_node.hpp"
 
@@ -15,20 +16,17 @@ namespace hardware {
 namespace ethernet {
 
 class ImuSensorHardware : public SensorImu::SensorInterface
-                        , public CommunicatorTxRxNode
 {
 public:
-  ImuSensorHardware(rclcpp::Node& ros_node, std::shared_ptr<Communicator> communicator);
+  ImuSensorHardware(std::shared_ptr<Executer> executer, std::shared_ptr<Communicator> communicator);
   ~ImuSensorHardware() override = default;
 
   void initialize(const SensorImu::Parameter& parameter) override;
 
 private:
-  void processRxData(const message::RxMessageDataBuffer& data);
-  void processMeasurement();
-  void doCommunication() override;
+  void processSending();
 
-  std::shared_ptr<rclcpp::TimerBase> _timer_get_measurement;
+  std::shared_ptr<CommunicatorNode> _communication_node;
 };
 
 } // end namespace ethernet

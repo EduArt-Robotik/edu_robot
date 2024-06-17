@@ -1,9 +1,12 @@
 #include "edu_robot/hardware/ethernet_gateway/ethernet_gateway_shield.hpp"
 #include "edu_robot/hardware/ethernet_gateway/ethernet_request.hpp"
 #include "edu_robot/hardware/ethernet_gateway/ethernet_communication_device.hpp"
-
 #include "edu_robot/hardware/ethernet_gateway/udp/message_definition.hpp"
 #include "edu_robot/hardware/ethernet_gateway/udp/protocol.hpp"
+
+#include <edu_robot/hardware/communicator_node.hpp>
+
+#include <edu_robot/executer.hpp>
 
 #include <cstddef>
 #include <memory>
@@ -25,6 +28,8 @@ using udp::message::AcknowledgedStatus;
 EthernetGatewayShield::EthernetGatewayShield(char const* const ip_address, const std::uint16_t port)
   : processing::ProcessingComponentOutput<float>("ethernet_gateway_shield")
   , _communicator(std::make_shared<Communicator>(std::make_shared<EthernetCommunicationDevice>(ip_address, port)))
+  , _executer(std::make_shared<Executer>())
+  , _communication_node(std::make_shared<CommunicatorNode>(_executer, _communicator))
 {
   // Configuring Diagnostic
   _clock = std::make_shared<rclcpp::Clock>();
@@ -44,8 +49,7 @@ EthernetGatewayShield::EthernetGatewayShield(char const* const ip_address, const
 
   // Performing Firmware Check
   auto request = EthernetRequest::make_request<udp::message::GetFirmwareVersion>();
-  auto future_response = _communicator->sendRequest(std::move(request));
-  wait_for_future(future_response, 200ms);
+  const auto got = _communication_node->sendRequest(std::move(request), 200ms);
 
   struct {
     std::uint8_t major;
@@ -53,7 +57,6 @@ EthernetGatewayShield::EthernetGatewayShield(char const* const ip_address, const
     std::uint8_t patch;
   } firmware_version;
 
-  auto got = future_response.get();
   firmware_version.major = got.response().data()[3];
   firmware_version.minor = got.response().data()[4];
   firmware_version.patch = got.response().data()[5];
@@ -80,10 +83,8 @@ void EthernetGatewayShield::enable()
 {
   for (std::size_t i = 0; i < 2; ++i) {
     auto request = EthernetRequest::make_request<udp::message::SetMotorEnabled>();
-    auto future_response = _communicator->sendRequest(std::move(request));
-    wait_for_future(future_response, 200ms);
+    const auto got = _communication_node->sendRequest(std::move(request), 200ms);
 
-    auto got = future_response.get();
     if (Acknowledgement<PROTOCOL::COMMAND::SET::MOTOR_ENABLE>::wasAcknowledged(got.response()) == false) {
       throw std::runtime_error("Request \"Set Motor Enabled\" was not acknowledged.");
     }
@@ -93,22 +94,19 @@ void EthernetGatewayShield::enable()
 void EthernetGatewayShield::disable()
 {
   auto request = EthernetRequest::make_request<udp::message::SetMotorDisabled>();
-  auto future_response = _communicator->sendRequest(std::move(request));
-  wait_for_future(future_response, 200ms);
+  const auto got = _communication_node->sendRequest(std::move(request), 200ms);
 
-  auto got = future_response.get();
   if (Acknowledgement<PROTOCOL::COMMAND::SET::MOTOR_DISABLE>::wasAcknowledged(got.response()) == false) {
     throw std::runtime_error("Request \"Set Motor Enabled\" was not acknowledged.");
   }
 }
 
+// is called by main thread
 RobotStatusReport EthernetGatewayShield::getStatusReport()
 {
   // Requesting Status Report
   auto request = EthernetRequest::make_request<udp::message::GetStatus>();
-  auto future_response = _communicator->sendRequest(std::move(request));
-  wait_for_future(future_response, 200ms);
-  auto got = future_response.get();
+  const auto got = _communication_node->sendRequest(std::move(request), 200ms);  
 
   // Do Status Report
   RobotStatusReport report;
@@ -133,6 +131,7 @@ RobotStatusReport EthernetGatewayShield::getStatusReport()
   return report;
 }
 
+// is called by the main thread
 diagnostic::Diagnostic EthernetGatewayShield::processDiagnosticsImpl()
 {
   diagnostic::Diagnostic diagnostic;

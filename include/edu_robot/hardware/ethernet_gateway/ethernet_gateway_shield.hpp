@@ -5,8 +5,11 @@
  */
 #pragma once
 
+#include <edu_robot/hardware/communicator_node.hpp>
 #include <edu_robot/hardware_robot_interface.hpp>
+
 #include <edu_robot/robot_status_report.hpp>
+#include <edu_robot/executer.hpp>
 
 #include <edu_robot/processing_component/processing_component.hpp>
 
@@ -33,12 +36,15 @@ public:
   void disable() override;
   RobotStatusReport getStatusReport() override;
 
-  std::shared_ptr<Communicator> getCommunicator() { return _communicator; }
+  inline std::shared_ptr<Communicator> getCommunicator() { return _communicator; }
+  inline std::shared_ptr<Executer> getExecuter() { return _executer; }
 
 private:
   diagnostic::Diagnostic processDiagnosticsImpl() override;
 
   std::shared_ptr<Communicator> _communicator;
+  std::shared_ptr<Executer> _executer;
+  std::shared_ptr<CommunicatorNode> _communication_node;
   std::shared_ptr<rclcpp::Clock> _clock;
 
   // diagnostics
