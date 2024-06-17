@@ -11,6 +11,7 @@
 #include <edu_robot/state.hpp>
 #include <edu_robot/hardware_error.hpp>
 
+#include <mutex>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <stdexcept>
@@ -179,6 +180,25 @@ MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
   return parameter;
 }
 
+MotorControllerHardware::MotorControllerHardware(
+  const std::string& name, const Parameter& parameter, std::shared_ptr<Executer> executer,
+  std::shared_ptr<Communicator> communicator)
+  : MotorController::HardwareInterface(name, 1)
+  , _parameter(parameter)
+  , _communication_node(std::make_shared<CommunicatorNode>(executer, communicator))
+  , _processing_data{
+      { 1, 0.0 }, 
+      {1, 0.0 },
+      { },
+      algorithm::LowPassFiler<float>(parameter.low_pass_set_point),
+      std::chrono::system_clock::now(),
+      0,
+      0
+    }
+{
+
+}
+
 void MotorControllerHardware::processRxData(const can::message::RxMessageDataBuffer &data)
 {
   if (_callback_process_measurement == nullptr
@@ -199,9 +219,7 @@ void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
   // Getting Firmware Version and Working Hours
   {
     auto request = Request::make_request<GetWorkingHours>(_parameter.can_id);
-    auto future_response = _communicator->sendRequest(std::move(request));
-    wait_for_future(future_response, 100ms);
-    const auto got = future_response.get();
+    const auto got = _communication_node->sendRequest(std::move(request), 100ms);
 
     RCLCPP_INFO(
       rclcpp::get_logger("MotorControllerHardware(igus)"),
@@ -220,9 +238,7 @@ void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
   // Getting Current Position
   {
     auto request = Request::make_request<SetVelocity>(_parameter.can_id, 0, getTimeStamp());
-    auto future_response = _communicator->sendRequest(std::move(request));
-    wait_for_future(future_response, 100ms);
-    const auto got = future_response.get();
+    const auto got = _communication_node->sendRequest(std::move(request), 100ms);
 
     _processing_data.last_position = AcknowledgedVelocity::position(got.response());
     _processing_data.stamp_last_received = std::chrono::system_clock::now();
@@ -244,23 +260,31 @@ void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
     throw std::runtime_error("Given RPM vector is too small.");
   }
 
+  std::scoped_lock lock(_processing_data.mutex);
+  _processing_data.rpm = rpm;
+}
+
+// is called by the executer thread
+void MotorControllerHardware::processSending()
+{
   // Processing Setting new Set Point
   // RPM hast to be negated, because motor is turing left with positive rpm value.
   // Controller wants rotation per sections with one decimal number.
-  _processing_data.low_pass_set_point(-rpm[0].rps() * 10.0f * _parameter.gear_ratio);
+  _processing_data.mutex.lock();
+  _processing_data.low_pass_set_point(-_processing_data.rpm[0].rps() * 10.0f * _parameter.gear_ratio);
+
   auto request = Request::make_request<SetVelocity>(
     _parameter.can_id,
     static_cast<std::uint8_t>(_processing_data.low_pass_set_point.getValue() + 127.5f), // \todo move converting to message definition. CanRequest ist the problem!
     // Rpm(_processing_data.low_pass_set_point.getValue()),
     getTimeStamp()
   );
+  _processing_data.mutex.unlock();
 
-  auto future_response = _communicator->sendRequest(std::move(request));
+  // Communicate
+  const auto got = _communication_node->sendRequest(std::move(request), 100ms);
 
   // Processing Received Feedback
-  wait_for_future(future_response, 100ms);
-  auto got = future_response.get();
-  
   const auto stamp_received = std::chrono::system_clock::now();
   const auto stamp_diff = std::chrono::duration_cast<std::chrono::milliseconds>(stamp_received - _processing_data.stamp_last_received).count();
   const float dt = std::min(static_cast<float>(stamp_diff) / 1000.0f, 0.5f); // limit dt to 0.5s
@@ -293,17 +317,10 @@ void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
   }
 }
 
-void MotorControllerHardware::doCommunication()
-{
-  
-}
-
 void MotorControllerHardware::enable()
 {
   auto request = Request::make_request<SetEnableMotor>(_parameter.can_id, 0);
-  auto future_response = _communicator->sendRequest(std::move(request));
-  wait_for_future(future_response, 200ms);
-  auto got = future_response.get();
+  _communication_node->sendRequest(std::move(request), 200ms);
 
   _processing_data.low_pass_set_point.clear();  
 }
@@ -311,17 +328,13 @@ void MotorControllerHardware::enable()
 void MotorControllerHardware::disable()
 {
   auto request = Request::make_request<SetDisableMotor>(_parameter.can_id, 0);
-  auto future_response = _communicator->sendRequest(std::move(request));
-  wait_for_future(future_response, 200ms);
-  auto got = future_response.get();
+  _communication_node->sendRequest(std::move(request), 200ms);
 }
 
 void MotorControllerHardware::reset()
 {
   auto request = Request::make_request<SetReset>(_parameter.can_id, 0);
-  auto future_response = _communicator->sendRequest(std::move(request));
-  wait_for_future(future_response, 200ms);
-  auto got = future_response.get();
+  _communication_node->sendRequest(std::move(request), 200ms);
 
   _processing_data.error_code = 0;
   _processing_data.low_pass_set_point.clear();

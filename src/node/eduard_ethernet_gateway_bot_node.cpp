@@ -45,13 +45,13 @@ public:
     }
 
     // Range Sensor
-    factory.addRangeSensor("range/front/left", 0u, *this)
-           .addRangeSensor("range/front/right", 1u, *this)
-           .addRangeSensor("range/rear/left", 2u, *this)
-           .addRangeSensor("range/rear/right", 3u, *this);
+    factory.addRangeSensor("range/front/left", 0u)
+           .addRangeSensor("range/front/right", 1u)
+           .addRangeSensor("range/rear/left", 2u)
+           .addRangeSensor("range/rear/right", 3u);
 
     // IMU Sensor
-    factory.addImuSensor("imu", *this);
+    factory.addImuSensor("imu");
 
     initialize(factory);
     shield->registerComponentInput(_detect_charging_component);

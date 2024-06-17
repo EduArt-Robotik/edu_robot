@@ -25,7 +25,6 @@ namespace hardware {
 namespace igus {
 
 class MotorControllerHardware : public MotorController::HardwareInterface
-                              , public CommunicatorTxRxNode
 {
 public:
   struct Parameter {
@@ -42,18 +41,8 @@ public:
   };
 
   MotorControllerHardware(
-    const std::string& name, const Parameter& parameter, std::shared_ptr<Communicator> communicator)
-    : MotorController::HardwareInterface(name, 1)
-    , CommunicatorTxRxNode(communicator)
-    , _parameter(parameter)
-    , _processing_data{
-        std::vector<Rpm>(1, 0.0),
-        algorithm::LowPassFiler<float>(parameter.low_pass_set_point),
-        std::chrono::system_clock::now(),
-        0,
-        0
-      }
-  { }
+    const std::string& name, const Parameter& parameter, std::shared_ptr<Executer> executer,
+    std::shared_ptr<Communicator> communicator);
   ~MotorControllerHardware() override = default;
 
   void processSetValue(const std::vector<Rpm>& rpm) override;
@@ -69,12 +58,16 @@ private:
   void processRxData(const message::RxMessageDataBuffer& data);
   diagnostic::Diagnostic diagnostic() override;
   std::uint8_t getTimeStamp();
-  void doCommunication() override;
+  void processSending();
 
   const Parameter _parameter;
+  std::shared_ptr<CommunicatorNode> _communication_node;
   
   struct {
+    std::vector<Rpm> rpm;    
     std::vector<Rpm> measured_rpm;
+    std::mutex mutex;
+
     algorithm::LowPassFiler<float> low_pass_set_point;
     std::chrono::time_point<std::chrono::system_clock> stamp_last_received;
     std::int32_t last_position;

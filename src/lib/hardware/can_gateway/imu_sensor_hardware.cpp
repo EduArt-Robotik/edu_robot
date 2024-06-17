@@ -2,6 +2,10 @@
 #include "edu_robot/hardware/can_gateway/can/message_definition.hpp"
 #include "edu_robot/hardware/can_gateway/can/can_rx_data_endpoint.hpp"
 
+#include <edu_robot/hardware/communicator_node.hpp>
+
+#include <memory>
+
 namespace eduart {
 namespace robot {
 namespace hardware {
@@ -13,13 +17,14 @@ using can::CanRxDataEndPoint;
 using can::message::sensor::imu::MeasurementOrientation;
 using can::message::sensor::imu::MeasurementRaw;
 
-ImuSensorHardware::ImuSensorHardware(const std::uint32_t can_id, std::shared_ptr<Communicator> communicator)
-  : CommunicatorTxRxNode(communicator)
-  , _can_id(can_id)
+ImuSensorHardware::ImuSensorHardware(
+  const std::uint32_t can_id, std::shared_ptr<Executer> executer, std::shared_ptr<Communicator> communicator)
+  : _can_id(can_id)
+  , _communication_node(std::make_shared<CommunicatorNode>(executer, communicator))
 {
   _processing_data.clear();
 
-  auto data_endpoint = createRxDataEndPoint<CanRxDataEndPoint, MeasurementOrientation>(
+  _communication_node->createRxDataEndPoint<CanRxDataEndPoint, MeasurementOrientation>(
     can_id,
     std::bind(&ImuSensorHardware::processRxData, this, std::placeholders::_1)
   );
@@ -64,11 +69,6 @@ void ImuSensorHardware::processRxData(const message::RxMessageDataBuffer& data)
 void ImuSensorHardware::initialize(const SensorImu::Parameter& parameter)
 {
   (void)parameter;
-}
-
-void ImuSensorHardware::doCommunication()
-{
-  
 }
 
 } // end namespace can_gateway

@@ -39,7 +39,7 @@ public:
     }
 
     // IMU Sensor
-    factory.addImuSensor("imu", *this);
+    factory.addImuSensor("imu");
 
     initialize(factory);
     shield->registerComponentInput(_detect_charging_component);

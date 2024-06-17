@@ -29,7 +29,7 @@ HardwareComponentFactory& HardwareComponentFactory::addMotorController(
   const std::string& controller_name, const MotorControllerHardware::Parameter& parameter)
 {
   auto motor_controller = std::make_shared<MotorControllerHardware>(
-    controller_name, parameter, _shield->getCommunicator(0)
+    controller_name, parameter, _shield->getExecuter(), _shield->getCommunicator(0)
   );
   _motor_controller_hardware.push_back(motor_controller);
   _shield->registerMotorControllerHardware(motor_controller);
@@ -55,7 +55,7 @@ HardwareComponentFactory& HardwareComponentFactory::addImuSensor(
   const std::string& sensor_name, const std::uint32_t can_id)
 {
   _hardware[sensor_name] = std::make_shared<hardware::can_gateway::ImuSensorHardware>(
-    can_id, _shield->getCommunicator(0)
+    can_id,  _shield->getExecuter(), _shield->getCommunicator(0)
   );
 
   return *this;
@@ -66,7 +66,7 @@ HardwareComponentFactory& HardwareComponentFactory::addTofSensor(
   rclcpp::Node& ros_node)
 {
   _hardware[sensor_name] = std::make_shared<hardware::can_gateway::SensorTofHardware>(
-    sensor_name, parameter, ros_node, _shield->getCommunicator(1));
+    sensor_name, parameter, ros_node,  _shield->getExecuter(), _shield->getCommunicator(1));
 
   return *this;
 }
@@ -76,7 +76,7 @@ HardwareComponentFactory& HardwareComponentFactory::addTofRingSensor(
   rclcpp::Node& ros_node)
 {
   _hardware[sensor_name] = std::make_shared<hardware::can_gateway::SensorTofRingHardware>(
-    sensor_name, parameter, ros_node, _shield->getCommunicator(1)
+    sensor_name, parameter, ros_node,  _shield->getExecuter(), _shield->getCommunicator(1)
   );
 
   return *this;

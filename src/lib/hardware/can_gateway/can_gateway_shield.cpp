@@ -1,4 +1,5 @@
 #include "edu_robot/hardware/can_gateway/can_gateway_shield.hpp"
+#include "edu_robot/executer.hpp"
 #include "edu_robot/hardware/can_gateway/can_communication_device.hpp"
 #include "edu_robot/hardware/can_gateway/motor_controller_hardware.hpp"
 #include "edu_robot/hardware/can_gateway/can/message_definition.hpp"
@@ -20,12 +21,15 @@ using hardware::can_gateway::can::CanRxDataEndPoint;
 
 CanGatewayShield::CanGatewayShield(char const* const can_device)
   : processing::ProcessingComponentOutput<float>("can_gateway_shield")
-  , CommunicatorRxNode(std::make_shared<Communicator>(
-      std::make_shared<CanCommunicationDevice>(can_device, CanCommunicationDevice::CanType::CAN), 1ms
-    ))
+  , _communicator{
+      std::make_shared<Communicator>(
+        std::make_shared<CanCommunicationDevice>(can_device, CanCommunicationDevice::CanType::CAN), 1ms),
+      nullptr,
+      nullptr
+    }
+  , _executer(std::make_shared<Executer>())
+  , _communication_node(std::make_shared<CommunicatorNode>(_executer, _communicator[0]))
 {
-  _communicator[0] = CommunicatorNode::_communicator;
-
   // Configuring Diagnostic
   _clock = std::make_shared<rclcpp::Clock>();
   _diagnostic.voltage = std::make_shared<diagnostic::MeanDiagnostic<float, std::less<float>>>(
@@ -55,17 +59,14 @@ CanGatewayShield::CanGatewayShield(char const* const can_device_0, char const* c
   );
 
   // Creating Data Endpoints for Measurements
-  auto endpoint_power = createRxDataEndPoint<CanRxDataEndPoint, can::message::power_management::Response>(
+  _communication_node->createRxDataEndPoint<CanRxDataEndPoint, can::message::power_management::Response>(
     0x580,
     std::bind(&CanGatewayShield::processPowerManagementBoardResponse, this, std::placeholders::_1)
   );
-  _communicator[0]->registerRxDataEndpoint(endpoint_power);
-
-  auto endpoint_shield = createRxDataEndPoint<CanRxDataEndPoint, can::message::can_gateway_shield::Response>(
+  _communication_node->createRxDataEndPoint<CanRxDataEndPoint, can::message::can_gateway_shield::Response>(
     0x381,
     std::bind(&CanGatewayShield::processCanGatewayShieldResponse, this, std::placeholders::_1)
   );
-  _communicator[0]->registerRxDataEndpoint(endpoint_shield);
 }
 
 CanGatewayShield::~CanGatewayShield()
@@ -87,6 +88,7 @@ void CanGatewayShield::disable()
   }
 }
 
+// is called by executer thread
 void CanGatewayShield::processPowerManagementBoardResponse(const message::RxMessageDataBuffer &data)
 {
   using can::message::power_management::Response;
@@ -116,6 +118,7 @@ void CanGatewayShield::processPowerManagementBoardResponse(const message::RxMess
   _diagnostic.current->update(_status_report.current.mcu);
 }
 
+// is called by executer thread
 void CanGatewayShield::processCanGatewayShieldResponse(const message::RxMessageDataBuffer &data)
 {
   using can::message::can_gateway_shield::Response;
@@ -154,6 +157,7 @@ void CanGatewayShield::registerMotorControllerHardware(
   _motor_controller_hardware.push_back(motor_controller_hardware);
 } 
 
+// is called by main thread
 diagnostic::Diagnostic CanGatewayShield::processDiagnosticsImpl()
 {
   diagnostic::Diagnostic diagnostic;

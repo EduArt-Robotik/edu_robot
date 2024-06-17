@@ -31,10 +31,8 @@ public:
     const std::string& controller_name, const MotorControllerHardware<2>::Parameter& parameter);
   HardwareComponentFactory& addSingleChannelMotorController(
     const std::string& controller_name, const MotorControllerHardware<1>::Parameter& parameter);
-  HardwareComponentFactory& addRangeSensor(
-    const std::string& sensor_name, const std::uint8_t id, rclcpp::Node& ros_node);
-  HardwareComponentFactory& addImuSensor(
-    const std::string& sensor_name, rclcpp::Node& ros_node);
+  HardwareComponentFactory& addRangeSensor(const std::string& sensor_name, const std::uint8_t id);
+  HardwareComponentFactory& addImuSensor(const std::string& sensor_name);
 
 private:
   std::shared_ptr<EthernetGatewayShield> _shield;

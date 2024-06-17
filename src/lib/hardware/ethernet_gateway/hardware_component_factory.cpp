@@ -43,20 +43,20 @@ HardwareComponentFactory& HardwareComponentFactory::addSingleChannelMotorControl
 }
 
 HardwareComponentFactory& HardwareComponentFactory::addRangeSensor(
-  const std::string& sensor_name, const std::uint8_t id, rclcpp::Node& ros_node)
+  const std::string& sensor_name, const std::uint8_t id)
 {
   auto range_sensor_hardware = std::make_shared<RangeSensorHardware>(
-    id, ros_node, _shield->getExecuter(), _shield->getCommunicator()
+    id, _shield->getExecuter(), _shield->getCommunicator()
   );
   _hardware[sensor_name] = range_sensor_hardware;
   return *this;
 }                                               
   
 HardwareComponentFactory& HardwareComponentFactory::addImuSensor(
-  const std::string& sensor_name, rclcpp::Node& ros_node)
+  const std::string& sensor_name)
 {
   auto imu_hardware = std::make_shared<ImuSensorHardware>(
-    ros_node, _shield->getExecuter(), _shield->getCommunicator()
+    _shield->getExecuter(), _shield->getCommunicator()
   );
   _hardware[sensor_name] = imu_hardware;
   return *this;

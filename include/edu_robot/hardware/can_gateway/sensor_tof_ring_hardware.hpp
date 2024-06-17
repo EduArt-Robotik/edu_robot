@@ -5,12 +5,15 @@
  */
 #pragma once
 
-#include "edu_robot/hardware/communicator_node.hpp"
 #include "edu_robot/hardware/can_gateway/sensor_tof_hardware.hpp"
+
+#include <edu_robot/hardware/communicator_node.hpp>
 
 #include <edu_robot/sensor_point_cloud.hpp>
 
 #include <Eigen/Geometry>
+
+#include <memory>
 
 namespace eduart {
 namespace robot {
@@ -18,7 +21,6 @@ namespace hardware {
 namespace can_gateway {
 
 class SensorTofRingHardware : public SensorPointCloud::SensorInterface
-                            , public CommunicatorTxNode
 {
 public:
   struct Parameter {
@@ -35,7 +37,7 @@ public:
   };
 
   SensorTofRingHardware(
-    const std::string& name, const Parameter& parameter, rclcpp::Node& ros_node,
+    const std::string& name, const Parameter& parameter, rclcpp::Node& ros_node, std::shared_ptr<Executer> executer,
     std::shared_ptr<Communicator> communicator);
   ~SensorTofRingHardware() override = default;
 
@@ -46,11 +48,11 @@ public:
 private:
   void processStartMeasurement();
   void processPointcloudMeasurement(sensor_msgs::msg::PointCloud2& point_cloud, const std::size_t sensor_index);
-  void doCommunication() override;
 
   const Parameter _parameter;
   std::shared_ptr<rclcpp::TimerBase> _timer_get_measurement;
   rclcpp::Node& _ros_node;
+  std::shared_ptr<CommunicatorNode> _communication_node;
   std::vector<std::shared_ptr<SensorTofHardware>> _sensor;
 
   struct {

@@ -1,5 +1,6 @@
 #include "edu_robot/hardware/can_gateway/sensor_tof_ring_hardware.hpp"
 #include "edu_robot/hardware/can_gateway/can/message_definition.hpp"
+#include "edu_robot/hardware/can_gateway/can/can_request.hpp"
 
 #include <tf2/transform_datatypes.h>
 #include <tf2_sensor_msgs/tf2_sensor_msgs.hpp>
@@ -82,10 +83,9 @@ SensorTofRingHardware::Parameter SensorTofRingHardware::get_parameter(
 }
 
 SensorTofRingHardware::SensorTofRingHardware(
-  const std::string& name, const Parameter& parameter, rclcpp::Node& ros_node,
+  const std::string& name, const Parameter& parameter, rclcpp::Node& ros_node, std::shared_ptr<Executer> executer,
   std::shared_ptr<Communicator> communicator)
-  : CommunicatorTxNode(communicator)
-  , _parameter(parameter)
+  :  _parameter(parameter)
   , _ros_node(ros_node)
 {
   (void)name;
@@ -93,7 +93,7 @@ SensorTofRingHardware::SensorTofRingHardware(
   for (std::size_t i = 0; i < _parameter.tof_sensor.size(); ++i) {
   // for (const auto& tof_sensor_parameter : _parameter.tof_sensor) {
     _sensor.emplace_back(std::make_shared<SensorTofHardware>(
-      _parameter.tof_sensor[i].name, _parameter.tof_sensor[i].parameter, _ros_node, _communicator
+      _parameter.tof_sensor[i].name, _parameter.tof_sensor[i].parameter, _ros_node, executer, communicator
     ));
     _processing_data.sensor_activation_bits |= (1 << (_parameter.tof_sensor[i].parameter.sensor_id - 1));
     _sensor.back()->registerCallbackProcessMeasurementData(
@@ -114,8 +114,9 @@ void SensorTofRingHardware::initialize(const SensorPointCloud::Parameter& parame
   _processing_data.point_cloud = create_point_cloud(_parameter);
   _processing_data.current_data_address = _processing_data.point_cloud->data.data();
 
-  _timer_get_measurement = _ros_node.create_wall_timer(
-    _parameter.measurement_interval, std::bind(&SensorTofRingHardware::processStartMeasurement, this)
+  _communication_node->addSendingJob(
+    std::bind(&SensorTofRingHardware::processStartMeasurement, this),
+    _parameter.measurement_interval
   );
 }
 
@@ -127,9 +128,7 @@ void SensorTofRingHardware::processStartMeasurement()
       _parameter.can_id_trigger, _processing_data.frame_number, _processing_data.sensor_activation_bits
     );
 
-    auto future_response = _communicator->sendRequest(std::move(request));
-    wait_for_future(future_response, 100ms);
-    auto got = future_response.get();
+    _communication_node->sendRequest(std::move(request), 100ms);
 
     _processing_data.point_cloud->header.stamp = _ros_node.get_clock()->now();
     _processing_data.frame_number++;
@@ -143,11 +142,6 @@ void SensorTofRingHardware::processStartMeasurement()
       "error occurred during start measurement. what = %s.", ex.what()
     );
   }
-}
-
-void SensorTofRingHardware::doCommunication()
-{
-  
 }
 
 void SensorTofRingHardware::processPointcloudMeasurement(

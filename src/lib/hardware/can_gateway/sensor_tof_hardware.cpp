@@ -1,6 +1,11 @@
 #include "edu_robot/hardware/can_gateway/sensor_tof_hardware.hpp"
 #include "edu_robot/hardware/can_gateway/can/message_definition.hpp"
 #include "edu_robot/hardware/can_gateway/can/can_rx_data_endpoint.hpp"
+#include "edu_robot/hardware/can_gateway/can/can_request.hpp"
+
+#include <edu_robot/hardware/communicator_node.hpp>
+
+#include <memory>
 
 
 namespace eduart {
@@ -86,23 +91,24 @@ SensorTofHardware::get_parameter(const std::string& name, const Parameter& defau
 }
 
 SensorTofHardware::SensorTofHardware(
-  const std::string& name, const Parameter& parameter, rclcpp::Node& ros_node, std::shared_ptr<Communicator> communicator)
+  const std::string& name, const Parameter& parameter, rclcpp::Node& ros_node, std::shared_ptr<Executer> executer,
+  std::shared_ptr<Communicator> communicator)
   : SensorPointCloud::SensorInterface()
-  , CommunicatorTxRxNode(communicator)
   , _parameter(parameter)
   , _ros_node(ros_node)
+  , _communication_node(std::make_shared<CommunicatorNode>(executer, communicator))
 {
   (void)name;
 
   _can_id.measurement = 0x308 + _parameter.sensor_id;
 
-  auto measurement_end_point = createRxDataEndPoint<CanRxDataEndPoint, ZoneMeasurement>(
+  _communication_node->createRxDataEndPoint<CanRxDataEndPoint, ZoneMeasurement>(
     _can_id.measurement,
     std::bind(&SensorTofHardware::processRxData, this, std::placeholders::_1)
   );
-  _communicator->registerRxDataEndpoint(measurement_end_point);
 }
 
+// is called by the executer thread of rx data endpoint
 void SensorTofHardware::processRxData(const message::RxMessageDataBuffer& data)
 {
   if (_callback_process_measurement == nullptr) {
@@ -178,12 +184,14 @@ void SensorTofHardware::initialize(const SensorPointCloud::Parameter& parameter)
   }
 
   if (_parameter.trigger_measurement) {
-    _timer_get_measurement = _ros_node.create_wall_timer(
-      _parameter.measurement_interval, std::bind(&SensorTofHardware::processMeasurement, this)
+    _communication_node->addSendingJob(
+      std::bind(&SensorTofHardware::processMeasurement, this),
+      _parameter.measurement_interval
     );
   }
 }
 
+// is called by the executer thread
 void SensorTofHardware::processMeasurement()
 {
   try {
@@ -192,9 +200,7 @@ void SensorTofHardware::processMeasurement()
       _can_id.trigger, _processing_data.frame_number, (1 << (_parameter.sensor_id - 1))
     );
 
-    _processing_data.future_response = _communicator->sendRequest(std::move(request));
-    wait_for_future(_processing_data.future_response, 100ms);
-    auto got = _processing_data.future_response.get();
+    _communication_node->sendRequest(std::move(request), 100ms);
 
     _processing_data.point_cloud->header.stamp = _ros_node.get_clock()->now();
     _processing_data.frame_number++;
@@ -207,11 +213,6 @@ void SensorTofHardware::processMeasurement()
       "error occurred during processing measurement. what = %s.", ex.what()
     );
   }
-}
-
-void SensorTofHardware::doCommunication()
-{
-  
 }
 
 } // end namespace can_gateway
