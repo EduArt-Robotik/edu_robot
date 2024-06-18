@@ -3,6 +3,8 @@
 #include "edu_robot/hardware/ethernet_gateway/udp/message_definition.hpp"
 #include "edu_robot/hardware/ethernet_gateway/udp/protocol.hpp"
 #include "edu_robot/hardware/ethernet_gateway/ethernet_request.hpp"
+#include <chrono>
+#include <functional>
 #include <memory>
 
 namespace eduart {
@@ -22,7 +24,9 @@ using udp::message::PROTOCOL;
 ImuSensorHardware::ImuSensorHardware(std::shared_ptr<Executer> executer, std::shared_ptr<Communicator> communicator)
   : _communication_node(std::make_shared<CommunicatorNode>(executer, communicator))
 {
-
+  _communication_node->addSendingJob(
+    std::bind(&ImuSensorHardware::processSending, this), 100ms
+  );
 }
 
 void ImuSensorHardware::initialize(const SensorImu::Parameter& parameter)
@@ -38,7 +42,7 @@ void ImuSensorHardware::initialize(const SensorImu::Parameter& parameter)
 
   if (Acknowledgement<PROTOCOL::COMMAND::SET::IMU_PARAMETER>::wasAcknowledged(got.response()) == false) {
     throw std::runtime_error("Request \"Set Motor Controller Parameter\" was not acknowledged.");
-  } 
+  }
 }
 
 void ImuSensorHardware::processSending()
@@ -50,7 +54,7 @@ void ImuSensorHardware::processSending()
   try {
     // Get measurement data from ethernet gateway and parse it to processing pipeline.
     auto request = EthernetRequest::make_request<GetImuMeasurement>();
-    const auto got = _communication_node->sendRequest(std::move(request), 100ms);
+    const auto got = _communication_node->sendRequest(std::move(request), 200ms);
 
     _callback_process_measurement(
       AcknowledgedImuMeasurement::orientation(got.response()),

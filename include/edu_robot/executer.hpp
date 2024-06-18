@@ -8,8 +8,10 @@
 #include <atomic>
 #include <chrono>
 #include <functional>
+#include <mutex>
 #include <thread>
 #include <vector>
+#include <iostream>
 
 namespace eduart {
 namespace robot {
@@ -22,6 +24,7 @@ public:
   Job() = default;
   Job(std::function<void()> do_job_function, const std::chrono::microseconds time_interval)
     : _do_job(do_job_function)
+    , _stamp_last_done(std::chrono::system_clock::now())
     , _time_interval(time_interval)
   {
     _is_active = isValid();
@@ -29,6 +32,7 @@ public:
 
   inline bool isValid() const { return !(_do_job == nullptr); }
   inline bool isActive() const { return _is_active; }
+  inline std::chrono::time_point<std::chrono::system_clock> stampLastDone() const { return _stamp_last_done; }
   inline bool shouldItBeDone(
     const std::chrono::time_point<std::chrono::system_clock> stamp_now = std::chrono::system_clock::now()) const
   {
@@ -40,6 +44,8 @@ public:
     }
 
     _do_job();
+    std::cout << "dt = " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - _stamp_last_done).count() << " ms" << std::endl;
+    _stamp_last_done = std::chrono::system_clock::now();
   }
 
   void activate() { _is_active = true; }
@@ -69,6 +75,7 @@ private:
   std::chrono::microseconds _max_time_between_runs = 1ms;
   std::chrono::time_point<std::chrono::system_clock> _stamp_last_run;
   std::thread _executer;
+  std::mutex _mutex;
   std::vector<Job> _jobs;
 };
 

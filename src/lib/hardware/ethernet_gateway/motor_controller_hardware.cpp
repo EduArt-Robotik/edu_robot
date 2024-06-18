@@ -11,6 +11,7 @@
 
 #include <edu_robot/hardware_error.hpp>
 
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <stdexcept>
@@ -110,7 +111,8 @@ void initialize_controller(
 template <>
 void MotorControllerHardware<1>::processRxData(const message::RxMessageDataBuffer &data)
 {
-  if (_callback_process_measurement == nullptr || udp::message::RpmMeasurement::canId(data) != _can_id) {
+  if (_callback_process_measurement == nullptr ||
+      udp::message::RpmMeasurement::canId(data) != _parameter.can_id) {
     return;
   }
   
@@ -122,7 +124,8 @@ void MotorControllerHardware<1>::processRxData(const message::RxMessageDataBuffe
 template <>
 void MotorControllerHardware<2>::processRxData(const message::RxMessageDataBuffer &data)
 {
-  if (_callback_process_measurement == nullptr || udp::message::RpmMeasurement::canId(data) != _can_id) {
+  if (_callback_process_measurement == nullptr ||
+      udp::message::RpmMeasurement::canId(data) != _parameter.can_id) {
     return;
   }
   
@@ -131,25 +134,13 @@ void MotorControllerHardware<2>::processRxData(const message::RxMessageDataBuffe
   // _callback_process_measurement(tcp::message::RpmMeasurement::rpm1(data));
 }
 
-template <>
-void MotorControllerHardware<1>::initialize(const Motor::Parameter& parameter)
-{
-  initialize_controller<1>(parameter, _parameter, _communication_node);
-}
-
-template <>
-void MotorControllerHardware<2>::initialize(const Motor::Parameter& parameter)
-{
-  initialize_controller<2>(parameter, _parameter, _communication_node);
-}
-
 // is called by the executer thread
 template <>
 void MotorControllerHardware<1>::processSending()
 {
   _data.mutex.lock();
   auto request = EthernetRequest::make_request<udp::message::SetMotorRpm>(
-    _can_id,
+    _parameter.can_id,
     _data.rpm[0],
     0.0f
   );
@@ -171,7 +162,7 @@ void MotorControllerHardware<2>::processSending()
 {
   _data.mutex.lock();
   auto request = EthernetRequest::make_request<udp::message::SetMotorRpm>(
-    _can_id,
+    _parameter.can_id,
     _data.rpm[0],
     _data.rpm[1]
   );
@@ -186,6 +177,24 @@ void MotorControllerHardware<2>::processSending()
   }
 
   _callback_process_measurement(_data.measured_rpm, AcknowledgedMotorRpm::enabled(got.response()));  
+}
+
+template <>
+void MotorControllerHardware<1>::initialize(const Motor::Parameter& parameter)
+{
+  initialize_controller<1>(parameter, _parameter, _communication_node);
+  _communication_node->addSendingJob(
+    std::bind(&MotorControllerHardware<1>::processSending, this), 50ms
+  );
+}
+
+template <>
+void MotorControllerHardware<2>::initialize(const Motor::Parameter& parameter)
+{
+  initialize_controller<2>(parameter, _parameter, _communication_node);
+  _communication_node->addSendingJob(
+    std::bind(&MotorControllerHardware<2>::processSending, this), 50ms
+  );  
 }
 
 } // end namespace ethernet

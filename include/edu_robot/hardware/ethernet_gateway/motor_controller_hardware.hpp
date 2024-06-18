@@ -101,7 +101,6 @@ private:
   void processSending();
 
   const Parameter _parameter;
-  std::uint8_t _can_id;
   std::shared_ptr<CommunicatorNode> _communication_node;
 
   struct {

@@ -40,7 +40,7 @@ void RangeSensorHardware::processSending()
   try {
     // Get measurement data from ethernet gateway and parse it to processing pipeline.
     auto request = EthernetRequest::make_request<GetDistanceMeasurement>(_id);
-    const auto got = _communication_node->sendRequest(std::move(request), 100ms);
+    const auto got = _communication_node->sendRequest(std::move(request), 200ms);
 
     _callback_process_measurement(AcknowledgedDistanceMeasurement::distance(got.response()));
   }

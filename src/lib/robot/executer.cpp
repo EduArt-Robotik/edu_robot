@@ -1,8 +1,12 @@
 #include "edu_robot/executer.hpp"
 
+#include <chrono>
+#include <exception>
+#include <mutex>
+#include <thread>
+
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
-#include <thread>
 
 namespace eduart {
 namespace robot {
@@ -33,10 +37,10 @@ void Executer::stop()
 
 void Executer::addJob(std::function<void()> do_job_function, const std::chrono::microseconds time_interval)
 {
-  if (_is_running) {
-    RCLCPP_ERROR(rclcpp::get_logger("Executer"), "can't add job when executer is running.");
-    return;
-  }
+  // if (_is_running) {
+  //   RCLCPP_ERROR(rclcpp::get_logger("Executer"), "can't add job when executer is running.");
+  //   return;
+  // }
 
   Job job(do_job_function, time_interval);
 
@@ -45,33 +49,45 @@ void Executer::addJob(std::function<void()> do_job_function, const std::chrono::
     return;
   }
 
+  std::scoped_lock lock(_mutex);
   _jobs.push_back(job);
 }
 
 void Executer::run()
 {
-  while (_is_running) {
+  while (_is_running && rclcpp::ok()) {
     // process all jobs if nothing to do sleep
     bool did_something = false;
     const auto stamp_now = std::chrono::system_clock::now();
 
-    for (auto& job : _jobs) {
-      if (job.shouldItBeDone(stamp_now) == false || job.isActive() == false) {
-        // job should not be done --> try next job
-        continue;
-      }
+    {
+      // job() below could throw an exception...
+      std::scoped_lock lock(_mutex);
 
-      // do job
-      job();
-      did_something = true;
+      for (auto& job : _jobs) {
+        if (job.shouldItBeDone(stamp_now) == false || job.isActive() == false) {
+          // job should not be done --> try next job
+          continue;
+        }
+
+        // do job
+        try {
+          job();
+          
+          did_something = true;
+        }
+        catch (std::exception& ex) {
+          RCLCPP_ERROR(rclcpp::get_logger("Executer"), "what = %s", ex.what());
+        }
+      }
     }
 
     if (did_something == false) {
       // all jobs are done --> sleep until next operation
-      const auto diff = stamp_now - _stamp_last_run;
-      const auto wait_time = diff > _max_time_between_runs ? _max_time_between_runs : _max_time_between_runs - diff;
+      const std::chrono::microseconds diff = std::chrono::duration_cast<std::chrono::microseconds>(stamp_now - _stamp_last_run);
+      const std::chrono::microseconds wait_time = diff > _max_time_between_runs ? _max_time_between_runs : _max_time_between_runs - diff;
       std::this_thread::sleep_for(wait_time);
-      return;
+      continue;
     }
 
     _stamp_last_run = stamp_now;

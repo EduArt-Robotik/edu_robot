@@ -27,7 +27,7 @@ using udp::message::AcknowledgedStatus;
 
 EthernetGatewayShield::EthernetGatewayShield(char const* const ip_address, const std::uint16_t port)
   : processing::ProcessingComponentOutput<float>("ethernet_gateway_shield")
-  , _communicator(std::make_shared<Communicator>(std::make_shared<EthernetCommunicationDevice>(ip_address, port)))
+  , _communicator(std::make_shared<Communicator>(std::make_shared<EthernetCommunicationDevice>(ip_address, port), 20ms))
   , _executer(std::make_shared<Executer>())
   , _communication_node(std::make_shared<CommunicatorNode>(_executer, _communicator))
 {
@@ -72,11 +72,15 @@ EthernetGatewayShield::EthernetGatewayShield(char const* const ip_address, const
             << static_cast<int>(got.response().data()[5]) << ": "
             << &got.response().data()[6]
             << std::endl << std::endl << std::endl;
+
+  // Starting Processing
+  _executer->start();
 }
 
 EthernetGatewayShield::~EthernetGatewayShield()
 {
   disable();
+  _executer->stop();
 }
 
 void EthernetGatewayShield::enable()

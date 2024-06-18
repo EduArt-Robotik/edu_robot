@@ -56,17 +56,17 @@ void LightingHardware::processSending()
     if (_name.find("left") != std::string::npos) {
       auto request = EthernetRequest::make_request<SetLighting>(
         PROTOCOL::LIGHTING::MODE::FLASH::LEFT, _data.color.r, _data.color.g, _data.color.b);
-      _communication_node->sendRequest(std::move(request), 100ms);
+      _communication_node->sendRequest(std::move(request), 200ms);
     }
     else if (_name.find("right") != std::string::npos) {
       auto request = EthernetRequest::make_request<SetLighting>(
         PROTOCOL::LIGHTING::MODE::FLASH::RIGHT, _data.color.r, _data.color.g, _data.color.b);
-      _communication_node->sendRequest(std::move(request), 100ms);
+      _communication_node->sendRequest(std::move(request), 200ms);
     }
     else if (_name.find("all") != std::string::npos) {
       auto request = EthernetRequest::make_request<SetLighting>(
         PROTOCOL::LIGHTING::MODE::FLASH::ALL, _data.color.r, _data.color.g, _data.color.b);
-      _communication_node->sendRequest(std::move(request), 100ms);
+      _communication_node->sendRequest(std::move(request), 200ms);
     }
     break;
 
@@ -74,35 +74,35 @@ void LightingHardware::processSending()
   case Mode::DIM: {
     auto request = EthernetRequest::make_request<SetLighting>(
       PROTOCOL::LIGHTING::MODE::DIM_LIGHT, _data.color.r, _data.color.g, _data.color.b);
-      _communication_node->sendRequest(std::move(request), 100ms);
+      _communication_node->sendRequest(std::move(request), 200ms);
   }
   break;
 
   case Mode::OFF: {
     auto request = EthernetRequest::make_request<SetLighting>(
       PROTOCOL::LIGHTING::MODE::LIGHTS_OFF, _data.color.r, _data.color.g, _data.color.b);
-      _communication_node->sendRequest(std::move(request), 100ms);  
+      _communication_node->sendRequest(std::move(request), 200ms);  
   }
   break;
 
   case Mode::PULSATION: {
     auto request = EthernetRequest::make_request<SetLighting>(
       PROTOCOL::LIGHTING::MODE::PULSATION, _data.color.r, _data.color.g, _data.color.b);
-      _communication_node->sendRequest(std::move(request), 100ms);  
+      _communication_node->sendRequest(std::move(request), 200ms);  
   }  
   break;
 
   case Mode::ROTATION: {
     auto request = EthernetRequest::make_request<SetLighting>(
       PROTOCOL::LIGHTING::MODE::ROTATION, _data.color.r, _data.color.g, _data.color.b);
-      _communication_node->sendRequest(std::move(request), 100ms);
+      _communication_node->sendRequest(std::move(request), 200ms);
   }
   break;
 
   case Mode::RUNNING: {
     auto request = EthernetRequest::make_request<SetLighting>(
       PROTOCOL::LIGHTING::MODE::RUNNING, _data.color.r, _data.color.g, _data.color.b);
-      _communication_node->sendRequest(std::move(request), 100ms);
+      _communication_node->sendRequest(std::move(request), 200ms);
   }
   break;
 
