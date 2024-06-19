@@ -8,6 +8,11 @@
 #include <edu_robot/hardware/communication_device.hpp>
 #include <edu_robot/hardware/message_buffer.hpp>
 
+#if _WITH_MRAA
+#include <mraa/common.hpp>
+#include <mraa/uart.hpp>
+#endif
+
 namespace eduart {
 namespace robot {
 namespace hardware {
