@@ -115,6 +115,7 @@ void Communicator::processing()
       _sending_in_progress.emplace(std::move(task));
       _is_being_send.emplace(std::move(request), std::move(future));
       _new_incoming_requests = _incoming_requests.size() > 0;
+      std::cout << "incoming requests = " << static_cast<int>(_incoming_requests.size()) << std::endl;
     }
 
     // Process Being Sent Messages

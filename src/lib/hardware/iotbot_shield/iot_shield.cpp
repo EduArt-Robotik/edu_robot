@@ -30,7 +30,7 @@ using namespace std::chrono_literals;
 
 IotShield::IotShield(char const* const device_name)
   : processing::ProcessingComponentOutput<float>("iot_shield")
-  , _communicator(std::make_shared<Communicator>(std::make_shared<UartCommunicationDevice>(device_name)))
+  , _communicator(std::make_shared<Communicator>(std::make_shared<UartCommunicationDevice>(device_name), 8ms))
   , _executer(std::make_shared<Executer>())
   , _communication_node(std::make_shared<CommunicatorNode>(_executer, _communicator))
 {
@@ -61,11 +61,15 @@ IotShield::IotShield(char const* const device_name)
   _communication_node->createRxDataEndPoint<RxDataEndPoint, ShieldResponse>(
     std::bind(&IotShield::processStatusReport, this, std::placeholders::_1)
   );
+
+  // Starting Processing
+  _executer->start();
 }
 
 IotShield::~IotShield()
 {
-  // \todo do some clean up on hardware side!
+  disable();
+  _executer->stop();
 }
 
 void IotShield::enable()
