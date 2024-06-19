@@ -9,6 +9,8 @@
 #include <edu_robot/hardware/message_buffer.hpp>
 
 #if _WITH_MRAA
+#include <memory>
+
 #include <mraa/common.hpp>
 #include <mraa/uart.hpp>
 #endif
