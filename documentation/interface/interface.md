@@ -8,7 +8,8 @@ A basic interface to the EduArt robots was defined. This interfaces are valid fo
 
 | Description                     | Topic                    | Type  | Message Type |
 |---------------------------------|--------------------------|-----------|---------------------------|
-| Velocity Input                  | /eduard/cmd_vel            | Input | sensor_msgs/msg/Twist                |
+| Velocity Input (mode remote controlled) | /eduard/cmd_vel            | Input | sensor_msgs/msg/Twist                |
+| Velocity Input (mode autonomous) | /eduard/autonomous/cmd_vel | Input | sensor_msgs/msg/Twist  |
 | Set Lighting Color/Mode         | /eduard/set_lighting_color | Input | edu_robot/msg/SetLightingColor       |
 | TF | /tf | In-/Output | |
 | Measured Odometry | /eduard/odom | Output | nav_msgs/Odometry |
