@@ -56,6 +56,7 @@ private:
   std::array<std::shared_ptr<Communicator>, 3> _communicator;
   std::shared_ptr<Executer> _executer;
   std::shared_ptr<CommunicatorNode> _communication_node;
+  std::mutex _mutex;
   std::shared_ptr<rclcpp::Clock> _clock;
   std::vector<std::shared_ptr<MotorControllerHardware>> _motor_controller_hardware;
 

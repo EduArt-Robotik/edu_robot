@@ -7,6 +7,7 @@
 #include "edu_robot/hardware/communicator_node.hpp"
 
 #include <memory>
+#include <mutex>
 #include <stdexcept>
 
 namespace eduart {
@@ -45,6 +46,9 @@ CanGatewayShield::CanGatewayShield(char const* const can_device)
     "processing dt", "ms", 10, 700, 1000, 50, 100
   );
   _diagnostic.last_processing = _clock->now();
+
+  // Executer
+  _executer->start();
 }
 
 CanGatewayShield::CanGatewayShield(char const* const can_device_0, char const* const can_device_1, char const* const can_device_2)
@@ -72,10 +76,13 @@ CanGatewayShield::CanGatewayShield(char const* const can_device_0, char const* c
 CanGatewayShield::~CanGatewayShield()
 {
   disable();
+  _executer->stop();
 }
 
 void CanGatewayShield::enable()
 {
+  std::scoped_lock lock(_mutex);
+
   for (auto& motor_controller : _motor_controller_hardware) {
     motor_controller->enable();
   }
@@ -83,6 +90,8 @@ void CanGatewayShield::enable()
 
 void CanGatewayShield::disable()
 {
+  std::scoped_lock lock(_mutex);
+
   for (auto& motor_controller : _motor_controller_hardware) {
     motor_controller->disable();
   }
@@ -92,6 +101,7 @@ void CanGatewayShield::disable()
 void CanGatewayShield::processPowerManagementBoardResponse(const message::RxMessageDataBuffer &data)
 {
   using can::message::power_management::Response;
+  std::scoped_lock lock(_mutex);
 
   if (Response::hasCorrectLength(data) == false) {
     return;
@@ -128,6 +138,7 @@ void CanGatewayShield::processCanGatewayShieldResponse(const message::RxMessageD
     return;
   }
 
+  std::scoped_lock lock(_mutex);
   _status_report.temperature = Response::temperature(data);
 
   // Do Diagnostics
@@ -140,14 +151,18 @@ void CanGatewayShield::processCanGatewayShieldResponse(const message::RxMessageD
   _diagnostic.temperature->update(_status_report.temperature);
 }
 
+// is called by the main thread
 RobotStatusReport CanGatewayShield::getStatusReport()
 {
+  std::scoped_lock lock(_mutex);
   return _status_report;
 }
 
 void CanGatewayShield::registerMotorControllerHardware(
   std::shared_ptr<MotorControllerHardware> motor_controller_hardware)
 {
+  std::scoped_lock lock(_mutex);
+
   if (std::find(_motor_controller_hardware.begin(), _motor_controller_hardware.end(), motor_controller_hardware)
       != _motor_controller_hardware.end())
   {
@@ -161,6 +176,7 @@ void CanGatewayShield::registerMotorControllerHardware(
 diagnostic::Diagnostic CanGatewayShield::processDiagnosticsImpl()
 {
   diagnostic::Diagnostic diagnostic;
+  std::scoped_lock lock(_mutex);
 
   diagnostic.add(*_diagnostic.voltage);
   diagnostic.add(*_diagnostic.current);
