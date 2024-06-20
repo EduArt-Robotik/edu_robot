@@ -252,6 +252,10 @@ void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
   // Motor Controller Parameter
   // First check if parameter differ from stored parameter on motor controller hardware.
   
+  // Start Processing
+  _communication_node->addSendingJob(
+    std::bind(&MotorControllerHardware::processSending, this), 50ms
+  );
 }
 
 void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
@@ -322,6 +326,7 @@ void MotorControllerHardware::enable()
   auto request = Request::make_request<SetEnableMotor>(_parameter.can_id, 0);
   _communication_node->sendRequest(std::move(request), 200ms);
 
+  std::scoped_lock lock(_processing_data.mutex);
   _processing_data.low_pass_set_point.clear();  
 }
 
@@ -336,6 +341,7 @@ void MotorControllerHardware::reset()
   auto request = Request::make_request<SetReset>(_parameter.can_id, 0);
   _communication_node->sendRequest(std::move(request), 200ms);
 
+  std::scoped_lock lock(_processing_data.mutex);
   _processing_data.error_code = 0;
   _processing_data.low_pass_set_point.clear();
 }
@@ -343,6 +349,7 @@ void MotorControllerHardware::reset()
 diagnostic::Diagnostic MotorControllerHardware::diagnostic()
 {
   diagnostic::Diagnostic diagnostic;
+  std::scoped_lock lock(_processing_data.mutex);
 
   if (_processing_data.error_code != 0) {
     diagnostic.add(

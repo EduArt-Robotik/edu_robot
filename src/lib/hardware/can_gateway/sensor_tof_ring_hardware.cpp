@@ -2,9 +2,13 @@
 #include "edu_robot/hardware/can_gateway/can/message_definition.hpp"
 #include "edu_robot/hardware/can_gateway/can/can_request.hpp"
 
+#include <edu_robot/hardware/communicator_node.hpp>
+
 #include <tf2/transform_datatypes.h>
 #include <tf2_sensor_msgs/tf2_sensor_msgs.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+
+#include <memory>
 
 namespace eduart {
 namespace robot {
@@ -85,8 +89,9 @@ SensorTofRingHardware::Parameter SensorTofRingHardware::get_parameter(
 SensorTofRingHardware::SensorTofRingHardware(
   const std::string& name, const Parameter& parameter, rclcpp::Node& ros_node, std::shared_ptr<Executer> executer,
   std::shared_ptr<Communicator> communicator)
-  :  _parameter(parameter)
+  : _parameter(parameter)
   , _ros_node(ros_node)
+  , _communication_node(std::make_shared<CommunicatorNode>(executer, communicator))
 {
   (void)name;
 

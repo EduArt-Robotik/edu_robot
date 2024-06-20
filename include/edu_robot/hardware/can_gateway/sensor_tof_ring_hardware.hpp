@@ -50,7 +50,6 @@ private:
   void processPointcloudMeasurement(sensor_msgs::msg::PointCloud2& point_cloud, const std::size_t sensor_index);
 
   const Parameter _parameter;
-  std::shared_ptr<rclcpp::TimerBase> _timer_get_measurement;
   rclcpp::Node& _ros_node;
   std::shared_ptr<CommunicatorNode> _communication_node;
   std::vector<std::shared_ptr<SensorTofHardware>> _sensor;
