@@ -96,11 +96,14 @@ message::RxMessageDataBuffer UartCommunicationDevice::receive()
   // DEBUG END
 
   if (received_bytes == 0) {
-    return { };
+    // return rx_buffer because of RVO
+    rx_buffer.clear();
+    return rx_buffer;
   }
-  if (received_bytes != rx_buffer.size()) {
+  else if (received_bytes != rx_buffer.size()) {
     throw HardwareError(State::UART_RECEIVING_FAILED, "Received bytes do not fit to rx buffer.");
   }
+  // else: --> all fine
 
   return rx_buffer;
 }
