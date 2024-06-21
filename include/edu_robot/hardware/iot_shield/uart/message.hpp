@@ -245,8 +245,8 @@ public:
     return MessageType::serialize(0, CommandByte::value(), element_value..., 0);
   }
   inline constexpr static auto makeSearchPattern() {
-    // return std::array<Byte, 0>(); // no pattern available --> accept everything
-    return element::impl::make_message_search_pattern<1>(MessageType{});
+    return std::array<Byte, 0>(); // no pattern available --> accept everything
+    // return element::impl::make_message_search_pattern<1>(MessageType{});
   }
 };
 

@@ -19,6 +19,8 @@ namespace iot_shield {
 namespace uart {
 namespace message {
 
+using uart::message::MessageFrame;
+
 using SetRpm = MessageFrame<element::Command<UART::COMMAND::SET::RPM>,
                             element::Int16,  // RPM set point motor 1
                             element::Int16,  // RPM set point motor 2
