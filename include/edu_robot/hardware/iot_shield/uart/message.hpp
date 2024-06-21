@@ -94,7 +94,7 @@ struct DataField {
     return serialized_bytes;
   }
   inline static constexpr DataType deserialize(const Byte data[size()])
-  {
+  { 
     const void* data_address = static_cast<const void*>(data);
     return *static_cast<const DataType*>(data_address);
   }
@@ -163,7 +163,8 @@ protected:
 template <class... Elements>
 TxMessageDataBuffer serialize(const typename Elements::type&... element_value, const std::tuple<Elements...>)
 {
-  TxMessageDataBuffer tx_buffer = { 0 };
+  constexpr std::size_t buffer_size = (Elements::size() + ...);
+  TxMessageDataBuffer tx_buffer(buffer_size);
   std::size_t byte_offset = 0;
 
   ([&]{
