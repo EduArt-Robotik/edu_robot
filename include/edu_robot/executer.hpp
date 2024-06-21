@@ -44,7 +44,7 @@ public:
     }
 
     _do_job();
-    std::cout << "dt = " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - _stamp_last_done).count() << " ms" << std::endl;
+    // std::cout << "dt = " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - _stamp_last_done).count() << " ms" << std::endl;
     _stamp_last_done = std::chrono::system_clock::now();
   }
 

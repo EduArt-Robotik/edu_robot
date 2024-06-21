@@ -1,4 +1,5 @@
 #include "edu_robot/hardware/iot_shield/uart_communication_device.hpp"
+#include <cstddef>
 #include <edu_robot/hardware_error.hpp>
 
 #include <rclcpp/logger.hpp>
@@ -74,7 +75,8 @@ void UartCommunicationDevice::send(message::Byte const *const tx_buffer, const s
 
 message::RxMessageDataBuffer UartCommunicationDevice::receive()
 {
-  message::RxMessageDataBuffer rx_buffer;
+  constexpr std::size_t rx_message_byte_count = 32;
+  message::RxMessageDataBuffer rx_buffer(rx_message_byte_count);
   std::size_t received_bytes = 0;
 
 #if _WITH_MRAA
@@ -93,6 +95,9 @@ message::RxMessageDataBuffer UartCommunicationDevice::receive()
   // std::cout << std::endl;
   // DEBUG END
 
+  if (received_bytes == 0) {
+    return { };
+  }
   if (received_bytes != rx_buffer.size()) {
     throw HardwareError(State::UART_RECEIVING_FAILED, "Received bytes do not fit to rx buffer.");
   }
