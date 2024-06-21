@@ -11,11 +11,10 @@
 
 #include <edu_robot/robot_status_report.hpp>
 
-#include <algorithm>
 #include <memory>
 #include <functional>
 #include <mutex>
-#include <stdexcept>
+#include <iostream>
 
 namespace eduart {
 namespace robot {
@@ -51,11 +50,13 @@ IotShield::IotShield(char const* const device_name)
   _diagnostic.last_processing = _clock->now();
 
   // set UART timeout
+  std::cout << "setting uart timeout" << std::endl;
   auto request = Request::make_request<uart::message::SetValueF<UART::COMMAND::SET::UART_TIMEOUT>>(
     1.0f, 0);
   auto future_response = _communicator->sendRequest(std::move(request));
   wait_for_future(future_response, 100ms);
   future_response.get();
+  std::cout << "setting done" << std::endl;
 
   // create data endpoint for status report
   _communication_node->createRxDataEndPoint<RxDataEndPoint, ShieldResponse>(
