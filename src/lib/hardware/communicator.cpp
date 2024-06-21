@@ -82,7 +82,7 @@ message::RxMessageDataBuffer Communicator::getRxBuffer()
 template <typename Left, typename Right>
 static bool is_same(const Left& lhs, const Right& rhs) {
   if (lhs.empty()) {
-    // if left hand side is empty accept it --> response is matched to everything
+    // if search pattern is empty than accept message
     return true;
   }
   if (lhs.size() > rhs.size()) {
