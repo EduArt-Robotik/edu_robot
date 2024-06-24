@@ -52,7 +52,7 @@ private:
   void processRxData(const message::RxMessageDataBuffer& data);
   void processSending();
 
-  const Parameter& _parameter;
+  const Parameter _parameter;
   std::shared_ptr<CommunicatorNode> _communication_node;
   struct {
     std::vector<Rpm> rpm;
