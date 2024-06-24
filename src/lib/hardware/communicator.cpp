@@ -119,7 +119,6 @@ void Communicator::processing()
       _sending_in_progress.emplace(std::move(task));
       _is_being_send.emplace(std::move(request), std::move(future));
       _new_incoming_requests = _incoming_requests.size() > 0;
-      std::cout << "incoming requests = " << static_cast<int>(_incoming_requests.size()) << std::endl;
     }
 
     // Process Being Sent Messages
@@ -171,6 +170,17 @@ void Communicator::processing()
           _rx_buffer_copy = rx_buffer;
         }
 
+        // Check if received data matches to an end point and call it if it does.
+        {
+          std::lock_guard guard(_mutex_rx_data_endpoint);
+
+          for (auto& endpoint : _rx_data_endpoint) {
+            if (is_same(endpoint->searchPattern(), rx_buffer)) {
+              endpoint->call(rx_buffer);
+            }
+          }
+        }
+
         // Check if received data matches to an open request.
         for (auto it =_open_request.begin(); it != _open_request.end();) {
           const auto& search_pattern = it->first._response_search_pattern;
@@ -188,17 +198,6 @@ void Communicator::processing()
           }
           // else
           ++it;
-        }
-
-        // Check if received data matches to an end point and call it if it does.
-        {
-          std::lock_guard guard(_mutex_rx_data_endpoint);
-
-          for (auto& endpoint : _rx_data_endpoint) {
-            if (is_same(endpoint->searchPattern(), rx_buffer)) {
-              endpoint->call(rx_buffer);
-            }
-          }
         }
       }
       catch (std::exception& ex) {

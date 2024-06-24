@@ -25,9 +25,6 @@ public:
   template <class Message, class... Arguments>
   inline static Request make_request(Arguments&&... args) {
     auto request_message = Message::serialize(std::forward<Arguments>(args)...);
-    std::cout << "request message: " << std::hex;
-    for (const auto byte : request_message) std::cout << static_cast<int>(byte) << " ";
-    std::cout << std::dec << std::endl;
     const auto response_message = Message::makeSearchPattern();
     return Request(request_message, response_message);
   }

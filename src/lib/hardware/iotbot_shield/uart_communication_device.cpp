@@ -53,10 +53,6 @@ UartCommunicationDevice::~UartCommunicationDevice()
 
 void UartCommunicationDevice::send(message::Byte const *const tx_buffer, const std::size_t length)
 {
-  std::cout << "sending: " << std::hex;
-  for (std::size_t i = 0; i < length; ++i) std::cout << static_cast<int>(tx_buffer[i]) << " ";
-  std::cout << std::dec << std::endl;
-
 #if _WITH_MRAA
   const char* data = static_cast<const char*>(static_cast<const void*>(tx_buffer));
   const std::size_t sent_bytes = _uart->write(data, length);
@@ -107,16 +103,9 @@ message::RxMessageDataBuffer UartCommunicationDevice::receive()
     return rx_buffer;
   }
   else if (received_bytes != rx_buffer.size()) {
-  std::cout << "received: " << std::hex;
-  for (const auto byte : rx_buffer) std::cout << static_cast<int>(byte) << " ";
-  std::cout << std::dec << std::endl;
     throw HardwareError(State::UART_RECEIVING_FAILED, "Received bytes do not fit to rx buffer.");
   }
   // else: --> all fine
-  std::cout << "received: " << std::hex;
-  for (const auto byte : rx_buffer) std::cout << static_cast<int>(byte) << " ";
-  std::cout << std::dec << std::endl;
-
   return rx_buffer;
 }
 
