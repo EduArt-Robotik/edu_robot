@@ -55,7 +55,7 @@ IotShield::IotShield(char const* const device_name)
 
   // create data endpoint for status report
   _communication_node->createRxDataEndPoint<RxDataEndPoint, ShieldResponse>(
-    std::bind(&IotShield::processStatusReport, this, std::placeholders::_1)
+    std::bind(&IotShield::processStatusReport, this, std::placeholders::_1), 3
   );
 
   // Starting Processing

@@ -26,7 +26,7 @@ ImuSensorHardware::ImuSensorHardware(std::shared_ptr<Executer> executer, std::sh
   : _communication_node(std::make_shared<CommunicatorNode>(executer, communicator))
 {
   _communication_node->createRxDataEndPoint<RxDataEndPoint, ShieldResponse>(
-    std::bind(&ImuSensorHardware::processRxData, this, std::placeholders::_1)
+    std::bind(&ImuSensorHardware::processRxData, this, std::placeholders::_1), 3
   );
 }
 

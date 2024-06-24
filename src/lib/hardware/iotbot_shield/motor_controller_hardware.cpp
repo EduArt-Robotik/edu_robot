@@ -69,7 +69,10 @@ MotorControllerHardware::MotorControllerHardware(
     }
 {
   _communication_node->createRxDataEndPoint<RxDataEndPoint, ShieldResponse>(
-    std::bind(&MotorControllerHardware::processRxData, this, std::placeholders::_1)
+    std::bind(&MotorControllerHardware::processRxData, this, std::placeholders::_1), 3
+  );
+  _communication_node->addSendingJob(
+    std::bind(&MotorControllerHardware::processSending, this), 100ms
   );
 }            
 
