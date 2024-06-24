@@ -11,7 +11,6 @@
 #include <mutex>
 #include <thread>
 #include <vector>
-#include <iostream>
 
 namespace eduart {
 namespace robot {

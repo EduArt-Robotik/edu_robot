@@ -1,12 +1,11 @@
 #include "edu_robot/hardware/iot_shield/uart_communication_device.hpp"
-#include <cstddef>
-#include <cstdint>
+
 #include <edu_robot/hardware_error.hpp>
 
-#include <iostream>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
-#include <thread>
+
+#include <cstddef>
 
 namespace eduart {
 namespace robot {

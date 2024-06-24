@@ -14,7 +14,6 @@
 #include <memory>
 #include <functional>
 #include <mutex>
-#include <iostream>
 
 namespace eduart {
 namespace robot {

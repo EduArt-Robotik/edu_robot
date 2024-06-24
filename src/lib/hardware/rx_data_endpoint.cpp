@@ -5,7 +5,6 @@
 #include <rclcpp/logging.hpp>
 
 #include <cstdint>
-#include <iostream>
 #include <mutex>
 
 namespace eduart {
