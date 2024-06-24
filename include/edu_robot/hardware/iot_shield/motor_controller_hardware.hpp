@@ -6,6 +6,7 @@
 #pragma once
 
 #include "edu_robot/executer.hpp"
+
 #include <edu_robot/motor_controller.hpp>
 #include <edu_robot/hardware_component_interfaces.hpp>
 #include <edu_robot/rpm.hpp>
@@ -15,6 +16,7 @@
 
 #include <memory>
 #include <string>
+#include <chrono>
 
 namespace eduart {
 namespace robot {
@@ -30,7 +32,7 @@ public:
     float threshold_stall_check = 0.25f;
     std::uint32_t control_frequency = 16000;
     bool encoder_inverted = false;
-    std::uint32_t timeout_ms = 1000;
+    std::chrono::milliseconds timeout = 1000ms;
   
     float weight_low_pass_set_point = 0.2f;
     float weight_low_pass_encoder   = 0.3f;    
@@ -55,6 +57,8 @@ private:
   struct {
     std::vector<Rpm> rpm;
     std::vector<Rpm> measured_rpm;
+    std::chrono::system_clock::time_point stamp_last_rpm_set;
+    bool timeout = true;
     std::mutex mutex;
   } _data;
 };

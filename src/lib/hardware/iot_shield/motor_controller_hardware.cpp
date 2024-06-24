@@ -3,6 +3,7 @@
 #include "edu_robot/hardware/iot_shield/uart/uart_request.hpp"
 #include "edu_robot/hardware/rx_data_endpoint.hpp"
 
+#include <chrono>
 #include <edu_robot/hardware/communicator_node.hpp>
 
 #include <edu_robot/hardware_error.hpp>
@@ -11,6 +12,8 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <stdexcept>
 
 namespace eduart {
@@ -35,7 +38,7 @@ MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
   ros_node.declare_parameter<int>(
     name + ".control_frequency", default_parameter.control_frequency);
   ros_node.declare_parameter<int>(
-    name + ".timeout_ms", default_parameter.timeout_ms);  
+    name + ".timeout_ms", default_parameter.timeout.count());  
 
   ros_node.declare_parameter<float>(
     name + ".weight_low_pass_set_point", default_parameter.weight_low_pass_set_point);
@@ -47,7 +50,7 @@ MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
   parameter.gear_ratio = ros_node.get_parameter(name + ".gear_ratio").as_double();
   parameter.encoder_ratio = ros_node.get_parameter(name + ".encoder_ratio").as_double();
   parameter.control_frequency = ros_node.get_parameter(name + ".control_frequency").as_int();
-  parameter.timeout_ms = ros_node.get_parameter(name + ".timeout_ms").as_int();
+  parameter.timeout = std::chrono::milliseconds(ros_node.get_parameter(name + ".timeout_ms").as_int());
 
   parameter.weight_low_pass_set_point = ros_node.get_parameter(name + ".weight_low_pass_set_point").as_double();
   parameter.weight_low_pass_encoder = ros_node.get_parameter(name + ".weight_low_pass_encoder").as_double();
@@ -65,6 +68,8 @@ MotorControllerHardware::MotorControllerHardware(
   , _data{
       {4, 0.0},
       {4, 0.0},
+      std::chrono::system_clock::now(),
+      true,
       {}
     }
 {
@@ -90,11 +95,12 @@ void MotorControllerHardware::processRxData(const uart::message::RxMessageDataBu
   
   // std::lock_guard lock(_data.mutex);
   // no need for mutex lock, because measured rpm are only touched here
+  std::scoped_lock lock(_data.mutex);
   _data.measured_rpm[0] = -uart::message::ShieldResponse::rpm0(data);
   _data.measured_rpm[1] = -uart::message::ShieldResponse::rpm1(data);
   _data.measured_rpm[2] = -uart::message::ShieldResponse::rpm2(data);
   _data.measured_rpm[3] = -uart::message::ShieldResponse::rpm3(data);
-  _callback_process_measurement(_data.measured_rpm, true);
+  _callback_process_measurement(_data.measured_rpm, !_data.timeout);
 }
 
 // is called by the main thread
@@ -106,11 +112,22 @@ void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
 
   std::lock_guard lock(_data.mutex);
   _data.rpm = rpm;
+  _data.stamp_last_rpm_set = std::chrono::system_clock::now();
+  _data.timeout = false;
 }
 
 void MotorControllerHardware::processSending()
 {
+  const auto stamp_now = std::chrono::system_clock::now();
   _data.mutex.lock();
+
+  if (stamp_now - _data.stamp_last_rpm_set > _parameter.timeout) {
+    // timeout occurred --> reset rpm values to zero
+    std::fill(_data.rpm.begin(), _data.rpm.end(), 0.0f);
+    _data.timeout = true;
+    RCLCPP_INFO(rclcpp::get_logger("MotorControllerHardware"), "timeout occurred! --> disable motor controller.");
+  }
+
   auto request = Request::make_request<uart::message::SetRpm>(
     -_data.rpm[0],
     -_data.rpm[1],
@@ -180,7 +197,7 @@ void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
   {
     // set UART timeout
     auto request = Request::make_request<uart::message::SetValueF<UART::COMMAND::SET::UART_TIMEOUT>>(
-      static_cast<float>(_parameter.timeout_ms) * 1000.0f, 0);
+      static_cast<float>(_parameter.timeout.count()) * 1000.0f, 0);
     _communication_node->sendRequest(std::move(request), 100ms);
   }
 }
