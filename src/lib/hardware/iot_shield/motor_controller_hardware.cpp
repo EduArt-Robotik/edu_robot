@@ -121,7 +121,7 @@ void MotorControllerHardware::processSending()
   const auto stamp_now = std::chrono::system_clock::now();
   _data.mutex.lock();
 
-  if (stamp_now - _data.stamp_last_rpm_set > _parameter.timeout) {
+  if (_data.timeout == false && stamp_now - _data.stamp_last_rpm_set > _parameter.timeout) {
     // timeout occurred --> reset rpm values to zero
     std::fill(_data.rpm.begin(), _data.rpm.end(), 0.0f);
     _data.timeout = true;

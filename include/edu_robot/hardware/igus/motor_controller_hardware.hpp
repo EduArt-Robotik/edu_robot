@@ -38,6 +38,7 @@ public:
     std::uint8_t max_current = 0x80; //> max current unit unkown
     bool rollover_flag = false;
     std::uint8_t tic_scaling_factor = 1; //> Tic scaling factor scales the encoder tics before CAN communication 
+    std::chrono::milliseconds timeout = 1000ms;
   };
 
   MotorControllerHardware(
@@ -66,6 +67,8 @@ private:
   struct {
     std::vector<Rpm> rpm;    
     std::vector<Rpm> measured_rpm;
+    std::chrono::system_clock::time_point stamp_last_rpm_set;
+    bool timeout = true;       
     std::mutex mutex;
 
     algorithm::LowPassFiler<float> low_pass_set_point;

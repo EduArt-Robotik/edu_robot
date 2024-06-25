@@ -63,7 +63,7 @@ MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
   ros_node.declare_parameter<int>(
     name + ".control_frequency", default_parameter.control_frequency);
   ros_node.declare_parameter<int>(
-    name + ".timeout_ms", default_parameter.timeout_ms);  
+    name + ".timeout_ms", default_parameter.timeout.count());  
 
   ros_node.declare_parameter<float>(
     name + ".weight_low_pass_set_point", default_parameter.weight_low_pass_set_point);
@@ -78,7 +78,7 @@ MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
   parameter.gear_ratio = ros_node.get_parameter(name + ".gear_ratio").as_double();
   parameter.encoder_ratio = ros_node.get_parameter(name + ".encoder_ratio").as_double();
   parameter.control_frequency = ros_node.get_parameter(name + ".control_frequency").as_int();
-  parameter.timeout_ms = ros_node.get_parameter(name + ".timeout_ms").as_int();
+  parameter.timeout = std::chrono::milliseconds(ros_node.get_parameter(name + ".timeout_ms").as_int());
 
   parameter.weight_low_pass_set_point = ros_node.get_parameter(name + ".weight_low_pass_set_point").as_double();
   parameter.weight_low_pass_encoder = ros_node.get_parameter(name + ".weight_low_pass_encoder").as_double();
@@ -98,7 +98,7 @@ void initialize_controller(
 
   {
     auto request = Request::make_request<SetTimeout>(
-      hardware_parameter.can_id.input, hardware_parameter.timeout_ms);
+      hardware_parameter.can_id.input, hardware_parameter.timeout.count());
     communication_node->sendRequest(std::move(request), 100ms);
   }
   {
@@ -167,6 +167,8 @@ MotorControllerHardware::MotorControllerHardware(
   , _data{
       { 2, 0.0 },
       { 2, 0.0 },
+      std::chrono::system_clock::now(),
+      true,
       { }
     }
 {
@@ -207,11 +209,23 @@ void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
 
   std::scoped_lock lock(_data.mutex);
   _data.rpm = rpm;
+  _data.stamp_last_rpm_set = std::chrono::system_clock::now();
+  _data.timeout = false;  
 }
 
 void MotorControllerHardware::processSending()
 {
+  const auto stamp_now = std::chrono::system_clock::now();
   _data.mutex.lock();
+
+  if (_data.timeout == false && stamp_now - _data.stamp_last_rpm_set > _parameter.timeout) {
+    // timeout occurred --> reset rpm values to zero
+    std::fill(_data.rpm.begin(), _data.rpm.end(), 0.0f);
+    _data.timeout = true;
+    disable();
+    RCLCPP_INFO(rclcpp::get_logger("MotorControllerHardware"), "timeout occurred! --> disable motor controller.");
+  }
+
   auto request = Request::make_request<SetRpm>(
     _parameter.can_id.input,
     _data.rpm[0],

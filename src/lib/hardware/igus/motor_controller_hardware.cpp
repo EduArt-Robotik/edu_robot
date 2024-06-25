@@ -37,9 +37,9 @@ using can::message::GetVelocityControlParameter;
 using can::message::GetFlags;
 using can::message::GetWorkingHours;
 
-using can::message::GeneralParameter;
-using can::message::VelocityControlLoopParameter;
-using can::message::Flags;
+// using can::message::GeneralParameter;
+// using can::message::VelocityControlLoopParameter;
+// using can::message::Flags;
 using can::message::WorkingHours;
 
 static void log_error_code(const std::uint8_t error_code)
@@ -107,56 +107,56 @@ static std::string get_error_string(const std::uint8_t error_code)
   return std::string(error_string.begin() + 1, error_string.end());
 }
 
-static MotorControllerHardware::Parameter read_hardware_parameter(
-  const std::uint16_t can_id, std::shared_ptr<Communicator> communicator)
-{
-  MotorControllerHardware::Parameter parameter;
+// static MotorControllerHardware::Parameter read_hardware_parameter(
+//   const std::uint16_t can_id, std::shared_ptr<Communicator> communicator)
+// {
+//   MotorControllerHardware::Parameter parameter;
 
-  // General Parameter
-  {
-    auto request = Request::make_request<GetGeneralParameter>(can_id);
-    auto future_response = communicator->sendRequest(std::move(request));
-    wait_for_future(future_response, 100ms);
-    const auto got = future_response.get();
+//   // General Parameter
+//   {
+//     auto request = Request::make_request<GetGeneralParameter>(can_id);
+//     auto future_response = communicator->sendRequest(std::move(request));
+//     wait_for_future(future_response, 100ms);
+//     const auto got = future_response.get();
 
-    parameter.can_id = can_id;
-    parameter.max_current = GeneralParameter::maxCurrent(got.response());
-    parameter.max_lag = GeneralParameter::maxLag(got.response());
-    parameter.max_missed_communications = GeneralParameter::maxMissedCommunication(got.response());
-  }
+//     parameter.can_id = can_id;
+//     parameter.max_current = GeneralParameter::maxCurrent(got.response());
+//     parameter.max_lag = GeneralParameter::maxLag(got.response());
+//     parameter.max_missed_communications = GeneralParameter::maxMissedCommunication(got.response());
+//   }
 
-  // Flags
-  {
-    auto request = Request::make_request<GetFlags>(can_id);
-    auto future_response = communicator->sendRequest(std::move(request));
-    wait_for_future(future_response, 100ms);
-    const auto got = future_response.get();
+//   // Flags
+//   {
+//     auto request = Request::make_request<GetFlags>(can_id);
+//     auto future_response = communicator->sendRequest(std::move(request));
+//     wait_for_future(future_response, 100ms);
+//     const auto got = future_response.get();
 
-    parameter.rollover_flag = Flags::roolOver(got.response());
-    parameter.tic_scaling_factor = Flags::ticScale(got.response());
-  }
+//     parameter.rollover_flag = Flags::roolOver(got.response());
+//     parameter.tic_scaling_factor = Flags::ticScale(got.response());
+//   }
 
-  return parameter;
-}
+//   return parameter;
+// }
 
-static Motor::Parameter read_motor_parameter(const std::uint16_t can_id, std::shared_ptr<Communicator> communicator)
-{
-  Motor::Parameter parameter;
+// static Motor::Parameter read_motor_parameter(const std::uint16_t can_id, std::shared_ptr<Communicator> communicator)
+// {
+//   Motor::Parameter parameter;
 
-  // PID
-  {
-    auto request = Request::make_request<GetVelocityControlParameter>(can_id);
-    auto future_response = communicator->sendRequest(std::move(request));
-    wait_for_future(future_response, 100ms);
-    const auto got = future_response.get();
+//   // PID
+//   {
+//     auto request = Request::make_request<GetVelocityControlParameter>(can_id);
+//     auto future_response = communicator->sendRequest(std::move(request));
+//     wait_for_future(future_response, 100ms);
+//     const auto got = future_response.get();
 
-    parameter.kp = VelocityControlLoopParameter::velocityControllerKp(got.response());
-    parameter.ki = VelocityControlLoopParameter::velocityControllerKi(got.response());
-    parameter.kd = VelocityControlLoopParameter::velocityControllerKd(got.response());
-  }
+//     parameter.kp = VelocityControlLoopParameter::velocityControllerKp(got.response());
+//     parameter.ki = VelocityControlLoopParameter::velocityControllerKi(got.response());
+//     parameter.kd = VelocityControlLoopParameter::velocityControllerKd(got.response());
+//   }
 
-  return parameter;
-}
+//   return parameter;
+// }
 
 MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
     const std::string& motor_controller_name, const Parameter& default_parameter, rclcpp::Node& ros_node)
@@ -189,6 +189,8 @@ MotorControllerHardware::MotorControllerHardware(
   , _processing_data{
       { 1, 0.0 }, 
       {1, 0.0 },
+      std::chrono::system_clock::now(),
+      true,
       { },
       algorithm::LowPassFiler<float>(parameter.low_pass_set_point),
       std::chrono::system_clock::now(),
@@ -266,6 +268,8 @@ void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
 
   std::scoped_lock lock(_processing_data.mutex);
   _processing_data.rpm = rpm;
+  _processing_data.stamp_last_rpm_set = std::chrono::system_clock::now();
+  _processing_data.timeout = false;  
 }
 
 // is called by the executer thread
@@ -274,9 +278,22 @@ void MotorControllerHardware::processSending()
   // Processing Setting new Set Point
   // RPM hast to be negated, because motor is turing left with positive rpm value.
   // Controller wants rotation per sections with one decimal number.
+  const auto stamp_now = std::chrono::system_clock::now();
   _processing_data.mutex.lock();
+
+  // check if time occurred
+  if (_processing_data.timeout == false && stamp_now - _processing_data.stamp_last_rpm_set > _parameter.timeout) {
+    // timeout occurred --> reset rpm values to zero
+    std::fill(_processing_data.rpm.begin(), _processing_data.rpm.end(), 0.0f);
+    _processing_data.timeout = true;
+    disable();
+    RCLCPP_INFO(rclcpp::get_logger("MotorControllerHardware"), "timeout occurred! --> disable motor controller.");
+  }
+
+  // low pass filter input set point
   _processing_data.low_pass_set_point(-_processing_data.rpm[0].rps() * 10.0f * _parameter.gear_ratio);
 
+  // sending velocity
   auto request = Request::make_request<SetVelocity>(
     _parameter.can_id,
     static_cast<std::uint8_t>(_processing_data.low_pass_set_point.getValue() + 127.5f), // \todo move converting to message definition. CanRequest ist the problem!

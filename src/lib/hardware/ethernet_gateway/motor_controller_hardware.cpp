@@ -52,7 +52,7 @@ void initialize_controller(
       hardware_parameter.threshold_stall_check,
       hardware_parameter.weight_low_pass_set_point,
       hardware_parameter.control_frequency,
-      hardware_parameter.timeout_ms
+      hardware_parameter.timeout.count()
     );
     const auto got = communicator_node->sendRequest(std::move(request), 200ms);
 
@@ -138,7 +138,19 @@ void MotorControllerHardware<2>::processRxData(const message::RxMessageDataBuffe
 template <>
 void MotorControllerHardware<1>::processSending()
 {
+  const auto stamp_now = std::chrono::system_clock::now();
   _data.mutex.lock();
+
+  if (_data.timeout == false && stamp_now - _data.stamp_last_rpm_set > _parameter.timeout) {
+    // timeout occurred --> reset rpm values to zero
+    std::fill(_data.rpm.begin(), _data.rpm.end(), 0.0f);
+    _data.timeout = true;
+    RCLCPP_INFO(rclcpp::get_logger("MotorControllerHardware"), "timeout occurred! --> disable motor controller.");
+
+    auto request = EthernetRequest::make_request<udp::message::SetMotorDisabled>();
+    _communication_node->sendRequest(std::move(request), 200ms);
+  }
+
   auto request = EthernetRequest::make_request<udp::message::SetMotorRpm>(
     _parameter.can_id,
     _data.rpm[0],
@@ -160,7 +172,19 @@ void MotorControllerHardware<1>::processSending()
 template <>
 void MotorControllerHardware<2>::processSending()
 {
+  const auto stamp_now = std::chrono::system_clock::now();
   _data.mutex.lock();
+
+  if (_data.timeout == false && stamp_now - _data.stamp_last_rpm_set > _parameter.timeout) {
+    // timeout occurred --> reset rpm values to zero
+    std::fill(_data.rpm.begin(), _data.rpm.end(), 0.0f);
+    _data.timeout = true;
+    RCLCPP_INFO(rclcpp::get_logger("MotorControllerHardware"), "timeout occurred! --> disable motor controller.");
+
+    auto request = EthernetRequest::make_request<udp::message::SetMotorDisabled>();
+    _communication_node->sendRequest(std::move(request), 200ms);
+  }
+
   auto request = EthernetRequest::make_request<udp::message::SetMotorRpm>(
     _parameter.can_id,
     _data.rpm[0],
