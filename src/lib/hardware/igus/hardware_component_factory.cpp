@@ -6,9 +6,9 @@
 #include <edu_robot/hardware/can_gateway/sensor_tof_ring_hardware.hpp>
 #include <edu_robot/hardware/can_gateway/imu_sensor_hardware.hpp>
 
-#include <functional>
-#include <memory>
 #include <rclcpp/node.hpp>
+
+#include <memory>
 
 namespace eduart {
 namespace robot {

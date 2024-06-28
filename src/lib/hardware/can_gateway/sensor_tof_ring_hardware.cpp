@@ -1,9 +1,13 @@
 #include "edu_robot/hardware/can_gateway/sensor_tof_ring_hardware.hpp"
+#include "edu_robot/hardware/can_gateway/can/can_rx_data_endpoint.hpp"
 #include "edu_robot/hardware/can_gateway/can/message_definition.hpp"
 #include "edu_robot/hardware/can_gateway/can/can_request.hpp"
 
 #include <edu_robot/hardware/communicator_node.hpp>
 
+#include <functional>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 #include <tf2/transform_datatypes.h>
 #include <tf2_sensor_msgs/tf2_sensor_msgs.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
@@ -17,6 +21,8 @@ namespace can_gateway {
 
 using can::Request;
 using can::message::sensor::tof::StartMeasurement;
+using can::message::sensor::tof::MeasurementComplete;
+using can::message::sensor::tof::TriggerDataTransmission;
 
 static std::shared_ptr<sensor_msgs::msg::PointCloud2> create_point_cloud(
   const SensorTofRingHardware::Parameter& parameter)
@@ -77,11 +83,13 @@ SensorTofRingHardware::Parameter SensorTofRingHardware::get_parameter(
   }
 
   ros_node.declare_parameter<int>(name + ".measurement_interval", parameter.measurement_interval.count());
-  ros_node.declare_parameter<int>(name + ".can_id_trigger", parameter.can_id_trigger);
+  ros_node.declare_parameter<int>(name + ".can_id.trigger", parameter.can_id_trigger);
+  ros_node.declare_parameter<int>(name + ".can_id.measurement_complete", parameter.can_id_measurement_complete);
 
   parameter.measurement_interval = std::chrono::milliseconds(
     ros_node.get_parameter(name + ".measurement_interval").as_int());
-  parameter.can_id_trigger = ros_node.get_parameter(name + ".can_id_trigger").as_int();
+  parameter.can_id_trigger = ros_node.get_parameter(name + ".can_id.trigger").as_int();
+  parameter.can_id_measurement_complete = ros_node.get_parameter(name + ".can_id.measurement_complete").as_int();
 
   return parameter;
 }
@@ -119,6 +127,10 @@ void SensorTofRingHardware::initialize(const SensorPointCloud::Parameter& parame
   _processing_data.point_cloud = create_point_cloud(_parameter);
   _processing_data.current_data_address = _processing_data.point_cloud->data.data();
 
+
+  _communication_node->createRxDataEndPoint<can::CanRxDataEndPoint, MeasurementComplete>(
+    _parameter.can_id_measurement_complete, std::bind(&SensorTofRingHardware::processFinishMeasurement, this, std::placeholders::_1), 8
+  );
   _communication_node->addSendingJob(
     std::bind(&SensorTofRingHardware::processStartMeasurement, this),
     _parameter.measurement_interval
@@ -127,6 +139,10 @@ void SensorTofRingHardware::initialize(const SensorPointCloud::Parameter& parame
 
 void SensorTofRingHardware::processStartMeasurement()
 {
+  if (_processing_data.active_measurement != 0) {
+    RCLCPP_ERROR(rclcpp::get_logger("SensorTofRingHardware"), "current measurements no finished! Data cloud be corrupt!");
+  }
+
   try {
     // Get measurement data from can gateway and parse it to processing pipeline.
     auto request = Request::make_request<StartMeasurement>(
@@ -140,6 +156,7 @@ void SensorTofRingHardware::processStartMeasurement()
     _processing_data.current_data_address = _processing_data.point_cloud->data.data();
     _processing_data.current_sensor = 0;
     _processing_data.next_expected_sensor = 0;
+    _processing_data.active_measurement = _processing_data.sensor_activation_bits;
   }
   catch (std::exception& ex) {
     RCLCPP_ERROR(
@@ -147,6 +164,31 @@ void SensorTofRingHardware::processStartMeasurement()
       "error occurred during start measurement. what = %s.", ex.what()
     );
   }
+}
+
+void SensorTofRingHardware::processFinishMeasurement(const message::RxMessageDataBuffer& rx_buffer)
+{
+  // mark that given sensor finished measurement
+  _processing_data.active_measurement &= ~(1 << MeasurementComplete::sensor(rx_buffer));
+
+  if (_processing_data.active_measurement != 0) {
+    // measurement not completed yet --> return and wait
+    return;
+  }
+
+  // measurement completed --> trigger data transmission
+  try {
+    auto request = Request::make_request<TriggerDataTransmission>(
+      _parameter.can_id_trigger, _processing_data.sensor_activation_bits
+    );
+    _communication_node->sendRequest(std::move(request), 100ms);
+  }
+  catch (std::exception& ex) {
+    RCLCPP_ERROR(
+      rclcpp::get_logger("SensorTofRingHardware"),
+      "error occurred during trigger data transmission. what = %s.", ex.what()
+    );
+  }  
 }
 
 void SensorTofRingHardware::processPointcloudMeasurement(
