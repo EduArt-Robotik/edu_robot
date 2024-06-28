@@ -15,6 +15,8 @@
 #include <rclcpp/rclcpp.hpp>
 
 #include <array>
+#include <string>
+#include <cstddef>
 
 using eduart::robot::bot::RebelMove;
 using eduart::robot::hardware::igus::CanGatewayShield;
@@ -46,9 +48,16 @@ public:
     }
 
     // ToF Sensor Ring
-    auto point_cloud_parameter = SensorTofRingHardware::get_parameter(
-      "pointcloud_left",
-      {"pointcloud_left_a", "pointcloud_left_b"},
+    constexpr std::size_t tof_num_sensors = 14;
+    std::vector<std::string> tof_sensor_names;
+
+    for (std::size_t i = 0; i < tof_num_sensors; ++i) {
+      tof_sensor_names.emplace_back(std::string("tof_pointcloud_sensor_") + std::to_string(i));
+    }
+
+    const auto point_cloud_parameter = SensorTofRingHardware::get_parameter(
+      "tof_sensor_ring",
+      tof_sensor_names,
       *this
     );
     factory.addTofRingSensor("pointcloud_left", point_cloud_parameter, *this);

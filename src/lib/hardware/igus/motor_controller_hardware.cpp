@@ -246,18 +246,16 @@ void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
     _processing_data.stamp_last_received = std::chrono::system_clock::now();
   }
 
-  if (_parameter.set_parameter == false) {
-    // do not flash set and flash the parameter to the EEPROM
-    return;
-  }
-
-  // Motor Controller Parameter
-  // First check if parameter differ from stored parameter on motor controller hardware.
-  
   // Start Processing
   _communication_node->addSendingJob(
     std::bind(&MotorControllerHardware::processSending, this), 50ms
   );
+
+  // Parameter Handling
+  if (_parameter.set_parameter == true) {
+    // Motor Controller Parameter
+    // First check if parameter differ from stored parameter on motor controller hardware.
+  }
 }
 
 void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
@@ -315,6 +313,7 @@ void MotorControllerHardware::processSending()
   const float rotation_per_seconds = position_per_seconds / 13188.7f;
 
   // Measured rpm value has to be negated, because motor is turing left with positive rpm value.
+  std::scoped_lock lock(_processing_data.mutex);
   _processing_data.measured_rpm[0] = Rpm::fromRps(rotation_per_seconds / _parameter.gear_ratio) * -1.0f;
   _processing_data.last_position = current_position;
   _processing_data.stamp_last_received = stamp_received;
