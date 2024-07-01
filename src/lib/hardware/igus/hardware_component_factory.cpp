@@ -5,6 +5,7 @@
 #include <edu_robot/hardware/can_gateway/sensor_tof_hardware.hpp>
 #include <edu_robot/hardware/can_gateway/sensor_tof_ring_hardware.hpp>
 #include <edu_robot/hardware/can_gateway/imu_sensor_hardware.hpp>
+#include <edu_robot/hardware/can_gateway/sensor_point_cloud_fusion.hpp>
 
 #include <rclcpp/node.hpp>
 
@@ -14,6 +15,9 @@ namespace eduart {
 namespace robot {
 namespace hardware {
 namespace igus {
+
+using can_gateway::SensorTofRingHardware;
+using can_gateway::SensorPointCloudFusion;
 
 HardwareComponentFactory& HardwareComponentFactory::addLighting(const std::string& lighting_name)
 {
@@ -72,12 +76,25 @@ HardwareComponentFactory& HardwareComponentFactory::addTofSensor(
 }
 
 HardwareComponentFactory& HardwareComponentFactory::addTofRingSensor(
-  const std::string& sensor_name, const hardware::can_gateway::SensorTofRingHardware::Parameter& parameter,
-  rclcpp::Node& ros_node)
+  const std::string& sensor_name, const std::vector<std::string>& left_ring_sensors,
+  const std::vector<std::string>& right_ring_sensors, rclcpp::Node& ros_node)
 {
-  _hardware[sensor_name] = std::make_shared<hardware::can_gateway::SensorTofRingHardware>(
-    sensor_name, parameter, ros_node,  _shield->getExecuter(), _shield->getCommunicator(1)
+  const auto parameter_left_sensors = SensorTofRingHardware::get_parameter(
+    sensor_name + "_left", left_ring_sensors, ros_node
   );
+  const auto parameter_right_sensors = SensorTofRingHardware::get_parameter(
+    sensor_name + "_right", right_ring_sensors, ros_node
+  );
+
+  auto left_ring = std::make_shared<SensorTofRingHardware>(
+    sensor_name, parameter_left_sensors, ros_node, _shield->getExecuter(), _shield->getCommunicator(1)
+  );
+  auto right_ring = std::make_shared<SensorTofRingHardware>(
+    sensor_name, parameter_left_sensors, ros_node, _shield->getExecuter(), _shield->getCommunicator(2)
+  );
+  std::vector<std::shared_ptr<SensorPointCloud::SensorInterface>> ring = { left_ring, right_ring };
+
+  _hardware[sensor_name] = std::make_shared<SensorPointCloudFusion>(ring);
 
   return *this;
 }

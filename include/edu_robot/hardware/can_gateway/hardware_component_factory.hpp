@@ -38,7 +38,8 @@ public:
   HardwareComponentFactory& addTofSensor(
     const std::string& sensor_name, const SensorTofHardware::Parameter& parameter, rclcpp::Node& ros_node);
   HardwareComponentFactory& addTofRingSensor(
-    const std::string& sensor_name, const SensorTofRingHardware::Parameter& parameter, rclcpp::Node& ros_node);
+    const std::string& sensor_name, const std::vector<std::string>& left_ring_sensors,
+    const std::vector<std::string>& right_ring_sensors, rclcpp::Node& ros_node);
 
 protected:
   std::shared_ptr<CanGatewayShield> _shield;

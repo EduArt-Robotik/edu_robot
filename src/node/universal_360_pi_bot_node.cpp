@@ -49,12 +49,12 @@ public:
     //   "pointcloud_left", {}, *this
     // );
     // factory.addTofSensor("pointcloud_left", point_cloud_parameter, *this);
-    auto point_cloud_parameter = SensorTofRingHardware::get_parameter(
-      "pointcloud_left",
-      {"pointcloud_left_a", "pointcloud_left_b"},
-      *this
-    );
-    factory.addTofRingSensor("pointcloud_left", point_cloud_parameter, *this);
+    // auto point_cloud_parameter = SensorTofRingHardware::get_parameter(
+    //   "pointcloud_left",
+    //   {"pointcloud_left_a", "pointcloud_left_b"},
+    //   *this
+    // );
+    // factory.addTofRingSensor("pointcloud_left", point_cloud_parameter, *this);
 
     // Initialize
     initialize(factory);

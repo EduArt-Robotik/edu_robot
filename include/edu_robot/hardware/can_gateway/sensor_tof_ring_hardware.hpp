@@ -46,6 +46,7 @@ public:
   void initialize(const SensorPointCloud::Parameter& parameter) override;
   static Parameter get_parameter(
     const std::string& name, const std::vector<std::string>& sensor_names, rclcpp::Node& ros_node);
+  inline const Parameter& parameter() const { return _parameter; }
 
 private:
   void processStartMeasurement();
@@ -62,9 +63,9 @@ private:
     std::size_t next_expected_sensor = 0;
     std::uint8_t frame_number = 0;
     std::uint8_t* current_data_address = 0;
-    std::uint8_t sensor_activation_bits = 0;
-    std::shared_ptr<sensor_msgs::msg::PointCloud2> point_cloud;
+    std::uint16_t sensor_activation_bits = 0;
     std::uint16_t active_measurement = 0;
+    std::shared_ptr<sensor_msgs::msg::PointCloud2> point_cloud;
   } _processing_data;
 };
 

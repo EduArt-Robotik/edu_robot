@@ -169,7 +169,7 @@ void SensorTofRingHardware::processStartMeasurement()
 void SensorTofRingHardware::processFinishMeasurement(const message::RxMessageDataBuffer& rx_buffer)
 {
   // mark that given sensor finished measurement
-  _processing_data.active_measurement &= ~(1 << MeasurementComplete::sensor(rx_buffer));
+  _processing_data.active_measurement &= ~(1 << (MeasurementComplete::sensor(rx_buffer) - 1));
 
   if (_processing_data.active_measurement != 0) {
     // measurement not completed yet --> return and wait
