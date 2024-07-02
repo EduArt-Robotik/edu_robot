@@ -52,6 +52,7 @@ void SensorPointCloudFusion::processPointcloudMeasurement(sensor_msgs::msg::Poin
   // only take point cloud if contains same fields
   if (_point_cloud->fields != point_cloud.fields || _point_cloud->point_step != point_cloud.point_step) {
     RCLCPP_ERROR(rclcpp::get_logger("SensorPointCloudFusion"), "given point cloud doesn't fit to previous ones. --> skip point cloud");
+    clearProcessing();
     throw std::invalid_argument("SensorPointCloudFusion: given point cloud doesn't fit to previous ones.");
   }
 
@@ -79,6 +80,11 @@ void SensorPointCloudFusion::processPointcloudMeasurement(sensor_msgs::msg::Poin
 
   // else: point cloud is complete --> send and reset it
   _callback_process_measurement(*_point_cloud);
+  clearProcessing();
+}
+
+void SensorPointCloudFusion::clearProcessing()
+{
   _point_cloud->height = 0;
   _point_cloud->width = 0;
   _point_cloud->data.clear();

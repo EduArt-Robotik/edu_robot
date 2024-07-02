@@ -197,14 +197,14 @@ void SensorTofRingHardware::processPointcloudMeasurement(
   // Note: expect the given point cloud is of exact same type as sensor point cloud.
 
   // Plausibility Check
-  if (sensor_index != _processing_data.next_expected_sensor) {
-    RCLCPP_ERROR(
-      rclcpp::get_logger("SensorTofRingHardware"),
-      "sensor_index %u is not the expected one (%u). The point cloud will contain corrupted data.",
-      static_cast<unsigned int>(sensor_index),
-      static_cast<unsigned int>(_processing_data.next_expected_sensor)
-    );
-  }
+  // if (sensor_index != _processing_data.next_expected_sensor) {
+  //   RCLCPP_ERROR(
+  //     rclcpp::get_logger("SensorTofRingHardware"),
+  //     "sensor_index %u is not the expected one (%u). The point cloud will contain corrupted data.",
+  //     static_cast<unsigned int>(sensor_index),
+  //     static_cast<unsigned int>(_processing_data.next_expected_sensor)
+  //   );
+  // }
 
   // Transform given point cloud into sensor frame.
   geometry_msgs::msg::TransformStamped transform;

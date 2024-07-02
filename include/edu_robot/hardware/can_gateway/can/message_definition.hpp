@@ -32,8 +32,8 @@ using message::MessageFrame;
 //   }
 // };
 
-using StartMeasurement = NoResponseMessageFrame<element::Uint8,     // frame no.
-                                                element::Uint16LE>; // sensor activation bits
+using StartMeasurement = NoResponseMessageFrame<element::Uint8,   // frame no.
+                                                element::Uint16>; // sensor activation bits
 
 struct MeasurementComplete : public MessageFrame<element::Uint8>  // frame no.
 {
@@ -41,7 +41,7 @@ struct MeasurementComplete : public MessageFrame<element::Uint8>  // frame no.
     return deserialize<1>(rx_buffer);
   }
 };
-using TriggerDataTransmission = NoResponseMessageFrame<element::Uint16LE>; // sensor activation bits                                        
+using TriggerDataTransmission = NoResponseMessageFrame<element::Uint16>; // sensor activation bits                                        
 
 struct Measurement : public Message<element::Uint24LE, // distance, sigma
                                     element::Uint8>    // zone no., frame no.

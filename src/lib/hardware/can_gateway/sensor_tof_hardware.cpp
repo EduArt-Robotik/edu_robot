@@ -103,7 +103,8 @@ SensorTofHardware::SensorTofHardware(
 
   _communication_node->createRxDataEndPoint<CanRxDataEndPoint, ZoneMeasurement>(
     _can_id.measurement,
-    std::bind(&SensorTofHardware::processRxData, this, std::placeholders::_1)
+    std::bind(&SensorTofHardware::processRxData, this, std::placeholders::_1),
+    8
   );
 }
 

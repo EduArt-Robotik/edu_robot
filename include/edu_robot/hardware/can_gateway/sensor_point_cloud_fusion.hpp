@@ -27,6 +27,7 @@ public:
 
 private:
   void processPointcloudMeasurement(sensor_msgs::msg::PointCloud2& point_cloud, const std::size_t sensor_index);
+  void clearProcessing();
 
   std::vector<std::shared_ptr<SensorPointCloud::SensorInterface>> _sensor_hardware;
   std::vector<bool> _received_point_cloud;
