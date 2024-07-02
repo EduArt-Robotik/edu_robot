@@ -144,6 +144,8 @@ void SensorTofRingHardware::processStartMeasurement()
       rclcpp::get_logger("SensorTofRingHardware"),
       "current measurements no finished! Data cloud be corrupt! active = %u", _processing_data.active_measurement
     );
+    RCLCPP_INFO(rclcpp::get_logger("SensorTofRingHardware"), "publishing pointcloud anyway.");
+    _callback_process_measurement(*_processing_data.point_cloud);
   }
 
   try {
