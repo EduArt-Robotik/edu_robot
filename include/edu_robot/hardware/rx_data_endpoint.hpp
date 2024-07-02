@@ -62,8 +62,8 @@ protected:
 
   void processDataJob();
 
-  std::vector<std::shared_ptr<message::RxMessageDataBuffer>> _input_data_buffer;
-  std::queue<std::shared_ptr<message::RxMessageDataBuffer>> _output_data_buffer;
+  std::vector<std::unique_ptr<message::RxMessageDataBuffer>> _input_data_buffer;
+  std::queue<std::unique_ptr<message::RxMessageDataBuffer>> _output_data_buffer;
   std::atomic_bool _running{true};
   std::shared_ptr<Executer> _executer;
   std::mutex _mutex;

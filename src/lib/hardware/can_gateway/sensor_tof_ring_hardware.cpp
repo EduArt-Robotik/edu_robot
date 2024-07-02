@@ -195,7 +195,7 @@ void SensorTofRingHardware::processFinishMeasurement(const message::RxMessageDat
       rclcpp::get_logger("SensorTofRingHardware"),
       "error occurred during trigger data transmission. what = %s.", ex.what()
     );
-  }  
+  }
 }
 
 void SensorTofRingHardware::processPointcloudMeasurement(

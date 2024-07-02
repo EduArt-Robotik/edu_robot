@@ -47,25 +47,25 @@ static void log_error_code(const std::uint8_t error_code)
   if (error_code & (1 << PROTOCOL::ERROR::BROWN_OUT_OR_WATCH_DOG_BIT)) {
     RCLCPP_ERROR(rclcpp::get_logger("Igus Motor Controller"), "brown out or watch dog");
   }
-  else if (error_code & (1 << PROTOCOL::ERROR::VELOCITY_LAG_BIT)) {
+  if (error_code & (1 << PROTOCOL::ERROR::VELOCITY_LAG_BIT)) {
     RCLCPP_ERROR(rclcpp::get_logger("Igus Motor Controller"), "velocity lag");    
   }
-  else if (error_code & (1 << PROTOCOL::ERROR::MOTOR_NOT_ENABLED)) {
+  if (error_code & (1 << PROTOCOL::ERROR::MOTOR_NOT_ENABLED)) {
     RCLCPP_ERROR(rclcpp::get_logger("Igus Motor Controller"), "motor not enabled");    
   }
-  else if (error_code & (1 << PROTOCOL::ERROR::COMM_WATCH_DOG)) {
+  if (error_code & (1 << PROTOCOL::ERROR::COMM_WATCH_DOG)) {
     RCLCPP_ERROR(rclcpp::get_logger("Igus Motor Controller"), "communication watch dog");    
   }
-  else if (error_code & (1 << PROTOCOL::ERROR::POSITION_LAG)) {
+  if (error_code & (1 << PROTOCOL::ERROR::POSITION_LAG)) {
     RCLCPP_ERROR(rclcpp::get_logger("Igus Motor Controller"), "position lag");    
   }
-  else if (error_code & (1 << PROTOCOL::ERROR::ENCODER_ERROR)) {
+  if (error_code & (1 << PROTOCOL::ERROR::ENCODER_ERROR)) {
     RCLCPP_ERROR(rclcpp::get_logger("Igus Motor Controller"), "encoder error");    
   }
-  else if (error_code & (1 << PROTOCOL::ERROR::OVER_CURRENT)) {
+  if (error_code & (1 << PROTOCOL::ERROR::OVER_CURRENT)) {
     RCLCPP_ERROR(rclcpp::get_logger("Igus Motor Controller"), "over current");    
   }
-  else if (error_code & (1 << PROTOCOL::ERROR::CAN_ERROR)) {
+  if (error_code & (1 << PROTOCOL::ERROR::CAN_ERROR)) {
     RCLCPP_ERROR(rclcpp::get_logger("Igus Motor Controller"), "can error");    
   }
 }
@@ -77,30 +77,26 @@ static std::string get_error_string(const std::uint8_t error_code)
   if (error_code & (1 << PROTOCOL::ERROR::BROWN_OUT_OR_WATCH_DOG_BIT)) {
     error_string += "|brown out or watch dog";
   }
-  else if (error_code & (1 << PROTOCOL::ERROR::VELOCITY_LAG_BIT)) {
+  if (error_code & (1 << PROTOCOL::ERROR::VELOCITY_LAG_BIT)) {
     error_string += "|velocity lag";
   }
-  else if (error_code & (1 << PROTOCOL::ERROR::MOTOR_NOT_ENABLED)) {
+  if (error_code & (1 << PROTOCOL::ERROR::MOTOR_NOT_ENABLED)) {
     error_string += "|motor not enabled";
   }
-  else if (error_code & (1 << PROTOCOL::ERROR::COMM_WATCH_DOG)) {
+  if (error_code & (1 << PROTOCOL::ERROR::COMM_WATCH_DOG)) {
     error_string += "|communication watch dog";
   }
-  else if (error_code & (1 << PROTOCOL::ERROR::POSITION_LAG)) {
+  if (error_code & (1 << PROTOCOL::ERROR::POSITION_LAG)) {
     error_string += "|position lag";    
   }
-  else if (error_code & (1 << PROTOCOL::ERROR::ENCODER_ERROR)) {
+  if (error_code & (1 << PROTOCOL::ERROR::ENCODER_ERROR)) {
     error_string += "|encoder error";
   }
-  else if (error_code & (1 << PROTOCOL::ERROR::OVER_CURRENT)) {
+  if (error_code & (1 << PROTOCOL::ERROR::OVER_CURRENT)) {
     error_string += "|over current";
   }
-  else if (error_code & (1 << PROTOCOL::ERROR::CAN_ERROR)) {
+  if (error_code & (1 << PROTOCOL::ERROR::CAN_ERROR)) {
     error_string += "|can error";    
-  }
-  else {
-    // no error or not handled --> return empty error string
-    return error_string;
   }
 
   // remove first pipe character

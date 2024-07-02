@@ -65,7 +65,7 @@ HardwareComponentFactory& HardwareComponentFactory::addTofRingSensor(
     sensor_name, parameter_left_sensors, ros_node, _shield->getExecuter(), _shield->getCommunicator(1)
   );
   auto right_ring = std::make_shared<SensorTofRingHardware>(
-    sensor_name, parameter_left_sensors, ros_node, _shield->getExecuter(), _shield->getCommunicator(2)
+    sensor_name, parameter_right_sensors, ros_node, _shield->getExecuter(), _shield->getCommunicator(2)
   );
   std::vector<std::shared_ptr<SensorPointCloud::SensorInterface>> ring = { left_ring, right_ring };
 
