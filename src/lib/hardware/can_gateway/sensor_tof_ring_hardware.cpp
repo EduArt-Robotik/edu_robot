@@ -36,12 +36,12 @@ static std::shared_ptr<sensor_msgs::msg::PointCloud2> create_point_cloud(
   // Preparing Point Cloud
   auto point_cloud = std::make_shared<sensor_msgs::msg::PointCloud2>();
   point_cloud->header.frame_id = "unkown";
-  point_cloud->width = number_of_points;
+  point_cloud->width = 0;
   point_cloud->height = 1;
   point_cloud->is_bigendian = false;
   point_cloud->point_step = 4 * 4; // 4 * float
   point_cloud->row_step = point_cloud->point_step * point_cloud->width;
-  point_cloud->data.resize(point_cloud->width * point_cloud->height * point_cloud->point_step);
+  point_cloud->data.reserve(number_of_points * point_cloud->point_step);
 
   sensor_msgs::msg::PointField point_field;
   point_field.name = "x";
@@ -125,8 +125,8 @@ void SensorTofRingHardware::initialize(const SensorPointCloud::Parameter& parame
   _processing_data.next_expected_sensor = _parameter.number_sensors() == 1 ? 0 : 1;
   _processing_data.frame_number = 0;
   _processing_data.point_cloud = create_point_cloud(_parameter);
-  _processing_data.current_data_address = _processing_data.point_cloud->data.data();
-
+  _processing_data.point_cloud->width = 0;
+  _processing_data.point_cloud->height = 1;
 
   _communication_node->createRxDataEndPoint<can::CanRxDataEndPoint, MeasurementComplete>(
     _parameter.can_id_measurement_complete, std::bind(&SensorTofRingHardware::processFinishMeasurement, this, std::placeholders::_1), 8
@@ -140,7 +140,10 @@ void SensorTofRingHardware::initialize(const SensorPointCloud::Parameter& parame
 void SensorTofRingHardware::processStartMeasurement()
 {
   if (_processing_data.active_measurement != 0) {
-    RCLCPP_ERROR(rclcpp::get_logger("SensorTofRingHardware"), "current measurements no finished! Data cloud be corrupt!");
+    RCLCPP_ERROR(
+      rclcpp::get_logger("SensorTofRingHardware"),
+      "current measurements no finished! Data cloud be corrupt! active = %u", _processing_data.active_measurement
+    );
   }
 
   try {
@@ -152,8 +155,10 @@ void SensorTofRingHardware::processStartMeasurement()
     _communication_node->sendRequest(std::move(request), 100ms);
 
     _processing_data.point_cloud->header.stamp = _ros_node.get_clock()->now();
+    _processing_data.point_cloud->data.clear();
+    _processing_data.point_cloud->width = 0;
+    _processing_data.point_cloud->height = 1;
     _processing_data.frame_number++;
-    _processing_data.current_data_address = _processing_data.point_cloud->data.data();
     _processing_data.current_sensor = 0;
     _processing_data.next_expected_sensor = 0;
     _processing_data.active_measurement = _processing_data.sensor_activation_bits;
@@ -214,15 +219,15 @@ void SensorTofRingHardware::processPointcloudMeasurement(
 
   // Copy given point cloud into sensor point cloud.
   _processing_data.current_sensor = sensor_index;
-  std::memcpy(
-    _processing_data.current_data_address, point_cloud_transformed.data.data(), point_cloud_transformed.data.size()
+  _processing_data.point_cloud->width += point_cloud.width * point_cloud.height;
+  _processing_data.point_cloud->data.insert(
+    _processing_data.point_cloud->data.begin(), point_cloud.data.begin(), point_cloud.data.end()
   );
 
   // Prepare next iteration if measurement not finished.
   if (sensor_index + 1 < _parameter.number_sensors()) {
     // Measurement not completed yet.
     _processing_data.next_expected_sensor = sensor_index + 1;
-    _processing_data.current_data_address += point_cloud_transformed.data.size();
     return;
   }
 

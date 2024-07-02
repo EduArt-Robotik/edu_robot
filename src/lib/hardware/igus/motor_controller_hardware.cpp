@@ -331,7 +331,7 @@ void MotorControllerHardware::processSending()
   if (_processing_data.error_code & ~(1 << PROTOCOL::ERROR::MOTOR_NOT_ENABLED)) {
     RCLCPP_ERROR(
       rclcpp::get_logger("Igus Motor Controller"),
-      "Received error code from hardware with can id = %u", _parameter.can_id
+      "Received error code %u from hardware with can id = %u", _processing_data.error_code, _parameter.can_id
     );
     log_error_code(_processing_data.error_code);
   }
