@@ -54,43 +54,6 @@ Eduard::Eduard(
 
 void Eduard::initialize(eduart::robot::HardwareComponentFactory& factory)
 {
-  // Lightings
-  registerLighting(std::make_shared<robot::Lighting>(
-    "head",
-    COLOR::DEFAULT::HEAD,
-    1.0f,
-    factory.hardware().at("head")->cast<robot::Lighting::ComponentInterface>()
-  ));
-  registerLighting(std::make_shared<robot::Lighting>(
-    "right_side",
-    COLOR::DEFAULT::HEAD,
-    1.0f,
-    factory.hardware().at("right_side")->cast<robot::Lighting::ComponentInterface>()
-  ));
-  registerLighting(std::make_shared<robot::Lighting>(
-    "left_side",
-    COLOR::DEFAULT::BACK,
-    1.0f,
-    factory.hardware().at("left_side")->cast<robot::Lighting::ComponentInterface>()
-  ));
-  registerLighting(std::make_shared<robot::Lighting>(
-    "back",
-    COLOR::DEFAULT::BACK,
-    1.0f,
-    factory.hardware().at("back")->cast<robot::Lighting::ComponentInterface>()
-  ));
-
-  // Use all representation to set a initial light.
-  auto lighting_all = std::make_shared<robot::Lighting>(
-    "all",
-    COLOR::DEFAULT::HEAD,
-    1.0f,
-    factory.hardware().at("all")->cast<robot::Lighting::ComponentInterface>()
-  );
-  lighting_all->setColor(COLOR::DEFAULT::BACK, Lighting::Mode::RUNNING);
-  registerLighting(lighting_all);
-
-
   // Motor Controllers
   const std::vector<std::string> motor_name = {
     "motor_a", "motor_b", "motor_c", "motor_d" };
@@ -102,32 +65,6 @@ void Eduard::initialize(eduart::robot::HardwareComponentFactory& factory)
 
   for (auto& motor_controller : motor_controllers) {
     registerMotorController(motor_controller);
-  }
-
-  // Range Sensors
-  constexpr std::array<const char*, 4> range_sensor_name = {
-    "range/front/left", "range/front/right", "range/rear/left", "range/rear/right" };
-  const std::array<tf2::Transform, 4> range_sensor_pose = {
-    tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3( 0.17,  0.063, 0.045)),
-    tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3( 0.17, -0.063, 0.045)),
-    tf2::Transform(tf2::Quaternion(0.0, 0.0, 1.0, 0.0), tf2::Vector3(-0.17,  0.063, 0.050)),
-    tf2::Transform(tf2::Quaternion(0.0, 0.0, 1.0, 0.0), tf2::Vector3(-0.17, -0.063, 0.050))
-  };
-  constexpr eduart::robot::SensorRange::Parameter range_sensor_parameter{ 10.0 * M_PI / 180.0, 0.01, 5.0 };
-
-  for (std::size_t i = 0; i < range_sensor_name.size(); ++i) {
-    auto range_sensor = std::make_shared<robot::SensorRange>(
-      range_sensor_name[i],
-      getFrameIdPrefix() + range_sensor_name[i],
-      getFrameIdPrefix() + Robot::_parameter.tf_base_frame,
-      range_sensor_pose[i],
-      range_sensor_parameter,
-      *this,
-      factory.hardware().at(range_sensor_name[i])->cast<robot::SensorRange::SensorInterface>()
-    );
-    registerSensor(range_sensor);
-    range_sensor->registerComponentInput(_collision_avoidance_component);
-    factory.hardware().at(range_sensor_name[i])->cast<robot::SensorRange::SensorInterface>()->initialize(range_sensor_parameter);
   }
 
   // IMU Sensor

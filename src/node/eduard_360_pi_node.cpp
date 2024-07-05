@@ -5,7 +5,7 @@
  */
 #include "edu_robot/hardware/can_gateway/motor_controller_hardware.hpp"
 
-#include <edu_robot/bot/eduard.hpp>
+#include <edu_robot/bot/eduard_v3.hpp>
 
 #include <edu_robot/hardware/can_gateway/can_gateway_shield.hpp>
 #include <edu_robot/hardware/can_gateway/hardware_component_factory.hpp>
@@ -16,16 +16,16 @@
 #include <string>
 #include <cstddef>
 
-using eduart::robot::bot::Eduard;
+using eduart::robot::bot::EduardV3;
 using eduart::robot::hardware::can_gateway::CanGatewayShield;
 using eduart::robot::hardware::can_gateway::HardwareComponentFactory;
 using eduart::robot::hardware::can_gateway::MotorControllerHardware;
 
-class CanGatewayBot : public Eduard
+class CanGatewayBot : public EduardV3
 {
 public:
   CanGatewayBot()
-    : Eduard(
+    : EduardV3(
         "eduard",
         std::make_unique<CanGatewayShield>(
           "eduart-can2", "eduart-can1", "eduart-can0"

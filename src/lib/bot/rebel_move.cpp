@@ -4,8 +4,6 @@
 
 #include <edu_robot/hardware_component_interfaces.hpp>
 #include <edu_robot/motor_controller.hpp>
-#include <edu_robot/robot.hpp>
-#include <edu_robot/sensor_range.hpp>
 #include <edu_robot/sensor_imu.hpp>
 #include <edu_robot/sensor_point_cloud.hpp>
 

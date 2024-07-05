@@ -1,6 +1,8 @@
 # Library for EduArt's Bots
 add_library(eduart-bot
   eduard.cpp
+  eduard_v2.cpp
+  eduard_v3.cpp
   universal_bot.cpp
   rebel_move.cpp
 )

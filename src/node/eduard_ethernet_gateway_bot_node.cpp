@@ -3,7 +3,7 @@
  *
  * Author: Christian Wendt (christian.wendt@eduart-robotik.com)
  */
-#include "edu_robot/bot/eduard.hpp"
+#include "edu_robot/bot/eduard_v2.hpp"
 
 #include <edu_robot/hardware/ethernet_gateway/hardware_component_factory.hpp>
 #include <edu_robot/hardware/ethernet_gateway/ethernet_gateway_shield.hpp>
@@ -12,16 +12,16 @@
 #include <rclcpp/executors.hpp>
 #include <rclcpp/rclcpp.hpp>
 
-using eduart::robot::bot::Eduard;
+using eduart::robot::bot::EduardV2;
 using eduart::robot::hardware::ethernet::EthernetGatewayShield;
 using eduart::robot::hardware::ethernet::HardwareComponentFactory;
 using eduart::robot::hardware::ethernet::MotorControllerHardware;
 
-class EduardEthernetGatewayBot : public Eduard
+class EduardEthernetGatewayBot : public EduardV2
 {
 public:
   EduardEthernetGatewayBot()
-    : Eduard(
+    : EduardV2(
         "eduard",
         std::make_unique<EthernetGatewayShield>("192.168.2.20", 1234)
       )
