@@ -1,6 +1,7 @@
 #include "edu_robot/hardware/rx_data_endpoint.hpp"
 #include "edu_robot/hardware/communicator_node.hpp"
 
+#include <memory>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 
@@ -25,7 +26,7 @@ RxDataEndPoint::RxDataEndPoint(
 {
   // Preallocate memory.
   for (auto& buffer : _input_data_buffer) {
-    buffer = std::make_shared<message::RxMessageDataBuffer>();
+    buffer = std::make_unique<message::RxMessageDataBuffer>();
     buffer->reserve(100);
   }
 
@@ -66,14 +67,14 @@ void RxDataEndPoint::call(const message::RxMessageDataBuffer& data)
   // Room for new input data --> copy data
 
   // Get available buffer and copy input data to it.
-  auto buffer = _input_data_buffer.back();
+  auto buffer = std::move(_input_data_buffer.back());
   _input_data_buffer.pop_back();
   _mutex.unlock();
   *buffer = data;
 
   // Add data to output queue.
   _mutex.lock();
-  _output_data_buffer.push(buffer);
+  _output_data_buffer.emplace(std::move(buffer));
   _mutex.unlock();
 }
 
@@ -88,7 +89,7 @@ void RxDataEndPoint::processDataJob()
   }
 
   // Take data buffer from queue.
-  auto buffer = _output_data_buffer.front();
+  auto buffer = std::move(_output_data_buffer.front());
   _output_data_buffer.pop();
   _mutex.unlock();
 
@@ -98,7 +99,7 @@ void RxDataEndPoint::processDataJob()
 
   // Move back empty data buffer to input buffer. Buffer keeps allocated memory.
   _mutex.lock();
-  _input_data_buffer.push_back(buffer);
+  _input_data_buffer.emplace_back(std::move(buffer));
   _mutex.unlock();
 }
 

@@ -16,7 +16,6 @@ namespace can_gateway {
 using can::CanRxDataEndPoint;
 using can::Request;
 using can::message::sensor::tof::StartMeasurement;
-using can::message::sensor::tof::MeasurementComplete;
 using can::message::sensor::tof::ZoneMeasurement;
 
 static std::shared_ptr<sensor_msgs::msg::PointCloud2> create_point_cloud(
@@ -104,7 +103,8 @@ SensorTofHardware::SensorTofHardware(
 
   _communication_node->createRxDataEndPoint<CanRxDataEndPoint, ZoneMeasurement>(
     _can_id.measurement,
-    std::bind(&SensorTofHardware::processRxData, this, std::placeholders::_1)
+    std::bind(&SensorTofHardware::processRxData, this, std::placeholders::_1),
+    8
   );
 }
 
@@ -119,16 +119,18 @@ void SensorTofHardware::processRxData(const message::RxMessageDataBuffer& data)
     const std::size_t zone_index = ZoneMeasurement::zone(data, element);
     const auto distance = ZoneMeasurement::distance(data, element);
     const auto sigma = ZoneMeasurement::sigma(data, element);
-  
-    if (zone_index != _processing_data.next_expected_zone) {
-      RCLCPP_WARN(
-        rclcpp::get_logger("SensorPointCloud"),
-        "zone_index %u is not expected the one (%u). The point cloud will contain corrupted data.",
-        static_cast<unsigned int>(zone_index),
-        static_cast<unsigned int>(_processing_data.next_expected_zone)
-      );
-    }
 
+    // \todo zone index is no consistent check below makes no sense  
+    // if (zone_index != _processing_data.next_expected_zone) {
+    //   RCLCPP_WARN(
+    //     rclcpp::get_logger("SensorPointCloud"),
+    //     "zone_index %u is not expected the one (%u). The point cloud will contain corrupted data.",
+    //     static_cast<unsigned int>(zone_index),
+    //     static_cast<unsigned int>(_processing_data.next_expected_zone)
+    //   );
+    // }
+
+    // \todo make points invalid if zone index was skipped. At the moment old points are kept.
     auto& point_cloud = _processing_data.point_cloud;
     const std::size_t idx_point_x = zone_index * point_cloud->point_step + point_cloud->fields[0].offset;
     const std::size_t idx_point_y = zone_index * point_cloud->point_step + point_cloud->fields[1].offset;

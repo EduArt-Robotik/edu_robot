@@ -32,23 +32,16 @@ using message::MessageFrame;
 //   }
 // };
 
-using StartMeasurement = NoResponseMessageFrame<element::Uint8,  // frame no.
-                                                element::Uint8>; // sensor activation bits
+using StartMeasurement = NoResponseMessageFrame<element::Uint8,   // frame no.
+                                                element::Uint16>; // sensor activation bits
 
-struct MeasurementComplete : public MessageFrame<element::Uint8,  // sensor no.
-                                                 element::Uint8,  // resolution
-                                                 element::Uint8>  // frame no.
+struct MeasurementComplete : public MessageFrame<element::Uint8>  // frame no.
 {
-  inline static constexpr std::size_t zone(const RxMessageDataBuffer& rx_buffer) {
+  inline static constexpr std::size_t sensor(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<1>(rx_buffer);
   }
-  inline static constexpr std::uint8_t resolution(const RxMessageDataBuffer& rx_buffer) {
-    return deserialize<2>(rx_buffer);
-  }
-  inline static constexpr std::size_t frame(const RxMessageDataBuffer& rx_buffer) {
-    return deserialize<3>(rx_buffer);
-  } 
-};                                                
+};
+using TriggerDataTransmission = NoResponseMessageFrame<element::Uint16>; // sensor activation bits                                        
 
 struct Measurement : public Message<element::Uint24LE, // distance, sigma
                                     element::Uint8>    // zone no., frame no.
