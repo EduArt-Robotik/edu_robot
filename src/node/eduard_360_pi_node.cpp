@@ -21,10 +21,10 @@ using eduart::robot::hardware::can_gateway::CanGatewayShield;
 using eduart::robot::hardware::can_gateway::HardwareComponentFactory;
 using eduart::robot::hardware::can_gateway::MotorControllerHardware;
 
-class CanGatewayBot : public EduardV3
+class Eduard360PiBot : public EduardV3
 {
 public:
-  CanGatewayBot()
+  Eduard360PiBot()
     : EduardV3(
         "eduard",
         std::make_unique<CanGatewayShield>(
@@ -36,13 +36,6 @@ public:
     auto factory = HardwareComponentFactory(shield);
     // _timer_process_status_report = create_wall_timer(100ms, [shield]{ shield->processStatusReport(); });
 
-    // Lightings
-    factory.addLighting("head")
-           .addLighting("right_side")
-           .addLighting("left_side")
-           .addLighting("back")
-           .addLighting("all");
-
     // Motor Controller
     for (std::size_t i = 0; i < 2; ++i) {
       const std::string motor_controller_name = "motor_controller_" + std::to_string(i);
@@ -51,11 +44,20 @@ public:
       factory.addMotorController(motor_controller_name, hardware_parameter);
     }
 
-    // Range Sensor
-    factory.addRangeSensor("range/front/left", 0u)
-           .addRangeSensor("range/front/right", 1u)
-           .addRangeSensor("range/rear/left", 2u)
-           .addRangeSensor("range/rear/right", 3u); 
+    // ToF Sensor Ring
+    constexpr std::size_t tof_num_sensors = 14;
+    std::vector<std::string> tof_sensor_ring_a_names;
+    std::vector<std::string> tof_sensor_ring_b_names;
+
+    for (std::size_t i = 1; i <= tof_num_sensors / 2; ++i) {
+      tof_sensor_ring_a_names.emplace_back(std::string("tof_pointcloud_sensor_") + std::to_string(i));
+    }
+    for (std::size_t i = tof_num_sensors / 2 + 1; i <= tof_num_sensors; ++i) {
+      tof_sensor_ring_b_names.emplace_back(std::string("tof_pointcloud_sensor_") + std::to_string(i));
+    }
+
+    factory.addTofRingSensor(
+      "tof_sensor_ring", tof_sensor_ring_a_names, tof_sensor_ring_b_names, *this);
 
     // IMU Sensor
     factory.addImuSensor("imu", 0x381);
@@ -70,7 +72,7 @@ public:
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<CanGatewayBot>());
+  rclcpp::spin(std::make_shared<Eduard360PiBot>());
   rclcpp::shutdown();
 
   return 0;
