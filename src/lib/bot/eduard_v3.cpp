@@ -33,7 +33,7 @@ void EduardV3::initialize(eduart::robot::HardwareComponentFactory& factory)
   for (std::size_t i = 0; i < point_cloud_name.size(); ++i) {
     const auto parameter = robot::SensorPointCloud::get_parameter(
       point_cloud_name[i], {}, *this);
-    auto hardware_interface = factory.hardware().at("pointcloud_left")->cast<robot::SensorPointCloud::SensorInterface>();
+    auto hardware_interface = factory.hardware().at("tof_sensor_ring")->cast<robot::SensorPointCloud::SensorInterface>();
     auto point_cloud_sensor = std::make_shared<robot::SensorPointCloud>(
       point_cloud_name[i],
       getFrameIdPrefix() + point_cloud_tf[i],

@@ -104,7 +104,6 @@ SensorTofRingHardware::SensorTofRingHardware(
   (void)name;
 
   for (std::size_t i = 0; i < _parameter.tof_sensor.size(); ++i) {
-  // for (const auto& tof_sensor_parameter : _parameter.tof_sensor) {
     _sensor.emplace_back(std::make_shared<SensorTofHardware>(
       _parameter.tof_sensor[i].name, _parameter.tof_sensor[i].parameter, _ros_node, executer, communicator
     ));
@@ -223,7 +222,9 @@ void SensorTofRingHardware::processPointcloudMeasurement(
   _processing_data.current_sensor = sensor_index;
   _processing_data.point_cloud->width += point_cloud.width * point_cloud.height;
   _processing_data.point_cloud->data.insert(
-    _processing_data.point_cloud->data.begin(), point_cloud.data.begin(), point_cloud.data.end()
+    _processing_data.point_cloud->data.end(),
+    point_cloud_transformed.data.begin(),
+    point_cloud_transformed.data.end()
   );
 
   // Prepare next iteration if measurement not finished.
