@@ -120,12 +120,11 @@ void SensorTofRingHardware::initialize(const SensorPointCloud::Parameter& parame
     tof_sensor->initialize(parameter);
   }
 
-  _processing_data.current_sensor = 0;
-  _processing_data.next_expected_sensor = _parameter.number_sensors() == 1 ? 0 : 1;
   _processing_data.frame_number = 0;
   _processing_data.point_cloud = create_point_cloud(_parameter);
   _processing_data.point_cloud->width = 0;
   _processing_data.point_cloud->height = 1;
+  _processing_data.received_points.resize(_parameter.number_sensors(), false);
 
   _communication_node->createRxDataEndPoint<can::CanRxDataEndPoint, MeasurementComplete>(
     _parameter.can_id_measurement_complete, std::bind(&SensorTofRingHardware::processFinishMeasurement, this, std::placeholders::_1), 8
@@ -160,9 +159,8 @@ void SensorTofRingHardware::processStartMeasurement()
     _processing_data.point_cloud->width = 0;
     _processing_data.point_cloud->height = 1;
     _processing_data.frame_number++;
-    _processing_data.current_sensor = 0;
-    _processing_data.next_expected_sensor = 0;
     _processing_data.active_measurement = _processing_data.sensor_activation_bits;
+    std::fill(_processing_data.received_points.begin(), _processing_data.received_points.end(), false);
   }
   catch (std::exception& ex) {
     RCLCPP_ERROR(
@@ -219,23 +217,22 @@ void SensorTofRingHardware::processPointcloudMeasurement(
   tf2::doTransform(point_cloud, point_cloud_transformed, transform);
 
   // Copy given point cloud into sensor point cloud.
-  _processing_data.current_sensor = sensor_index;
   _processing_data.point_cloud->width += point_cloud.width * point_cloud.height;
   _processing_data.point_cloud->data.insert(
     _processing_data.point_cloud->data.end(),
     point_cloud_transformed.data.begin(),
     point_cloud_transformed.data.end()
   );
+  _processing_data.received_points[sensor_index] = true;
 
-  // Prepare next iteration if measurement not finished.
-  if (sensor_index + 1 < _parameter.number_sensors()) {
-    // Measurement not completed yet.
-    _processing_data.next_expected_sensor = sensor_index + 1;
-    return;
+  for (const auto received : _processing_data.received_points) {
+    if (received == false) {
+      // Measurement no finished --> do nothing
+      return;
+    }
   }
 
   // Measurement finished --> publish point cloud.
-  _processing_data.next_expected_sensor = 0;
   _callback_process_measurement(*_processing_data.point_cloud);
 }
 
