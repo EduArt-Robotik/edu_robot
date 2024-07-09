@@ -9,6 +9,7 @@
 
 #include <edu_robot/sensor_point_cloud.hpp>
 
+#include <cstddef>
 #include <memory>
 
 namespace eduart {
@@ -62,6 +63,7 @@ private:
     std::vector<float> tan_x_lookup; // used to transform to point y
     std::vector<float> tan_y_lookup; // used to transform to point x    
     std::uint8_t frame_number;
+    std::size_t point_counter = 0;
     std::shared_ptr<sensor_msgs::msg::PointCloud2> point_cloud;
   } _processing_data;
 };                              

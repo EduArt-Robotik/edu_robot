@@ -5,8 +5,9 @@
 
 #include <edu_robot/hardware/communicator_node.hpp>
 
-#include <memory>
+#include <rclcpp/logging.hpp>
 
+#include <memory>
 
 namespace eduart {
 namespace robot {
@@ -17,6 +18,7 @@ using can::CanRxDataEndPoint;
 using can::Request;
 using can::message::sensor::tof::StartMeasurement;
 using can::message::sensor::tof::ZoneMeasurement;
+using can::message::sensor::tof::DataTransmissionComplete;
 
 static std::shared_ptr<sensor_msgs::msg::PointCloud2> create_point_cloud(
   const SensorTofHardware::Parameter& parameter)
@@ -114,6 +116,20 @@ void SensorTofHardware::processRxData(const message::RxMessageDataBuffer& data)
   if (_callback_process_measurement == nullptr) {
     return;
   }
+  if (DataTransmissionComplete::hasCorrectLength(data)) {
+    // Measurement Complete
+    if (_processing_data.point_counter != DataTransmissionComplete::pointCount(data)) {
+      RCLCPP_ERROR(rclcpp::get_logger("SensorTofHardware"), "count of processed points is no equal to transmitted points");
+    }
+
+    // Calling Layer Above
+    _callback_process_measurement(*_processing_data.point_cloud);
+
+    // Preparing Next Iteration
+    _processing_data.next_expected_zone = 0;
+    _processing_data.point_counter = 0;
+    return;
+  }
 
   for (std::size_t element = 0; element < ZoneMeasurement::elements(data); ++element) {
     const std::size_t zone_index = ZoneMeasurement::zone(data, element);
@@ -143,16 +159,8 @@ void SensorTofHardware::processRxData(const message::RxMessageDataBuffer& data)
     *reinterpret_cast<float*>(&point_cloud->data[idx_sigma])   = sigma;
 
     _processing_data.current_zone = zone_index;
-
-    if (zone_index + 1 < _processing_data.number_of_zones) {
-      // measurement not complete yet
-      _processing_data.next_expected_zone = zone_index + 1;
-      continue;;
-    }
-
-    // measurement finished --> publish point cloud
-    _processing_data.next_expected_zone = 0;
-    _callback_process_measurement(*point_cloud);
+    _processing_data.next_expected_zone = zone_index + 1;
+    _processing_data.point_counter++;
   }
 }
 
@@ -168,6 +176,7 @@ void SensorTofHardware::initialize(const SensorPointCloud::Parameter& parameter)
   _processing_data.frame_number = 0;  
   _processing_data.tan_x_lookup.resize(_processing_data.number_of_zones);
   _processing_data.tan_y_lookup.resize(_processing_data.number_of_zones);
+  _processing_data.point_counter = 0;
 
   const float alpha_increment_vertical = _parameter.fov.vertical / static_cast<double>(_parameter.number_of_zones.vertical);
   const float alpha_increment_horizontal = _parameter.fov.horizontal / static_cast<double>(_parameter.number_of_zones.horizontal);
