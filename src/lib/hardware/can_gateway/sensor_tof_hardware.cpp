@@ -8,6 +8,8 @@
 #include <rclcpp/logging.hpp>
 
 #include <memory>
+#include <limits>
+#include <cstddef>
 
 namespace eduart {
 namespace robot {
@@ -53,6 +55,23 @@ static std::shared_ptr<sensor_msgs::msg::PointCloud2> create_point_cloud(
   point_cloud->fields.push_back(point_field);
 
   return point_cloud;
+}
+
+static void set_nan_points(sensor_msgs::msg::PointCloud2& point_cloud)
+{
+  const std::size_t number_of_points = point_cloud.height * point_cloud.width;
+
+  for (std::size_t point_idx = 0; point_idx < number_of_points; ++point_idx) {
+    const std::size_t idx_point_x = point_idx * point_cloud.point_step + point_cloud.fields[0].offset;
+    const std::size_t idx_point_y = point_idx * point_cloud.point_step + point_cloud.fields[1].offset;
+    const std::size_t idx_point_z = point_idx * point_cloud.point_step + point_cloud.fields[2].offset;
+    const std::size_t idx_sigma   = point_idx * point_cloud.point_step + point_cloud.fields[3].offset;
+
+    *reinterpret_cast<float*>(&point_cloud.data[idx_point_x]) = std::numeric_limits<float>::quiet_NaN();
+    *reinterpret_cast<float*>(&point_cloud.data[idx_point_y]) = std::numeric_limits<float>::quiet_NaN();
+    *reinterpret_cast<float*>(&point_cloud.data[idx_point_z]) = std::numeric_limits<float>::quiet_NaN();
+    *reinterpret_cast<float*>(&point_cloud.data[idx_sigma])   = std::numeric_limits<float>::quiet_NaN();    
+  }
 }
 
 SensorTofHardware::Parameter
@@ -128,6 +147,8 @@ void SensorTofHardware::processRxData(const message::RxMessageDataBuffer& data)
     // Preparing Next Iteration
     _processing_data.next_expected_zone = 0;
     _processing_data.point_counter = 0;
+    set_nan_points(*_processing_data.point_cloud);
+
     return;
   }
 
@@ -135,16 +156,6 @@ void SensorTofHardware::processRxData(const message::RxMessageDataBuffer& data)
     const std::size_t zone_index = ZoneMeasurement::zone(data, element);
     const auto distance = ZoneMeasurement::distance(data, element);
     const auto sigma = ZoneMeasurement::sigma(data, element);
-
-    // \todo zone index is no consistent check below makes no sense  
-    // if (zone_index != _processing_data.next_expected_zone) {
-    //   RCLCPP_WARN(
-    //     rclcpp::get_logger("SensorPointCloud"),
-    //     "zone_index %u is not expected the one (%u). The point cloud will contain corrupted data.",
-    //     static_cast<unsigned int>(zone_index),
-    //     static_cast<unsigned int>(_processing_data.next_expected_zone)
-    //   );
-    // }
 
     // \todo make points invalid if zone index was skipped. At the moment old points are kept.
     auto& point_cloud = _processing_data.point_cloud;
@@ -177,6 +188,7 @@ void SensorTofHardware::initialize(const SensorPointCloud::Parameter& parameter)
   _processing_data.tan_x_lookup.resize(_processing_data.number_of_zones);
   _processing_data.tan_y_lookup.resize(_processing_data.number_of_zones);
   _processing_data.point_counter = 0;
+  set_nan_points(*_processing_data.point_cloud);
 
   const float alpha_increment_vertical = _parameter.fov.vertical / static_cast<double>(_parameter.number_of_zones.vertical);
   const float alpha_increment_horizontal = _parameter.fov.horizontal / static_cast<double>(_parameter.number_of_zones.horizontal);
