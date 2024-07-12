@@ -33,7 +33,7 @@ HardwareComponentFactory& HardwareComponentFactory::addMotorController(
   const std::string& controller_name, const MotorControllerHardware::Parameter& parameter)
 {
   auto motor_controller = std::make_shared<MotorControllerHardware>(
-    controller_name, parameter, _shield->getExecuter(), _shield->getCommunicator(0)
+    controller_name, parameter, _shield->getExecuter(0), _shield->getCommunicator(0)
   );
   _motor_controller_hardware.push_back(motor_controller);
   _shield->registerMotorControllerHardware(motor_controller);
@@ -59,7 +59,7 @@ HardwareComponentFactory& HardwareComponentFactory::addImuSensor(
   const std::string& sensor_name, const std::uint32_t can_id)
 {
   _hardware[sensor_name] = std::make_shared<hardware::can_gateway::ImuSensorHardware>(
-    can_id,  _shield->getExecuter(), _shield->getCommunicator(0)
+    can_id,  _shield->getExecuter(1), _shield->getCommunicator(0)
   );
 
   return *this;
@@ -70,7 +70,7 @@ HardwareComponentFactory& HardwareComponentFactory::addTofSensor(
   rclcpp::Node& ros_node)
 {
   _hardware[sensor_name] = std::make_shared<hardware::can_gateway::SensorTofHardware>(
-    sensor_name, parameter, ros_node,  _shield->getExecuter(), _shield->getCommunicator(1));
+    sensor_name, parameter, ros_node,  _shield->getExecuter(2), _shield->getCommunicator(1));
 
   return *this;
 }
@@ -87,10 +87,10 @@ HardwareComponentFactory& HardwareComponentFactory::addTofRingSensor(
   );
 
   auto left_ring = std::make_shared<SensorTofRingHardware>(
-    sensor_name, parameter_left_sensors, ros_node, _shield->getExecuter(), _shield->getCommunicator(1)
+    sensor_name, parameter_left_sensors, ros_node, _shield->getExecuter(2), _shield->getCommunicator(1)
   );
   auto right_ring = std::make_shared<SensorTofRingHardware>(
-    sensor_name, parameter_right_sensors, ros_node, _shield->getExecuter(), _shield->getCommunicator(2)
+    sensor_name, parameter_right_sensors, ros_node, _shield->getExecuter(3), _shield->getCommunicator(2)
   );
   std::vector<std::shared_ptr<SensorPointCloud::SensorInterface>> ring = { left_ring, right_ring };
 
