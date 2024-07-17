@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <cstddef>
 
 namespace eduart {
 namespace robot {
@@ -45,7 +46,7 @@ public:
     
     return _communicator[index];
   }
-  inline std::shared_ptr<Executer> getExecuter() { return _executer; }
+  inline std::shared_ptr<Executer> getExecuter(const std::size_t index = 0) { return _executer[index]; }
   void registerMotorControllerHardware(std::shared_ptr<MotorControllerHardware> motor_controller_hardware);
 
 private:
@@ -54,7 +55,7 @@ private:
   void processCanGatewayShieldResponse(const message::RxMessageDataBuffer &data);
 
   std::array<std::shared_ptr<Communicator>, 3> _communicator;
-  std::shared_ptr<Executer> _executer;
+  std::vector<std::shared_ptr<Executer>> _executer;
   std::shared_ptr<CommunicatorNode> _communication_node;
   std::mutex _mutex;
   std::shared_ptr<rclcpp::Clock> _clock;

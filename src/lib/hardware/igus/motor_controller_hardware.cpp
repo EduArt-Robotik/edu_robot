@@ -306,7 +306,7 @@ void MotorControllerHardware::processSending()
   const auto current_position = AcknowledgedVelocity::position(got.response());
   const float position_diff = static_cast<float>(current_position - _processing_data.last_position);
   const float position_per_seconds = position_diff / dt;
-  const float rotation_per_seconds = position_per_seconds / 13188.7f;
+  const float rotation_per_seconds = position_per_seconds / 13188.7f; // number was measured on real platform
 
   // Measured rpm value has to be negated, because motor is turing left with positive rpm value.
   std::scoped_lock lock(_processing_data.mutex);

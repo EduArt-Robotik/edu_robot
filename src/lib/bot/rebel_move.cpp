@@ -146,8 +146,8 @@ Eigen::MatrixXf RebelMove::getKinematicMatrix(const DriveKinematic kinematic) co
     kinematic_matrix.resize(4, 3);
     kinematic_matrix <<  1.0f, -1.0f, (l_x + l_y) * 0.5f,
                          1.0f,  1.0f, (l_x + l_y) * 0.5f,
-                        -1.0f, -1.0f, (l_x + l_y) * 0.5f,
-                        -1.0f,  1.0f, (l_x + l_y) * 0.5f;
+                        -1.0f,  1.0f, (l_x + l_y) * 0.5f,
+                        -1.0f, -1.0f, (l_x + l_y) * 0.5f;
     kinematic_matrix *= 1.0f / wheel_radius;    
   }
   else {

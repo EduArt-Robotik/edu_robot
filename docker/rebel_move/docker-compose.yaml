@@ -15,6 +15,7 @@ services:
 #            - CYCLONEDDS_URI=/home/user/ros/launch_content/iot_cyclone_dds_profile.xml            
         network_mode: "host"
         command: bash -c 'cd /home/user/ros/launch_content; ros2 launch rebel-move-360.launch.py'
+#        command: tail -F anything
         volumes:
             - './launch_content:/home/user/ros/launch_content:r'
         devices:
@@ -29,6 +30,7 @@ services:
         ipc: host
         pid: host
         mem_limit: 300mb
+        command: bash -c 'cd /home/user/ros/launch_content; ros2 launch robot_remote_control.launch.py'        
         environment:
             - EDU_ROBOT_NAMESPACE=${EDU_ROBOT_NAMESPACE}
 #            - CYCLONEDDS_URI=/home/user/ros/launch_content/iot_cyclone_dds_profile.xml            
@@ -37,3 +39,4 @@ services:
             - '/dev:/dev'
         volumes:
             - '/dev:/dev'
+            - './launch_content:/home/user/ros/launch_content:r'

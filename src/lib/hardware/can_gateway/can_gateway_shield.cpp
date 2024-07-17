@@ -28,8 +28,6 @@ CanGatewayShield::CanGatewayShield(char const* const can_device)
       nullptr,
       nullptr
     }
-  , _executer(std::make_shared<Executer>())
-  , _communication_node(std::make_shared<CommunicatorNode>(_executer, _communicator[0]))
 {
   // Configuring Diagnostic
   _clock = std::make_shared<rclcpp::Clock>();
@@ -48,7 +46,11 @@ CanGatewayShield::CanGatewayShield(char const* const can_device)
   _diagnostic.last_processing = _clock->now();
 
   // Executer
-  _executer->start();
+  for (std::size_t i = 0; i < 4; ++i) {
+    _executer.emplace_back(std::make_shared<Executer>());
+    _executer.back()->start();
+  }
+  _communication_node = std::make_shared<CommunicatorNode>(_executer[0], _communicator[0]);
 }
 
 CanGatewayShield::CanGatewayShield(char const* const can_device_0, char const* const can_device_1, char const* const can_device_2)
@@ -76,7 +78,9 @@ CanGatewayShield::CanGatewayShield(char const* const can_device_0, char const* c
 CanGatewayShield::~CanGatewayShield()
 {
   disable();
-  _executer->stop();
+  for (auto& executer : _executer) {
+    executer->stop();
+  }
 }
 
 void CanGatewayShield::enable()

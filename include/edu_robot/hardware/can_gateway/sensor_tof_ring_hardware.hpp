@@ -59,11 +59,10 @@ private:
   std::vector<std::shared_ptr<SensorTofHardware>> _sensor;
 
   struct {
-    std::size_t current_sensor = 0;
-    std::size_t next_expected_sensor = 0;
     std::uint8_t frame_number = 0;
     std::uint16_t sensor_activation_bits = 0;
     std::uint16_t active_measurement = 0;
+    std::vector<bool> received_points;
     std::shared_ptr<sensor_msgs::msg::PointCloud2> point_cloud;
   } _processing_data;
 };
