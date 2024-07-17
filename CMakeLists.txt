@@ -124,13 +124,16 @@ ament_export_include_directories(
   include
 )
 ament_export_libraries(
+  eduart-bot
   eduart-iotbot-shield
-  eduart-robot-eduard
   eduart-robot
   processing-component
   eduart-ethernet-gateway
-  eduart-robot-universal-bot
   eduart-action
+  eduart-diagnostic
+  igus
+  eduart-hardware
+  eduart-hardware-can
 )
 ament_export_dependencies(
   rclcpp
