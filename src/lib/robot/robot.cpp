@@ -305,7 +305,7 @@ void Robot::callbackSetMotorRpm(std::shared_ptr<const std_msgs::msg::Float32Mult
   catch (std::exception& ex) {
     RCLCPP_ERROR_STREAM(get_logger(), "Error occurred while trying to set new values for motor controller."
                                       << " what() = " << ex.what());     
-  }  
+  }
 }
 
 void Robot::callbackSetLightingColor(std::shared_ptr<const edu_robot::msg::SetLightingColor> msg)

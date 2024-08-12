@@ -153,8 +153,8 @@ Eigen::MatrixXf UniversalBot::getKinematicMatrix(const DriveKinematic kinematic)
       const float wheel_radius = _parameter.axis[axis].wheel_diameter * 0.5f;
       const float l_squared = l_x * l_x + l_y * l_y;
 
-      kinematic_matrix.row(axis * 2 + 0) = Eigen::Vector3f( 1.0f, 0.0f, l_squared / (2.0f * l_y)) / wheel_radius;
-      kinematic_matrix.row(axis * 2 + 1) = Eigen::Vector3f(-1.0f, 0.0f, l_squared / (2.0f * l_y)) / wheel_radius;
+      kinematic_matrix.row(axis * 2 + 0) = Eigen::Vector3f(-1.0f, 0.0f, l_squared / (2.0f * l_y)) / wheel_radius;
+      kinematic_matrix.row(axis * 2 + 1) = Eigen::Vector3f( 1.0f, 0.0f, l_squared / (2.0f * l_y)) / wheel_radius;
     }
   }
   else {
