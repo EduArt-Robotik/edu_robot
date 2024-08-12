@@ -108,11 +108,6 @@ void SensorImu::processMeasurementData(
   _pub_imu_message->publish(imu_msg);
 
   // TF
-  // Only publish tf if enabled.
-  if (_parameter.publish_tf == false) {
-    return;
-  }
-
   geometry_msgs::msg::TransformStamped tf_msg;
 
   tf_msg.header.frame_id = frameId();
@@ -123,7 +118,14 @@ void SensorImu::processMeasurementData(
   tf_msg.transform.translation.y = 0.0;
   tf_msg.transform.translation.z = 0.0;
 
-  if (_parameter.publish_orientation_without_yaw_tf) {
+  if (_parameter.publish_tf == false) {
+    // publish empty rotation
+    tf_msg.transform.rotation.x = 0.0;
+    tf_msg.transform.rotation.y = 0.0;
+    tf_msg.transform.rotation.z = 0.0;
+    tf_msg.transform.rotation.w = 1.0;
+  }
+  else if (_parameter.publish_orientation_without_yaw_tf) {
     // Estimate orientation from linear acceleration --> without yaw angle.
     const Eigen::Vector3d ground_reference(0.0, 0.0, -9.81);
     const Eigen::Quaterniond q_without_yaw = Eigen::Quaterniond::FromTwoVectors(linear_acceleration, ground_reference);

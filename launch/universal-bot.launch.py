@@ -27,4 +27,3 @@ def generate_launch_description():
     return LaunchDescription([
       ethernet_gateway_flex_bot
     ])
-    

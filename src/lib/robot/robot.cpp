@@ -289,7 +289,7 @@ void Robot::callbackSetMotorRpm(std::shared_ptr<const std_msgs::msg::Float32Mult
     const Eigen::Vector3f velocity_measured = _inverse_kinematic_matrix * radps_measured;
     _odometry_component->process(velocity_measured);
     _pub_odometry->publish(_odometry_component->getOdometryMessage(
-      getFrameIdPrefix() + _parameter.tf_footprint_frame, getFrameIdPrefix() + "odom"
+      getFrameIdPrefix() + _parameter.tf_base_frame, getFrameIdPrefix() + "odom"
     ));
 
     if (_parameter.publish_tf_odom) {
