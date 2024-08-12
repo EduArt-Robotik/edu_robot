@@ -8,26 +8,30 @@
 #include <edu_robot/hardware_component_interfaces.hpp>
 #include <edu_robot/sensor_imu.hpp>
 
-#include "edu_robot/hardware/iot_shield/iot_shield_device_interfaces.hpp"
+#include <edu_robot/hardware/communicator_node.hpp>
+#include <memory>
 
 namespace eduart {
 namespace robot {
-namespace iotbot {
+namespace hardware {
+namespace iot_shield {
 
 class ImuSensorHardware : public SensorImu::SensorInterface
-                        , public IotShieldTxRxDevice
 {
 public:
-  ImuSensorHardware(std::shared_ptr<IotShieldCommunicator> communicator);
+  ImuSensorHardware(std::shared_ptr<Executer> executer, std::shared_ptr<Communicator> communicator);
   ~ImuSensorHardware() override = default;
 
-  void processRxData(const uart::message::RxMessageDataBuffer& data) override;
   void initialize(const SensorImu::Parameter& parameter) override;
 
 private:
+  void processRxData(const message::RxMessageDataBuffer& data);
+
+  std::shared_ptr<CommunicatorNode> _communication_node;
   bool _raw_mode = true;
 };
 
-} // end namespace iotbot
+} // end namespace iot_shield
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

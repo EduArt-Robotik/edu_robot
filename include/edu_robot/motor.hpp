@@ -28,25 +28,17 @@ public:
    */
   struct Parameter
   {
-    bool inverted = false;
-    float gear_ratio = 89.0f;
-    float encoder_ratio = 2048.0f;
-    float max_rpm = 100.0f;
-    float threshold_stall_check = 0.25f;
-    std::uint32_t control_frequency = 16000;
-    bool encoder_inverted = false;
     bool closed_loop = true;
     std::size_t index = 0;
-    std::uint32_t timeout_ms = 1000;
-
+    float max_rpm = 100.0f;
+  
     float kp = 0.5f;
     float ki = 5.0f;
     float kd = 0.0f;
 
-    float weight_low_pass_set_point = 0.2f;
-    float weight_low_pass_encoder   = 0.3f;
-
-    bool isValid() const { return true; } // \todo implement properly
+    bool isValid() const {
+      return kp >= 0.0f && ki >= 0.0f && kd >= 0.0f;
+    }
   };
 
   Motor(const std::string& name, const Parameter& parameter, rclcpp::Node& ros_node, const std::string& urdf_joint_name);

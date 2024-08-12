@@ -9,6 +9,7 @@
 
 #include "edu_robot/hardware/can_gateway/sensor_tof_hardware.hpp"
 #include "edu_robot/hardware/can_gateway/sensor_tof_ring_hardware.hpp"
+#include "edu_robot/hardware/can_gateway/motor_controller_hardware.hpp"
 
 #include <cstdint>
 #include <memory>
@@ -29,7 +30,7 @@ public:
 
   HardwareComponentFactory& addLighting(const std::string& lighting_name);
   HardwareComponentFactory& addMotorController(
-    const std::string& controller_name, const std::uint32_t can_id_input, const std::uint32_t can_id_output);
+    const std::string& controller_name, const MotorControllerHardware::Parameter& parameter);
   HardwareComponentFactory& addRangeSensor(
     const std::string& sensor_name, const std::uint8_t id);
   HardwareComponentFactory& addImuSensor(
@@ -37,7 +38,8 @@ public:
   HardwareComponentFactory& addTofSensor(
     const std::string& sensor_name, const SensorTofHardware::Parameter& parameter, rclcpp::Node& ros_node);
   HardwareComponentFactory& addTofRingSensor(
-    const std::string& sensor_name, const SensorTofRingHardware::Parameter& parameter, rclcpp::Node& ros_node);
+    const std::string& sensor_name, const std::vector<std::string>& left_ring_sensors,
+    const std::vector<std::string>& right_ring_sensors, rclcpp::Node& ros_node);
 
 protected:
   std::shared_ptr<CanGatewayShield> _shield;

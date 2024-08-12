@@ -2,7 +2,7 @@ version: "3.0"
 
 services:
     eduard-iot2050:
-        image: eduartrobotik/eduard-iotbot:0.5.0
+        image: eduartrobotik/eduart-robot:0.5.0
         container_name: eduard-iotbot-0.5.0
         user: root
         restart: always

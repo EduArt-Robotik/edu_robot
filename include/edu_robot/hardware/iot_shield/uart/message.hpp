@@ -6,6 +6,7 @@
 #pragma once
 
 #include <edu_robot/rpm.hpp>
+#include <edu_robot/hardware/message_buffer.hpp>
 
 #include <algorithm>
 #include <array>
@@ -16,11 +17,12 @@
 
 namespace eduart {
 namespace robot {
-namespace iotbot {
+namespace hardware {
+namespace iot_shield {
 namespace uart {
 namespace message {
 
-using Byte = std::uint8_t;
+using Byte = hardware::message::Byte;
 
 struct UART {
   struct BUFFER {
@@ -63,8 +65,8 @@ struct UART {
   };
 };
 
-using TxMessageDataBuffer = std::array<std::uint8_t, UART::BUFFER::TX_SIZE>;
-using RxMessageDataBuffer = std::array<std::uint8_t, uart::message::UART::BUFFER::RX_SIZE>;
+using TxMessageDataBuffer = hardware::message::TxMessageDataBuffer;
+using RxMessageDataBuffer = hardware::message::RxMessageDataBuffer;
 
 namespace element {
 namespace impl {
@@ -92,7 +94,7 @@ struct DataField {
     return serialized_bytes;
   }
   inline static constexpr DataType deserialize(const Byte data[size()])
-  {
+  { 
     const void* data_address = static_cast<const void*>(data);
     return *static_cast<const DataType*>(data_address);
   }
@@ -159,9 +161,10 @@ protected:
 // struct message_element<Index, MessageElement<0, 0, HeadElement, TailElements...>> { using type = HeadElement; };
 
 template <class... Elements>
-constexpr TxMessageDataBuffer serialize(const typename Elements::type&... element_value, const std::tuple<Elements...>)
+TxMessageDataBuffer serialize(const typename Elements::type&... element_value, const std::tuple<Elements...>)
 {
-  TxMessageDataBuffer tx_buffer = { 0 };
+  constexpr std::size_t buffer_size = (Elements::size() + ...);
+  TxMessageDataBuffer tx_buffer(buffer_size);
   std::size_t byte_offset = 0;
 
   ([&]{
@@ -218,7 +221,7 @@ template <class... Elements>
 struct Message : public std::tuple<Elements...>
 {
   inline static constexpr std::size_t size() { return (Elements::size() + ...); }
-  static constexpr TxMessageDataBuffer serialize(const typename Elements::type&... element_value) {
+  static TxMessageDataBuffer serialize(const typename Elements::type&... element_value) {
     return element::impl::serialize<Elements...>(element_value..., std::tuple<Elements...>{});
   }
   template <std::size_t Index>
@@ -239,7 +242,7 @@ private:
 public:
   using MessageType::size;
 
-  inline constexpr static TxMessageDataBuffer serialize(const typename Elements::type&... element_value) {
+  inline static TxMessageDataBuffer serialize(const typename Elements::type&... element_value) {
     return MessageType::serialize(0, CommandByte::value(), element_value..., 0);
   }
   inline constexpr static auto makeSearchPattern() {
@@ -250,6 +253,7 @@ public:
 
 } // end namespace message
 } // end namespace uart
-} // end namespace iotbot
+} // end namespace iot_shield
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

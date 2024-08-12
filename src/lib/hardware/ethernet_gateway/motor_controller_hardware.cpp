@@ -1,15 +1,19 @@
 #include "edu_robot/hardware/ethernet_gateway/motor_controller_hardware.hpp"
+#include "edu_robot/hardware/communicator_node.hpp"
 #include "edu_robot/hardware/ethernet_gateway/udp/message_definition.hpp"
 #include "edu_robot/hardware/ethernet_gateway/udp/protocol.hpp"
 #include "edu_robot/hardware/ethernet_gateway/ethernet_request.hpp"
 
+#include <cstddef>
 #include <edu_robot/component_error.hpp>
 #include <edu_robot/rpm.hpp>
 #include <edu_robot/state.hpp>
 
 #include <edu_robot/hardware_error.hpp>
 
+#include <functional>
 #include <memory>
+#include <mutex>
 #include <stdexcept>
 
 namespace eduart {
@@ -28,8 +32,10 @@ using udp::message::SetMotorRpm;
 using udp::message::SetMotorMeasurement;
 using udp::message::AcknowledgedMotorRpm;
 
+template <std::size_t NUM_CHANNELS>
 void initialize_controller(
-  const Motor::Parameter& parameter, const std::uint8_t can_id, std::shared_ptr<Communicator> communicator)
+  const Motor::Parameter& parameter, const typename MotorControllerHardware<NUM_CHANNELS>::Parameter& hardware_parameter,
+  std::shared_ptr<CommunicatorNode> communicator_node)
 {
   // Initial Motor Controller Hardware
   if (false == parameter.isValid()) {
@@ -40,18 +46,16 @@ void initialize_controller(
   {
     auto request = EthernetRequest::make_request<SetMotorControllerParameter>(
       0,
-      can_id,
-      parameter.gear_ratio,
+      hardware_parameter.can_id,
+      hardware_parameter.gear_ratio,
       parameter.max_rpm,
-      parameter.threshold_stall_check,
-      parameter.weight_low_pass_set_point,
-      parameter.control_frequency,
-      parameter.timeout_ms
+      hardware_parameter.threshold_stall_check,
+      hardware_parameter.weight_low_pass_set_point,
+      hardware_parameter.control_frequency,
+      hardware_parameter.timeout.count()
     );
-    auto future_response = communicator->sendRequest(std::move(request));
-    wait_for_future(future_response, 200ms);
+    const auto got = communicator_node->sendRequest(std::move(request), 200ms);
 
-    auto got = future_response.get();
     if (Acknowledgement<PROTOCOL::COMMAND::SET::MOTOR_CONTROLLER_PARAMETER>::wasAcknowledged(got.response()) == false) {
       throw ComponentError(State::MOTOR_ERROR, "Request \"Set Motor Controller Parameter\" was not acknowledged.");
     }
@@ -60,15 +64,13 @@ void initialize_controller(
   {
     auto request = EthernetRequest::make_request<SetEncoderParameter>(
       0,
-      can_id,
-      parameter.encoder_ratio,
-      parameter.weight_low_pass_encoder,
-      parameter.encoder_inverted
+      hardware_parameter.can_id,
+      hardware_parameter.encoder_ratio,
+      hardware_parameter.weight_low_pass_encoder,
+      hardware_parameter.encoder_inverted
     );
-    auto future_response = communicator->sendRequest(std::move(request));
-    wait_for_future(future_response, 200ms);
+    const auto got = communicator_node->sendRequest(std::move(request), 200ms);
 
-    auto got = future_response.get();
     if (Acknowledgement<PROTOCOL::COMMAND::SET::ENCODER_PARAMETER>::wasAcknowledged(got.response()) == false) {
       throw ComponentError(State::MOTOR_ERROR, "Request \"Set Encoder Parameter\" was not acknowledged.");
     }
@@ -77,19 +79,17 @@ void initialize_controller(
   {
     auto request = EthernetRequest::make_request<SetPidControllerParameter>(
       0,
-      can_id,
+      hardware_parameter.can_id,
       parameter.kp,
       parameter.ki,
       parameter.kd,
      -parameter.max_rpm,
       parameter.max_rpm,
-      parameter.weight_low_pass_set_point,
+      hardware_parameter.weight_low_pass_set_point,
       true
     );
-    auto future_response = communicator->sendRequest(std::move(request));
-    wait_for_future(future_response, 200ms);
+    const auto got = communicator_node->sendRequest(std::move(request), 200ms);
 
-    auto got = future_response.get();
     if (Acknowledgement<PROTOCOL::COMMAND::SET::PID_CONTROLLER_PARAMETER>::wasAcknowledged(got.response()) == false) {
       throw ComponentError(State::MOTOR_ERROR, "Request \"Set Pid Controller Parameter\" was not acknowledged.");
     }
@@ -111,7 +111,8 @@ void initialize_controller(
 template <>
 void MotorControllerHardware<1>::processRxData(const message::RxMessageDataBuffer &data)
 {
-  if (_callback_process_measurement == nullptr || udp::message::RpmMeasurement::canId(data) != _can_id) {
+  if (_callback_process_measurement == nullptr ||
+      udp::message::RpmMeasurement::canId(data) != _parameter.can_id) {
     return;
   }
   
@@ -123,7 +124,8 @@ void MotorControllerHardware<1>::processRxData(const message::RxMessageDataBuffe
 template <>
 void MotorControllerHardware<2>::processRxData(const message::RxMessageDataBuffer &data)
 {
-  if (_callback_process_measurement == nullptr || udp::message::RpmMeasurement::canId(data) != _can_id) {
+  if (_callback_process_measurement == nullptr ||
+      udp::message::RpmMeasurement::canId(data) != _parameter.can_id) {
     return;
   }
   
@@ -132,68 +134,91 @@ void MotorControllerHardware<2>::processRxData(const message::RxMessageDataBuffe
   // _callback_process_measurement(tcp::message::RpmMeasurement::rpm1(data));
 }
 
+// is called by the executer thread
+template <>
+void MotorControllerHardware<1>::processSending()
+{
+  const auto stamp_now = std::chrono::system_clock::now();
+  _data.mutex.lock();
+
+  if (_data.timeout == false && stamp_now - _data.stamp_last_rpm_set > _parameter.timeout) {
+    // timeout occurred --> reset rpm values to zero
+    std::fill(_data.rpm.begin(), _data.rpm.end(), 0.0f);
+    _data.timeout = true;
+    RCLCPP_INFO(rclcpp::get_logger("MotorControllerHardware"), "timeout occurred! --> disable motor controller.");
+
+    auto request = EthernetRequest::make_request<udp::message::SetMotorDisabled>();
+    _communication_node->sendRequest(std::move(request), 200ms);
+  }
+
+  auto request = EthernetRequest::make_request<udp::message::SetMotorRpm>(
+    _parameter.can_id,
+    _data.rpm[0],
+    0.0f
+  );
+  _data.mutex.unlock();
+
+  const auto got = _communication_node->sendRequest(std::move(request), 200ms);
+  _data.measured_rpm[0] = AcknowledgedMotorRpm::rpm0(got.response());
+  _data.measured_rpm[1] = 0.0;  
+
+  if (_callback_process_measurement == nullptr) {
+    return;
+  }
+
+  _callback_process_measurement(_data.measured_rpm, AcknowledgedMotorRpm::enabled(got.response()));
+}
+
+template <>
+void MotorControllerHardware<2>::processSending()
+{
+  const auto stamp_now = std::chrono::system_clock::now();
+  _data.mutex.lock();
+
+  if (_data.timeout == false && stamp_now - _data.stamp_last_rpm_set > _parameter.timeout) {
+    // timeout occurred --> reset rpm values to zero
+    std::fill(_data.rpm.begin(), _data.rpm.end(), 0.0f);
+    _data.timeout = true;
+    RCLCPP_INFO(rclcpp::get_logger("MotorControllerHardware"), "timeout occurred! --> disable motor controller.");
+
+    auto request = EthernetRequest::make_request<udp::message::SetMotorDisabled>();
+    _communication_node->sendRequest(std::move(request), 200ms);
+  }
+
+  auto request = EthernetRequest::make_request<udp::message::SetMotorRpm>(
+    _parameter.can_id,
+    _data.rpm[0],
+    _data.rpm[1]
+  );
+  _data.mutex.unlock();
+
+  const auto got = _communication_node->sendRequest(std::move(request), 200ms);
+  _data.measured_rpm[0] = AcknowledgedMotorRpm::rpm0(got.response());
+  _data.measured_rpm[1] = AcknowledgedMotorRpm::rpm1(got.response());  
+
+  if (_callback_process_measurement == nullptr) {
+    return;
+  }
+
+  _callback_process_measurement(_data.measured_rpm, AcknowledgedMotorRpm::enabled(got.response()));  
+}
+
 template <>
 void MotorControllerHardware<1>::initialize(const Motor::Parameter& parameter)
 {
-  initialize_controller(parameter, _can_id, _communicator);
+  initialize_controller<1>(parameter, _parameter, _communication_node);
+  _communication_node->addSendingJob(
+    std::bind(&MotorControllerHardware<1>::processSending, this), 50ms
+  );
 }
 
 template <>
 void MotorControllerHardware<2>::initialize(const Motor::Parameter& parameter)
 {
-  initialize_controller(parameter, _can_id, _communicator);
-}
-
-template <>
-void MotorControllerHardware<1>::processSetValue(const std::vector<Rpm>& rpm)
-{
-  if (rpm.size() < 1) {
-    throw std::runtime_error("Given RPM vector is too small.");
-  }
-
-  auto request = EthernetRequest::make_request<udp::message::SetMotorRpm>(
-    _can_id,
-    rpm[0],
-    0.0
-  );
-
-  auto future_response = _communicator->sendRequest(std::move(request));
-  wait_for_future(future_response, 200ms);
-  auto got = future_response.get();
-  _measured_rpm[0] = AcknowledgedMotorRpm::rpm0(got.response());
-  _measured_rpm[1] = 0.0;  
-
-  if (_callback_process_measurement == nullptr) {
-    return;
-  }
-
-  _callback_process_measurement(_measured_rpm, AcknowledgedMotorRpm::enabled(got.response()));
-}
-
-template <>
-void MotorControllerHardware<2>::processSetValue(const std::vector<Rpm>& rpm)
-{
-  if (rpm.size() < 2) {
-    throw std::runtime_error("Given RPM vector is too small.");
-  }
-
-  auto request = EthernetRequest::make_request<udp::message::SetMotorRpm>(
-    _can_id,
-    rpm[0],
-    rpm[1]
-  );
-
-  auto future_response = _communicator->sendRequest(std::move(request));
-  wait_for_future(future_response, 200ms);
-  auto got = future_response.get();
-  _measured_rpm[0] = AcknowledgedMotorRpm::rpm0(got.response());
-  _measured_rpm[1] = AcknowledgedMotorRpm::rpm1(got.response());  
-
-  if (_callback_process_measurement == nullptr) {
-    return;
-  }
-
-  _callback_process_measurement(_measured_rpm, AcknowledgedMotorRpm::enabled(got.response()));
+  initialize_controller<2>(parameter, _parameter, _communication_node);
+  _communication_node->addSendingJob(
+    std::bind(&MotorControllerHardware<2>::processSending, this), 50ms
+  );  
 }
 
 } // end namespace ethernet

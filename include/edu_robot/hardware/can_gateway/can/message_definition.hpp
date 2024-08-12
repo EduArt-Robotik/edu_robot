@@ -32,23 +32,26 @@ using message::MessageFrame;
 //   }
 // };
 
-using StartMeasurement = NoResponseMessageFrame<element::Uint8,  // frame no.
-                                                element::Uint8>; // sensor activation bits
+using StartMeasurement = NoResponseMessageFrame<element::Uint8,   // frame no.
+                                                element::Uint16>; // sensor activation bits
 
-struct MeasurementComplete : public MessageFrame<element::Uint8,  // sensor no.
-                                                 element::Uint8,  // resolution
-                                                 element::Uint8>  // frame no.
+struct MeasurementComplete : public MessageFrame<element::Uint8>  // frame no.
 {
-  inline static constexpr std::size_t zone(const RxMessageDataBuffer& rx_buffer) {
+  inline static constexpr std::size_t sensor(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<1>(rx_buffer);
   }
-  inline static constexpr std::uint8_t resolution(const RxMessageDataBuffer& rx_buffer) {
+};
+using TriggerDataTransmission = NoResponseMessageFrame<element::Uint16>; // sensor activation bits
+struct DataTransmissionComplete : public MessageFrame<element::Uint8, // total points count
+                                                      element::Uint8> // frame id
+{
+  inline static constexpr std::size_t pointCount(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<1>(rx_buffer);
+  }
+  inline static constexpr std::uint8_t frameId(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<2>(rx_buffer);
   }
-  inline static constexpr std::size_t frame(const RxMessageDataBuffer& rx_buffer) {
-    return deserialize<3>(rx_buffer);
-  } 
-};                                                
+}; 
 
 struct Measurement : public Message<element::Uint24LE, // distance, sigma
                                     element::Uint8>    // zone no., frame no.
@@ -70,7 +73,7 @@ struct Measurement : public Message<element::Uint24LE, // distance, sigma
   inline static float sigma(const std::array<RxMessageDataBuffer::value_type, Measurement::size()>& rx_buffer)
   {
     return ((*reinterpret_cast<const std::uint32_t*>(&deserialize<0>(rx_buffer)[0]) >> 0) & 0x3ff) / 128.0f / 1000.0f;
-  } 
+  }
 };
 
 struct ZoneMeasurement : public MessageFrame<> // use empty message frame as base

@@ -75,13 +75,12 @@ install(
 
 install(
   TARGETS
-    iotbot-shield
-    ethernet-gateway
-    ethernet-gateway-universal-bot
-    ethernet-gateway-ohmni-bot
-    igus-can-turtle-bot
-    can-gateway-universal-bot
-    can-gateway-bot
+    eduard-iot-bot
+    eduard-ethernet-gateway-bot
+    universal-ethernet-gateway-bot
+    rebel-move-360-pi-bot
+    universal-360-pi-bot
+    eduard-360-pi-bot
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   # for humble...
@@ -92,16 +91,13 @@ install(
 )
 install(
   TARGETS
-    eduart-robot-universal-bot
+    eduart-bot
     eduart-iotbot-shield
-    eduart-robot-eduard
     eduart-robot
     processing-component
     eduart-ethernet-gateway
-    ohmni-bot
     eduart-action
     eduart-diagnostic
-    eduart-turtle
     igus
     eduart-hardware
     eduart-hardware-can
@@ -128,13 +124,16 @@ ament_export_include_directories(
   include
 )
 ament_export_libraries(
+  eduart-bot
   eduart-iotbot-shield
-  eduart-robot-eduard
   eduart-robot
   processing-component
   eduart-ethernet-gateway
-  eduart-robot-universal-bot
   eduart-action
+  eduart-diagnostic
+  igus
+  eduart-hardware
+  eduart-hardware-can
 )
 ament_export_dependencies(
   rclcpp

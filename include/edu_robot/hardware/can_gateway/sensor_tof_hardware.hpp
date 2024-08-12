@@ -5,10 +5,12 @@
  */
 #pragma once
 
-#include "edu_robot/hardware/can_gateway/can/can_request.hpp"
-#include "edu_robot/hardware/communicator_device_interfaces.hpp"
+#include <edu_robot/hardware/communicator_node.hpp>
 
 #include <edu_robot/sensor_point_cloud.hpp>
+
+#include <cstddef>
+#include <memory>
 
 namespace eduart {
 namespace robot {
@@ -16,7 +18,6 @@ namespace hardware {
 namespace can_gateway {
 
 class SensorTofHardware : public SensorPointCloud::SensorInterface
-                        , public CommunicatorTxRxDevice
 {
 public:
   struct Parameter {
@@ -34,7 +35,7 @@ public:
   };
 
   SensorTofHardware(
-    const std::string& name, const Parameter& parameter, rclcpp::Node& ros_node,
+    const std::string& name, const Parameter& parameter, rclcpp::Node& ros_node, std::shared_ptr<Executer> executer,
     std::shared_ptr<Communicator> communicator);
   ~SensorTofHardware() override = default;
 
@@ -46,8 +47,8 @@ private:
   void processMeasurement();
 
   const Parameter _parameter;
-  std::shared_ptr<rclcpp::TimerBase> _timer_get_measurement;
   rclcpp::Node& _ros_node;
+  std::shared_ptr<CommunicatorNode> _communication_node;
 
   struct {
     std::uint32_t trigger = 0x388;
@@ -62,7 +63,7 @@ private:
     std::vector<float> tan_x_lookup; // used to transform to point y
     std::vector<float> tan_y_lookup; // used to transform to point x    
     std::uint8_t frame_number;
-    std::future<hardware::Request> future_response;
+    std::size_t point_counter = 0;
     std::shared_ptr<sensor_msgs::msg::PointCloud2> point_cloud;
   } _processing_data;
 };                              

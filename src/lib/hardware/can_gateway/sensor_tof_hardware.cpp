@@ -1,7 +1,15 @@
 #include "edu_robot/hardware/can_gateway/sensor_tof_hardware.hpp"
 #include "edu_robot/hardware/can_gateway/can/message_definition.hpp"
 #include "edu_robot/hardware/can_gateway/can/can_rx_data_endpoint.hpp"
+#include "edu_robot/hardware/can_gateway/can/can_request.hpp"
 
+#include <edu_robot/hardware/communicator_node.hpp>
+
+#include <rclcpp/logging.hpp>
+
+#include <memory>
+#include <limits>
+#include <cstddef>
 
 namespace eduart {
 namespace robot {
@@ -11,8 +19,8 @@ namespace can_gateway {
 using can::CanRxDataEndPoint;
 using can::Request;
 using can::message::sensor::tof::StartMeasurement;
-using can::message::sensor::tof::MeasurementComplete;
 using can::message::sensor::tof::ZoneMeasurement;
+using can::message::sensor::tof::DataTransmissionComplete;
 
 static std::shared_ptr<sensor_msgs::msg::PointCloud2> create_point_cloud(
   const SensorTofHardware::Parameter& parameter)
@@ -47,6 +55,23 @@ static std::shared_ptr<sensor_msgs::msg::PointCloud2> create_point_cloud(
   point_cloud->fields.push_back(point_field);
 
   return point_cloud;
+}
+
+static void set_nan_points(sensor_msgs::msg::PointCloud2& point_cloud)
+{
+  const std::size_t number_of_points = point_cloud.height * point_cloud.width;
+
+  for (std::size_t point_idx = 0; point_idx < number_of_points; ++point_idx) {
+    const std::size_t idx_point_x = point_idx * point_cloud.point_step + point_cloud.fields[0].offset;
+    const std::size_t idx_point_y = point_idx * point_cloud.point_step + point_cloud.fields[1].offset;
+    const std::size_t idx_point_z = point_idx * point_cloud.point_step + point_cloud.fields[2].offset;
+    const std::size_t idx_sigma   = point_idx * point_cloud.point_step + point_cloud.fields[3].offset;
+
+    *reinterpret_cast<float*>(&point_cloud.data[idx_point_x]) = std::numeric_limits<float>::quiet_NaN();
+    *reinterpret_cast<float*>(&point_cloud.data[idx_point_y]) = std::numeric_limits<float>::quiet_NaN();
+    *reinterpret_cast<float*>(&point_cloud.data[idx_point_z]) = std::numeric_limits<float>::quiet_NaN();
+    *reinterpret_cast<float*>(&point_cloud.data[idx_sigma])   = std::numeric_limits<float>::quiet_NaN();    
+  }
 }
 
 SensorTofHardware::Parameter
@@ -86,28 +111,44 @@ SensorTofHardware::get_parameter(const std::string& name, const Parameter& defau
 }
 
 SensorTofHardware::SensorTofHardware(
-  const std::string& name, const Parameter& parameter, rclcpp::Node& ros_node, std::shared_ptr<Communicator> communicator)
+  const std::string& name, const Parameter& parameter, rclcpp::Node& ros_node, std::shared_ptr<Executer> executer,
+  std::shared_ptr<Communicator> communicator)
   : SensorPointCloud::SensorInterface()
-  , CommunicatorTxRxDevice(communicator)
   , _parameter(parameter)
   , _ros_node(ros_node)
+  , _communication_node(std::make_shared<CommunicatorNode>(executer, communicator))
 {
   (void)name;
 
   _can_id.measurement = 0x308 + _parameter.sensor_id;
 
-  auto measurement_end_point = CanRxDataEndPoint::make_data_endpoint<ZoneMeasurement>(
+  _communication_node->createRxDataEndPoint<CanRxDataEndPoint, ZoneMeasurement>(
     _can_id.measurement,
     std::bind(&SensorTofHardware::processRxData, this, std::placeholders::_1),
-    this
+    8
   );
-  _communicator->registerRxDataEndpoint(measurement_end_point);
-  registerRxDataEndpoint(measurement_end_point);
 }
 
+// is called by the executer thread of rx data endpoint
 void SensorTofHardware::processRxData(const message::RxMessageDataBuffer& data)
 {
   if (_callback_process_measurement == nullptr) {
+    return;
+  }
+  if (DataTransmissionComplete::hasCorrectLength(data)) {
+    // Measurement Complete
+    if (_processing_data.point_counter != DataTransmissionComplete::pointCount(data)) {
+      RCLCPP_ERROR(rclcpp::get_logger("SensorTofHardware"), "count of processed points is no equal to transmitted points");
+    }
+
+    // Calling Layer Above
+    _callback_process_measurement(*_processing_data.point_cloud);
+
+    // Preparing Next Iteration
+    _processing_data.next_expected_zone = 0;
+    _processing_data.point_counter = 0;
+    set_nan_points(*_processing_data.point_cloud);
+
     return;
   }
 
@@ -115,16 +156,8 @@ void SensorTofHardware::processRxData(const message::RxMessageDataBuffer& data)
     const std::size_t zone_index = ZoneMeasurement::zone(data, element);
     const auto distance = ZoneMeasurement::distance(data, element);
     const auto sigma = ZoneMeasurement::sigma(data, element);
-  
-    if (zone_index != _processing_data.next_expected_zone) {
-      RCLCPP_WARN(
-        rclcpp::get_logger("SensorPointCloud"),
-        "zone_index %u is not expected the one (%u). The point cloud will contain corrupted data.",
-        static_cast<unsigned int>(zone_index),
-        static_cast<unsigned int>(_processing_data.next_expected_zone)
-      );
-    }
 
+    // \todo make points invalid if zone index was skipped. At the moment old points are kept.
     auto& point_cloud = _processing_data.point_cloud;
     const std::size_t idx_point_x = zone_index * point_cloud->point_step + point_cloud->fields[0].offset;
     const std::size_t idx_point_y = zone_index * point_cloud->point_step + point_cloud->fields[1].offset;
@@ -137,16 +170,8 @@ void SensorTofHardware::processRxData(const message::RxMessageDataBuffer& data)
     *reinterpret_cast<float*>(&point_cloud->data[idx_sigma])   = sigma;
 
     _processing_data.current_zone = zone_index;
-
-    if (zone_index + 1 < _processing_data.number_of_zones) {
-      // measurement not complete yet
-      _processing_data.next_expected_zone = zone_index + 1;
-      continue;;
-    }
-
-    // measurement finished --> publish point cloud
-    _processing_data.next_expected_zone = 0;
-    _callback_process_measurement(*point_cloud);
+    _processing_data.next_expected_zone = zone_index + 1;
+    _processing_data.point_counter++;
   }
 }
 
@@ -162,6 +187,8 @@ void SensorTofHardware::initialize(const SensorPointCloud::Parameter& parameter)
   _processing_data.frame_number = 0;  
   _processing_data.tan_x_lookup.resize(_processing_data.number_of_zones);
   _processing_data.tan_y_lookup.resize(_processing_data.number_of_zones);
+  _processing_data.point_counter = 0;
+  set_nan_points(*_processing_data.point_cloud);
 
   const float alpha_increment_vertical = _parameter.fov.vertical / static_cast<double>(_parameter.number_of_zones.vertical);
   const float alpha_increment_horizontal = _parameter.fov.horizontal / static_cast<double>(_parameter.number_of_zones.horizontal);
@@ -180,12 +207,14 @@ void SensorTofHardware::initialize(const SensorPointCloud::Parameter& parameter)
   }
 
   if (_parameter.trigger_measurement) {
-    _timer_get_measurement = _ros_node.create_wall_timer(
-      _parameter.measurement_interval, std::bind(&SensorTofHardware::processMeasurement, this)
+    _communication_node->addSendingJob(
+      std::bind(&SensorTofHardware::processMeasurement, this),
+      _parameter.measurement_interval
     );
   }
 }
 
+// is called by the executer thread
 void SensorTofHardware::processMeasurement()
 {
   try {
@@ -194,9 +223,7 @@ void SensorTofHardware::processMeasurement()
       _can_id.trigger, _processing_data.frame_number, (1 << (_parameter.sensor_id - 1))
     );
 
-    _processing_data.future_response = _communicator->sendRequest(std::move(request));
-    wait_for_future(_processing_data.future_response, 100ms);
-    auto got = _processing_data.future_response.get();
+    _communication_node->sendRequest(std::move(request), 100ms);
 
     _processing_data.point_cloud->header.stamp = _ros_node.get_clock()->now();
     _processing_data.frame_number++;

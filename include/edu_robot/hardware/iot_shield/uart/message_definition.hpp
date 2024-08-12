@@ -8,15 +8,18 @@
 #include "edu_robot/hardware/iot_shield/uart/message.hpp"
 
 #include <Eigen/Dense>
-#include <array>
+
 #include <edu_robot/rpm.hpp>
 #include <edu_robot/color.hpp>
 
 namespace eduart {
 namespace robot {
-namespace iotbot {
+namespace hardware {
+namespace iot_shield {
 namespace uart {
 namespace message {
+
+using uart::message::MessageFrame;
 
 using SetRpm = MessageFrame<element::Command<UART::COMMAND::SET::RPM>,
                             element::Int16,  // RPM set point motor 1
@@ -100,10 +103,14 @@ struct ShieldResponse : public uart::message::Message<element::Uint8, element::I
   inline static constexpr float range3(const RxMessageDataBuffer& rx_buffer) { return static_cast<float>(deserialize<14>(rx_buffer)) / 1000.0f; }
   inline static constexpr float voltage(const RxMessageDataBuffer& rx_buffer) { return static_cast<float>(deserialize<15>(rx_buffer)) / 100.0f; }
   inline static constexpr float current(const RxMessageDataBuffer& rx_buffer) { return static_cast<float>(deserialize<16>(rx_buffer)) / 20.0f; }
+  inline constexpr static auto makeSearchPattern() {
+    return std::array<Byte, 0>();;
+  }
 };                                                     
 
 } // end namespace message
 } // end namespace uart
-} // end namespace iotbot
+} // end namespace iot_shield
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

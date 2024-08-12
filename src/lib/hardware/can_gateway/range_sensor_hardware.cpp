@@ -1,6 +1,9 @@
 #include "edu_robot/hardware/can_gateway/range_sensor_hardware.hpp"
 #include "edu_robot/hardware/can_gateway/can/can_request.hpp"
+#include "edu_robot/hardware/can_gateway/can/can_rx_data_endpoint.hpp"
+#include "edu_robot/hardware/communicator_node.hpp"
 
+#include <memory>
 #include <rclcpp/qos.hpp>
 
 namespace eduart {
@@ -9,17 +12,20 @@ namespace hardware {
 namespace can_gateway {
 
 using namespace std::chrono_literals;
+using can::CanRxDataEndPoint;
 
 RangeSensorHardware::RangeSensorHardware(
-  const std::uint8_t id, std::shared_ptr<Communicator> communicator)
-  : CommunicatorTxRxDevice(communicator)
-  , _id(id)
+  const std::uint8_t id, std::shared_ptr<Executer> executer, std::shared_ptr<Communicator> communicator)
+  : _id(id)
+  , _communication_node(std::make_shared<CommunicatorNode>(executer, communicator))
 {
-
+  
 }
 
 void RangeSensorHardware::processRxData(const message::RxMessageDataBuffer& data)
 {
+  (void)data;
+
   if (_callback_process_measurement == nullptr) {
     return;
   }

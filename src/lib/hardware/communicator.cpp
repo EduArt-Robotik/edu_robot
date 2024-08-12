@@ -81,6 +81,10 @@ message::RxMessageDataBuffer Communicator::getRxBuffer()
 
 template <typename Left, typename Right>
 static bool is_same(const Left& lhs, const Right& rhs) {
+  if (lhs.empty()) {
+    // if search pattern is empty than accept message
+    return true;
+  }
   if (lhs.size() > rhs.size()) {
     return false;;
   }
@@ -114,7 +118,7 @@ void Communicator::processing()
       auto future = task.get_future();
       _sending_in_progress.emplace(std::move(task));
       _is_being_send.emplace(std::move(request), std::move(future));
-      _new_incoming_requests = false;
+      _new_incoming_requests = _incoming_requests.size() > 0;
     }
 
     // Process Being Sent Messages
@@ -166,6 +170,17 @@ void Communicator::processing()
           _rx_buffer_copy = rx_buffer;
         }
 
+        // Check if received data matches to an end point and call it if it does.
+        {
+          std::lock_guard guard(_mutex_rx_data_endpoint);
+
+          for (auto& endpoint : _rx_data_endpoint) {
+            if (is_same(endpoint->searchPattern(), rx_buffer)) {
+              endpoint->call(rx_buffer);
+            }
+          }
+        }
+
         // Check if received data matches to an open request.
         for (auto it =_open_request.begin(); it != _open_request.end();) {
           const auto& search_pattern = it->first._response_search_pattern;
@@ -183,17 +198,6 @@ void Communicator::processing()
           }
           // else
           ++it;
-        }
-
-        // Check if received data matches to an end point and call it if it does.
-        {
-          std::lock_guard guard(_mutex_rx_data_endpoint);
-
-          for (auto& endpoint : _rx_data_endpoint) {
-            if (is_same(endpoint->searchPattern(), rx_buffer)) {
-              endpoint->call(rx_buffer);
-            }
-          }
         }
       }
       catch (std::exception& ex) {
@@ -268,17 +272,17 @@ void Communicator::processReceiving()
         std::unique_lock lock(_mutex_receiving_data);
 
         if (_rx_buffer_queue.size() >= _max_rx_buffer_queue_size) {
-while (_rx_buffer_queue.empty() == false) {
-  std::stringstream debug_out;
-  debug_out << "rx_buffer: " << std::hex;
+          while (_rx_buffer_queue.empty() == false) {
+            std::stringstream debug_out;
+            debug_out << "rx_buffer: " << std::hex;
 
-  for (const auto byte : _rx_buffer_queue.front()) {
-    debug_out << static_cast<int>(byte) << " ";
-  }
+            for (const auto byte : _rx_buffer_queue.front()) {
+              debug_out << static_cast<int>(byte) << " ";
+            }
 
-  _rx_buffer_queue.pop();
-  RCLCPP_INFO_STREAM(rclcpp::get_logger("Communicator"), debug_out.str());
-}
+            _rx_buffer_queue.pop();
+            RCLCPP_INFO_STREAM(rclcpp::get_logger("Communicator"), debug_out.str());
+          }
           throw ComponentError(State::FUNCTIONAL_ERROR, "Max rx buffer queue size is reached.");
         }
 

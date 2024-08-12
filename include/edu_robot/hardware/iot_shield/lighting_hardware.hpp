@@ -8,26 +8,30 @@
 #include <edu_robot/hardware_component_interfaces.hpp>
 #include <edu_robot/lighting.hpp>
 
-#include "edu_robot/hardware/iot_shield/iot_shield_device_interfaces.hpp"
+#include <edu_robot/hardware/communicator_node.hpp>
+#include <memory>
 
 namespace eduart {
 namespace robot {
-namespace iotbot {
+namespace hardware {
+namespace iot_shield {
 
 class LightingHardware : public Lighting::ComponentInterface
-                       , public eduart::robot::iotbot::IotShieldTxDevice
 {
 public:
-  LightingHardware(const std::string& name, std::shared_ptr<IotShieldCommunicator> communicator);
+  LightingHardware(
+    const std::string& name, std::shared_ptr<Executer> executer, std::shared_ptr<Communicator> communicator);
   ~LightingHardware() override;
 
   void processSetValue(const Color& color, const robot::Lighting::Mode& mode) override;
   void initialize(const Lighting::Parameter& parameter) override;
 
 private:
-  std::string _name;  
+  std::string _name;
+  std::shared_ptr<CommunicatorNode> _communication_node;
 };
 
-} // end namespace iotbot
+} // end namespace iot_shield
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

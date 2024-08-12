@@ -21,7 +21,7 @@ def generate_launch_description():
 
     eduard_iot2050 = Node(
       package='edu_robot',
-      executable='iotbot-shield',
+      executable='eduard-iot-bot',
       name='eduard',
       parameters=[parameter_file],
       namespace=EnvironmentVariable('EDU_ROBOT_NAMESPACE', default_value="eduard"),

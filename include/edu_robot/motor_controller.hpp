@@ -5,6 +5,7 @@
  */
 #pragma once
 
+#include "edu_robot/diagnostic/diagnostic.hpp"
 #include <edu_robot/hardware_component_interfaces.hpp>
 #include <edu_robot/motor.hpp>
 #include <edu_robot/hardware_interface.hpp>
@@ -46,6 +47,9 @@ public:
   public:
     inline std::size_t motors() const { return _num_motors; }
     inline const std::string& name() const { return _name; }
+    virtual diagnostic::Diagnostic diagnostic() {
+      return { };
+    }
 
   private:
     std::string _name;

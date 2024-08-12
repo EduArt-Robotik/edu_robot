@@ -27,20 +27,11 @@ public:
   inline static Request make_request(const std::uint32_t can_address, Arguments&&... args) {
     auto request_message = Message::serialize(can_address, std::forward<Arguments>(args)...);
     const auto response_message = Message::makeSearchPattern(can_address);
-    // return Request(Message{}, can_address, std::forward<Arguments>(args)...);
     return Request(request_message, response_message);
   }
   Request(Request&&) = default;
 
 private:
-  template <template <class...> class Message, class... Elements>
-  Request(const Message<Elements...>, const std::uint32_t can_address, const typename Elements::type&... element_value) {
-    _request_message = Message<Elements...>::serialize(can_address, element_value...);
-    const auto search_pattern = Message<Elements...>::makeSearchPattern(can_address);
-
-    _response_search_pattern.resize(search_pattern.size());
-    std::copy(search_pattern.begin(), search_pattern.end(), _response_search_pattern.begin());
-  }
   template<class SearchPattern>
   Request(message::TxMessageDataBuffer& request_message, const SearchPattern& search_pattern)
   {

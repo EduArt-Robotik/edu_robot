@@ -21,7 +21,7 @@ tf2::Transform Sensor::get_transform_from_parameter(const std::string& sensor_na
 
   tf2::Vector3 translation(x, y, z);
   tf2::Quaternion orientation;
-  orientation.setEuler(yaw, pitch, roll);
+  orientation.setRPY(roll, pitch, yaw);
   return tf2::Transform(orientation, translation);
 }
 

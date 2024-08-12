@@ -1,8 +1,11 @@
 #include "edu_robot/hardware/rx_data_endpoint.hpp"
-#include "edu_robot/hardware/communicator_device_interfaces.hpp"
+#include "edu_robot/hardware/communicator_node.hpp"
+
+#include <memory>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 
 #include <cstdint>
-#include <iostream>
 #include <mutex>
 
 namespace eduart {
@@ -14,21 +17,21 @@ using namespace std::chrono_literals;
 RxDataEndPoint::RxDataEndPoint(
   std::vector<message::Byte>& search_pattern,
   const std::function<void(const message::RxMessageDataBuffer&)>& callback_process_data,
-  CommunicatorRxDevice* data_receiver,
+  std::shared_ptr<Executer> executer,
   const std::uint8_t buffer_size)
   : _input_data_buffer(buffer_size)
+  , _executer(executer)
   , _response_search_pattern(std::move(search_pattern))
   , _callback_process_data(callback_process_data)
-  , _data_receiver(data_receiver)
 {
   // Preallocate memory.
   for (auto& buffer : _input_data_buffer) {
-    buffer = std::make_shared<message::RxMessageDataBuffer>();
+    buffer = std::make_unique<message::RxMessageDataBuffer>();
     buffer->reserve(100);
   }
 
-  // Start executer.
-  _executer = std::thread(&RxDataEndPoint::processDataJob, this);
+  // Register at executer.
+  _executer->addJob(std::bind(&RxDataEndPoint::processDataJob, this), 1ms);
 }
 
 void RxDataEndPoint::deactivate()
@@ -64,44 +67,40 @@ void RxDataEndPoint::call(const message::RxMessageDataBuffer& data)
   // Room for new input data --> copy data
 
   // Get available buffer and copy input data to it.
-  auto buffer = _input_data_buffer.back();
+  auto buffer = std::move(_input_data_buffer.back());
   _input_data_buffer.pop_back();
   _mutex.unlock();
   *buffer = data;
 
   // Add data to output queue.
   _mutex.lock();
-  _output_data_buffer.push(buffer);
+  _output_data_buffer.emplace(std::move(buffer));
   _mutex.unlock();
 }
 
 void RxDataEndPoint::processDataJob()
 {
-  while (_running) {
-    _mutex.lock();
+  _mutex.lock();
 
-    if (_output_data_buffer.empty()) {
-      // no data to process --> sleep and try again
-      _mutex.unlock();
-      std::this_thread::sleep_for(1ms);
-      continue;
-    }
-
-    // Take data buffer from queue.
-    auto buffer = _output_data_buffer.front();
-    _output_data_buffer.pop();
+  if (_output_data_buffer.empty()) {
+    // no data to process --> nothing to do --> return
     _mutex.unlock();
-
-    // Process data buffer.
-    std::scoped_lock lock_receiver(_data_receiver->rxDataMutex());
-    _callback_process_data(*buffer);
-    buffer->clear();
-
-    // Move back empty data buffer to input buffer.
-    _mutex.lock();
-    _input_data_buffer.push_back(buffer);
-    _mutex.unlock();
+    return;
   }
+
+  // Take data buffer from queue.
+  auto buffer = std::move(_output_data_buffer.front());
+  _output_data_buffer.pop();
+  _mutex.unlock();
+
+  // Process data buffer.
+  _callback_process_data(*buffer);
+  buffer->clear();
+
+  // Move back empty data buffer to input buffer. Buffer keeps allocated memory.
+  _mutex.lock();
+  _input_data_buffer.emplace_back(std::move(buffer));
+  _mutex.unlock();
 }
 
 } // end namespace igus

@@ -35,6 +35,7 @@ namespace impl {
 template <typename DataType, bool BigEndian = true>
 struct DataField {
   inline static constexpr std::size_t size() { return sizeof(DataType); }
+  inline static constexpr bool is_constant = false;
   using type = DataType;
 
   // It is a default serialization. On demand customization should take place in derived classes.
@@ -82,6 +83,7 @@ struct DataField {
 // (Partial-)Specialized Data Fields
 template <typename DataType, DataType Value, bool BigEndian = true>
 struct ConstDataField : public DataField<DataType> {
+  inline static constexpr bool is_constant = true; //> shadows original flag
   using DataField<DataType>::size;
   using type = typename DataField<DataType>::type;
 
@@ -120,6 +122,9 @@ protected:
     return std::tuple_element<0, std::tuple<Elements...>>::type::size();
   }
 };
+
+// Helper Functions for Building Serialization Function Signature
+
 
 // Helper Functions for Message Handling
 template <class... Elements>
@@ -201,6 +206,7 @@ struct Uint8  : public impl::DataField<std::uint8_t> {
 // Big Endian
 using Int8 = impl::DataField<std::int8_t>;
 using Int16 = impl::DataField<std::int16_t>;
+using Int32 = impl::DataField<std::int32_t>;
 using Uint16 = impl::DataField<std::uint16_t>;
 using Uint24 = impl::DataField<std::array<unsigned char, 3>>;
 using Uint32 = impl::DataField<std::uint32_t>;
@@ -219,6 +225,7 @@ template <class... Elements>
 struct Message : public std::tuple<Elements...>
 {
   inline static constexpr std::size_t size() { return (Elements::size() + ...); }
+  inline static constexpr std::size_t count_arguments() { return ((Elements::is_constant ? 1 : 0) + ...); }
   static TxMessageDataBuffer serialize(const typename Elements::type&... element_value) {
     return element::impl::serialize<Elements...>(element_value..., std::tuple<Elements...>{});
   }

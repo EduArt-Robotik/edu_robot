@@ -1,6 +1,8 @@
 #include "edu_robot/hardware/can_gateway/lighting_hardware.hpp"
 #include "edu_robot/hardware/can_gateway/can/can_request.hpp"
+#include "edu_robot/hardware/communicator_node.hpp"
 
+#include <memory>
 #include <stdexcept>
 #include <string>
 
@@ -11,9 +13,10 @@ namespace can_gateway {
 
 using namespace std::chrono_literals;
 
-LightingHardware::LightingHardware(const std::string& name, std::shared_ptr<Communicator> communicator)
-  : CommunicatorTxDevice(communicator)
-  , _name(name)
+LightingHardware::LightingHardware(
+  const std::string& name, std::shared_ptr<Executer> executer, std::shared_ptr<Communicator> communicator)
+  : _name(name)
+  , _communication_node(std::make_shared<CommunicatorNode>(executer, communicator))
 {
 
 }
@@ -25,7 +28,9 @@ LightingHardware::~LightingHardware()
 
 void LightingHardware::processSetValue(const Color& color, const robot::Lighting::Mode& mode)
 {
-  using Mode = robot::Lighting::Mode;
+  (void)color;
+  (void)mode;
+  // using Mode = robot::Lighting::Mode;
 
   // HACK! At the moment each light can't controlled separately.
   // switch (mode) {
@@ -107,6 +112,11 @@ void LightingHardware::processSetValue(const Color& color, const robot::Lighting
 void LightingHardware::initialize(const Lighting::Parameter& parameter)
 {
   (void)parameter;
+}
+
+void LightingHardware::processSending()
+{
+  
 }
 
 } // end namespace can_gateway
