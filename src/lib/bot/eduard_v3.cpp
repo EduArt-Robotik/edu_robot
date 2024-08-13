@@ -37,7 +37,7 @@ void EduardV3::initialize(eduart::robot::HardwareComponentFactory& factory)
     auto point_cloud_sensor = std::make_shared<robot::SensorPointCloud>(
       point_cloud_name[i],
       getFrameIdPrefix() + point_cloud_tf[i],
-      getFrameIdPrefix() + Robot::_parameter.tf_base_frame,
+      getFrameIdPrefix() + Robot::_parameter.tf.base_frame,
       point_cloud_pose[i],
       parameter,
       *this,
