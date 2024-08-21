@@ -81,7 +81,7 @@ void RebelMove::initialize(eduart::robot::HardwareComponentFactory& factory)
     auto point_cloud_sensor = std::make_shared<robot::SensorPointCloud>(
       point_cloud_name[i],
       getFrameIdPrefix() + point_cloud_tf[i],
-      getFrameIdPrefix() + Robot::_parameter.tf_base_frame,
+      getFrameIdPrefix() + Robot::_parameter.tf.base_frame,
       point_cloud_pose[i],
       parameter,
       *this,
@@ -94,13 +94,13 @@ void RebelMove::initialize(eduart::robot::HardwareComponentFactory& factory)
   // IMU Sensor
   SensorImu::Parameter imu_parameter;
   imu_parameter.raw_data_mode = false;
-  imu_parameter.rotated_frame = getFrameIdPrefix() + Robot::_parameter.tf_base_frame;
+  imu_parameter.rotated_frame = getFrameIdPrefix() + Robot::_parameter.tf.base_frame;
   imu_parameter = SensorImu::get_parameter("imu", imu_parameter, *this);
 
   auto imu_sensor = std::make_shared<robot::SensorImu>(
     "imu",
     getFrameIdPrefix() + "imu/base",
-    getFrameIdPrefix() + Robot::_parameter.tf_footprint_frame,
+    getFrameIdPrefix() + Robot::_parameter.tf.footprint_frame,
     tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.0, 0.0, 0.04)),
     imu_parameter,
     getTfBroadcaster(),
