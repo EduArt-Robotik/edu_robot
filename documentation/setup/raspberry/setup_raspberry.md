@@ -1,8 +1,28 @@
-# Setting up a Raspberry PI
+# Setting up a Raspberry Pi
+
+## Installing Ubuntu on Raspberry Pi
+
+We currently recommend installing Ubuntu 24.04 LTS on the Raspberry. There is a ROS2 installation for this distribution, which is available as a binary.
+
+Please visit this [link](https://ubuntu.com/download/raspberry-pi) for installation instructions. We recommend that you only install the server version. However, it is up to you to decide exactly which version to install. You are also free to install the desktop version.
+
+### Flashing SD Card 
+
+Please use the [Raspberry Pi Imager](https://www.raspberrypi.com/software/) to install your favorite OS for Raspberry Pi. We recommend to install Ubuntu 24.04 LTS, because there exists a native ROS2 installation for it.
+
+We also recommend to enable SSH via the tool and create following user:
+* username : user
+* password : eduart
+
+But please feel free to configure it like you want.
+
+The image is now flashed on the SD card. Please insert it into the Raspberry Pi and boot it up.
 
 ## Enabling CAN Interfaces
 
-1. Install Raspberry Pi OS or Ubuntu, Ubuntu 22.04.3 server (jammy jellyfish) has been tested
+> **Note**: sudo privileges are required.
+
+1. Login into the raspberry.
 2. Update and install packages
 ```console
 sudo apt update
@@ -107,4 +127,78 @@ All three CAN interface should be listed and in state UP:
     link/can 
 5: can2: <NOARP,UP,LOWER_UP,ECHO> mtu 16 qdisc pfifo_fast state UP group default qlen 10
     link/can 
+```
+
+## Install ROS Control Software
+
+Please follow these steps to prepare the installation of the ROS2 control software:
+
+1. [Install Docker Engine](../iot2050/setup_iot2050.md#docker-engine)
+2. [Prepare Environment](../iot2050/setup_iot2050.md#prepare-environment)
+
+### Get Control Software and Launch it
+
+First clone the Git repository by executing the command:
+
+```bash
+cd ~
+git clone --branch main https://github.com/EduArt-Robotik/edu_robot.git
+cd ~/edu_robot/docker/raspberry
+```
+
+In this folder a docker compose file is located. It is used to launch the basic control software including joy node and a joy interpreter. Launch the software by:
+
+```bash
+docker compose up
+```
+
+The software will be registered for auto start after the robot boots up. If you want to remove it from the autostart execute following command inside the same folder:
+
+```bash
+docker compose down
+```
+
+### Native ROS2 Installation
+
+The ROS2 software for controlling the robot's hardware runs in Docker. Other applications can also be installed via Docker. It is therefore not necessary to install ROS2 natively on the system.
+
+However, for all those who prefer to have ROS2 installed natively, this can be done with the following steps:
+
+* Set Locale
+
+```bash
+locale  # check for UTF-8
+
+sudo apt update && sudo apt install locales
+sudo locale-gen en_US en_US.UTF-8
+sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+export LANG=en_US.UTF-8
+
+locale  # verify settings
+```
+
+* Enable Required Repositories
+
+```bash
+sudo apt install software-properties-common
+sudo add-apt-repository universe
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
+```
+
+* Install Prerequisites
+
+```bash
+sudo apt install tar bzip2 wget -y
+```
+
+* Install Development Tools
+
+```bash
+sudo apt update && sudo apt install ros-dev-tools
+```
+
+* Install ROS2
+
+```bash
+
 ```
