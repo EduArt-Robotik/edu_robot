@@ -47,7 +47,7 @@ dtoverlay=mcp251xfd,spi0-1,oscillator=40000000,interrupt=13
 dtoverlay=mcp251xfd,spi1-0,oscillator=40000000,interrupt=24
 ```
 
-3. Add udev rules for CAN interfaces
+3. Add udev rules for CAN interfaces </br>
 The extension board for the Raspberry Pi provides three CANFD interfaces. To ensure that the naming of the interfaces is the same after each boot process, a udev rule must be created in the /etc/udev/rules.d directory. Create the file /etc/udev/rules.d/42-mcp251xfd.rules using nano:
 
 ```bash
@@ -121,12 +121,12 @@ ip address
 All three CAN interface should be listed and in state UP:
 
 ```bash
-3: can0: <NOARP,UP,LOWER_UP,ECHO> mtu 16 qdisc pfifo_fast state UP group default qlen 10
+3: eduart-can1: <NOARP,UP,LOWER_UP,ECHO> mtu 72 qdisc pfifo_fast state UP group default qlen 10
     link/can 
-4: can1: <NOARP,UP,LOWER_UP,ECHO> mtu 16 qdisc pfifo_fast state UP group default qlen 10
+4: eduart-can0: <NOARP,UP,LOWER_UP,ECHO> mtu 72 qdisc pfifo_fast state UP group default qlen 10
     link/can 
-5: can2: <NOARP,UP,LOWER_UP,ECHO> mtu 16 qdisc pfifo_fast state UP group default qlen 10
-    link/can 
+5: eduart-can2: <NOARP,UP,LOWER_UP,ECHO> mtu 16 qdisc pfifo_fast state UP group default qlen 10
+    link/can
 ```
 
 ## Install ROS Control Software
@@ -182,23 +182,25 @@ locale  # verify settings
 ```bash
 sudo apt install software-properties-common
 sudo add-apt-repository universe
+sudo apt update && sudo apt install curl -y
+sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
-```
-
-* Install Prerequisites
-
-```bash
-sudo apt install tar bzip2 wget -y
 ```
 
 * Install Development Tools
 
 ```bash
-sudo apt update && sudo apt install ros-dev-tools
+sudo apt update && sudo apt upgrade && sudo apt install ros-dev-tools
 ```
 
 * Install ROS2
 
 ```bash
-
+sudo apt install ros-jazzy-ros-base
 ```
+
+* Source ROS into your .bashrc
+```bash
+echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
+```
+* 
