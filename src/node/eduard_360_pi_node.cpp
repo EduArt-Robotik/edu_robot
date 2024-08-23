@@ -45,19 +45,11 @@ public:
     }
 
     // ToF Sensor Ring
-    constexpr std::size_t tof_num_sensors = 14;
-    std::vector<std::string> tof_sensor_ring_a_names;
-    std::vector<std::string> tof_sensor_ring_b_names;
-
-    for (std::size_t i = 1; i <= tof_num_sensors / 2; ++i) {
-      tof_sensor_ring_a_names.emplace_back(std::string("tof_pointcloud_sensor_") + std::to_string(i));
-    }
-    for (std::size_t i = tof_num_sensors / 2 + 1; i <= tof_num_sensors; ++i) {
-      tof_sensor_ring_b_names.emplace_back(std::string("tof_pointcloud_sensor_") + std::to_string(i));
-    }
+    std::vector<std::string> tof_sensors_left  = {"front", "rear"};
+    std::vector<std::string> tof_sensors_right = {"front", "rear"};
 
     factory.addTofRingSensor(
-      "tof_sensor_ring", tof_sensor_ring_a_names, tof_sensor_ring_b_names, *this);
+      "tof_sensor_ring", tof_sensors_left, tof_sensors_right, *this);
 
     // IMU Sensor
     factory.addImuSensor("imu", 0x381);
