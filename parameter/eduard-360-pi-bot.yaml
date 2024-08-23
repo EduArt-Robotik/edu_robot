@@ -108,8 +108,26 @@
       can_id:
         measurement_complete: 776
         trigger: 904
+      front:
+        fov:
+          horizontal: 0.7853981852531433
+          vertical: 0.7853981852531433
+        measurement_interval_ms: 100
+        number_of_zones:
+          horizontal: 8
+          vertical: 8
+        sensor_id: 1
+        transform:
+          orientation:
+            pitch: 0.0
+            roll: 0.0
+            yaw: 0.0
+          translation:
+            x: 0.0
+            y: 0.0
+            z: 0.0
       measurement_interval: 100
-      tof_pointcloud_sensor_1:
+      rear:
         fov:
           horizontal: 0.7853981852531433
           vertical: 0.7853981852531433
@@ -117,115 +135,7 @@
         number_of_zones:
           horizontal: 8
           vertical: 8
-        sensor_id: 1
-        transform:
-          orientation:
-            pitch: 0.0
-            roll: 0.0
-            yaw: 0.0
-          translation:
-            x: 0.0
-            y: 0.0
-            z: 0.0
-      tof_pointcloud_sensor_2:
-        fov:
-          horizontal: 0.7853981852531433
-          vertical: 0.7853981852531433
-        measurement_interval_ms: 100
-        number_of_zones:
-          horizontal: 8
-          vertical: 8
-        sensor_id: 1
-        transform:
-          orientation:
-            pitch: 0.0
-            roll: 0.0
-            yaw: 0.0
-          translation:
-            x: 0.0
-            y: 0.0
-            z: 0.0
-      tof_pointcloud_sensor_3:
-        fov:
-          horizontal: 0.7853981852531433
-          vertical: 0.7853981852531433
-        measurement_interval_ms: 100
-        number_of_zones:
-          horizontal: 8
-          vertical: 8
-        sensor_id: 1
-        transform:
-          orientation:
-            pitch: 0.0
-            roll: 0.0
-            yaw: 0.0
-          translation:
-            x: 0.0
-            y: 0.0
-            z: 0.0
-      tof_pointcloud_sensor_4:
-        fov:
-          horizontal: 0.7853981852531433
-          vertical: 0.7853981852531433
-        measurement_interval_ms: 100
-        number_of_zones:
-          horizontal: 8
-          vertical: 8
-        sensor_id: 1
-        transform:
-          orientation:
-            pitch: 0.0
-            roll: 0.0
-            yaw: 0.0
-          translation:
-            x: 0.0
-            y: 0.0
-            z: 0.0
-      tof_pointcloud_sensor_5:
-        fov:
-          horizontal: 0.7853981852531433
-          vertical: 0.7853981852531433
-        measurement_interval_ms: 100
-        number_of_zones:
-          horizontal: 8
-          vertical: 8
-        sensor_id: 1
-        transform:
-          orientation:
-            pitch: 0.0
-            roll: 0.0
-            yaw: 0.0
-          translation:
-            x: 0.0
-            y: 0.0
-            z: 0.0
-      tof_pointcloud_sensor_6:
-        fov:
-          horizontal: 0.7853981852531433
-          vertical: 0.7853981852531433
-        measurement_interval_ms: 100
-        number_of_zones:
-          horizontal: 8
-          vertical: 8
-        sensor_id: 1
-        transform:
-          orientation:
-            pitch: 0.0
-            roll: 0.0
-            yaw: 0.0
-          translation:
-            x: 0.0
-            y: 0.0
-            z: 0.0
-      tof_pointcloud_sensor_7:
-        fov:
-          horizontal: 0.7853981852531433
-          vertical: 0.7853981852531433
-        measurement_interval_ms: 100
-        number_of_zones:
-          horizontal: 8
-          vertical: 8
-        sensor_id: 1
+        sensor_id: 2
         transform:
           orientation:
             pitch: 0.0
@@ -239,8 +149,26 @@
       can_id:
         measurement_complete: 776
         trigger: 904
+      front:
+        fov:
+          horizontal: 0.7853981852531433
+          vertical: 0.7853981852531433
+        measurement_interval_ms: 100
+        number_of_zones:
+          horizontal: 8
+          vertical: 8
+        sensor_id: 1
+        transform:
+          orientation:
+            pitch: 0.0
+            roll: 0.0
+            yaw: 0.0
+          translation:
+            x: 0.0
+            y: 0.0
+            z: 0.0
       measurement_interval: 100
-      tof_pointcloud_sensor_10:
+      rear:
         fov:
           horizontal: 0.7853981852531433
           vertical: 0.7853981852531433
@@ -248,7 +176,7 @@
         number_of_zones:
           horizontal: 8
           vertical: 8
-        sensor_id: 1
+        sensor_id: 2
         transform:
           orientation:
             pitch: 0.0
@@ -258,112 +186,3 @@
             x: 0.0
             y: 0.0
             z: 0.0
-      tof_pointcloud_sensor_11:
-        fov:
-          horizontal: 0.7853981852531433
-          vertical: 0.7853981852531433
-        measurement_interval_ms: 100
-        number_of_zones:
-          horizontal: 8
-          vertical: 8
-        sensor_id: 1
-        transform:
-          orientation:
-            pitch: 0.0
-            roll: 0.0
-            yaw: 0.0
-          translation:
-            x: 0.0
-            y: 0.0
-            z: 0.0
-      tof_pointcloud_sensor_12:
-        fov:
-          horizontal: 0.7853981852531433
-          vertical: 0.7853981852531433
-        measurement_interval_ms: 100
-        number_of_zones:
-          horizontal: 8
-          vertical: 8
-        sensor_id: 1
-        transform:
-          orientation:
-            pitch: 0.0
-            roll: 0.0
-            yaw: 0.0
-          translation:
-            x: 0.0
-            y: 0.0
-            z: 0.0
-      tof_pointcloud_sensor_13:
-        fov:
-          horizontal: 0.7853981852531433
-          vertical: 0.7853981852531433
-        measurement_interval_ms: 100
-        number_of_zones:
-          horizontal: 8
-          vertical: 8
-        sensor_id: 1
-        transform:
-          orientation:
-            pitch: 0.0
-            roll: 0.0
-            yaw: 0.0
-          translation:
-            x: 0.0
-            y: 0.0
-            z: 0.0
-      tof_pointcloud_sensor_14:
-        fov:
-          horizontal: 0.7853981852531433
-          vertical: 0.7853981852531433
-        measurement_interval_ms: 100
-        number_of_zones:
-          horizontal: 8
-          vertical: 8
-        sensor_id: 1
-        transform:
-          orientation:
-            pitch: 0.0
-            roll: 0.0
-            yaw: 0.0
-          translation:
-            x: 0.0
-            y: 0.0
-            z: 0.0
-      tof_pointcloud_sensor_8:
-        fov:
-          horizontal: 0.7853981852531433
-          vertical: 0.7853981852531433
-        measurement_interval_ms: 100
-        number_of_zones:
-          horizontal: 8
-          vertical: 8
-        sensor_id: 1
-        transform:
-          orientation:
-            pitch: 0.0
-            roll: 0.0
-            yaw: 0.0
-          translation:
-            x: 0.0
-            y: 0.0
-            z: 0.0
-      tof_pointcloud_sensor_9:
-        fov:
-          horizontal: 0.7853981852531433
-          vertical: 0.7853981852531433
-        measurement_interval_ms: 100
-        number_of_zones:
-          horizontal: 8
-          vertical: 8
-        sensor_id: 1
-        transform:
-          orientation:
-            pitch: 0.0
-            roll: 0.0
-            yaw: 0.0
-          translation:
-            x: 0.0
-            y: 0.0
-            z: 0.0
-
