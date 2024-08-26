@@ -32,6 +32,7 @@ public:
         )
       )
   {
+    // creating HAL objects
     auto shield = std::dynamic_pointer_cast<CanGatewayShield>(_hardware_interface);
     auto factory = HardwareComponentFactory(shield);
     // _timer_process_status_report = create_wall_timer(100ms, [shield]{ shield->processStatusReport(); });
@@ -44,6 +45,9 @@ public:
       factory.addMotorController(motor_controller_name, hardware_parameter);
     }
 
+    // Lighting
+    factory.addLighting();
+
     // ToF Sensor Ring
     std::vector<std::string> tof_sensors_left  = {"front", "rear"};
     std::vector<std::string> tof_sensors_right = {"front", "rear"};
@@ -54,7 +58,7 @@ public:
     // IMU Sensor
     factory.addImuSensor("imu", 0x381);
 
-    // Initialize
+    // Initialize using created factory
     initialize(factory);
     shield->registerComponentInput(_detect_charging_component);
     _mode_state_machine.switchToMode(eduart::robot::RobotMode::INACTIVE);

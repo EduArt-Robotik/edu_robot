@@ -20,9 +20,14 @@ using can::message::lighting::SetLighting;
 using can::message::PROTOCOL;
 using can::Request;
 
+void LightingGroup::processSetValue(const Color& color, const robot::Lighting::Mode& mode)
+{
+  LightingHardwareManager::instance().processSetValue(_name, color, mode);
+}
+
 LightingHardwareManager::LightingHardwareManager()
 {
-  const std::array<std::string, 5> lighting_name = {"all", "front", "back", "left_side", "right_side"};
+  const std::array<std::string, 5> lighting_name = {"all", "head", "back", "left_side", "right_side"};
 
   for (const auto& name : lighting_name) {
     _lighting_group[name] = std::make_shared<LightingGroup>(name);

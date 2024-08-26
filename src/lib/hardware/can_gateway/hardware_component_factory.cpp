@@ -18,17 +18,9 @@ namespace robot {
 namespace hardware {
 namespace can_gateway {
 
-
-void LightingGroup::processSetValue(const Color& color, const robot::Lighting::Mode& mode)
-{
-  LightingHardwareManager::instance().processSetValue(_name, color, mode);
-}
-
-
-
 HardwareComponentFactory& HardwareComponentFactory::addLighting()
 {
-  const std::array<std::string, 5> lighting_name = {"all", "front", "back", "left_side", "right_side"};
+  const std::array<std::string, 5> lighting_name = {"all", "head", "back", "left_side", "right_side"};
 
   LightingHardwareManager::instance().initialize(
     _shield->getExecuter(), _shield->getCommunicator(2), _shield->getCommunicator(1)
