@@ -278,6 +278,38 @@ struct Response : public message::MessageFrame<element::Int16, // temperature me
 
 } // end namespace can_gateway_shield
 
+namespace lighting {
+
+struct Sync : public message::NoResponseMessageFrame<element::Command<PROTOCOL::LIGHTING::COMMAND::BEAT>,
+                                                     element::Uint8, // new counter value
+                                                     element::Uint8> // flag for left side
+{
+  inline static TxMessageDataBuffer serialize(
+    const std::uint32_t can_address, const std::uint8_t new_counter_value, const bool left_side)
+  {
+    return message::MessageFrame<element::Command<PROTOCOL::LIGHTING::COMMAND::BEAT>, element::Uint8, element::Uint8>::serialize(
+      can_address, 0, new_counter_value, left_side ? 1 : 0
+    );
+  }
+};
+
+template <Byte Command>
+struct SetLighting : public message::NoResponseMessageFrame<element::Command<Command>, // lighting set command
+                                                            element::Uint8, // color r
+                                                            element::Uint8, // color g
+                                                            element::Uint8> // color b
+{
+  inline static TxMessageDataBuffer serialize(
+    const std::uint32_t can_address, const std::uint8_t red, const std::uint8_t green, const std::uint8_t blue)
+  {
+    return message::MessageFrame<element::Command<Command>, element::Uint8, element::Uint8, element::Uint8>::serialize(
+      can_address, 0, red, green, blue
+    );
+  }  
+};
+
+} // end namespace lighting
+
 } // end namespace message
 } // end namespace can
 } // end namespace can_gateway

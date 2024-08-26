@@ -46,6 +46,21 @@ struct PROTOCOL {
       static constexpr Byte VOLTAGE = 0x02;
     };
   };
+  struct LIGHTING {
+    struct COMMAND {
+      static constexpr Byte BEAT        = 1; // Heartbeat of IOTShield for synchronizing attached devices
+      static constexpr Byte LIGHTS_OFF  = 2; // Lights off
+      static constexpr Byte DIM_LIGHT   = 3; // Dimmed headlight
+      static constexpr Byte HIGH_BEAM   = 4; // high beam headlight
+      static constexpr Byte FLASH_ALL   = 5; // Flash lights
+      static constexpr Byte FLASH_LEFT  = 6; // Flash lights to the left
+      static constexpr Byte FLASH_RIGHT = 7; // Flash lights to the right
+      static constexpr Byte PULSATION   = 8; // Pulsation
+      static constexpr Byte ROTATION    = 9; // Rotating light
+      static constexpr Byte RUNNING     = 10;// Running light
+      static constexpr Byte DISTANCE    = 11;// Indicate distance by color
+    };
+  };
 };
 
 } // end namespace message

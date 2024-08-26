@@ -67,6 +67,42 @@ void Eduard::initialize(eduart::robot::HardwareComponentFactory& factory)
     registerMotorController(motor_controller);
   }
 
+  // Lightings
+  registerLighting(std::make_shared<robot::Lighting>(
+    "head",
+    COLOR::DEFAULT::HEAD,
+    1.0f,
+    factory.hardware().at("head")->cast<robot::Lighting::ComponentInterface>()
+  ));
+  registerLighting(std::make_shared<robot::Lighting>(
+    "right_side",
+    COLOR::DEFAULT::HEAD,
+    1.0f,
+    factory.hardware().at("right_side")->cast<robot::Lighting::ComponentInterface>()
+  ));
+  registerLighting(std::make_shared<robot::Lighting>(
+    "left_side",
+    COLOR::DEFAULT::BACK,
+    1.0f,
+    factory.hardware().at("left_side")->cast<robot::Lighting::ComponentInterface>()
+  ));
+  registerLighting(std::make_shared<robot::Lighting>(
+    "back",
+    COLOR::DEFAULT::BACK,
+    1.0f,
+    factory.hardware().at("back")->cast<robot::Lighting::ComponentInterface>()
+  ));
+
+  // Use all representation to set a initial light.
+  auto lighting_all = std::make_shared<robot::Lighting>(
+    "all",
+    COLOR::DEFAULT::HEAD,
+    1.0f,
+    factory.hardware().at("all")->cast<robot::Lighting::ComponentInterface>()
+  );
+  lighting_all->setColor(COLOR::DEFAULT::BACK, Lighting::Mode::RUNNING);
+  registerLighting(lighting_all);
+
   // IMU Sensor
   SensorImu::Parameter imu_parameter;
   imu_parameter.raw_data_mode = false;

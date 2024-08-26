@@ -27,16 +27,8 @@ public:
   void initialize(const Lighting::Parameter& parameter) override;
 
 private:
-  void processSending();
-
   std::string _name;
   std::shared_ptr<CommunicatorNode> _communication_node;
-
-  struct {
-    Color color;
-    Lighting::Mode mode = Lighting::Mode::OFF;
-    std::mutex mutex;
-  } _data;  
 };
 
 } // end namespace ethernet

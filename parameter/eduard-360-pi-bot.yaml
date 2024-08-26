@@ -85,7 +85,7 @@
         input: 1024
         output: 1152
       control_frequency: 16000
-      encoder_inverted: false
+      encoder_inverted: true
       encoder_ratio: 2048.0
       gear_ratio: 89.0
       timeout_ms: 500
@@ -96,7 +96,7 @@
         input: 1025
         output: 1153
       control_frequency: 16000
-      encoder_inverted: false
+      encoder_inverted: true
       encoder_ratio: 2048.0
       gear_ratio: 89.0
       timeout_ms: 500
