@@ -127,7 +127,7 @@ void SensorImu::processMeasurementData(
   }
   else if (_parameter.publish_orientation_without_yaw_tf) {
     // Estimate orientation from linear acceleration --> without yaw angle.
-    const Eigen::Vector3d ground_reference(0.0, 0.0, -9.81);
+    const Eigen::Vector3d ground_reference(0.0, 0.0, 9.81);
     const Eigen::Quaterniond q_without_yaw = Eigen::Quaterniond::FromTwoVectors(linear_acceleration, ground_reference);
 
     tf_msg.transform.rotation.x = q_without_yaw.x();

@@ -139,16 +139,16 @@ struct MeasurementRaw : public message::MessageFrame<element::Uint8, // measurem
   }
   inline static Eigen::Vector3d linearAcceleration(const RxMessageDataBuffer& rx_buffer) {
     return Eigen::Vector3d(
-      static_cast<double>(deserialize<2>(rx_buffer)) / 1000.0f,
-      static_cast<double>(deserialize<3>(rx_buffer)) / 1000.0f,
-      static_cast<double>(deserialize<4>(rx_buffer)) / 1000.0f
+      -static_cast<double>(deserialize<3>(rx_buffer)) / 1000.0f,
+      -static_cast<double>(deserialize<4>(rx_buffer)) / 1000.0f,
+      static_cast<double>(deserialize<2>(rx_buffer)) / 1000.0f
     );
   }
   inline static Eigen::Vector3d angularVelocity(const RxMessageDataBuffer& rx_buffer) {
     return Eigen::Vector3d(
-      static_cast<double>(deserialize<2>(rx_buffer)) / 1000.0f,
-      static_cast<double>(deserialize<3>(rx_buffer)) / 1000.0f,
-      static_cast<double>(deserialize<4>(rx_buffer)) / 1000.0f    
+      -static_cast<double>(deserialize<3>(rx_buffer)) / 1000.0f,
+      -static_cast<double>(deserialize<4>(rx_buffer)) / 1000.0f,
+      static_cast<double>(deserialize<2>(rx_buffer)) / 1000.0f    
     );
   }
 };
