@@ -44,7 +44,7 @@ public:
         motor_controller_name, {}, *this);
       factory.addMotorController(motor_controller_name, hardware_parameter);
     }
-
+    
     // Lighting
     factory.addLighting();
 

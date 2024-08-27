@@ -61,12 +61,12 @@ void LightingHardwareManager::processSetValue(const std::string& name, const Col
   // HACK! At the moment each light can't controlled separately.
   switch (mode) {
   case Mode::FLASH:
-    if (name == "left") {
+    if (name == "left_side") {
       auto request = Request::make_request<SetLighting<PROTOCOL::LIGHTING::COMMAND::FLASH_LEFT>>(
         _parameter.can_address, color.r, color.g, color.b);
       _communication_node_left->sendRequest(std::move(request), 100ms);
     }
-    else if (name == "right") {
+    else if (name == "right_side") {
       auto request = Request::make_request<SetLighting<PROTOCOL::LIGHTING::COMMAND::FLASH_RIGHT>>(
         _parameter.can_address, color.r, color.g, color.b);
       _communication_node_right->sendRequest(std::move(request), 100ms);
