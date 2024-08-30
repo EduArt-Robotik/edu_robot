@@ -116,16 +116,16 @@
         number_of_zones:
           horizontal: 8
           vertical: 8
-        sensor_id: 1
+        sensor_id: 2
         transform:
           orientation:
             pitch: 0.0
-            roll: 0.0
-            yaw: 0.0
+            roll: -1.570796327
+            yaw: -1.570796327
           translation:
-            x: 0.0
-            y: 0.0
-            z: 0.0
+            x: 0.17
+            y: 0.063
+            z: 0.045
       measurement_interval: 100
       rear:
         fov:
@@ -135,16 +135,16 @@
         number_of_zones:
           horizontal: 8
           vertical: 8
-        sensor_id: 2
+        sensor_id: 1
         transform:
           orientation:
-            pitch: 0.0
+            pitch: 1.570796327
             roll: 0.0
-            yaw: 0.0
+            yaw: 3.141592654
           translation:
-            x: 0.0
-            y: 0.0
-            z: 0.0
+            x: -0.17
+            y: 0.063
+            z: 0.05
     tof_sensor_ring_right:
       can_id:
         measurement_complete: 776
@@ -157,16 +157,16 @@
         number_of_zones:
           horizontal: 8
           vertical: 8
-        sensor_id: 1
+        sensor_id: 2
         transform:
           orientation:
             pitch: 0.0
-            roll: 0.0
-            yaw: 0.0
+            roll: 1.570796327
+            yaw: 1.570796327
           translation:
-            x: 0.0
-            y: 0.0
-            z: 0.0
+            x: 0.17
+            y: -0.063
+            z: 0.045
       measurement_interval: 100
       rear:
         fov:
@@ -176,13 +176,13 @@
         number_of_zones:
           horizontal: 8
           vertical: 8
-        sensor_id: 2
+        sensor_id: 1
         transform:
           orientation:
-            pitch: 0.0
+            pitch: 1.570796327
             roll: 0.0
-            yaw: 0.0
+            yaw: 3.141592654
           translation:
-            x: 0.0
-            y: 0.0
-            z: 0.0
+            x: -0.17
+            y: -0.063
+            z: 0.05
