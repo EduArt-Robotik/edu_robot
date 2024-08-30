@@ -8,17 +8,17 @@
       axis:
         forward: 1
         left: 0
-        throttle: 3
-        turn: 2
+        throttle: 2
+        turn: 3
 
       button: 
         disable: 8
         enable: 9
-        indicate_operation: 1
-        indicate_parking: 3
+        indicate_operation: 2
+        indicate_parking: 0
         indicate_turn_left: 4
         indicate_turn_right: 5
-        indicate_warning: 13
+        indicate_warning: 12
         override_collision_avoidance: 7
-        switch_to_mecanum_drive_kinematic: 2
-        switch_to_skid_drive_kinematic: 0
+        switch_to_mecanum_drive_kinematic: 1
+        switch_to_skid_drive_kinematic: 3
