@@ -2,9 +2,9 @@
 
 ## Installing Ubuntu on Raspberry Pi
 
-We currently recommend installing Ubuntu 24.04 LTS on the Raspberry. There is a ROS2 installation for this distribution, which is available as a binary.
+We currently recommend installing Raspian on the Raspberry.
 
-Please visit this [link](https://ubuntu.com/download/raspberry-pi) for installation instructions. We recommend that you only install the server version. However, it is up to you to decide exactly which version to install. You are also free to install the desktop version.
+Please visit this [link](https://www.raspberrypi.com/software/) for installation instructions. We recommend that you only install the server version. However, it is up to you to decide exactly which version to install. You are also free to install the desktop version.
 
 ### Flashing SD Card 
 
@@ -36,6 +36,12 @@ Open the file "config.txt" using nano
 
 ```bash
 sudo nano /boot/firmware/config.txt
+```
+
+Make sure the SPI is enabled. Following line must be active:
+
+```bash
+dtparam=spi=on
 ```
 
 And add following lines to the file:
@@ -127,6 +133,26 @@ All three CAN interface should be listed and in state UP:
     link/can 
 5: eduart-can2: <NOARP,UP,LOWER_UP,ECHO> mtu 16 qdisc pfifo_fast state UP group default qlen 10
     link/can
+```
+
+## Increase Power Limitation
+
+Edit EEPROM entry ba
+
+```bash
+ sudo -E rpi-eeprom-config --edit
+```
+
+and put following line to the end of the file:
+
+```bash
+PSU_MAX_CURRENT=5000
+```
+
+Now reboot to apply the changes.
+
+```bash
+sudo reboot
 ```
 
 ## Install ROS Control Software
