@@ -33,7 +33,7 @@ services:
         network_mode: "host"
         devices:
             - '/dev:/dev'
-        command: bash -c 'cd /home/user/ros/launch_content; ros2 launch robot_remote_control.launch.py'            
+        command: bash -c 'cd /home/user/ros/launch_content; ros2 launch robot_remote_control_raspberry.launch.py'            
         volumes:
             - '/dev:/dev'
             - './launch_content:/home/user/ros/launch_content:r'            
