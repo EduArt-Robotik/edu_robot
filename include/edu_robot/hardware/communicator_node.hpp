@@ -37,6 +37,7 @@ public:
 
     // Deactivate all data endpoints.
     for (auto & endpoint : _data_endpoint) {
+      // \todo it crashes here! fix me!
       endpoint->deactivate();
     }
   }

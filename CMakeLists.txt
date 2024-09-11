@@ -140,6 +140,7 @@ ament_export_dependencies(
   tf2
   tf2_ros
   tf2_geometry_msgs
+  tf2_sensor_msgs
   std_msgs
   geometry_msgs
   nav_msgs

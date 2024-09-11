@@ -3,7 +3,7 @@ version: "3.0"
 services:
     eduard-raspberry-pi:
         image: eduartrobotik/eduart-robot:0.5.0
-        container_name: eduard-ipcbot-0.5.0
+        container_name: eduard-raspberry-0.5.0
         user: user
         restart: always
         privileged: true
@@ -13,7 +13,7 @@ services:
         environment:
             - EDU_ROBOT_NAMESPACE=${EDU_ROBOT_NAMESPACE}
         network_mode: "host"
-        command: bash -c 'cd /home/user/ros/launch_content; ros2 launch eduard-raspberry-pi.launch.py'
+        command: bash -c 'cd /home/user/ros/launch_content; ros2 launch eduard-360-pi.launch.py'
         volumes:
             - './launch_content:/home/user/ros/launch_content:r'
         devices:
@@ -21,7 +21,7 @@ services:
 
     eduard-robot-control:
         image: eduartrobotik/eduard-robot-control-ipcbot:0.3.1
-        container_name: eduard-robot-control-ipcbot-0.3.1
+        container_name: eduard-robot-control-raspberry-0.3.1
         user: user
         restart: always
         privileged: true
@@ -33,7 +33,7 @@ services:
         network_mode: "host"
         devices:
             - '/dev:/dev'
-        command: bash -c 'cd /home/user/ros/launch_content; ros2 launch robot_remote_control.launch.py'            
+        command: bash -c 'cd /home/user/ros/launch_content; ros2 launch robot_remote_control_raspberry.launch.py'            
         volumes:
             - '/dev:/dev'
             - './launch_content:/home/user/ros/launch_content:r'            

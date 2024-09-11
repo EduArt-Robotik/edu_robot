@@ -32,6 +32,7 @@ public:
         )
       )
   {
+    // creating HAL objects
     auto shield = std::dynamic_pointer_cast<CanGatewayShield>(_hardware_interface);
     auto factory = HardwareComponentFactory(shield);
     // _timer_process_status_report = create_wall_timer(100ms, [shield]{ shield->processStatusReport(); });
@@ -43,26 +44,21 @@ public:
         motor_controller_name, {}, *this);
       factory.addMotorController(motor_controller_name, hardware_parameter);
     }
+    
+    // Lighting
+    factory.addLighting();
 
     // ToF Sensor Ring
-    constexpr std::size_t tof_num_sensors = 14;
-    std::vector<std::string> tof_sensor_ring_a_names;
-    std::vector<std::string> tof_sensor_ring_b_names;
-
-    for (std::size_t i = 1; i <= tof_num_sensors / 2; ++i) {
-      tof_sensor_ring_a_names.emplace_back(std::string("tof_pointcloud_sensor_") + std::to_string(i));
-    }
-    for (std::size_t i = tof_num_sensors / 2 + 1; i <= tof_num_sensors; ++i) {
-      tof_sensor_ring_b_names.emplace_back(std::string("tof_pointcloud_sensor_") + std::to_string(i));
-    }
+    std::vector<std::string> tof_sensors_left  = {"front", "rear"};
+    std::vector<std::string> tof_sensors_right = {"front", "rear"};
 
     factory.addTofRingSensor(
-      "tof_sensor_ring", tof_sensor_ring_a_names, tof_sensor_ring_b_names, *this);
+      "tof_sensor_ring", tof_sensors_left, tof_sensors_right, *this);
 
     // IMU Sensor
     factory.addImuSensor("imu", 0x381);
 
-    // Initialize
+    // Initialize using created factory
     initialize(factory);
     shield->registerComponentInput(_detect_charging_component);
     _mode_state_machine.switchToMode(eduart::robot::RobotMode::INACTIVE);

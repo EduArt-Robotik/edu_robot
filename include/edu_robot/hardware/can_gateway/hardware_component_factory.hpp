@@ -28,7 +28,7 @@ public:
   HardwareComponentFactory(std::shared_ptr<CanGatewayShield> shield) : _shield(shield) { }
   ~HardwareComponentFactory() override = default;
 
-  HardwareComponentFactory& addLighting(const std::string& lighting_name);
+  HardwareComponentFactory& addLighting();
   HardwareComponentFactory& addMotorController(
     const std::string& controller_name, const MotorControllerHardware::Parameter& parameter);
   HardwareComponentFactory& addRangeSensor(

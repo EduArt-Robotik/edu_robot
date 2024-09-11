@@ -18,11 +18,17 @@ namespace robot {
 namespace hardware {
 namespace can_gateway {
 
-HardwareComponentFactory& HardwareComponentFactory::addLighting(const std::string& lighting_name)
+HardwareComponentFactory& HardwareComponentFactory::addLighting()
 {
-  _hardware[lighting_name] = std::make_unique<can_gateway::LightingHardware>(
-    lighting_name, _shield->getExecuter(), _shield->getCommunicator(0)
+  const std::array<std::string, 5> lighting_name = {"all", "head", "back", "left_side", "right_side"};
+
+  LightingHardwareManager::instance().initialize(
+    _shield->getExecuter(), _shield->getCommunicator(2), _shield->getCommunicator(1)
   );
+
+  for (const auto& name : lighting_name) {
+    _hardware[name] = LightingHardwareManager::instance().lighting(name);
+  }
 
   return *this;
 } 
@@ -62,10 +68,10 @@ HardwareComponentFactory& HardwareComponentFactory::addTofRingSensor(
   );
 
   auto left_ring = std::make_shared<SensorTofRingHardware>(
-    sensor_name, parameter_left_sensors, ros_node, _shield->getExecuter(), _shield->getCommunicator(1)
+    sensor_name, parameter_left_sensors, ros_node, _shield->getExecuter(), _shield->getCommunicator(2)
   );
   auto right_ring = std::make_shared<SensorTofRingHardware>(
-    sensor_name, parameter_right_sensors, ros_node, _shield->getExecuter(), _shield->getCommunicator(2)
+    sensor_name, parameter_right_sensors, ros_node, _shield->getExecuter(), _shield->getCommunicator(1)
   );
   std::vector<std::shared_ptr<SensorPointCloud::SensorInterface>> ring = { left_ring, right_ring };
 
