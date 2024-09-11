@@ -44,7 +44,7 @@ Make sure the SPI is enabled. Following line must be active:
 dtparam=spi=on
 ```
 
-And add following lines to the file:
+And add following lines to the file end:
 
 ```bash
 dtoverlay=spi1-2cs
@@ -206,6 +206,27 @@ locale  # verify settings
 * Enable Required Repositories
 
 ```bash
+# debian
+sudo apt update && sudo apt install -y \
+  git \
+  colcon \
+  python3-rosdep2 \
+  vcstool \
+  wget \
+  python3-flake8-blind-except \
+  python3-flake8-class-newline \
+  python3-flake8-deprecated \
+  python3-mypy \
+  python3-pip \
+  python3-pytest \
+  python3-pytest-cov \
+  python3-pytest-mock \
+  python3-pytest-repeat \
+  python3-pytest-rerunfailures \
+  python3-pytest-runner \
+  python3-pytest-timeout  
+
+# ubuntu
 sudo apt install software-properties-common
 sudo add-apt-repository universe
 sudo apt update && sudo apt install curl -y
@@ -213,6 +234,18 @@ sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
 ```
 
+* Install Prerequisites
+
+```bash
+sudo apt install -y \
+  tar \
+  bzip2 \
+  wget \
+  libfastrtps-dev \
+  libcycloneddsidl0
+```
+
+>>>>>>> Stashed changes
 * Install Development Tools
 
 ```bash
@@ -220,13 +253,32 @@ sudo apt update && sudo apt upgrade && sudo apt install ros-dev-tools
 ```
 
 * Install ROS2
-
 ```bash
-sudo apt install ros-jazzy-ros-base
+mkdir -p ~/ros2_jazzy/src
+cd ~/ros2_jazzy
+wget https://raw.githubusercontent.com/ros2/ros2/jazzy/ros2.repos
+# removing repositories already in Debian
+# sed -i '/\(eProsima\|ignition\|osrf\|tango\|urdfdom\|tinyxml_\|loader\|pluginlib\|test_interface\|testing_tools\|fixture\|gz_\)/,+3d' ros2.repos
+vcs import src < ros2.repos
 ```
 
-* Source ROS into your .bashrc
+* Install ROS2 dependencies:
+
 ```bash
-echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
+# cloning extra sources required for RViz
+cd ~/ros2_jazzy/src
+git clone https://github.com/gazebo-release/gz_math_vendor.git --branch jazzy
+git clone https://github.com/gazebo-release/gz_cmake_vendor.git --branch jazzy
+git clone https://github.com/gazebo-release/gz_utils_vendor.git --branch jazzy
+git clone https://github.com/ros2/rcutils.git --branch jazzy
+
+# installing dependencies
+rosdep update
+rosdep install --from-paths src --ignore-src --rosdistro jazzy -y --skip-keys "fastcdr rti-connext-dds-6.0.1 urdfdom_headers python3-vcstool"
 ```
-* 
+
+* Building ROS2
+
+```bash
+colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --event-handlers console_direct+
+```
