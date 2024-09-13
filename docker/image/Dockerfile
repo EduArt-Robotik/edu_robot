@@ -1,4 +1,4 @@
-FROM eduartrobotik/eduart-ros-base:humble-1.2.2
+FROM eduartrobotik/eduart-ros-base:jazzy-1.0.0
 
 ENV USER user
 ENV DEBIAN_FRONTEND=noninteractive
@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # install mraa lib for UART communication in shield node
 USER root
 RUN apt-get update \
-    && apt-get install -y software-properties-common git build-essential swig3.0 python2-dev python2 python-dev-is-python3 libnode-dev cmake libjson-c-dev \
+    && apt-get install -y software-properties-common git build-essential swig3.0 python-dev-is-python3 libnode-dev cmake libjson-c-dev \
     # todo master brauch is not good, but the only one how compiles.
     && git clone --branch master https://github.com/eclipse/mraa.git \
     && cd mraa \
