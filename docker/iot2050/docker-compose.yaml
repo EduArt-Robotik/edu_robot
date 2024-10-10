@@ -23,7 +23,7 @@ services:
             - dialout
 
     eduard-robot-control:
-        image: eduartrobotik/eduard-robot-control-sdl-joy:0.4.0
+        image: eduartrobotik/eduard-robot-control:0.4.0
         container_name: eduard-robot-control-iotbot-0.4.0
         user: root
         restart: always

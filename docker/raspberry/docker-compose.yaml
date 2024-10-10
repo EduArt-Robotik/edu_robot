@@ -21,7 +21,7 @@ services:
             - '/dev:/dev'
 
     eduard-robot-control:
-        image: eduartrobotik/eduard-robot-control-linux-joy:0.4.0
+        image: eduartrobotik/eduard-robot-control:0.4.0
         container_name: eduard-robot-control-raspberry-0.4.0
         user: user
         restart: always
