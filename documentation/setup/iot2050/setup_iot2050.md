@@ -171,6 +171,18 @@ Now define the variable. Here in this example 'eduard/blue' was chosen. This nam
 EDU_ROBOT_NAMESPACE=eduard/blue
 ```
 
+Another setting that we set via this file is the ROS middleware used. This can be set system-wide via an environment variable. There are two EduArt robots to choose from:
+
+* rmw_fastrtps_cpp (FastRTPS)
+* rmw_cyclonedds_cpp (CycloneDDS)
+
+By default the FastRTPS is used. If you want to use a different middleware, please define the following variables in the environment file with your preferred middleware.
+
+```bash
+# ROS2 Middleware
+RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+```
+
 **For nano beginners:** to leave nano press *Strg+x* followed by *y* followed by *Return*.
 
 You have to log out and log in again for the setting to take effect.
