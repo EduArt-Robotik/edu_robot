@@ -21,7 +21,7 @@ def generate_launch_description():
 
     eduard_ipc = Node(
       package='edu_robot',
-      executable='ethernet-gateway',
+      executable='eduard-ethernet-gateway-bot',
       name='eduard',
       parameters=[parameter_file],
       namespace=EnvironmentVariable('EDU_ROBOT_NAMESPACE', default_value="eduard"),
