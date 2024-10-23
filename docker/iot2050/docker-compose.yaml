@@ -13,6 +13,7 @@ services:
         environment:
             - EDU_ROBOT_NAMESPACE=${EDU_ROBOT_NAMESPACE}
             - RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION}
+            - CYCLONEDDS_URI=/home/user/ros/launch_content/cyclone_profile.xml         
         network_mode: "host"
         command: bash -c 'cd /home/user/ros/launch_content; ros2 launch eduard-iot2050.launch.py'
         volumes:
@@ -34,6 +35,7 @@ services:
         environment:
             - EDU_ROBOT_NAMESPACE=${EDU_ROBOT_NAMESPACE}
             - RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION}
+            - CYCLONEDDS_URI=/home/user/ros/launch_content/cyclone_profile.xml         
         network_mode: "host"
         command: bash -c 'cd /home/user/ros/launch_content; ros2 launch robot_remote_control_iot2050.launch.py'
         volumes:
