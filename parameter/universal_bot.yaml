@@ -33,111 +33,94 @@
           x: -0.14
           y: 0.08
         wheel_diameter: 0.113
+
+    motor_controller_0:
+      can_id: 0
+      control_frequency: 16000
+      timeout_ms: 500
+      encoder_inverted: true
+      encoder_ratio: 2048.0
+      gear_ratio: 89.0
+      weight_low_pass_encoder: 0.8
+      weight_low_pass_set_point: 0.8      
+
+    motor_controller_1:
+      can_id: 1
+      control_frequency: 16000
+      timeout_ms: 500
+      encoder_inverted: true
+      encoder_ratio: 2048.0
+      gear_ratio: 89.0
+      weight_low_pass_encoder: 0.8
+      weight_low_pass_set_point: 0.8   
+
+    motor_controller_2:
+      can_id: 2
+      control_frequency: 16000
+      timeout_ms: 500
+      encoder_inverted: true
+      encoder_ratio: 2048.0
+      gear_ratio: 89.0
+      weight_low_pass_encoder: 0.8
+      weight_low_pass_set_point: 0.8      
+
     motor_a:
       closed_loop: true
-      control_frequency: 16000
-      encoder_inverted: true
-      encoder_ratio: 4096.0
-      gear_ratio: 100.0
-      inverted: false
-      max_rpm: 100.0
-      index: 1
+      index: 0
+      max_rpm: 90.0
       pid:
         kd: 0.0
-        ki: 5.0
+        ki: 7.0
         kp: 0.5
-      weight_low_pass_encoder: 0.3
-      weight_low_pass_set_point: 0.2
+  
     motor_b:
       closed_loop: true
-      control_frequency: 16000
-      encoder_inverted: true
-      encoder_ratio: 4096.0
-      gear_ratio: 100.0
-      inverted: false
-      max_rpm: 100.0
-      index: 2
+      index: 0
+      max_rpm: 90.0
       pid:
         kd: 0.0
-        ki: 5.0
+        ki: 7.0
         kp: 0.5
-      weight_low_pass_encoder: 0.3
-      weight_low_pass_set_point: 0.2
+
     motor_c:
       closed_loop: true
-      control_frequency: 16000
-      encoder_inverted: true
-      encoder_ratio: 4096.0
-      gear_ratio: 100.0
-      inverted: false
-      max_rpm: 100.0
-      index: 3
+      index: 0
+      max_rpm: 90.0
       pid:
         kd: 0.0
-        ki: 5.0
+        ki: 7.0
         kp: 0.5
-      weight_low_pass_encoder: 0.3
-      weight_low_pass_set_point: 0.2
+
     motor_d:
       closed_loop: true
-      control_frequency: 16000
-      encoder_inverted: true
-      encoder_ratio: 4096.0
-      gear_ratio: 100.0
-      inverted: false
-      max_rpm: 100.0
-      index: 4
+      index: 0
+      max_rpm: 90.0
       pid:
         kd: 0.0
-        ki: 5.0
+        ki: 7.0
         kp: 0.5
-      weight_low_pass_encoder: 0.3
-      weight_low_pass_set_point: 0.2
+
     motor_e:
       closed_loop: true
-      control_frequency: 16000
-      encoder_inverted: true
-      encoder_ratio: 4096.0
-      gear_ratio: 100.0
-      inverted: false
-      max_rpm: 100.0
-      index: 5
+      index: 0
+      max_rpm: 90.0
       pid:
         kd: 0.0
-        ki: 5.0
+        ki: 7.0
         kp: 0.5
-      weight_low_pass_encoder: 0.3
-      weight_low_pass_set_point: 0.2
+
     motor_f:
       closed_loop: true
-      control_frequency: 16000
-      encoder_inverted: true
-      encoder_ratio: 4096.0
-      gear_ratio: 100.0
-      inverted: false
-      max_rpm: 100.0
-      index: 6
+      index: 0
+      max_rpm: 90.0
       pid:
         kd: 0.0
-        ki: 5.0
+        ki: 7.0
         kp: 0.5
-      weight_low_pass_encoder: 0.3
-      weight_low_pass_set_point: 0.2
+  
     number_of_axes: 3
     publish_tf_odom: true
-    qos_overrides:
-      /parameter_events:
-        publisher:
-          depth: 1000
-          durability: volatile
-          history: keep_last
-          reliability: reliable
-      /tf:
-        publisher:
-          depth: 100
-          durability: volatile
-          history: keep_last
-          reliability: reliable
+
     tf_base_frame: base_link
     tf_footprint_frame: base_footprint
     use_sim_time: false
