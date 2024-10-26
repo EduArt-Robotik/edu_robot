@@ -16,8 +16,8 @@ def generate_launch_description():
 
     ethernet_gateway_flex_bot = Node(
       package='edu_robot',
-      executable='eduard-ethernet-gateway-bot',
-      name='ethernet_gateway_universal_bot',
+      executable='universal-ethernet-gateway-bot',
+      name='universal_ethernet_gateway_bot',
       namespace=EnvironmentVariable('EDU_ROBOT_NAMESPACE', default_value="eduard"),      
       # prefix=['gdbserver localhost:3000'],
       parameters=[parameter_file],
