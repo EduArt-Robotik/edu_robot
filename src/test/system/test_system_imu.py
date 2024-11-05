@@ -8,6 +8,7 @@ from sensor_msgs.msg import Imu
 # Globals
 _DEBUG = False
 _TOLERANCE = 0.5
+_EDUARD_NAMESPACE ='eduard/schitz'
 
 # Helper Functions
 def print_green(text):
@@ -67,7 +68,7 @@ def imu_subscriber(imu_test_node):
                 print_debug(f'Sum Acceleration: x: {imu_data["linear_accel_x"]:.4f}, y: {imu_data["linear_accel_y"]:.4f}, z: {imu_data["linear_accel_z"]:.4f}, count: {imu_data["count"]}')
 
     imu_test_node.create_subscription(
-        Imu, 'eduard/orange/imu', callback, QoSProfile(
+        Imu, _EDUARD_NAMESPACE+'/imu', callback, QoSProfile(
             reliability=QoSReliabilityPolicy.BEST_EFFORT,
             history=QoSHistoryPolicy.KEEP_LAST,
             depth=1
@@ -78,22 +79,28 @@ def imu_subscriber(imu_test_node):
 
 # Tests
 def test_z_acceleration(imu_test_node, imu_subscriber):
-    implementedTest('Z', 'All wheels on the ground, base plate is parallel to the floor', imu_test_node, imu_subscriber)
+    implementedTest('Z', 'All wheels on the ground, base plate is parallel to the floor', 9.81, imu_test_node, imu_subscriber)
 
 def test_y_acceleration(imu_test_node, imu_subscriber):
-    implementedTest('Y', 'On the right two wheels, base plate is vertical to the floor', imu_test_node, imu_subscriber)
+    implementedTest('Y', 'On the RIGHT two wheels, base plate is vertical to the floor', 9.81, imu_test_node, imu_subscriber)
+
+def test_negative_y_acceleration(imu_test_node, imu_subscriber):
+    implementedTest('Y', 'On the LEFT two wheels, base plate is vertical to the floor', -9.81, imu_test_node, imu_subscriber)
 
 def test_x_acceleration(imu_test_node, imu_subscriber):
-    implementedTest('X', 'On the back, base plate is vertical to the floor', imu_test_node, imu_subscriber)
+    implementedTest('X', 'On the BACK, base plate is vertical to the floor', 9.81,  imu_test_node, imu_subscriber)
+
+def test_negative_x_acceleration(imu_test_node, imu_subscriber):
+    implementedTest('X', 'On the FRONT, base plate is vertical to the floor', -9.81,  imu_test_node, imu_subscriber)
 
 
 # Test implementation
-def implementedTest(axis, description, node, imu_data):
+def implementedTest(axis, description, targetAcceleration, node, imu_data):
     # Wait for User to be ready.
     print('\n')
     print_blue(f'Linear {axis} Acceleration of IMU')
     print('Please place the Robot in the following way:')
-    print(f'{description}')
+    print_yellow(f'{description}')
     print('')
     
     # Wait for user input to start the test
@@ -127,11 +134,11 @@ def implementedTest(axis, description, node, imu_data):
 
     
     if (axis.lower() == 'x'):
-        checkTolerance(avg_x, 9.81, _TOLERANCE)
+        checkTolerance(avg_x, targetAcceleration, _TOLERANCE)
     elif (axis.lower() == 'y'):
-        checkTolerance(avg_y, 9.81, _TOLERANCE)
+        checkTolerance(avg_y, targetAcceleration, _TOLERANCE)
     elif (axis.lower() == 'z'):
-        checkTolerance(avg_z, 9.81, _TOLERANCE)
+        checkTolerance(avg_z, targetAcceleration, _TOLERANCE)
     else:
         pytest.fail('No vaild axis')
    
