@@ -54,6 +54,10 @@ Setup your System native and in Virtual machine.
 
 * [SLAM and Nav2](documentation/nav2/setup_nav2.md)
 
+### Devices
+
+* [Olive USB Camera](documentation/device/olive-cam.md)
+
 # Controlling the Robot
 
 ## Controller
