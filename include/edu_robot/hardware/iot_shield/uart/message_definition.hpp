@@ -91,9 +91,9 @@ struct ShieldResponse : public uart::message::Message<element::Uint8, element::I
       // Convert from [mdeg/s] to [rad/s].
       // Data are received in following order:
       // index 8 = -z, index 9 = y, index 10 = x
-      ( static_cast<double>(deserialize<10>(rx_buffer)) / 10000.0) * (2.0 * M_PI / 180.0),
-      (-static_cast<double>(deserialize< 9>(rx_buffer)) / 10000.0) * (2.0 * M_PI / 180.0),
-      ( static_cast<double>(deserialize< 8>(rx_buffer)) / 10000.0) * (2.0 * M_PI / 180.0)
+      (-static_cast<double>(deserialize< 9>(rx_buffer)) / 100.0) * (2.0 * M_PI / 180.0),
+      ( static_cast<double>(deserialize<10>(rx_buffer)) / 100.0) * (2.0 * M_PI / 180.0),
+      ( static_cast<double>(deserialize< 8>(rx_buffer)) / 100.0) * (2.0 * M_PI / 180.0)
     );
   }
   inline static constexpr float temperature(const RxMessageDataBuffer& rx_buffer) { return static_cast<float>(deserialize<9>(rx_buffer)) / 100.0f; }

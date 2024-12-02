@@ -8,7 +8,7 @@ from sensor_msgs.msg import Imu
 # Globals
 _DEBUG = False
 _TOLERANCE = 0.5
-_EDUARD_NAMESPACE ='eduard/schitz'
+_EDUARD_NAMESPACE ='eduard/blue'
 
 # Helper Functions
 def print_green(text):
