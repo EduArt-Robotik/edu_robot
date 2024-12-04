@@ -20,8 +20,7 @@ The software package 'edu_robot' provides ROS2 interface. For details please fol
 
 ## ROS2 Middleware
 
-
-|<img src='documentation/image/warning.png' height='100' width='400'/>   |    Version 0.5.0 of edu_robot switches from FarstRTPS (the ROS2 default) to Cyclone DDS as its middleware! This change is important because these two middlewares are not fully compatible. Therefore, if you update to version 0.5.0 you have to make your sure that your whole ROS infrastructure uses the same middleware!    <br> <br>    If you wish to keep FastRTPS as your middleware, you can do this by simply editing a parameter file. Please refer to [this](documentation/update/changing-middleware.md) guide on how to adjust the middleware settings for the docker containers and your system! |
+|<img src='documentation/image/warning.png' height='100' width='400'/>   |    Version 0.5.x of edu_robot switches its ROS2 middleware from FarstRTPS (the ROS2 default) to Cyclone DDS! This change is important because these two middlewares are not fully compatible. Therefore, if you update to version 0.5.x you have to make your sure that your whole ROS2 infrastructure uses the same middleware!    <br> <br>    If you wish to keep FastRTPS as your middleware, you can do this by simply editing a parameter file. Please refer to [this guide](documentation/update/changing-middleware.md) on how to adjust the middleware settings for the docker containers and your system! |
 |---|----|
 
 ## Lighting Codes
