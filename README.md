@@ -18,6 +18,20 @@ The software package 'edu_robot' provides ROS2 interface. For details please fol
 
 [ROS2 Interfaces](documentation/interface/interface.md)
 
+## ROS2 Middleware
+
+
+  <table>
+    <tr>
+      <th><img src='documentation/image/warning.png' height='200' width='500'/></th>
+      <th><p><strong>Note:</strong></p> Since version 0.5.0 the standard middleware is Cyclone DDS of edu_robot. This     must be taken into account because Cyclone DDS and FastRTPS are currently not fully compatible. So if you update from an older version to this one, data can no longer be exchanged via ROS. The middleware must match your infrastructure!
+      
+  The middleware can be parameterized here. If you want to switch to FastRTPS, you can do so [here](documentation/update/changing-middleware.md).
+     </th>
+    </tr>
+  </table>
+
+
 ## Lighting Codes
 
 | Mode | Color | Description |
