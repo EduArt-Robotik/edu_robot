@@ -45,16 +45,23 @@ docker compose up
 
 As already mentioned, every participant in the ROS2 network must use the same middleware due to compatibility concerns. This also applies to command line tools (ros2 topic list, ...). It is therefore necessary that the middleware is also switched to CycloneDDS on the system on which ROS2 is used. This is done using the same environment variable.
 
-For a temporary change, the variable can be set via an `export` command in your terminal. However, this setting is only valid for the current session!
+For a temporary change, the variable can be set via an `export` command in your terminal. However, this setting is only active for the current session!
 ```bash
-export <TODO>
+export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 ```
+----
 
 If the middleware is to be changed permanently, it is advisable to add the `export` command in the `~/.bashrc` file. For this, open the file:
 ```bash
 nano ~/.bashrc
 ```
+
 Go to the bottom of the file and add the following line:
 ```bash
-TODO
+export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+```
+
+To make the change take effect for existing terminal sessions, you need to source the file:
+```bash
+source ~/.bashrc
 ```
