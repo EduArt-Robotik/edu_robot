@@ -1,6 +1,6 @@
 # edu_robot - Control Software for IoT Shield and Ethernet Gateway
 
-Welcome to the EduArt ROS2 robot control software. In first place it provides a ROS2 node for controlling and monitoring EduArt robots, i.e., the robot Eduard in different hardware realizations like the IoT Bot, the IPC Bot or a custom build robot relying on our stackable drive system. There is also a [digital twin](https://github.com/EduArt-Robotik/edu_simulation) in the making, which is not yet feature complete. But, some basic interfaces are already implemented.
+Welcome to the EduArt ROS2 robot control software. In first place, it provides a ROS2 node for controlling and monitoring EduArt robots, i.e., the robot Eduard in different hardware realizations like the IoT Bot, the IPC Bot or a custom build robot relying on our stackable drive system. There is also a [digital twin](https://github.com/EduArt-Robotik/edu_simulation) in the making, which is not yet feature complete. But, some basic interfaces are already implemented.
 
 These packages are also designed for being used in a robot fleet setup. Basically, they are able to handle multiple robot instances at the same time while using namespaces.
 
@@ -21,16 +21,8 @@ The software package 'edu_robot' provides ROS2 interface. For details please fol
 ## ROS2 Middleware
 
 
-  <table>
-    <tr>
-      <th><img src='documentation/image/warning.png' height='200' width='500'/></th>
-      <th><p><strong>Note:</strong></p> Since version 0.5.0 the standard middleware is Cyclone DDS of edu_robot. This     must be taken into account because Cyclone DDS and FastRTPS are currently not fully compatible. So if you update from an older version to this one, data can no longer be exchanged via ROS. The middleware must match your infrastructure!
-      
-  The middleware can be parameterized here. If you want to switch to FastRTPS, you can do so [here](documentation/update/changing-middleware.md).
-     </th>
-    </tr>
-  </table>
-
+|<img src='documentation/image/warning.png' height='200' width='500'/>   |    Version 0.5.0 of edu_robot switches from FarstRTPS (the ROS2 default) to Cyclone DDS as its middleware! This change is important because these two middlewares are not fully compatiple. Therefore, if you update to version 0.5.0 you have to make your sure that your whole ROS infrastructure uses the same middleware! <br> If you wish to keep FastRTPS as your middleware, you can do this by simply editing a parameter file. Please refere to [this](documentation/update/changing-middleware.md) guide on how to adjust the middleware settings for the docker containers and your system! |
+|---|----|
 
 ## Lighting Codes
 
