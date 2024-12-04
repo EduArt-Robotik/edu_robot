@@ -1,6 +1,6 @@
 FROM eduartrobotik/eduart-ros-base:jazzy-1.0.1
 
-ENV USER user
+ENV USER=user
 ENV DEBIAN_FRONTEND=noninteractive
 
 # install mraa lib for UART communication in shield node

@@ -118,7 +118,7 @@
         ki: 7.0
         kp: 0.5
   
-    number_of_axes: 3
+    number_of_axes: 2
     publish_tf_odom: true
 
     tf_base_frame: base_link

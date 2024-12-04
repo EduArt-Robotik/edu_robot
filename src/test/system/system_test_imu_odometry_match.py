@@ -20,6 +20,7 @@ from edu_robot.msg import Mode, RobotStatusReport
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 from std_srvs.srv import Trigger
+from sensor_msgs.msg import Imu
 
 @pytest.mark.launch_test
 def generate_test_description():
@@ -53,6 +54,10 @@ class SystemTestIotBotOdometry(unittest.TestCase):
   def setUp(self):
     # Create a ROS node for tests
     namespace = 'eduard/blue'
+    self.collect_data = False
+    self.imu_data = []
+    self.odom_data = []
+
     self.node = rclpy.create_node('system_test_timeout')
     self.pub_twist = self.node.create_publisher(Twist, namespace + '/cmd_vel', 2)
     self.sub_odom = self.node.create_subscription(
@@ -62,14 +67,32 @@ class SystemTestIotBotOdometry(unittest.TestCase):
         depth=100
       )
     )
+    self.sub_imu = self.node.create_subscription(
+      Imu, namespace + '/imu', self.callbackImu, QoSProfile(
+        reliability=QoSReliabilityPolicy.BEST_EFFORT,
+        history=QoSHistoryPolicy.KEEP_LAST,
+        depth=100
+      )
+    )
     self.srv_set_mode = self.node.create_client(SetMode, namespace + '/set_mode')
     self.srv_reset_odometry = self.node.create_client(Trigger, namespace + '/reset_odometry')
-    self.odom_msg = Odometry()
-    self.odom_msg.pose.pose.position.x = 0.0
     self.terminal_settings = termios.tcgetattr(sys.stdin)
 
-  def callbackOdometry(self, msg):
-    self.odom_msg = msg
+  def callbackOdometry(self, msg : Odometry):
+    if self.collect_data is False:
+      return
+    # collecting data is in progress
+
+    # pick only yaw rate
+    self.odom_data.append(msg.twist.twist.angular.z)
+
+  def callbackImu(self, msg : Imu):
+    if self.collect_data is False:
+      return
+    # collecting data is in progress
+
+    # pick only yaw rate   
+    self.imu_data.append(msg.angular_velocity.z)
 
   def getKey(self, timeout):
     tty.setraw(sys.stdin.fileno())
@@ -98,7 +121,7 @@ class SystemTestIotBotOdometry(unittest.TestCase):
   def disableRobot(self):
     print('Disabling IotBot')
     twist_msg = Twist()
-    twist_msg.linear.x = 0.0
+    twist_msg.angular.z = 0.0
     self.pub_twist.publish(twist_msg)
 
     set_mode_request = SetMode.Request()
@@ -112,19 +135,18 @@ class SystemTestIotBotOdometry(unittest.TestCase):
 
     assert future.result().state.mode.mode is Mode.INACTIVE
 
-  def test_drive_one_meter_in_x_with_mecanum(self, launch_service, proc_output):
+  def test_compare_imu_and_odometry(self, launch_service, proc_output):
     # Wait for User to be ready.
     print('###########################################################################################')
-    print('# Test drive one meter in x direction with Mecanum                                        #')
+    print('# Compare IMU and Odometry while rotating around z axis                                   #')
     print('###########################################################################################')
-    print('Please place the IoTBot on the ground with 1m space in front of the robot.')
-    print('Please make sure the Mecanum wheels are mounted.')
-    print('Mark the starting position so you can measure the driven distance after the test finished.')
+    print('Please place the IoTBot on the ground.')
+    print('Please make sure the IoTBot can rotate.')
     print('Press any key "s" to start the test...')
     while self.getKey(0.1) != 's': pass
     print('Test is running...')
 
-    # Drive 1 meter straight in x direction.
+    # Rotate around the z axis.
     ## Reset Odometry
     print('Reset Odometry')
     assert self.srv_reset_odometry.service_is_ready() is True
@@ -134,7 +156,11 @@ class SystemTestIotBotOdometry(unittest.TestCase):
     assert future.result().success is True
 
     ## Enable Robot
+    velocity = 1.0
+    test_running = True
     twist_msg = Twist()
+    twist_msg.angular.z = velocity
+
     self.pub_twist.publish(twist_msg)
     self.enableRobot()
 
@@ -142,76 +168,54 @@ class SystemTestIotBotOdometry(unittest.TestCase):
     stamp_last_sent = time()
     stamp_start = stamp_last_sent
     wait_time_twist = 1.0 / 10.0 # 10 Hz
-    goal_distance = 1.0
-    slow_down_distance = 0.1
 
-    print('Driving One Meter in X Direction')
-    while rclpy.ok() and self.odom_msg.pose.pose.position.x < goal_distance:
-      # Calculate
-      position_diff = self.odom_msg.pose.pose.position.x - goal_distance
-      velocity_x = 0.3 if abs(position_diff) > slow_down_distance else 0.1
-
+    print('Rotating robot...')
+    while rclpy.ok() and test_running:
       # Sending Twist with 10 Hz
-      if time() - stamp_last_sent > wait_time_twist:
-        twist_msg.linear.x = velocity_x
+      stamp = time()
+
+      if stamp - stamp_last_sent > wait_time_twist:
         self.pub_twist.publish(twist_msg)
         stamp_last_sent = time()
+
+      if stamp - stamp_start > 2.0:
+        self.collect_data = True
+
+      if stamp - stamp_start > 5.0:
+        self.collect_data = False
+
+        # Check if there were any data received.
+        if len(self.imu_data) == 0 or len(self.odom_data) == 0:
+          self.fail()
+          return
+        
+        # calculate test result
+        mean_imu = sum(self.imu_data) / len(self.imu_data)
+        mean_odom = sum(self.odom_data) / len(self.odom_data)
+
+        print('Received IMU yaw rate measurements:')
+        print('count = ', len(self.imu_data))
+        [print(data) for data in self.imu_data]
+        print('Recieved Odometry yaw rate measurements:')
+        print('count = ', len(self.odom_data))
+        [print(data) for data in self.odom_data]
+
+        print('IMU mean = ', mean_imu)
+        print('Odometry mean = ', mean_odom)
+
+        # check test result
+        ## mean values should be close to given yaw rate
+        assert abs(mean_imu - velocity) < 0.1
+
+        ## mean values should be close together
+        assert abs(mean_imu - mean_odom) < 0.1
+
+        ## terminate test
+        test_running = False
 
       # spinning with 100 Hz
       rclpy.spin_once(self.node, timeout_sec=0.01)
 
-    ## Disabling Robot
-    print('Test finished after ' + str(time() - stamp_start) + ' s.')
-    self.disableRobot()
-
-
-  def test_drive_one_meter_in_y_with_mecanum(self, launch_service, proc_output):
-    # Wait for User to be ready.
-    print('###########################################################################################')
-    print('# Test drive one meter in y direction with Mecanum                                        #')
-    print('###########################################################################################')
-    print('Please place the IoTBot on the ground with 1m space on left side of the robot.')
-    print('Please make sure the Mecanum wheels are mounted.')
-    print('Mark the starting position so you can measure the driven distance after the test finished.')
-    print('Press any key "s" to start the test...')
-    while self.getKey(0.1) != 's': pass
-    print('Test is running...')
-
-    # Drive 1 meter straight in y direction.
-    ## Reset Odometry
-    print('Reset Odometry')
-    assert self.srv_reset_odometry.service_is_ready() is True
-    future = self.srv_reset_odometry.call_async(Trigger.Request())
-    rclpy.spin_until_future_complete(self.node, future)
-
-    assert future.result().success is True
-
-    ## Enable Robot
-    twist_msg = Twist()
-    self.pub_twist.publish(twist_msg)
-    self.enableRobot()
-
-    ## Drive in y direction until distance of one meter is reached.
-    stamp_last_sent = time()
-    stamp_start = stamp_last_sent
-    wait_time_twist = 1.0 / 10.0 # 10 Hz
-    goal_distance = 1.0
-    slow_down_distance = 0.1
-
-    print('Driving One Meter in Y Direction')
-    while rclpy.ok() and self.odom_msg.pose.pose.position.y < goal_distance:
-      # Calculate
-      position_diff = self.odom_msg.pose.pose.position.y - goal_distance
-      velocity_y = 0.3 if abs(position_diff) > slow_down_distance else 0.1
-
-      # Sending Twist with 10 Hz
-      if time() - stamp_last_sent > wait_time_twist:
-        twist_msg.linear.y = velocity_y
-        self.pub_twist.publish(twist_msg)
-        stamp_last_sent = time()
-
-      # spinning with 100 Hz
-      rclpy.spin_once(self.node, timeout_sec=0.01)
 
     ## Disabling Robot
     print('Test finished after ' + str(time() - stamp_start) + ' s.')
