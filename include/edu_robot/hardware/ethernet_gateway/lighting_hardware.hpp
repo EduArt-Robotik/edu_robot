@@ -5,8 +5,11 @@
  */
 #pragma once
 
-#include "edu_robot/lighting.hpp"
-#include "edu_robot/hardware/ethernet_gateway/ethernet_gateway_device_interfaces.hpp"
+#include <edu_robot/executer.hpp>
+#include <edu_robot/lighting.hpp>
+#include <edu_robot/hardware/communicator_node.hpp>
+
+#include <memory>
 
 namespace eduart {
 namespace robot {
@@ -14,10 +17,10 @@ namespace hardware {
 namespace ethernet {
   
 class LightingHardware : public Lighting::ComponentInterface
-                       , public EthernetGatewayTxDevice
 {
 public:
-  LightingHardware(const std::string& name, std::shared_ptr<Communicator> communicator);
+  LightingHardware(
+    const std::string& name, std::shared_ptr<Executer> executer, std::shared_ptr<Communicator> communicator);
   ~LightingHardware() override;
 
   void processSetValue(const Color& color, const robot::Lighting::Mode& mode) override;
@@ -25,6 +28,7 @@ public:
 
 private:
   std::string _name;
+  std::shared_ptr<CommunicatorNode> _communication_node;
 };
 
 } // end namespace ethernet

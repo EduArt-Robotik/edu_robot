@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include <edu_robot/hardware/can/can_gateway_shield.hpp>
+#include <edu_robot/hardware/can_gateway/can_gateway_shield.hpp>
 
 #include <edu_robot/hardware/communicator.hpp>
 
@@ -26,10 +26,11 @@ namespace igus {
 
 class MotorControllerHardware;
 
-class CanGatewayShield : public hardware::can::CanGatewayShield
+class CanGatewayShield : public hardware::can_gateway::CanGatewayShield
 {
 public:
   CanGatewayShield(char const* const can_device);
+  CanGatewayShield(char const* const can_device_0, char const* const can_device_1, char const* const can_device_2);  
   ~CanGatewayShield() override;
   void enable() override;
   void disable() override;

@@ -1,61 +1,73 @@
 ## Build Nodes
-### IotBot
-add_executable(iotbot-shield
-  iotbot_shield_node.cpp
+### Eduard IotBot
+add_executable(eduard-iot-bot
+  eduard_iot_bot_node.cpp
 )
-target_link_libraries(iotbot-shield
+target_link_libraries(eduard-iot-bot
   eduart-iotbot-shield
+  eduart-bot
 )
-ament_target_dependencies(iotbot-shield
+ament_target_dependencies(eduard-iot-bot
   "rclcpp"
 )
 
-### Ehternet Gateway
-add_executable(ethernet-gateway
-  ethernet_gateway_bot_node.cpp
+### Eduard Ehternet Gateway
+add_executable(eduard-ethernet-gateway-bot
+  eduard_ethernet_gateway_bot_node.cpp
 )
-target_link_libraries(ethernet-gateway
+target_link_libraries(eduard-ethernet-gateway-bot
   eduart-ethernet-gateway
-  eduart-robot-eduard
+  eduart-bot
 )
-ament_target_dependencies(ethernet-gateway
+ament_target_dependencies(eduard-ethernet-gateway-bot
   "rclcpp"
 )
 
-### Ehternet Gateway Universal Bot
-add_executable(ethernet-gateway-universal-bot
-  ethernet_gateway_universal_bot_node.cpp
+### Universal Ehternet Gateway Bot
+add_executable(universal-ethernet-gateway-bot
+  universal_ethernet_gateway_bot_node.cpp
 )
-target_link_libraries(ethernet-gateway-universal-bot
+target_link_libraries(universal-ethernet-gateway-bot
   eduart-ethernet-gateway
-  eduart-robot-universal-bot
-  eduart-robot-eduard
+  eduart-bot
 )
-ament_target_dependencies(ethernet-gateway-universal-bot
+ament_target_dependencies(universal-ethernet-gateway-bot
   "rclcpp"
 )
 
-### Ehternet Gateway Ohmni Bot
-add_executable(ethernet-gateway-ohmni-bot
-  ohmni_bot_node.cpp
+### Eduard 360 Pi Bot
+add_executable(eduard-360-pi-bot
+  eduard_360_pi_node.cpp
 )
-target_link_libraries(ethernet-gateway-ohmni-bot
-  eduart-ethernet-gateway
-  ohmni-bot
-)
-ament_target_dependencies(ethernet-gateway-ohmni-bot
-  "rclcpp"
-)
-
-### Igus Can Turtle Bot
-add_executable(igus-can-turtle-bot
-  igus_can_turtle_bot_node.cpp
-)
-target_link_libraries(igus-can-turtle-bot
-  igus
-  eduart-turtle
+target_link_libraries(eduard-360-pi-bot
+  eduart-bot
   eduart-hardware-can
 )
-ament_target_dependencies(igus-can-turtle-bot
+ament_target_dependencies(eduard-360-pi-bot
+  "rclcpp"
+)
+
+### Universal Bot 360
+add_executable(universal-360-pi-bot
+  universal_360_pi_bot_node.cpp
+)
+target_link_libraries(universal-360-pi-bot
+  eduart-bot
+  eduart-hardware-can
+)
+ament_target_dependencies(universal-360-pi-bot
+  "rclcpp"
+)
+
+### Rebel Move Bot
+add_executable(rebel-move-360-pi-bot
+  rebel_move_360_pi_bot_node.cpp
+)
+target_link_libraries(rebel-move-360-pi-bot
+  igus
+  eduart-bot
+  eduart-hardware-can
+)
+ament_target_dependencies(rebel-move-360-pi-bot
   "rclcpp"
 )

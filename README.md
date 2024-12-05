@@ -1,6 +1,6 @@
 # edu_robot - Control Software for IoT Shield and Ethernet Gateway
 
-Welcome to the EduArt ROS2 robot control software. In first place it provides a ROS2 node for controlling and monitoring EduArt robots, i.e., the robot Eduard in different hardware realizations like the IoT Bot, the IPC Bot or a custom build robot relying on our stackable drive system. There is also a [digital twin](https://github.com/EduArt-Robotik/edu_simulation) in the making, which is not yet feature complete. But, some basic interfaces are already implemented.
+Welcome to the EduArt ROS2 robot control software. In first place, it provides a ROS2 node for controlling and monitoring EduArt robots, i.e., the robot Eduard in different hardware realizations like the IoT Bot, the IPC Bot or a custom build robot relying on our stackable drive system. There is also a [digital twin](https://github.com/EduArt-Robotik/edu_simulation) in the making, which is not yet feature complete. But, some basic interfaces are already implemented.
 
 These packages are also designed for being used in a robot fleet setup. Basically, they are able to handle multiple robot instances at the same time while using namespaces.
 
@@ -17,6 +17,11 @@ Eduard comes in two hardware realizations. Both using this control software. Bel
 The software package 'edu_robot' provides ROS2 interface. For details please follow the link below:
 
 [ROS2 Interfaces](documentation/interface/interface.md)
+
+## ROS2 Middleware
+
+|<img src='documentation/image/warning.png' height='100' width='400'/>   |    Version 0.5.x of edu_robot switches its ROS2 middleware from FarstRTPS (the ROS2 default) to Cyclone DDS! This change is important because these two middlewares are not fully compatible. Therefore, if you update to version 0.5.x you have to make your sure that your whole ROS2 infrastructure uses the same middleware!    <br> <br>    If you wish to keep FastRTPS as your middleware, you can do this by simply editing a parameter file. Please refer to [this guide](documentation/update/changing-middleware.md) on how to adjust the middleware settings for the docker containers and your system! |
+|---|----|
 
 ## Lighting Codes
 
@@ -36,6 +41,10 @@ The software package 'edu_robot' provides ROS2 interface. For details please fol
 * [First Time Setup](documentation/setup/iot2050/setup_iot2050.md)
 * [Update ROS Software](documentation/update/update-software.md)
 * [Setup PS5 Controller](documentation/setup/joystick/ps5-gamepad.md)
+
+### On Raspberry Pi
+
+* [First Time Setup](documentation/setup/raspberry/setup_raspberry.md)
 
 ### On IPC127e
 

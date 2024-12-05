@@ -5,8 +5,9 @@
  */
 #pragma once
 
-#include "edu_robot/color.hpp"
-#include "edu_robot/hardware_component_interfaces.hpp"
+#include <edu_robot/color.hpp>
+#include <edu_robot/hardware_component_interfaces.hpp>
+#include <edu_robot/hardware_interface.hpp>
 
 #include <memory>
 #include <string>
@@ -37,8 +38,11 @@ public:
 
   };
 
-  class ComponentInterface : public HardwareComponent<Parameter>
-                           , public HardwareActuator<Color, Mode> { };
+  struct ComponentInterface : public HardwareInterface
+                            , public HardwareComponent<Parameter>
+                            , public HardwareActuator<Color, Mode> {
+    ComponentInterface() : HardwareInterface(HardwareInterface::Type::LIGHTING) { }
+  };
 
   Lighting(const std::string& name, const Color default_color, const float default_brightness,
            std::shared_ptr<ComponentInterface> hardware_interface);

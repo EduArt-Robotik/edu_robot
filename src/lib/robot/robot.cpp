@@ -37,17 +37,25 @@ static Robot::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
   Robot::Parameter parameter;
   
   // Declare Parameters
-  ros_node.declare_parameter<std::string>("tf_base_frame", parameter.tf_base_frame);
-  ros_node.declare_parameter<std::string>("tf_footprint_frame", parameter.tf_footprint_frame);
-  ros_node.declare_parameter<bool>("publish_tf_odom", parameter.publish_tf_odom);
+  ros_node.declare_parameter<std::string>("tf.base_frame", parameter.tf.base_frame);
+  ros_node.declare_parameter<std::string>("tf.footprint_frame", parameter.tf.footprint_frame);
+  ros_node.declare_parameter<bool>("odometry.publishing_tf", parameter.odometry.publishing_tf);
+  ros_node.declare_parameter<int>(
+    "odometry.publishing_interval_ms", parameter.odometry.publishing_interval.count());
+
   ros_node.declare_parameter<bool>("collision_avoidance.enable", parameter.enable_collision_avoidance);
-  ros_node.declare_parameter<float>("collision_avoidance.distance_reduce_velocity", parameter.collision_avoidance.distance_reduce_velocity);
-  ros_node.declare_parameter<float>("collision_avoidance.distance_velocity_zero", parameter.collision_avoidance.distance_velocity_zero);
+  ros_node.declare_parameter<float>(
+    "collision_avoidance.distance_reduce_velocity", parameter.collision_avoidance.distance_reduce_velocity);
+  ros_node.declare_parameter<float>(
+    "collision_avoidance.distance_velocity_zero", parameter.collision_avoidance.distance_velocity_zero);
 
   // Get Parameter Values
-  parameter.tf_base_frame = ros_node.get_parameter("tf_base_frame").as_string();
-  parameter.tf_footprint_frame = ros_node.get_parameter("tf_footprint_frame").as_string();
-  parameter.publish_tf_odom = ros_node.get_parameter("publish_tf_odom").as_bool();
+  parameter.tf.base_frame = ros_node.get_parameter("tf.base_frame").as_string();
+  parameter.tf.footprint_frame = ros_node.get_parameter("tf.footprint_frame").as_string();
+  parameter.odometry.publishing_tf = ros_node.get_parameter("odometry.publishing_tf").as_bool();
+  parameter.odometry.publishing_interval = std::chrono::milliseconds(
+    ros_node.get_parameter("odometry.publishing_interval_ms").as_int());
+
   parameter.enable_collision_avoidance = ros_node.get_parameter("collision_avoidance.enable").as_bool();
   parameter.collision_avoidance.distance_reduce_velocity = ros_node.get_parameter("collision_avoidance.distance_reduce_velocity").as_double();
   parameter.collision_avoidance.distance_velocity_zero = ros_node.get_parameter("collision_avoidance.distance_velocity_zero").as_double();
@@ -70,7 +78,7 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<HardwareRobotInterfa
   );
   auto hardware_name = getFrameIdPrefix();
   hardware_name.pop_back(); // remove '/' at the end
-  _diagnostic_updater->setHardwareID(hardware_name);
+  _diagnostic_updater->setHardwareID(hardware_name.empty() ? robot_name : hardware_name);
   _diagnostic_updater->add(
     "power_management",
     std::static_pointer_cast<diagnostic::DiagnosticComponent>(_hardware_interface).get(),
@@ -124,11 +132,6 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<HardwareRobotInterfa
   // Initialize Event Managing
   _action_manager = std::make_shared<action::ActionManager>();
 
-  // Timers
-  _timer_status_report = create_wall_timer(500ms, std::bind(&Robot::processStatusReport, this));
-  _timer_tf_publishing = create_wall_timer(100ms, std::bind(&Robot::processTfPublishing, this));
-  _timer_watch_dog = create_wall_timer(500ms, std::bind(&Robot::processWatchDogBarking, this));
-
   // Initialize Processing Components
   _collision_avoidance_component = std::make_shared<processing::CollisionAvoidance>(
     _parameter.collision_avoidance,
@@ -141,6 +144,14 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<HardwareRobotInterfa
   _odometry_component = std::make_shared<processing::OdometryEstimator>(
     processing::OdometryEstimator::Parameter{},
     *this
+  );
+
+  // Timers
+  _timer_status_report = create_wall_timer(500ms, std::bind(&Robot::processStatusReport, this));
+  _timer_tf_publishing = create_wall_timer(100ms, std::bind(&Robot::processTfPublishing, this));
+  _timer_watch_dog = create_wall_timer(500ms, std::bind(&Robot::processWatchDogBarking, this));
+  _timer_odometry = create_wall_timer(
+    _parameter.odometry.publishing_interval, std::bind(&Robot::publishingOdometry, this)
   );
 }
 
@@ -214,29 +225,6 @@ void Robot::callbackVelocity(std::shared_ptr<const geometry_msgs::msg::Twist> tw
         
       _motor_controllers[c]->setRpm(set_rpm);
     }
-
-    // Calculating Odometry and Publishing it
-    Eigen::VectorXf radps_measured(radps.size());
-
-    for (std::size_t c = 0, row = 0; c < _motor_controllers.size(); ++c) {
-      for (std::size_t m = 0; m < _motor_controllers[c]->motors(); ++m, ++row) {
-        const auto parameter = _motor_controllers[c]->motor(m).parameter();
-        const std::size_t index = parameter.index == 0 ? row : parameter.index - 1;
-        radps_measured(index) = _motor_controllers[c]->getMeasuredRpm()[m].radps();
-      }
-    }
-
-    const Eigen::Vector3f velocity_measured = _inverse_kinematic_matrix * radps_measured;
-    _odometry_component->process(velocity_measured);
-    _pub_odometry->publish(_odometry_component->getOdometryMessage(
-      getFrameIdPrefix() + _parameter.tf_footprint_frame, getFrameIdPrefix() + "odom"
-    ));
-
-    if (_parameter.publish_tf_odom) {
-      _tf_broadcaster->sendTransform(_odometry_component->getTfMessage(
-        getFrameIdPrefix() + _parameter.tf_footprint_frame, getFrameIdPrefix() + "odom"
-      ));
-    }
   }
   catch (HardwareError& ex) {
     RCLCPP_ERROR_STREAM(get_logger(), "Hardware error occurred while trying to set new values for motor controller."
@@ -272,31 +260,7 @@ void Robot::callbackSetMotorRpm(std::shared_ptr<const std_msgs::msg::Float32Mult
       }
 
       _motor_controllers[c]->setRpm(set_rpm);
-    }
-
-    // Calculating Odometry and Publishing it
-    // \todo code duplication!
-    Eigen::VectorXf radps_measured(_motor_controllers.size());
-
-    for (std::size_t c = 0, row = 0; c < _motor_controllers.size(); ++c) {
-      for (std::size_t m = 0; m < _motor_controllers[c]->motors(); ++m, ++row) {
-        const auto parameter = _motor_controllers[c]->motor(m).parameter();
-        const std::size_t index = parameter.index == 0 ? row : parameter.index - 1;        
-        radps_measured(index) = _motor_controllers[c]->getMeasuredRpm()[m].radps();
-      }
-    }
-
-    const Eigen::Vector3f velocity_measured = _inverse_kinematic_matrix * radps_measured;
-    _odometry_component->process(velocity_measured);
-    _pub_odometry->publish(_odometry_component->getOdometryMessage(
-      getFrameIdPrefix() + _parameter.tf_footprint_frame, getFrameIdPrefix() + "odom"
-    ));
-
-    if (_parameter.publish_tf_odom) {
-      _tf_broadcaster->sendTransform(_odometry_component->getTfMessage(
-        getFrameIdPrefix() + _parameter.tf_footprint_frame, getFrameIdPrefix() + "odom"
-      ));
-    }    
+    }  
   }
   catch (HardwareError& ex) {
     RCLCPP_ERROR_STREAM(get_logger(), "Hardware error occurred while trying to set new values for motor controller."
@@ -306,6 +270,36 @@ void Robot::callbackSetMotorRpm(std::shared_ptr<const std_msgs::msg::Float32Mult
     RCLCPP_ERROR_STREAM(get_logger(), "Error occurred while trying to set new values for motor controller."
                                       << " what() = " << ex.what());     
   }
+}
+
+void Robot::publishingOdometry()
+{
+  if (_inverse_kinematic_matrix.rows() == 0 || _inverse_kinematic_matrix.cols() == 0) {
+    return;
+  }
+
+  // Calculating Odometry and Publishing it
+  Eigen::VectorXf radps_measured(_inverse_kinematic_matrix.cols());
+
+  for (std::size_t c = 0, row = 0; c < _motor_controllers.size(); ++c) {
+    for (std::size_t m = 0; m < _motor_controllers[c]->motors(); ++m, ++row) {
+      const auto parameter = _motor_controllers[c]->motor(m).parameter();
+      const std::size_t index = parameter.index == 0 ? row : parameter.index - 1;
+      radps_measured(index) = _motor_controllers[c]->getMeasuredRpm()[m].radps();
+    }
+  }
+
+  const Eigen::Vector3f velocity_measured = _inverse_kinematic_matrix * radps_measured;
+  _odometry_component->process(velocity_measured);
+  _pub_odometry->publish(_odometry_component->getOdometryMessage(
+    getFrameIdPrefix() + _parameter.tf.base_frame, getFrameIdPrefix() + "odom"
+  ));
+
+  if (_parameter.odometry.publishing_tf) {
+    _tf_broadcaster->sendTransform(_odometry_component->getTfMessage(
+      getFrameIdPrefix() + _parameter.tf.footprint_frame, getFrameIdPrefix() + "odom"
+    ));
+  }  
 }
 
 void Robot::callbackSetLightingColor(std::shared_ptr<const edu_robot::msg::SetLightingColor> msg)
@@ -389,9 +383,9 @@ void Robot::callbackServiceResetOdometry(const std::shared_ptr<std_srvs::srv::Tr
 
   _odometry_component->reset();
 
-  if (_parameter.publish_tf_odom) {
+  if (_parameter.odometry.publishing_tf) {
     _tf_broadcaster->sendTransform(_odometry_component->getTfMessage(
-      getFrameIdPrefix() + _parameter.tf_footprint_frame, getFrameIdPrefix() + "odom"
+      getFrameIdPrefix() + _parameter.tf.footprint_frame, getFrameIdPrefix() + "odom"
     ));
   }
 

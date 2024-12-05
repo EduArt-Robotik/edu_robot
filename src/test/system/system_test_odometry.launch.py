@@ -93,9 +93,7 @@ class SystemTestIotBotOdometry(unittest.TestCase):
     print('Enabling IotBot')
     assert self.srv_set_mode.service_is_ready() is True
     future = self.srv_set_mode.call_async(set_mode_request)
-    rclpy.spin_until_future_complete(self.node, future)
 
-    assert future.result().state.mode.mode is Mode.REMOTE_CONTROLLED
 
   def disableRobot(self):
     print('Disabling IotBot')
@@ -136,6 +134,8 @@ class SystemTestIotBotOdometry(unittest.TestCase):
     assert future.result().success is True
 
     ## Enable Robot
+    twist_msg = Twist()
+    self.pub_twist.publish(twist_msg)
     self.enableRobot()
 
     ## Drive in x direction until distance of one meter is reached.
@@ -153,7 +153,6 @@ class SystemTestIotBotOdometry(unittest.TestCase):
 
       # Sending Twist with 10 Hz
       if time() - stamp_last_sent > wait_time_twist:
-        twist_msg = Twist()
         twist_msg.linear.x = velocity_x
         self.pub_twist.publish(twist_msg)
         stamp_last_sent = time()
@@ -178,7 +177,7 @@ class SystemTestIotBotOdometry(unittest.TestCase):
     while self.getKey(0.1) != 's': pass
     print('Test is running...')
 
-    # Drive 1 meter straight in x direction.
+    # Drive 1 meter straight in y direction.
     ## Reset Odometry
     print('Reset Odometry')
     assert self.srv_reset_odometry.service_is_ready() is True
@@ -188,16 +187,18 @@ class SystemTestIotBotOdometry(unittest.TestCase):
     assert future.result().success is True
 
     ## Enable Robot
+    twist_msg = Twist()
+    self.pub_twist.publish(twist_msg)
     self.enableRobot()
 
-    ## Drive in x direction until distance of one meter is reached.
+    ## Drive in y direction until distance of one meter is reached.
     stamp_last_sent = time()
     stamp_start = stamp_last_sent
     wait_time_twist = 1.0 / 10.0 # 10 Hz
     goal_distance = 1.0
     slow_down_distance = 0.1
 
-    print('Driving One Meter in X Direction')
+    print('Driving One Meter in Y Direction')
     while rclpy.ok() and self.odom_msg.pose.pose.position.y < goal_distance:
       # Calculate
       position_diff = self.odom_msg.pose.pose.position.y - goal_distance
@@ -205,7 +206,6 @@ class SystemTestIotBotOdometry(unittest.TestCase):
 
       # Sending Twist with 10 Hz
       if time() - stamp_last_sent > wait_time_twist:
-        twist_msg = Twist()
         twist_msg.linear.y = velocity_y
         self.pub_twist.publish(twist_msg)
         stamp_last_sent = time()

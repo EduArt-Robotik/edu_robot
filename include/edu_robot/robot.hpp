@@ -45,6 +45,8 @@
 namespace eduart {
 namespace robot {
 
+using namespace std::chrono_literals;
+
 class Lighting;
 
 /**
@@ -58,11 +60,18 @@ protected:
 
 public:
   struct Parameter {
-    std::string tf_base_frame = "base_link";
-    std::string tf_footprint_frame = "base_footprint";
+    struct {
+      std::string base_frame = "base_link";
+      std::string footprint_frame = "base_footprint";
+    } tf;
+
     bool enable_collision_avoidance = true;
-    bool publish_tf_odom = true;
     processing::CollisionAvoidance::Parameter collision_avoidance;
+
+    struct {
+      bool publishing_tf = true;
+      std::chrono::milliseconds publishing_interval{100ms};
+    } odometry;
   };
 
   virtual ~Robot();
@@ -87,6 +96,10 @@ protected:
    * \param rpm_msg Received rpm message.
    */
   void callbackSetMotorRpm(std::shared_ptr<const std_msgs::msg::Float32MultiArray> rpm_msg);
+  /**
+   * \brief Timer callback for publishing odometry
+   */
+  void publishingOdometry();
   /**
    * \brief Callback used to set the color and brightness of connected lightings.
    *
@@ -176,6 +189,7 @@ private:
   std::shared_ptr<rclcpp::TimerBase> _timer_status_report; 
   std::shared_ptr<rclcpp::TimerBase> _timer_tf_publishing;
   std::shared_ptr<rclcpp::TimerBase> _timer_watch_dog;
+  std::shared_ptr<rclcpp::TimerBase> _timer_odometry;
 };
 
 } // end namespace robot

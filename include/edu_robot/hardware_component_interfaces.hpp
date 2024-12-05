@@ -31,7 +31,7 @@ template <typename... Data>
 class HardwareSensor
 {
 public:
-  using ProcessMeasurementCallback = std::function<void(const Data&...)>;
+  using ProcessMeasurementCallback = std::function<void(Data&...)>;
 
   virtual ~HardwareSensor() = default;
   void registerCallbackProcessMeasurementData(ProcessMeasurementCallback callback) {

@@ -1,7 +1,0 @@
-<CycloneDDS>
-   <Domain>
-     <General>
-        <NetworkInterfaceAddress>eth0</NetworkInterfaceAddress>
-    </General>
-   </Domain>
-</CycloneDDS>

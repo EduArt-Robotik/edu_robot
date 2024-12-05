@@ -9,6 +9,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 namespace eduart {
 namespace robot {

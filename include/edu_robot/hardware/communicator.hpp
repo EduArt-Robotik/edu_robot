@@ -7,16 +7,19 @@
 
 #include "edu_robot/hardware/message_buffer.hpp"
 #include "edu_robot/hardware/communication_device.hpp"
+#include "edu_robot/hardware/rx_data_endpoint.hpp"
 
-#include <cstddef>
 #include <edu_robot/state.hpp>
 #include <edu_robot/hardware_error.hpp>
+
+#include <rclcpp/logger.hpp>
+#include <rclcpp/logging.hpp>
 
 #include <atomic>
 #include <list>
 #include <mutex>
-#include <functional>
 #include <chrono>
+#include <cstddef>
 #include <thread>
 #include <future>
 #include <queue>
@@ -25,6 +28,8 @@
 namespace eduart {
 namespace robot {
 namespace hardware {
+
+using namespace std::chrono_literals;
 
 class Request
 {
@@ -55,40 +60,7 @@ protected:
   std::vector<message::Byte> _response_search_pattern;
 };
 
-class RxDataEndPoint
-{
-  friend class Communicator;
 
-public:
-  using CallbackProcessData = std::function<void(const message::RxMessageDataBuffer&)>;
-
-  RxDataEndPoint(RxDataEndPoint&&) = default;
-
-  /**
-   * \brief Creates an data endpoint that processes incoming data from the ethernet gateway.
-   * \param callback The callback function that is been called when the message search pattern matches.
-   *                 Note: the callback must be threadsafe!
-   * \return Return an data endpoint ready to use by the ethernet communicator.
-   */
-  template <class Message>
-  inline static RxDataEndPoint make_data_endpoint(const CallbackProcessData& callback) {
-    const auto search_pattern = Message::makeSearchPattern();
-    std::vector<message::Byte> search_pattern_vector(search_pattern.begin(), search_pattern.end());
-    return RxDataEndPoint(search_pattern, callback);
-  }
-
-private:
-  template <class Message>
-  RxDataEndPoint(
-    std::vector<message::Byte>& search_pattern,
-    std::function<void(const message::RxMessageDataBuffer&)>& callback_process_data)
-    : _response_search_pattern(std::move(search_pattern))
-    , _callback_process_data(callback_process_data)
-  { }
-
-  std::vector<message::Byte> _response_search_pattern;
-  std::function<void(const message::RxMessageDataBuffer&)> _callback_process_data;
-};
 
 template <typename Request, typename Duration>
 inline void wait_for_future(std::future<Request>& future, const Duration& timeout) {
@@ -97,17 +69,22 @@ inline void wait_for_future(std::future<Request>& future, const Duration& timeou
   }
 }
 
+template <typename Request>
+inline bool is_future_ready(std::future<Request>& future) {
+  return future.wait_for(0) == std::future_status::ready;
+}
+
 class Communicator
 {
   using TaskSendingUart = std::packaged_task<void()>;
   using TaskReceiving = std::packaged_task<message::RxMessageDataBuffer()>;
 
 public:
-  Communicator(std::shared_ptr<CommunicationDevice> device);
+  Communicator(std::shared_ptr<CommunicationDevice> device, const std::chrono::milliseconds wait_time_sending = 20ms);
   ~Communicator();
 
   std::future<Request> sendRequest(Request request);
-  void registerRxDataEndpoint(RxDataEndPoint&& endpoint);
+  void registerRxDataEndpoint(std::shared_ptr<RxDataEndPoint> endpoint);
   message::RxMessageDataBuffer getRxBuffer();
 
 private:
@@ -127,7 +104,7 @@ private:
   std::queue<std::pair<Request, std::promise<Request>>> _incoming_requests;
   std::queue<std::pair<std::pair<Request, std::promise<Request>>, std::future<void>>> _is_being_send;
   std::list<std::pair<Request, std::promise<Request>>> _open_request;
-  std::vector<RxDataEndPoint> _rx_data_endpoint;
+  std::vector<std::shared_ptr<RxDataEndPoint>> _rx_data_endpoint;
 
   // Sending Thread
   std::chrono::milliseconds _wait_time_after_sending;
@@ -147,6 +124,6 @@ private:
   std::list<Request> _open_response_tasks;
 };
 
-} // end namespace igus
+} // end namespace hardware
 } // end namespace eduart
 } // end namespace robot

@@ -5,8 +5,10 @@
  */
 #pragma once
 
-#include "edu_robot/hardware_component_interfaces.hpp"
-#include "edu_robot/motor.hpp"
+#include "edu_robot/diagnostic/diagnostic.hpp"
+#include <edu_robot/hardware_component_interfaces.hpp>
+#include <edu_robot/motor.hpp>
+#include <edu_robot/hardware_interface.hpp>
 
 #include <edu_robot/diagnostic/diagnostic_component.hpp>
 #include <edu_robot/diagnostic/standard_deviation.hpp>
@@ -32,16 +34,22 @@ public:
   /**
    * \brief Hardware interface used for communication with actual hardware.
    */
-  class HardwareInterface : public HardwareComponent<Motor::Parameter>
+  class HardwareInterface : public eduart::robot::HardwareInterface
+                          , public HardwareComponent<Motor::Parameter>
                           , public HardwareActuator<std::vector<Rpm>>
-                          , public HardwareSensor<std::vector<Rpm>, bool>
+                          , public HardwareSensor<const std::vector<Rpm>, const bool>
   {
   protected:
-    HardwareInterface(const std::string& name, const std::size_t num_motors) : _name(name), _num_motors(num_motors) { }
+    HardwareInterface(const std::string& name, const std::size_t num_motors)
+      : eduart::robot::HardwareInterface(HardwareInterface::Type::MOTOR_CONTROLLER)
+      , _name(name), _num_motors(num_motors) { }
 
   public:
     inline std::size_t motors() const { return _num_motors; }
     inline const std::string& name() const { return _name; }
+    virtual diagnostic::Diagnostic diagnostic() {
+      return { };
+    }
 
   private:
     std::string _name;

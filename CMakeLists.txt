@@ -14,6 +14,7 @@ find_package(rclcpp REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
+find_package(tf2_sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(geometry_msgs REQUIRED)
@@ -74,11 +75,12 @@ install(
 
 install(
   TARGETS
-    iotbot-shield
-    ethernet-gateway
-    ethernet-gateway-universal-bot
-    ethernet-gateway-ohmni-bot
-    igus-can-turtle-bot
+    eduard-iot-bot
+    eduard-ethernet-gateway-bot
+    universal-ethernet-gateway-bot
+    rebel-move-360-pi-bot
+    universal-360-pi-bot
+    eduard-360-pi-bot
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   # for humble...
@@ -89,16 +91,13 @@ install(
 )
 install(
   TARGETS
-    eduart-robot-universal-bot
+    eduart-bot
     eduart-iotbot-shield
-    eduart-robot-eduard
     eduart-robot
     processing-component
     eduart-ethernet-gateway
-    ohmni-bot
     eduart-action
     eduart-diagnostic
-    eduart-turtle
     igus
     eduart-hardware
     eduart-hardware-can
@@ -125,19 +124,23 @@ ament_export_include_directories(
   include
 )
 ament_export_libraries(
+  eduart-bot
   eduart-iotbot-shield
-  eduart-robot-eduard
   eduart-robot
   processing-component
   eduart-ethernet-gateway
-  eduart-robot-universal-bot
   eduart-action
+  eduart-diagnostic
+  igus
+  eduart-hardware
+  eduart-hardware-can
 )
 ament_export_dependencies(
   rclcpp
   tf2
   tf2_ros
   tf2_geometry_msgs
+  tf2_sensor_msgs
   std_msgs
   geometry_msgs
   nav_msgs
