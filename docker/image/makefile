@@ -1,7 +1,7 @@
-image_name = eduart-robot:0.5.0
+image_name = eduart-robot:1.0.0
 
 download-sources:
-	git clone --branch 0.5.0 https://github.com/EduArt-Robotik/edu_robot.git
+	git clone --branch 1.0.0 https://github.com/EduArt-Robotik/edu_robot.git
 
 build-docker:
 	docker build -t $(image_name) .
