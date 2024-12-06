@@ -22,6 +22,8 @@ The software package 'edu_robot' provides ROS2 interface. For details please fol
 
 Since version 0.5.0 it is possible to select the ROS2 middleware if edu_robot is used in a Docker container. If you want to configure it, you can do so by following [these instructions](documentation/update/changing-middleware.md).
 
+Since December 2024, EduArt robots are delivered with Cyclone DDS as middleware by default. If you would like to use FastRTPS, please also refer to [these instructions](documentation/update/changing-middleware.md).
+
 ## Lighting Codes
 
 | Mode | Color | Description |
