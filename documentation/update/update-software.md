@@ -1,5 +1,11 @@
 # Updating EduArt's ROS2 Software
+
+## Changing ROS2 Middleware
+
+ONLY DO IF NEEDED! Since version 0.5.0 it is possible to select the ROS2 middleware if edu_robot is used in a Docker container. If you want to configure it, you can do so by following [these instructions](changing-middleware.md).
+
 ## Checking
+
 To be always up to date, it is worth checking the system regularly for updates. To do this, change to the "home" directory and then into the folder "edu_nodered_ros2_plugin" and execute the commands:
 
 ```bash
