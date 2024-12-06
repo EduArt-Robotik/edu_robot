@@ -73,6 +73,18 @@ The last step is to choose the packages to be installed. We strongly recommend t
 
 After the packages are installed, the installer will finish the installation and reboot the system.
 
+Once the robot is rebooted and you are logged in, you should to remove the installation medium (USB-Stick) from your *apt*-sources. Otherwise *apt* will complain every time you update your system. To do this, first open the sources list:
+```bash
+sudo nano /etc/apt/sources.list
+```
+
+Now, remove (or comment out) the the line that referes to the installation medium. This can look something like this:
+```bash
+...
+#deb cdrom:[Debian GNU/Linux 12.8.0 _Bookworm_ ...
+...
+```
+Save and exit the file.
 
 ## Configure IPC127e
 
