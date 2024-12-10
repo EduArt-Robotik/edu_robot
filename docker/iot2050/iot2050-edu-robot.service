@@ -7,7 +7,7 @@ After=docker.service
 Type=oneshot
 RemainAfterExit=yes
 # first stop and remove already running container
-ExecStart=/bin/docker compose down -f /home/user/edu_robot/docker/iot2050/docker-compose.yaml
+ExecStartPre=/bin/docker compose -f /home/user/edu_robot/docker/iot2050/docker-compose.yaml down
 # start container
-ExecStart=/bin/docker compose up -f /home/user/edu_robot/docker/iot2050/docker-compose.yaml
-ExecStop=/bin/docker compose down -f /home/user/edu_robot/docker/iot2050/docker-compose.yaml
+ExecStart=/bin/docker compose -f /home/user/edu_robot/docker/iot2050/docker-compose.yaml up -d
+ExecStop=/bin/docker compose -f /home/user/edu_robot/docker/iot2050/docker-compose.yaml down
