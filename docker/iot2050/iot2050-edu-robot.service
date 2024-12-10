@@ -11,3 +11,6 @@ ExecStartPre=/bin/docker compose -f /home/user/edu_robot/docker/iot2050/docker-c
 # start container
 ExecStart=/bin/docker compose -f /home/user/edu_robot/docker/iot2050/docker-compose.yaml up -d
 ExecStop=/bin/docker compose -f /home/user/edu_robot/docker/iot2050/docker-compose.yaml down
+
+[Install]
+WantedBy=multi-user.target
