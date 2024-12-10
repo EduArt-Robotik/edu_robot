@@ -4,6 +4,7 @@ PartOf=docker.service
 After=docker.service
 
 [Service]
+EnvironmentFile=/etc/environment
 Type=oneshot
 RemainAfterExit=yes
 # first stop and remove already running container
