@@ -1,0 +1,13 @@
+[Unit]
+Description=Service for controlling Iot Bot Hardware.
+PartOf=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+# first stop and remove already running container
+ExecStart=/bin/docker compose down -f /home/user/edu_robot/docker/iot2050/docker-compose.yaml
+# start container
+ExecStart=/bin/docker compose up -f /home/user/edu_robot/docker/iot2050/docker-compose.yaml
+ExecStop=/bin/docker compose down -f /home/user/edu_robot/docker/iot2050/docker-compose.yaml
