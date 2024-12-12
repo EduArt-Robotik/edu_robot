@@ -1,0 +1,43 @@
+version: "3.0"
+
+services:
+    eduard-ipc127e:
+        image: eduartrobotik/eduart-robot:0.5.0
+        container_name: eduard-ipcbot-0.5.0
+        user: user
+        restart: always
+        privileged: true
+        ipc: host
+        pid: host
+        mem_limit: 300mb
+        environment:
+            - EDU_ROBOT_NAMESPACE=${EDU_ROBOT_NAMESPACE}
+            - RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION}
+            - CYCLONEDDS_URI=/home/user/ros/launch_content/cyclone_profile.xml         
+        network_mode: "host"
+        command: bash -c 'cd /home/user/ros/launch_content; ros2 launch eduard-ipcbx21a.launch.py'
+        volumes:
+            - './launch_content:/home/user/ros/launch_content:r'
+        devices:
+            - '/dev:/dev'
+
+    eduard-robot-control:
+        image: eduartrobotik/eduart-robot-control:0.4.0
+        container_name: eduard-robot-control-ipcbot-0.4.0
+        user: user
+        restart: always
+        privileged: true
+        ipc: host
+        pid: host
+        mem_limit: 300mb
+        environment:
+            - EDU_ROBOT_NAMESPACE=${EDU_ROBOT_NAMESPACE}
+            - RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION}
+            - CYCLONEDDS_URI=/home/user/ros/launch_content/cyclone_profile.xml          
+        network_mode: "host"
+        command: bash -c 'cd /home/user/ros/launch_content; ros2 launch robot_remote_control.launch.py'
+        devices:
+            - '/dev:/dev'
+        volumes:
+            - '/dev:/dev'
+            - './launch_content:/home/user/ros/launch_content:r'            
