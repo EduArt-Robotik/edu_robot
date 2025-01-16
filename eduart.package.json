@@ -15,7 +15,7 @@
     "0.4.1",
     "0.5.0"
   ],
-  "service": [
+  "software": [
     {
       "name": "edu_robot",
       "platform": [
