@@ -1,0 +1,43 @@
+{
+  "name": "edu_robot",
+  "version": [
+    "0.1.0-alpha",
+    "0.1.0-beta",
+    "0.1.1-beta",
+    "0.2.0",
+    "0.2.1",
+    "0.3.0",
+    "0.3.1",
+    "0.3.2",
+    "0.3.3",
+    "0.3.4",
+    "0.4.0",
+    "0.4.1",
+    "0.5.0"
+  ],
+  "service": [
+    {
+      "name": "edu_robot",
+      "platform": [
+        {
+          "name": "iot2050",
+          "path": "docker/iot2050",
+          "serviced_file": "iot2050-edu-robot.service",
+          "docker_compose_file": "docker-compose.yaml"
+        },
+        {
+          "name": "ipc127e",
+          "path": "docker/ipc127e",
+          "serviced_file": "ipc127e-edu-robot.service",
+          "docker_compose_file": "docker-compose.yaml"
+        },
+        {
+          "name": "pi5",
+          "path": "docker/raspberry",
+          "serviced_file": "iot2050-edu-robot.service",
+          "docker_compose_file": "docker-compose.yaml"      
+        }
+      ]
+    }
+  ]
+}
