@@ -122,11 +122,13 @@ SensorTofHardware::SensorTofHardware(
 
   _can_id.measurement = 0x308 + _parameter.sensor_id;
 
-  _communication_node->createRxDataEndPoint<CanRxDataEndPoint, ZoneMeasurement>(
+  auto rx_data_end_point = CanRxDataEndPoint::make_data_endpoint(
+    executer,
     _can_id.measurement,
     std::bind(&SensorTofHardware::processRxData, this, std::placeholders::_1),
     8
   );
+  _communication_node->registerRxDataEndPoint(rx_data_end_point);
 }
 
 // is called by the executer thread of rx data endpoint
