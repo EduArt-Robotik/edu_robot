@@ -39,7 +39,7 @@ static std::shared_ptr<sensor_msgs::msg::PointCloud2> create_point_cloud(
   point_cloud->width = 0;
   point_cloud->height = 1;
   point_cloud->is_bigendian = false;
-  point_cloud->point_step = 4 * 4; // 4 * float
+  point_cloud->point_step = 4 * sizeof(float); // 4 * float
   point_cloud->row_step = point_cloud->point_step * point_cloud->width;
   point_cloud->data.reserve(number_of_points * point_cloud->point_step);
 
