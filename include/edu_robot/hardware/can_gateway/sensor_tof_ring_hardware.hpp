@@ -50,7 +50,7 @@ public:
 
 private:
   void processStartMeasurement();
-  void processFinishMeasurement(const message::RxMessageDataBuffer& rx_buffer);
+  void processFinishMeasurement(std::uint8_t sensor_id);    // Gets called by individual Sensors when measurement is finished
   void processPointcloudMeasurement(sensor_msgs::msg::PointCloud2& point_cloud, const std::size_t sensor_index);
 
   const Parameter _parameter;

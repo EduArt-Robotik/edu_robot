@@ -39,7 +39,7 @@ static std::shared_ptr<sensor_msgs::msg::PointCloud2> create_point_cloud(
   point_cloud->width = 0;
   point_cloud->height = 1;
   point_cloud->is_bigendian = false;
-  point_cloud->point_step = 4 * sizeof(float); // 4 * float
+  point_cloud->point_step = 4 * sizeof(float);
   point_cloud->row_step = point_cloud->point_step * point_cloud->width;
   point_cloud->data.reserve(number_of_points * point_cloud->point_step);
 
@@ -108,6 +108,9 @@ SensorTofRingHardware::SensorTofRingHardware(
       _parameter.tof_sensor[i].name, _parameter.tof_sensor[i].parameter, _ros_node, executer, communicator
     ));
     _processing_data.sensor_activation_bits |= (1 << (_parameter.tof_sensor[i].parameter.sensor_id - 1));
+    _sensor.back()->registerMeasurementCompleteCallback(
+      std::bind(&SensorTofRingHardware::processFinishMeasurement, this, i)
+      );   
     _sensor.back()->registerCallbackProcessMeasurementData(
       std::bind(&SensorTofRingHardware::processPointcloudMeasurement, this, std::placeholders::_1, i)
     );
@@ -126,9 +129,6 @@ void SensorTofRingHardware::initialize(const SensorPointCloud::Parameter& parame
   _processing_data.point_cloud->height = 1;
   _processing_data.received_points.resize(_parameter.number_sensors(), false);
 
-  _communication_node->createRxDataEndPoint<can::CanRxDataEndPoint, MeasurementComplete>(
-    _parameter.can_id_measurement_complete, std::bind(&SensorTofRingHardware::processFinishMeasurement, this, std::placeholders::_1), 8
-  );
   _communication_node->addSendingJob(
     std::bind(&SensorTofRingHardware::processStartMeasurement, this),
     _parameter.measurement_interval
@@ -170,17 +170,17 @@ void SensorTofRingHardware::processStartMeasurement()
   }
 }
 
-void SensorTofRingHardware::processFinishMeasurement(const message::RxMessageDataBuffer& rx_buffer)
+void SensorTofRingHardware::processFinishMeasurement(std::uint8_t sensor_id)
 {
   // mark that given sensor finished measurement
-  _processing_data.active_measurement &= ~(1 << (MeasurementComplete::sensor(rx_buffer) - 1));
+  _processing_data.active_measurement &= ~(1 << sensor_id);
 
   if (_processing_data.active_measurement != 0) {
     // measurement not completed yet --> return and wait
     return;
   }
 
-  // measurement completed --> trigger data transmission
+  // measurement of all sensors completed --> trigger data transmission
   try {
     auto request = Request::make_request<TriggerDataTransmission>(
       _parameter.can_id_trigger, _processing_data.sensor_activation_bits
@@ -234,6 +234,8 @@ void SensorTofRingHardware::processPointcloudMeasurement(
 
   // Measurement finished --> publish point cloud.
   _callback_process_measurement(*_processing_data.point_cloud);
+  // TODO:  Clarify behavior when one or more tof sensors are missing.
+  //        Data could still be published?
 }
 
 } // end namespace can_gateway

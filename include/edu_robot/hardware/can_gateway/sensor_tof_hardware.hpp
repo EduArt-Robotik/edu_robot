@@ -20,6 +20,7 @@ namespace can_gateway {
 class SensorTofHardware : public SensorPointCloud::SensorInterface
 {
 public:
+  using MeasurementCompleteCallback = std::function<void()>;
   struct Parameter {
     struct {
       std::size_t vertical = 8;
@@ -41,6 +42,9 @@ public:
 
   void initialize(const SensorPointCloud::Parameter& parameter) override;
   static Parameter get_parameter(const std::string& name, const Parameter& default_parameter, rclcpp::Node& ros_node);
+  inline void registerMeasurementCompleteCallback(MeasurementCompleteCallback callback){
+    _callback_finished_measurement = callback;
+  }
 
 private:
   void processRxData(const message::RxMessageDataBuffer& data);
@@ -49,6 +53,7 @@ private:
   const Parameter _parameter;
   rclcpp::Node& _ros_node;
   std::shared_ptr<CommunicatorNode> _communication_node;
+  MeasurementCompleteCallback _callback_finished_measurement = nullptr;
 
   struct {
     std::uint32_t trigger = 0x388;
@@ -64,6 +69,7 @@ private:
     std::vector<float> tan_y_lookup; // used to transform to point x    
     std::uint8_t frame_number;
     std::size_t point_counter = 0;
+    std::size_t point_index = 0;
     std::shared_ptr<sensor_msgs::msg::PointCloud2> point_cloud;
   } _processing_data;
 };                              
