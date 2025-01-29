@@ -56,7 +56,7 @@ public:
   void registerRxDataEndPoint(std::shared_ptr<RxDataEndPoint> rx_data_end_point)
   {
     // Guarantee rx data end point is only contained once.
-    if (std::find(_data_endpoint.begin(), _data_endpoint.end(), rx_data_end_point) == _data_endpoint.end()) {
+    if (std::find(_data_endpoint.begin(), _data_endpoint.end(), rx_data_end_point) != _data_endpoint.end()) {
       throw std::invalid_argument("CommunicatorNode: can't register rx data end point. Is already contained.");
     }
     //else: end point is good --> can be added
