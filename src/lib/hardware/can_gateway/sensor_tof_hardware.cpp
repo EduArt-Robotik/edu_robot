@@ -138,7 +138,7 @@ void SensorTofHardware::processRxData(const message::RxMessageDataBuffer& data)
   
   if (MeasurementComplete::hasCorrectLength(data)) {
     // Measurement Complete
-    if (MeasurementComplete::sensor(data) == _parameter.sensor_id){
+    if (MeasurementComplete::sensor(data) != _parameter.sensor_id){
       RCLCPP_ERROR(rclcpp::get_logger("SensorTofHardware"), "sensor ID doesn't match with sensor can address ");
     }
 
@@ -180,8 +180,8 @@ void SensorTofHardware::processRxData(const message::RxMessageDataBuffer& data)
     for(std::size_t i = 0; i < ZoneMeasurement::elements(data); i++){
 
       const auto index = _processing_data.point_index;
-      const auto distance = ZoneMeasurement::distance(data, index);
-      const auto sigma = ZoneMeasurement::sigma(data, index);
+      const auto distance = ZoneMeasurement::distance(data, i);
+      const auto sigma = ZoneMeasurement::sigma(data, i);
 
       auto& point_cloud = _processing_data.point_cloud;
       const std::size_t idx_point_x = index * point_cloud->point_step + point_cloud->fields[0].offset;
@@ -189,7 +189,7 @@ void SensorTofHardware::processRxData(const message::RxMessageDataBuffer& data)
       const std::size_t idx_point_z = index * point_cloud->point_step + point_cloud->fields[2].offset;
       const std::size_t idx_sigma   = index * point_cloud->point_step + point_cloud->fields[3].offset;
 
-      if (distance == 0 && sigma == 0) {
+      if (distance == 0.0f && sigma == 0.0f) {
         // empty measurement (signaled by 3 byte = 0) 
         *reinterpret_cast<float*>(&point_cloud->data[idx_point_x]) = std::numeric_limits<float>::quiet_NaN();
         *reinterpret_cast<float*>(&point_cloud->data[idx_point_y]) = std::numeric_limits<float>::quiet_NaN();
@@ -205,8 +205,8 @@ void SensorTofHardware::processRxData(const message::RxMessageDataBuffer& data)
         _processing_data.point_counter++;
       }
 
-      _processing_data.current_zone = index;
-      _processing_data.next_expected_zone = index + 1;
+      _processing_data.current_zone = index;            // TODO: still needed?
+      _processing_data.next_expected_zone = index + 1;  // TODO: still needed?
       _processing_data.point_index++;
       // TODO: Check if point_index exceeds the expected number of points (expected number is set by parameter)
     }
