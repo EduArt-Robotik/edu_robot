@@ -51,8 +51,8 @@ Since version 0.5.0 it is possible to select the ROS2 middleware if edu_robot is
 * [Update ROS Software](documentation/update/update-software.md)
 * [Setup PS5 Controller](documentation/setup/joystick/ps5-gamepad.md)
 
-### Coming Soon
-Setup your System native and in Virtual machine.
+### Setup a Virtual Machine
+Have a look at [this guide](documentation/setup/virtualMachine.md) on how to setup a Virtual Machine (VM) to get started with your ROS2 development.
 
 ### As Siemens Industrial Application
 
