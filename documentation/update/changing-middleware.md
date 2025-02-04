@@ -43,15 +43,24 @@ docker compose up
 ## Setting the Middleware for a local ROS2 Environment
 > **__Note:__** This is **not** necessary if changed the ROS2 middleware of the Docker containers to FastRTPS 
 
-As already mentioned, every participant in the ROS2 network must use the same middleware due to compatibility issues. This also applies to command line tools (`ros2 topic list`, ...). It is therefore necessary to switch the middleware to CycloneDDS on the system on which ROS2 is used. This is done using the same environment variable.
+As already mentioned, every participant in the ROS2 network must use the same middleware due to compatibility issues. This also applies to command line tools (`ros2 topic list`, ...). It is therefore necessary to switch the middleware to CycloneDDS on the system on which ROS2 is used. 
 
+First, you need to install cyclone DDS on your local machine:
+```bash
+sudo apt install ros-jazzy-rmw-cyclonedds-cpp
+```
+
+
+Again, the environment variable is beeing used to change the middleware:
+
+**Option 1** <br>
 For a temporary change, the variable can be set via an `export` command in your terminal. However, this setting is only active for the current session!
 ```bash
 export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 ```
 
-----
 
+**Option 2** <br>
 If the middleware is to be changed permanently, it is advisable to add the `export` command in the `~/.bashrc` file. For this, first open the file:
 ```bash
 nano ~/.bashrc
