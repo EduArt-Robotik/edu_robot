@@ -74,7 +74,7 @@ Guest additions are needed for e.g. fullscreen
 3. Close the terminal and open a new one. Test if the ros commands (e.g. `ros2 topic list`) work.
 
 # 8. Install the Cyclone DDS Middleware
-Since version 0.5.0 of `edu_robot`, EduArt changed to *Cyclone DDS* as its default middleware.
+Since version 0.5.0 of *edu_robot*, EduArt changed to *Cyclone DDS* as its default middleware.
 1. Install *Cyclone DDS*
    - For Humble ([link](https://docs.ros.org/en/humble/Installation/DDS-Implementations/Working-with-Eclipse-CycloneDDS.html)): `sudo apt install ros-humble-rmw-cyclonedds-cpp` 
    - For Jazzy ([link](https://docs.ros.org/en/jazzy/Installation/DDS-Implementations/Working-with-Eclipse-CycloneDDS.html)): `sudo apt install ros-jazzy-rmw-cyclonedds-cpp`
@@ -88,15 +88,18 @@ The following section shows how individual packages can be built in the VM.
 1. Create a ROS2 workspace <br>
 The can be chosen freely. Here is a example: `mkdir -p ~/ros2/src`
 2. Change into the source directory: `cd ~/ros2/src`
-3. Download the packages `edu_robot` ([link](https://github.com/EduArt-Robotik/edu_robot)) and `edu_robot_control` ([link](https://github.com/EduArt-Robotik/edu_robot_control)) from GitHub:
+3. Download the packages *edu_robot* ([link](https://github.com/EduArt-Robotik/edu_robot)) and *edu_robot_control* ([link](https://github.com/EduArt-Robotik/edu_robot_control)) from GitHub:
 ```bash
 git clone https://github.com/EduArt-Robotik/edu_robot.git
 git clone https://github.com/EduArt-Robotik/edu_robot_control.git
 ```
-4. Download the dependency `diagnostic_updater` ([link](https://github.com/ros/diagnostics)):
-```bash
-git clone https://github.com/ros/diagnostics.git
-```
+4. Install some dependencies
+   - *diagnostic_updater* ([link](https://github.com/ros/diagnostics)):
+     - For Humble: `sudo apt install ros-humble-diagnostic-updater`
+     - For Jazzy: `sudo apt install ros-jazzy-diagnostic-updater`
+   - *xacro* ([link](https://github.com/ros/xacro)):
+     - For Humble: `sudo apt install ros-humble-xacro`
+     - For Jazzy: `sudo apt install ros-jazzy-xacro`
 5. Change into the root directory of the workspace: `cd ..`
 6. Build the packages: `colcon build --symlink-install`
 7. Add the workspace to your `bashrc` file
