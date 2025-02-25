@@ -25,3 +25,7 @@ ament_target_dependencies(eduart-hardware-can
   "tf2_ros"
   "tf2_sensor_msgs"
 )
+list(APPEND BUILT_LIBRARIES eduart-hardware-can)
+
+# Populating Built Libraries
+set(BUILT_LIBRARIES ${BUILT_LIBRARIES} PARENT_SCOPE)

@@ -31,3 +31,23 @@ target_link_libraries(eduart-iotbot-shield
   eduart-robot
   eduart-hardware
 )
+list(APPEND BUILT_LIBRARIES eduart-iotbot-shield)
+
+# Export hardware plugins
+if (HAVE_MRAA)
+  add_library(ros2-control-eduard-iot SHARED
+    ros2_hardware_adapter.cpp
+  )
+  target_include_directories(ros2-control-eduard-iot PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+  )
+  ament_target_dependencies(ros2-control-eduard-iot
+    "pluginlib"
+    "hardware_interface"
+  )
+  list(APPEND BUILT_LIBRARIES ros2-control-eduard-iot)
+endif()
+
+# Populating Built Libraries
+set(BUILT_LIBRARIES ${BUILT_LIBRARIES} PARENT_SCOPE)
