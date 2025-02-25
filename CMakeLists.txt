@@ -80,7 +80,6 @@ install(
   DIRECTORY
     launch
     parameter
-    model
   DESTINATION share/${PROJECT_NAME}
 )
 

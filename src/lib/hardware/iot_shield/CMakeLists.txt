@@ -42,6 +42,9 @@ if (HAVE_MRAA)
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
   )
+  target_link_libraries(ros2-control-eduard-iot
+    mraa
+  )
   ament_target_dependencies(ros2-control-eduard-iot
     "pluginlib"
     "hardware_interface"
