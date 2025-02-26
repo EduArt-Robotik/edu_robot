@@ -20,7 +20,9 @@ The software package 'edu_robot' provides ROS2 interface. For details please fol
 
 ## ROS2 Middleware
 
-Since version 0.5.0 it is possible to select the ROS2 middleware if edu_robot is used in a Docker container. If you want to configure it, you can do so by following [these instructions](documentation/update/changing-middleware.md).
+Since version 0.5.0 it is possible to select the ROS2 middleware if edu_robot is used in a Docker container. 
+If you want to configure it, you can do so by following [these instructions](documentation/update/changing-middleware.md). 
+To see when, how and why you need to setup a Cyclone profile, have a look at [this guide](https://github.com/EduArt-Robotik/edu_robot/blob/develop/documentation/update/cyclone-profiles.md).  
 
 ## Lighting Codes
 
