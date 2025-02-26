@@ -15,8 +15,8 @@
     imu:
       fusion_weight: 0.029999999329447746
       mounting_orientation:
-        pitch: -1.5707963705062866
         roll: -1.5707963705062866
+        pitch: -1.5707963705062866
         yaw: -1.5707963705062866
       publish_orientation_without_yaw_tf: true
       publish_tf: true
@@ -119,9 +119,9 @@
         sensor_id: 2
         transform:
           orientation:
-            pitch: 0.0
-            roll: -1.570796327
-            yaw: -1.570796327
+            roll: 1.570796327
+            pitch: -0.343829863        # -19,7° (TOF-sensor is angled on PCB)
+            yaw: 1.570796327
           translation:
             x: 0.17
             y: 0.063
@@ -138,8 +138,8 @@
         sensor_id: 1
         transform:
           orientation:
-            pitch: 1.570796327
             roll: 0.0
+            pitch: 1.570796327
             yaw: 3.141592654
           translation:
             x: -0.17
@@ -160,9 +160,9 @@
         sensor_id: 2
         transform:
           orientation:
-            pitch: 0.0
-            roll: 1.570796327
-            yaw: 1.570796327
+            roll: -1.570796327
+            pitch: -0.343829863        # -19,7° (TOF-sensor is angled on PCB)
+            yaw: -1.570796327
           translation:
             x: 0.17
             y: -0.063
@@ -179,8 +179,8 @@
         sensor_id: 1
         transform:
           orientation:
-            pitch: 1.570796327
             roll: 0.0
+            pitch: 1.570796327
             yaw: 3.141592654
           translation:
             x: -0.17
