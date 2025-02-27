@@ -24,8 +24,8 @@ services:
             - dialout
 
     eduard-robot-control:
-        image: eduartrobotik/eduart-robot-control:0.4.0
-        container_name: eduard-robot-control-iotbot-0.4.0
+        image: eduartrobotik/eduart-robot-control:0.5.0
+        container_name: eduard-robot-control-iotbot-0.5.0
         user: root
         restart: always
         privileged: true
@@ -37,7 +37,7 @@ services:
             - RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION}
             - CYCLONEDDS_URI=/home/user/ros/launch_content/cyclone_profile.xml         
         network_mode: "host"
-        command: bash -c 'cd /home/user/ros/launch_content; ros2 launch robot_remote_control_iot2050.launch.py'
+        command: bash -c 'cd /home/user/ros/launch_content; ros2 launch robot_remote_control_iot2050.launch.py & ros2 launch edu_robot_control eduard_robot_description.launch.py hardware_type:=iot2050'
         volumes:
             - './launch_content:/home/user/ros/launch_content:r'
             - '/dev:/dev'

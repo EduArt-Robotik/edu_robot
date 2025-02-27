@@ -14,3 +14,7 @@ target_include_directories(eduart-bot
 target_link_libraries(eduart-bot
   eduart-robot
 )
+list(APPEND BUILT_LIBRARIES eduart-bot)
+
+# Populating Built Libraries
+set(BUILT_LIBRARIES ${BUILT_LIBRARIES} PARENT_SCOPE)

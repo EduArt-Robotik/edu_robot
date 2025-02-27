@@ -17,3 +17,7 @@ ament_target_dependencies(
   "nav_msgs"
   "tf2_geometry_msgs"
 )
+list(APPEND BUILT_LIBRARIES processing-component)
+
+# Populating Built Libraries
+set(BUILT_LIBRARIES ${BUILT_LIBRARIES} PARENT_SCOPE)

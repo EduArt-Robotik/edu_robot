@@ -38,3 +38,7 @@ ament_target_dependencies(
   "diagnostic_msgs"
   "std_srvs"
 )
+list(APPEND BUILT_LIBRARIES eduart-robot)
+
+# Populating Built Libraries
+set(BUILT_LIBRARIES ${BUILT_LIBRARIES} PARENT_SCOPE)

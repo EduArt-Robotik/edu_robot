@@ -17,3 +17,7 @@ target_link_libraries(igus
 ament_target_dependencies(igus
   "rclcpp"
 )
+list(APPEND BUILT_LIBRARIES igus)
+
+# Populating Built Libraries
+set(BUILT_LIBRARIES ${BUILT_LIBRARIES} PARENT_SCOPE)

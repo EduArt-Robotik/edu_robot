@@ -23,6 +23,8 @@
   <depend>sensor_msgs</depend>
   <depend>diagnostic_updater</depend>
   <depend>std_srvs</depend>
+  <depend>hardware_interface</depend>
+  <depend>pluginlib</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
