@@ -1,6 +1,7 @@
 #include "edu_robot/hardware/iot_shield/ros2_hardware_adapter.hpp"
 
 #include <iostream>
+#include <mraa/gpio.hpp>
 
 namespace eduart {
 namespace robot {
@@ -33,6 +34,7 @@ hardware_interface::CallbackReturn Ros2HardwareAdapter::on_configure(const rclcp
           auto pwm = std::make_shared<mraa::Pwm>(pin);
           pwm->period_us(period_us);
           pwm->enable(true);
+          pwm->write(0.0f);
           _pwm[gpio.name + '/' + command.name] = pwm;
         }
         else if (command.name.find("dout") != std::string::npos) {
@@ -40,6 +42,7 @@ hardware_interface::CallbackReturn Ros2HardwareAdapter::on_configure(const rclcp
           const int pin = std::stoi(command.parameters.at("pin"));
           auto output = std::make_shared<mraa::Gpio>(pin);
           output->dir(mraa::DIR_OUT);
+          output->write(0);
           _gpio[gpio.name + '/' + command.name] = output;
         }
       }
@@ -103,20 +106,35 @@ hardware_interface::CallbackReturn Ros2HardwareAdapter::on_configure(const rclcp
 
 hardware_interface::CallbackReturn Ros2HardwareAdapter::on_activate(const rclcpp_lifecycle::State & previous_state)
 {
-  RCLCPP_INFO(get_logger(), __PRETTY_FUNCTION__);
+  RCLCPP_INFO(get_logger(), "activating hardware and set it to default value");
+
+  // Setting Output Default Values, also Reflecting back State
+  for (auto& [name, gpio] : _gpio) {
+    if (gpio->readDir() == mraa::DIR_OUT) { 
+      gpio->write(0);
+      set_command(name, 0);
+      set_state(name, 0);
+    }
+  }
+  for (auto& [name, pwm] : _pwm) {
+    pwm->write(0.0);
+    pwm->enable(true);
+    set_command(name, 0.0);
+    set_state(name, 0.0);
+  }
+
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
 hardware_interface::CallbackReturn Ros2HardwareAdapter::on_deactivate(const rclcpp_lifecycle::State & previous_state)
 {
-  RCLCPP_INFO(get_logger(), __PRETTY_FUNCTION__);
+  RCLCPP_INFO(get_logger(), "deactivating hardware.");
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
 hardware_interface::return_type Ros2HardwareAdapter::read(
   const rclcpp::Time & time, const rclcpp::Duration & period)
 {
-  // RCLCPP_INFO(get_logger(), __PRETTY_FUNCTION__);
   (void)time;
   (void)period;
 
@@ -129,6 +147,12 @@ hardware_interface::return_type Ros2HardwareAdapter::read(
       else if (name.find("analog") != std::string::npos) {
         // analog input
         set_state(name, _aio.at(name)->readFloat());
+      }
+      else if (name.find("pwm") != std::string::npos) {
+        set_state(name, get_command(name));
+      }
+      else if (name.find("dout") != std::string::npos) {
+        set_state(name, get_command(name));
       }
     }
     catch (std::out_of_range& ex) {
@@ -152,13 +176,11 @@ hardware_interface::return_type Ros2HardwareAdapter::write(const rclcpp::Time & 
     try {
       if (name.find("dout") != std::string::npos) {
         // digital output
-        _gpio.at(name)->write(get_state(name));
-        set_state(name, get_state(name));
+        _gpio.at(name)->write(get_command(name));
       }
       else if (name.find("pwm") != std::string::npos) {
         // pwm output
-        _pwm.at(name)->write(get_state(name));
-        set_state(name, get_state(name));
+        _pwm.at(name)->write(get_command(name));
       }
     }
     catch (std::out_of_range& ex) {
