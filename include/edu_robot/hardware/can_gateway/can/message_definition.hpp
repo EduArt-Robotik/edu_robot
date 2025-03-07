@@ -53,19 +53,8 @@ struct DataTransmissionComplete : public MessageFrame<element::Uint8, // total p
   }
 }; 
 
-struct Measurement : public Message<element::Uint24LE, // distance, sigma
-                                    element::Uint8>    // zone no., frame no.
+struct Measurement : public Message<element::Uint24LE> // distance, sigma
 {
-  inline static constexpr std::size_t zone(
-    const std::array<RxMessageDataBuffer::value_type, Measurement::size()>& rx_buffer)
-  {
-    return (deserialize<1>(rx_buffer) >> 2) & 0x3f;
-  }
-  inline static constexpr std::size_t frame(
-    const std::array<RxMessageDataBuffer::value_type, Measurement::size()>& rx_buffer)
-  {
-    return deserialize<1>(rx_buffer) & 0x03;
-  }
   inline static float distance(const std::array<RxMessageDataBuffer::value_type, Measurement::size()>& rx_buffer)
   {
     return ((*reinterpret_cast<const std::uint32_t*>(&deserialize<0>(rx_buffer)[0]) >> 10) & 0x3fff) / 4.0f / 1000.0f;
@@ -78,12 +67,6 @@ struct Measurement : public Message<element::Uint24LE, // distance, sigma
 
 struct ZoneMeasurement : public MessageFrame<> // use empty message frame as base
 {
-  inline static std::size_t zone(const RxMessageDataBuffer& rx_buffer, const std::size_t index) {
-    return Measurement::zone(selectDataElement(rx_buffer, index));
-  }
-  inline static std::size_t frame(const RxMessageDataBuffer& rx_buffer, const std::size_t index) {
-    return Measurement::frame(selectDataElement(rx_buffer, index));
-  }
   inline static float distance(const RxMessageDataBuffer& rx_buffer, const std::size_t index) {
     return Measurement::distance(selectDataElement(rx_buffer, index));
   }

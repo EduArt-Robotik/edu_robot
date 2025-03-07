@@ -6,6 +6,7 @@
 #pragma once
 
 #include "edu_robot/hardware/communicator.hpp"
+#include "edu_robot/hardware/can_gateway/can/message.hpp"
 
 namespace eduart {
 namespace robot {
@@ -30,6 +31,17 @@ public:
     const std::uint8_t buffer_size = 5)
   {
     const auto search_pattern = Message::makeSearchPattern(can_id);
+    std::vector<message::Byte> search_pattern_vector(search_pattern.begin(), search_pattern.end());
+    return std::shared_ptr<CanRxDataEndPoint>(
+      new CanRxDataEndPoint(search_pattern_vector, callback, executer, buffer_size)
+    );
+  }
+
+  inline static std::shared_ptr<RxDataEndPoint> make_data_endpoint(
+    std::shared_ptr<Executer> executer, const std::uint32_t can_id, const CallbackProcessData& callback,
+    const std::uint8_t buffer_size = 5)
+  {
+    const auto search_pattern = message::MessageFrame<>::makeSearchPattern(can_id);
     std::vector<message::Byte> search_pattern_vector(search_pattern.begin(), search_pattern.end());
     return std::shared_ptr<CanRxDataEndPoint>(
       new CanRxDataEndPoint(search_pattern_vector, callback, executer, buffer_size)
