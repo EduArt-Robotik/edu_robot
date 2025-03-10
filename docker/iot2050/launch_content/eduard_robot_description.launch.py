@@ -20,6 +20,7 @@ def generate_robot_model(context: LaunchContext, robot_name_arg: LaunchConfigura
     hardware_type = hardware_type_arg.perform(context)
     urdf_eduard_model_path = urdf_eduard_model_path_arg.perform(context)
 
+    print('urdf file = ', urdf_eduard_model_path)
     print("use robot name = ", robot_name)
     print("use wheel type = ", wheel_type)
     robot_description = xacro.process_file(
@@ -92,7 +93,8 @@ def generate_launch_description():
       executable="spawner",
       arguments=["gpio_controller", "--param-file", robot_controller],
       namespace=edu_robot_namespace,
-      condition=LaunchConfigurationEquals('hardware_type', 'iot2050')
+      condition=LaunchConfigurationEquals('hardware_type', 'iot2050'),
+      output='both'
     )
 
     return LaunchDescription([
