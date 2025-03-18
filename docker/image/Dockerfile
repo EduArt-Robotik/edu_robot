@@ -1,4 +1,4 @@
-FROM eduartrobotik/eduart-ros-base:jazzy-1.0.1
+FROM eduartrobotik/eduart-ros-base:jazzy-1.2.0
 
 ENV USER=user
 ENV DEBIAN_FRONTEND=noninteractive
