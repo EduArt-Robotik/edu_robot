@@ -16,7 +16,7 @@ def generate_launch_description():
     package_path = FindPackageShare('edu_robot')
     parameter_file = PathJoinSubstitution([
       './',
-      'eduard-ipc127e.yaml'
+      'eduard-ipcbx21a.yaml'
     ])
 
     eduard_ipc = Node(
