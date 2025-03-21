@@ -60,7 +60,6 @@ HardwareComponentFactory& HardwareComponentFactory::addTofRingSensor(
   const std::string& sensor_name, const std::vector<std::string>& left_ring_sensors,
   const std::vector<std::string>& right_ring_sensors, rclcpp::Node& ros_node)
 {
-  std::cout << __PRETTY_FUNCTION__ << std::endl;
   const auto parameter_left_sensors = SensorTofRingHardware::get_parameter(
     sensor_name + "_left", left_ring_sensors, ros_node
   );

@@ -37,6 +37,11 @@ void SensorVirtualRange::processPointCloudMeasurement(sensor_msgs::msg::PointClo
   float distance = std::numeric_limits<float>::max();
 
   for (sensor_msgs::PointCloud2ConstIterator<float> point(point_cloud_transformed, "x"); point != point.end(); ++point) {
+    // only process points that are above robot's ground plane
+    if (point[2] < -_sensor_transform.getOrigin().getZ()) {
+      continue;
+    }
+
     distance = std::min(distance, point[0]);
   }
 

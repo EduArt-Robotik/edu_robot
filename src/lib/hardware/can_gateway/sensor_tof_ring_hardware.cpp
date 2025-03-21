@@ -96,7 +96,7 @@ SensorTofRingHardware::Parameter SensorTofRingHardware::get_parameter(
       SensorTofHardware::get_parameter(
         name + '.' + sensor_name, sensor_parameter, ros_node
       ),
-      "tof." + side + "." + sensor_name,
+      "tof." + sensor_name + "." + side,
       Sensor::get_transform_from_parameter(name + '.' + sensor_name, ros_node),
       false
     });
