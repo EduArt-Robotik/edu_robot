@@ -2,12 +2,15 @@
 #include "edu_robot/hardware/can_gateway/can/can_rx_data_endpoint.hpp"
 #include "edu_robot/hardware/can_gateway/can/message_definition.hpp"
 #include "edu_robot/hardware/can_gateway/can/can_request.hpp"
+#include "edu_robot/hardware/can_gateway/range_sensor_virtual.hpp"
 
 #include <edu_robot/hardware/communicator_node.hpp>
 
 #include <functional>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
+#include <regex>
+#include <string>
 #include <tf2/transform_datatypes.h>
 #include <tf2_sensor_msgs/tf2_sensor_msgs.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
@@ -23,6 +26,18 @@ using can::Request;
 using can::message::sensor::tof::StartMeasurement;
 using can::message::sensor::tof::MeasurementComplete;
 using can::message::sensor::tof::TriggerDataTransmission;
+
+static std::string get_virtual_range_sensor_name(const std::string& tof_sensor_name)
+{
+  const std::string removed_prefix(tof_sensor_name, tof_sensor_name.find(".")); // remove tof prefix
+  std::cout << "removed prefix: " << removed_prefix << std::endl;
+  const std::string sensor_name_with_dots = "range" + removed_prefix;
+  std::cout << "sensor name with dots: " << sensor_name_with_dots << std::endl;
+  const std::string range_sensor_name = std::regex_replace(removed_prefix, std::regex("."), "/");
+  std::cout << "range sensor name: " << range_sensor_name << std::endl;
+
+  return range_sensor_name;
+}
 
 static std::shared_ptr<sensor_msgs::msg::PointCloud2> create_point_cloud(
   const SensorTofRingHardware::Parameter& parameter)
@@ -71,15 +86,22 @@ SensorTofRingHardware::Parameter SensorTofRingHardware::get_parameter(
   Parameter parameter;
   SensorTofHardware::Parameter sensor_parameter;
   sensor_parameter.trigger_measurement = false; // disable triggering of new measurement in sub sensor
+  const std::string side = name.find("right") != std::string::npos ? "right" : "left"; // \todo only works if right or left is contained in name
 
   for (const auto& sensor_name : sensor_names) {
     parameter.tof_sensor.push_back({
       SensorTofHardware::get_parameter(
         name + '.' + sensor_name, sensor_parameter, ros_node
       ),
-      sensor_name,
+      "tof." + side + "." + sensor_name,
       Sensor::get_transform_from_parameter(name + '.' + sensor_name, ros_node),
+      false
     });
+
+    // virtual range sensor handling
+    ros_node.declare_parameter<bool>(
+      name + '.' + sensor_name + ".virtual_range_sensor", parameter.tof_sensor.back().virtual_range_sensor);
+    parameter.tof_sensor.back().virtual_range_sensor = ros_node.get_parameter(name + '.' + sensor_name + ".virtual_range_sensor").as_bool();
   }
 
   ros_node.declare_parameter<int>(name + ".measurement_interval", parameter.measurement_interval.count());
@@ -104,8 +126,18 @@ SensorTofRingHardware::SensorTofRingHardware(
   (void)name;
 
   for (std::size_t i = 0; i < _parameter.tof_sensor.size(); ++i) {
+    // add virtual range sensor if wanted
+    std::shared_ptr<RangeSensorVirtual> virtual_range_sensor = nullptr;
+
+    if (_parameter.tof_sensor[i].virtual_range_sensor) {
+      virtual_range_sensor = std::make_shared<RangeSensorVirtual>(_parameter.tof_sensor[i].transform);
+      std::string range_sensor_name = get_virtual_range_sensor_name(_parameter.tof_sensor[i].name);
+      _virtual_range_sensor[range_sensor_name] = virtual_range_sensor;
+    }
+
+    // instantiate and register tof sensor
     _sensor.emplace_back(std::make_shared<SensorTofHardware>(
-      _parameter.tof_sensor[i].name, _parameter.tof_sensor[i].parameter, _ros_node, executer, communicator
+      _parameter.tof_sensor[i].name, _parameter.tof_sensor[i].parameter, _ros_node, executer, communicator, virtual_range_sensor
     ));
     _processing_data.sensor_activation_bits |= (1 << (_parameter.tof_sensor[i].parameter.sensor_id - 1));
     _sensor.back()->registerMeasurementCompleteCallback(

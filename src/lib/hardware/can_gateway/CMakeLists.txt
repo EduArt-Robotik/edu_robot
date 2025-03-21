@@ -8,7 +8,7 @@ add_library(eduart-hardware-can
   motor_controller_hardware.cpp
   imu_sensor_hardware.cpp
   lighting_hardware.cpp
-  range_sensor_hardware.cpp
+  range_sensor_virtual.cpp
   sensor_point_cloud_fusion.cpp
 )
 target_link_libraries(eduart-hardware-can

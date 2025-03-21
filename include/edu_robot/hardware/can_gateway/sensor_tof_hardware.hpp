@@ -9,6 +9,8 @@
 
 #include <edu_robot/sensor_point_cloud.hpp>
 
+#include "edu_robot/hardware/can_gateway/range_sensor_virtual.hpp"
+
 #include <cstddef>
 #include <memory>
 
@@ -37,7 +39,7 @@ public:
 
   SensorTofHardware(
     const std::string& name, const Parameter& parameter, rclcpp::Node& ros_node, std::shared_ptr<Executer> executer,
-    std::shared_ptr<Communicator> communicator);
+    std::shared_ptr<Communicator> communicator, std::shared_ptr<RangeSensorVirtual> virtual_range_sensor = nullptr);
   ~SensorTofHardware() override = default;
 
   void initialize(const SensorPointCloud::Parameter& parameter) override;
@@ -54,6 +56,7 @@ private:
   rclcpp::Node& _ros_node;
   std::shared_ptr<CommunicatorNode> _communication_node;
   MeasurementCompleteCallback _callback_finished_measurement = nullptr;
+  std::shared_ptr<RangeSensorVirtual> _virtual_range_sensor = nullptr;
 
   struct {
     std::uint32_t trigger = 0x388;

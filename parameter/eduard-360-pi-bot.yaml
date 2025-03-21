@@ -109,6 +109,7 @@
         measurement_complete: 776
         trigger: 904
       front:
+        virtual_range_sensor: true
         fov:
           horizontal: 0.7853981852531433
           vertical: 0.7853981852531433
@@ -128,6 +129,7 @@
             z: 0.045
       measurement_interval: 100
       rear:
+        virtual_range_sensor: true      
         fov:
           horizontal: 0.7853981852531433
           vertical: 0.7853981852531433
@@ -150,6 +152,7 @@
         measurement_complete: 776
         trigger: 904
       front:
+        virtual_range_sensor: true
         fov:
           horizontal: 0.7853981852531433
           vertical: 0.7853981852531433
@@ -169,6 +172,7 @@
             z: 0.045
       measurement_interval: 100
       rear:
+        virtual_range_sensor: true      
         fov:
           horizontal: 0.7853981852531433
           vertical: 0.7853981852531433

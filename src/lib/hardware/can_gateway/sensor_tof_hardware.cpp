@@ -80,9 +80,7 @@ SensorTofHardware::get_parameter(const std::string& name, const Parameter& defau
 {
   SensorTofHardware::Parameter parameter;
 
-  // ros_node.declare_parameter<int>(name + ".can_id.trigger", default_parameter.can_id.trigger);
-  // ros_node.declare_parameter<int>(name + ".can_id.complete", default_parameter.can_id.complete);
-  // ros_node.declare_parameter<int>(name + ".can_id.measurement", default_parameter.can_id.measurement);
+  // parameter declaration
   ros_node.declare_parameter<int>(name + ".sensor_id", default_parameter.sensor_id);
 
   ros_node.declare_parameter<int>(
@@ -94,9 +92,7 @@ SensorTofHardware::get_parameter(const std::string& name, const Parameter& defau
   ros_node.declare_parameter<int>(
     name + ".measurement_interval_ms", default_parameter.measurement_interval.count());
 
-  // parameter.can_id.trigger = ros_node.get_parameter(name + ".can_id.trigger").as_int();
-  // parameter.can_id.complete = ros_node.get_parameter(name + ".can_id.complete").as_int();
-  // parameter.can_id.measurement = ros_node.get_parameter(name + ".can_id.measurement").as_int();
+  // parameter reading
   parameter.sensor_id = ros_node.get_parameter(name + ".sensor_id").as_int();
 
   parameter.number_of_zones.vertical = ros_node.get_parameter(name + ".number_of_zones.vertical").as_int();
@@ -113,11 +109,12 @@ SensorTofHardware::get_parameter(const std::string& name, const Parameter& defau
 
 SensorTofHardware::SensorTofHardware(
   const std::string& name, const Parameter& parameter, rclcpp::Node& ros_node, std::shared_ptr<Executer> executer,
-  std::shared_ptr<Communicator> communicator)
+  std::shared_ptr<Communicator> communicator, std::shared_ptr<RangeSensorVirtual> virtual_range_sensor)
   : SensorPointCloud::SensorInterface()
   , _parameter(parameter)
   , _ros_node(ros_node)
   , _communication_node(std::make_shared<CommunicatorNode>(executer, communicator))
+  , _virtual_range_sensor(virtual_range_sensor)
 {
   (void)name;
 
@@ -163,6 +160,9 @@ void SensorTofHardware::processRxData(const message::RxMessageDataBuffer& data)
 
     // Calling Layer Above
     _callback_process_measurement(*_processing_data.point_cloud);
+    if (_virtual_range_sensor) {
+      _virtual_range_sensor->processPointCloudMeasurement(*_processing_data.point_cloud);
+    }
 
     // Preparing Next Iteration
     _processing_data.next_expected_zone = 0;
