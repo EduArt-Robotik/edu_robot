@@ -15,11 +15,11 @@ namespace robot {
 namespace hardware {
 namespace can_gateway {
 
-class RangeSensorVirtual : public SensorRange::SensorInterface
+class SensorVirtualRange : public SensorRange::SensorInterface
 {
 public:
-  RangeSensorVirtual(const tf2::Transform& sensor_transform);
-  ~RangeSensorVirtual() override = default;
+  SensorVirtualRange(const tf2::Transform& sensor_transform);
+  ~SensorVirtualRange() override = default;
 
   void initialize(const SensorRange::Parameter& parameter) override;
 

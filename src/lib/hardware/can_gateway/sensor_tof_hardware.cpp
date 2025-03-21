@@ -2,6 +2,7 @@
 #include "edu_robot/hardware/can_gateway/can/message_definition.hpp"
 #include "edu_robot/hardware/can_gateway/can/can_rx_data_endpoint.hpp"
 #include "edu_robot/hardware/can_gateway/can/can_request.hpp"
+#include "edu_robot/hardware/can_gateway/sensor_virtual_range.hpp"
 
 #include <edu_robot/hardware/communicator_node.hpp>
 
@@ -109,7 +110,7 @@ SensorTofHardware::get_parameter(const std::string& name, const Parameter& defau
 
 SensorTofHardware::SensorTofHardware(
   const std::string& name, const Parameter& parameter, rclcpp::Node& ros_node, std::shared_ptr<Executer> executer,
-  std::shared_ptr<Communicator> communicator, std::shared_ptr<RangeSensorVirtual> virtual_range_sensor)
+  std::shared_ptr<Communicator> communicator, std::shared_ptr<SensorVirtualRange> virtual_range_sensor)
   : SensorPointCloud::SensorInterface()
   , _parameter(parameter)
   , _ros_node(ros_node)

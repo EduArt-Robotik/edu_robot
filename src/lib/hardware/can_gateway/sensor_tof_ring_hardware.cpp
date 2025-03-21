@@ -2,20 +2,20 @@
 #include "edu_robot/hardware/can_gateway/can/can_rx_data_endpoint.hpp"
 #include "edu_robot/hardware/can_gateway/can/message_definition.hpp"
 #include "edu_robot/hardware/can_gateway/can/can_request.hpp"
-#include "edu_robot/hardware/can_gateway/range_sensor_virtual.hpp"
 
 #include <edu_robot/hardware/communicator_node.hpp>
 
-#include <functional>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
-#include <regex>
-#include <string>
+
 #include <tf2/transform_datatypes.h>
 #include <tf2_sensor_msgs/tf2_sensor_msgs.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 #include <memory>
+#include <functional>
+#include <regex>
+#include <string>
 
 namespace eduart {
 namespace robot {
@@ -30,11 +30,14 @@ using can::message::sensor::tof::TriggerDataTransmission;
 static std::string get_virtual_range_sensor_name(const std::string& tof_sensor_name)
 {
   const std::string removed_prefix(tof_sensor_name, tof_sensor_name.find(".")); // remove tof prefix
-  std::cout << "removed prefix: " << removed_prefix << std::endl;
   const std::string sensor_name_with_dots = "range" + removed_prefix;
-  std::cout << "sensor name with dots: " << sensor_name_with_dots << std::endl;
-  const std::string range_sensor_name = std::regex_replace(removed_prefix, std::regex("."), "/");
-  std::cout << "range sensor name: " << range_sensor_name << std::endl;
+  std::string range_sensor_name = sensor_name_with_dots;
+
+  for (auto& character : range_sensor_name) {
+    if (character == '.') {
+      character = '/';
+    }
+  }
 
   return range_sensor_name;
 }
@@ -127,10 +130,10 @@ SensorTofRingHardware::SensorTofRingHardware(
 
   for (std::size_t i = 0; i < _parameter.tof_sensor.size(); ++i) {
     // add virtual range sensor if wanted
-    std::shared_ptr<RangeSensorVirtual> virtual_range_sensor = nullptr;
+    std::shared_ptr<SensorVirtualRange> virtual_range_sensor = nullptr;
 
     if (_parameter.tof_sensor[i].virtual_range_sensor) {
-      virtual_range_sensor = std::make_shared<RangeSensorVirtual>(_parameter.tof_sensor[i].transform);
+      virtual_range_sensor = std::make_shared<SensorVirtualRange>(_parameter.tof_sensor[i].transform);
       std::string range_sensor_name = get_virtual_range_sensor_name(_parameter.tof_sensor[i].name);
       _virtual_range_sensor[range_sensor_name] = virtual_range_sensor;
     }

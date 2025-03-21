@@ -4,7 +4,7 @@
 #include "edu_robot/hardware/can_gateway/motor_controller_hardware.hpp"
 #include "edu_robot/hardware/can_gateway/imu_sensor_hardware.hpp"
 #include "edu_robot/hardware/can_gateway/lighting_hardware.hpp"
-#include "edu_robot/hardware/can_gateway/range_sensor_virtual.hpp"
+#include "edu_robot/hardware/can_gateway/sensor_virtual_range.hpp"
 #include "edu_robot/hardware/can_gateway/sensor_tof_ring_hardware.hpp"
 #include "edu_robot/hardware/can_gateway/sensor_point_cloud_fusion.hpp"
 
