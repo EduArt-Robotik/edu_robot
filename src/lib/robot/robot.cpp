@@ -39,6 +39,8 @@ static Robot::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
   // Declare Parameters
   ros_node.declare_parameter<std::string>("tf.base_frame", parameter.tf.base_frame);
   ros_node.declare_parameter<std::string>("tf.footprint_frame", parameter.tf.footprint_frame);
+  ros_node.declare_parameter<int>("tf.publishing_interval_ms", parameter.tf.publishing_interval.count());
+
   ros_node.declare_parameter<bool>("odometry.publishing_tf", parameter.odometry.publishing_tf);
   ros_node.declare_parameter<int>(
     "odometry.publishing_interval_ms", parameter.odometry.publishing_interval.count());
@@ -52,6 +54,9 @@ static Robot::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
   // Get Parameter Values
   parameter.tf.base_frame = ros_node.get_parameter("tf.base_frame").as_string();
   parameter.tf.footprint_frame = ros_node.get_parameter("tf.footprint_frame").as_string();
+  parameter.tf.publishing_interval = std::chrono::milliseconds(
+    ros_node.get_parameter("tf.publishing_interval_ms").as_int());
+
   parameter.odometry.publishing_tf = ros_node.get_parameter("odometry.publishing_tf").as_bool();
   parameter.odometry.publishing_interval = std::chrono::milliseconds(
     ros_node.get_parameter("odometry.publishing_interval_ms").as_int());
@@ -148,7 +153,9 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<HardwareRobotInterfa
 
   // Timers
   _timer_status_report = create_wall_timer(500ms, std::bind(&Robot::processStatusReport, this));
-  _timer_tf_publishing = create_wall_timer(100ms, std::bind(&Robot::processTfPublishing, this));
+  _timer_tf_publishing = create_wall_timer(
+    _parameter.tf.publishing_interval, std::bind(&Robot::processTfPublishing, this)
+  );
   _timer_watch_dog = create_wall_timer(500ms, std::bind(&Robot::processWatchDogBarking, this));
   _timer_odometry = create_wall_timer(
     _parameter.odometry.publishing_interval, std::bind(&Robot::publishingOdometry, this)

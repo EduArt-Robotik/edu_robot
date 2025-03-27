@@ -1,5 +1,8 @@
 /**:
   ros__parameters:
+    # General Parameters
+    use_sim_time: false
+
     # Collision Avoidance
     collision_avoidance:
       distance_reduce_velocity: 0.4
@@ -20,20 +23,19 @@
         yaw: -1.5707963705062866
       publish_orientation_without_yaw_tf: true
       publish_tf: true
-      raw_data_mode: false
-      tf_frame_rotated: eduard/base_link
-      
-    # General Parameter
-    use_sim_time: false
     
+    # TF2
     tf:
       base_frame: base_link
       footprint_frame: base_footprint
-      
+      publishing_interval_ms: 50
+    
+    # Odometry
     odometry:
       publishing_interval_ms: 50
       publishing_tf: true
 
+    # Kinematic
     mecanum:
       length:
         x: 0.25
@@ -91,6 +93,7 @@
       timeout_ms: 500
       weight_low_pass_encoder: 0.3
       weight_low_pass_set_point: 0.2
+
     motor_controller_1:
       can_id:
         input: 1025

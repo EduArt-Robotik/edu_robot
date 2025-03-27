@@ -1,44 +1,82 @@
 /**:
   ros__parameters:
-# General Parameters
-    tf_base_frame: base_link
-    tf_footprint_frame: base_footprint
+    # General Parameters
     use_sim_time: false
 
-# Collision Avoidance
+    # Collision Avoidance
     collision_avoidance:
       enable: true
       distance_reduce_velocity: 0.6
       distance_velocity_zero: 0.05
 
-# IMU Sensor
+    # Diagnostic
+    diagnostic_updater:
+      period: 1.0
+      use_fqn: false
+
+    # TF2
+    tf:
+      base_frame: base_link
+      footprint_frame: base_footprint
+      publishing_interval_ms: 100
+    
+    # Odometry
+    odometry:
+      publishing_interval_ms: 100
+      publishing_tf: true
+
+    # IMU Sensor
     imu:
       fusion_weight: 0.029999999329447746
       raw_data_mode: true
       publish_tf: true
       publish_orientation_without_yaw_tf : true
 
-# Motor Controller
+    # Motor Controller
     motor_a:
       control_frequency: 16000
       timeout_ms: 500
       encoder_inverted: true
       encoder_ratio: 2048.0
       gear_ratio: 89.0
-      max_rpm: 140.0
+      weight_low_pass_encoder: 0.3
+      weight_low_pass_set_point: 0.2
+
+    # Motor
+    motor_a:
+      closed_loop: true
+      index: 0
+      max_rpm: 100.0
       pid:
         kd: 0.0
         ki: 5.0
         kp: 0.5
-      weight_low_pass_encoder: 0.3
-      weight_low_pass_set_point: 0.2
+    motor_b:
+      closed_loop: true
+      index: 0
+      max_rpm: 100.0
+      pid:
+        kd: 0.0
+        ki: 5.0
+        kp: 0.5
+    motor_c:
+      closed_loop: true
+      index: 0
+      max_rpm: 100.0
+      pid:
+        kd: 0.0
+        ki: 5.0
+        kp: 0.5
+    motor_d:
+      closed_loop: true
+      index: 0
+      max_rpm: 100.0
+      pid:
+        kd: 0.0
+        ki: 5.0
+        kp: 0.5
 
-# Motor B, C and D are configured together with motor A. Motor B, C and D therefore receive the same parameters as motor A.
-    # motor_b:  
-    # motor_c:  
-    # motor_d:
-
-# Range Sensor
+    # Range Sensor
     range:  
       front:
         left:
@@ -62,7 +100,7 @@
           range_max: 5.0
           range_min: 0.009999999776482582
 
-# Drive Kinematic
+    # Drive Kinematic
     skid:
       length:
         x: 0.25

@@ -63,6 +63,7 @@ public:
     struct {
       std::string base_frame = "base_link";
       std::string footprint_frame = "base_footprint";
+      std::chrono::milliseconds publishing_interval{20ms};
     } tf;
 
     bool enable_collision_avoidance = true;
@@ -70,7 +71,7 @@ public:
 
     struct {
       bool publishing_tf = true;
-      std::chrono::milliseconds publishing_interval{100ms};
+      std::chrono::milliseconds publishing_interval{20ms};
     } odometry;
   };
 
