@@ -1,10 +1,10 @@
 #include "edu_robot/hardware/can_gateway/sensor_virtual_range.hpp"
-#include "edu_robot/hardware/communicator_node.hpp"
 
-#include <limits>
 #include <rclcpp/qos.hpp>
 #include <sensor_msgs/point_cloud2_iterator.hpp>
 #include <tf2/LinearMath/Vector3.hpp>
+
+#include <limits>
 
 namespace eduart {
 namespace robot {
@@ -27,13 +27,22 @@ void SensorVirtualRange::initialize(const SensorRange::Parameter& parameter)
 
 void SensorVirtualRange::processPointCloudMeasurement(sensor_msgs::msg::PointCloud2& point_cloud)
 {
+  const std::size_t number_of_points = point_cloud.data.size() / point_cloud.point_step;
+
   // Align given point cloud with robot's coordinate system (axis aligned)
   geometry_msgs::msg::TransformStamped transform;
   transform.transform = tf2::toMsg(_sensor_transform);
   sensor_msgs::msg::PointCloud2 point_cloud_transformed;
   tf2::doTransform(point_cloud, point_cloud_transformed, transform);
 
+  if (number_of_points < 2) {
+    // not enough points for processing
+    return;
+  }
+
   // find closest point
+  std::vector<float> distances;
+  distances.reserve(number_of_points);
   float distance = std::numeric_limits<float>::max();
 
   for (sensor_msgs::PointCloud2ConstIterator<float> point(point_cloud_transformed, "x"); point != point.end(); ++point) {
@@ -42,11 +51,17 @@ void SensorVirtualRange::processPointCloudMeasurement(sensor_msgs::msg::PointClo
       continue;
     }
 
-    distance = std::min(distance, point[0]);
+    distance = std::min(distance, point[0]); // \todo remove distance
+    // take value or maximum numeric limit if distance is zero
+    distances.push_back(point[0] == 0.0f ? std::numeric_limits<float>::max() : point[0]);
   }
 
+  // sort distances and pick second closest one
+  std::sort(distances.begin(), distances.end());
+
   if (_callback_process_measurement != nullptr) {
-    _callback_process_measurement(distance);
+    // pick second closest one --> drop outlier
+    _callback_process_measurement(distances[1]);
   }
 }
 
