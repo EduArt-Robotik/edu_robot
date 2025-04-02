@@ -57,6 +57,7 @@ rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typ
 
 # Building Libraries
 add_subdirectory(src/lib/action)
+add_subdirectory(src/lib/algorithm)
 add_subdirectory(src/lib/diagnostic)
 add_subdirectory(src/lib/robot)
 add_subdirectory(src/lib/processing_component)

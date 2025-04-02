@@ -1,8 +1,13 @@
 #include "edu_robot/hardware/can_gateway/sensor_virtual_range.hpp"
+#include "edu_robot/algorithm/rotation.hpp"
 
-#include <rclcpp/qos.hpp>
+#include "geometry_msgs/msg/transform_stamped.hpp"
 #include <sensor_msgs/point_cloud2_iterator.hpp>
 #include <tf2/LinearMath/Vector3.hpp>
+
+#include <Eigen/Geometry>
+
+#include <rclcpp/qos.hpp>
 
 #include <limits>
 
@@ -32,6 +37,8 @@ void SensorVirtualRange::processPointCloudMeasurement(sensor_msgs::msg::PointClo
   // Align given point cloud with robot's coordinate system (axis aligned)
   geometry_msgs::msg::TransformStamped transform;
   transform.transform = tf2::toMsg(_sensor_transform);
+  algorithm::eliminate_yaw(transform.transform.rotation);
+
   sensor_msgs::msg::PointCloud2 point_cloud_transformed;
   tf2::doTransform(point_cloud, point_cloud_transformed, transform);
 
@@ -42,6 +49,7 @@ void SensorVirtualRange::processPointCloudMeasurement(sensor_msgs::msg::PointClo
 
   // find closest point
   std::vector<float> distances;
+  
   distances.reserve(number_of_points);
   float distance = std::numeric_limits<float>::max();
 

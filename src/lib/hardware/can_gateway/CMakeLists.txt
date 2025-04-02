@@ -12,6 +12,7 @@ add_library(eduart-hardware-can
   sensor_point_cloud_fusion.cpp
 )
 target_link_libraries(eduart-hardware-can
+  eduart-algorithm
   eduart-robot
   eduart-hardware
 )
