@@ -4,7 +4,7 @@
 
 #include "geometry_msgs/msg/transform_stamped.hpp"
 #include <sensor_msgs/point_cloud2_iterator.hpp>
-#include <tf2/LinearMath/Vector3.hpp>
+#include <tf2/LinearMath/Vector3.h>
 
 #include <Eigen/Geometry>
 
@@ -33,7 +33,6 @@ void SensorVirtualRange::initialize(const SensorRange::Parameter& parameter)
 
 void SensorVirtualRange::processPointCloudMeasurement(sensor_msgs::msg::PointCloud2& point_cloud)
 {
-  std::cout << __PRETTY_FUNCTION__ << std::endl;
   const Eigen::Quaterniond camera_to_robot(
     Eigen::AngleAxisd(M_PI_2, Eigen::Vector3d::UnitX()) * Eigen::AngleAxisd(M_PI_2, Eigen::Vector3d::UnitY()));
   const std::size_t number_of_points = point_cloud.data.size() / point_cloud.point_step;
@@ -47,7 +46,8 @@ void SensorVirtualRange::processPointCloudMeasurement(sensor_msgs::msg::PointClo
 
   // Align given point cloud with robot's coordinate system (axis aligned)
   geometry_msgs::msg::TransformStamped transform;
-  transform.transform.rotation = message::to_ros(sensor_to_robot * camera_to_robot);
+  // transform.transform.rotation = message::to_ros(sensor_to_robot * camera_to_robot);
+  transform.transform.rotation = tf2::toMsg(_sensor_transform.getRotation());
 
   sensor_msgs::msg::PointCloud2 point_cloud_transformed;
   tf2::doTransform(point_cloud, point_cloud_transformed, transform);
@@ -67,20 +67,28 @@ void SensorVirtualRange::processPointCloudMeasurement(sensor_msgs::msg::PointClo
     std::cout << "point: " << point[0] << ", " << point[1] << ", " << point[2] << std::endl;
 
     // only process points that are above robot's ground plane
-    if (point[2] < -_sensor_transform.getOrigin().getZ()) {
+    if (std::isnan(point[0]) || point[0] == 0.0f || point[2] < -_sensor_transform.getOrigin().getZ()) {
+      distances.push_back(std::numeric_limits<float>::max());
       continue;
     }
+    // else: valid point
 
     distance = std::min(distance, point[0]); // \todo remove distance
     // take value or maximum numeric limit if distance is zero
-    distances.push_back(point[0] == 0.0f ? std::numeric_limits<float>::max() : point[0]);
+    distances.push_back(std::abs(point[0]));
   }
 
   // sort distances and pick second closest one
   std::sort(distances.begin(), distances.end());
 
+  for (const auto& distance : distances) {
+    std::cout << distance << ",";
+  }
+  std::cout << std::endl;
+
   if (_callback_process_measurement != nullptr) {
     // pick second closest one --> drop outlier
+    std::cout << "distance = " << distances[1] << std::endl;
     _callback_process_measurement(distances[1]);
   }
 }
