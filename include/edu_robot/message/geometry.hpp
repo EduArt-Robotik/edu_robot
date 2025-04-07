@@ -10,6 +10,7 @@
 
 #include <Eigen/src/Geometry/Quaternion.h>
 #include <geometry_msgs/msg/quaternion.hpp>
+#include <tf2/LinearMath/Quaternion.hpp>
 
 namespace eduart {
 namespace robot {
@@ -18,6 +19,9 @@ namespace message {
 // from ros
 inline Eigen::Quaterniond from_ros(const geometry_msgs::msg::Quaternion& q) {
   return Eigen::Quaterniond(q.w, q.x, q.y, q.z);
+}
+inline Eigen::Quaterniond from_ros(const tf2::Quaternion& q) {
+  return Eigen::Quaterniond(q.w(), q.x(), q.y(), q.z());
 }
 // to ros
 inline geometry_msgs::msg::Quaternion to_ros(const Eigen::Quaterniond& q) {

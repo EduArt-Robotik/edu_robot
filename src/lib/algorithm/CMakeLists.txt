@@ -1,5 +1,6 @@
 add_library(eduart-algorithm
   rotation.cpp
+  geometry.cpp
 )
 target_link_libraries(eduart-algorithm
   "${cpp_typesupport_target}"
@@ -13,6 +14,7 @@ target_include_directories(eduart-algorithm PUBLIC
 ament_target_dependencies(
   eduart-algorithm
   "geometry_msgs"
+  "tf2"
 )
 list(APPEND BUILT_LIBRARIES eduart-algorithm)
 
