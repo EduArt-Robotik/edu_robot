@@ -24,10 +24,16 @@ RUN apt-get update \
     && mkdir build \
     && cd build \
     && cmake .. \
-    && make \
+    && make -j$(nproc) \
     && make install \
     # hack: was the fastest and most fluffy way
-    && cp /usr/local/lib/libmraa.so* /usr/lib
+    && cp /usr/local/lib/libmraa.so* /usr/lib \
+    # lib pigpio
+    && cd /tmp \
+    && git clone --branch v79 https://github.com/joan2937/pigpio.git \
+    && cd pigpio \
+    && make -j$(nproc) \
+    && make install
 
 USER $USER
 

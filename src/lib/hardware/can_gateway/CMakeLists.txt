@@ -27,5 +27,24 @@ ament_target_dependencies(eduart-hardware-can
 )
 list(APPEND BUILT_LIBRARIES eduart-hardware-can)
 
+# Export hardware plugins
+if (HAVE_PIGPIO)
+  add_library(ros2-control-eduard-raspberry SHARED
+    ros2_hardware_adapter.cpp
+  )
+  target_include_directories(ros2-control-eduard-raspberry PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+  )
+  target_link_libraries(ros2-control-eduard-raspberry
+    pigpio
+  )
+  ament_target_dependencies(ros2-control-eduard-raspberry
+    "pluginlib"
+    "hardware_interface"
+  )
+  list(APPEND BUILT_LIBRARIES ros2-control-eduard-raspberry)
+endif()
+
 # Populating Built Libraries
 set(BUILT_LIBRARIES ${BUILT_LIBRARIES} PARENT_SCOPE)
