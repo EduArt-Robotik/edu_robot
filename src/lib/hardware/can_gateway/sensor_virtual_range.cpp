@@ -24,7 +24,7 @@ SensorVirtualRange::SensorVirtualRange(const tf2::Transform& sensor_transform)
   : _sensor_transform(sensor_transform)
 {
   // remove translation so only rotation will be applied. --> point cloud will be axis aligned with the robot
-  _sensor_transform.setOrigin(tf2::Vector3(0.0, 0.0, 0.0));
+  // _sensor_transform.setOrigin(tf2::Vector3(0.0, 0.0, 0.0));
 }
 
 void SensorVirtualRange::initialize(const SensorRange::Parameter& parameter)
@@ -98,7 +98,7 @@ void SensorVirtualRange::processPointCloudMeasurement(sensor_msgs::msg::PointClo
   // the plane represents the robots ground plane
   Plane<double> ground_plane(Eigen::Vector3d(0, 0, -_sensor_transform.getOrigin().z()), Eigen::Vector3d::UnitZ());
   // only rotate, because plane already translated at construction
-  algorithm::rotate_plane(ground_plane, message::from_ros(_sensor_transform.getRotation()));
+  algorithm::rotate_plane(ground_plane, message::from_ros(_sensor_transform.getRotation()).conjugate());
 
   // process points
   const std::size_t number_of_points = point_cloud.data.size() / point_cloud.point_step;  
