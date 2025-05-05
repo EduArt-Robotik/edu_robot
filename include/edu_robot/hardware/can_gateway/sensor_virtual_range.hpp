@@ -6,6 +6,7 @@
 #pragma once
 
 #include <edu_robot/sensor_range.hpp>
+#include <edu_robot/plane.hpp>
 
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <tf2/LinearMath/Transform.hpp>
@@ -27,6 +28,7 @@ public:
 
 private:
   tf2::Transform _sensor_transform;
+  Plane<double> _ground_plane;
 };               
 
 } // end namespace can_gateway
