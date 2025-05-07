@@ -133,43 +133,44 @@
       </hardware>
       <gpio name="x10">
         <state_interface name="din_8">
-          <param name="pin">8</param>
+          <param name="pin">26</param>
           <param name="resistor">pull_up</param>
         </state_interface>
 
         <state_interface name="din_9">
-          <param name="pin">9</param>
+          <param name="pin">27</param>
           <param name="resistor">pull_up</param>
         </state_interface>
 
-        <state_interface name="din_10">
-          <param name="pin">10</param>
+        <!-- port is used by SPI -->
+        <!-- <state_interface name="din_10">
+          <param name="pin">17</param>
           <param name="resistor">pull_up</param>
-        </state_interface>
+        </state_interface> -->
 
         <command_interface name="dout_11">
-          <param name="pin">11</param>
+          <param name="pin">20</param>
         </command_interface>
         <state_interface name="dout_11"/>
 
         <command_interface name="dout_12">
-          <param name="pin">12</param>
+          <param name="pin">19</param>
         </command_interface>
         <state_interface name="dout_12"/>
 
         <command_interface name="dout_13">
-          <param name="pin">13</param>
+          <param name="pin">21</param>
         </command_interface>
         <state_interface name="dout_13"/>
       </gpio>
       <gpio name="x11">
         <state_interface name="din_2">
-          <param name="pin">2</param>
+          <param name="pin">23</param>
           <param name="resistor">pull_up</param>
         </state_interface>
 
         <state_interface name="din_3">
-          <param name="pin">3</param>
+          <param name="pin">22</param>
           <param name="resistor">pull_up</param>
         </state_interface>
 
@@ -184,13 +185,12 @@
         <state_interface name="dout_5"/>
 
         <command_interface name="dout_6">
-          <param name="period_us">1000</param>
-          <param name="pin">6</param>
+          <param name="pin">12</param>
         </command_interface>
         <state_interface name="dout_6"/>
 
         <command_interface name="dout_7">
-          <param name="pin">7</param>
+          <param name="pin">6</param>
         </command_interface>
         <state_interface name="dout_7"/>
       </gpio>

@@ -25,7 +25,6 @@ Ros2HardwareAdapter::~Ros2HardwareAdapter()
 hardware_interface::CallbackReturn Ros2HardwareAdapter::on_init(const hardware_interface::HardwareInfo & info)
 {
   hardware_interface::SystemInterface::on_init(info);
-  RCLCPP_INFO(get_logger(), __PRETTY_FUNCTION__);
 
   _chip = std::make_shared<gpiod::chip>("gpiochip0", gpiod::chip::OPEN_BY_NAME);
 
@@ -35,7 +34,6 @@ hardware_interface::CallbackReturn Ros2HardwareAdapter::on_init(const hardware_i
 hardware_interface::CallbackReturn Ros2HardwareAdapter::on_configure(const rclcpp_lifecycle::State& previous_state)
 {
   (void)previous_state;
-  RCLCPP_INFO(get_logger(), __PRETTY_FUNCTION__);
 
   for (const auto& gpio : info_.gpios) {
     // outputs
@@ -62,9 +60,6 @@ hardware_interface::CallbackReturn Ros2HardwareAdapter::on_configure(const rclcp
             gpiod::line_request::DIRECTION_OUTPUT,
             0
           };
-
-          // line.set_direction_output(0);
-          // line.set_flags(0);
           line.request(config, 0);
 
           _gpio[gpio.name + '/' + command.name] = line;
@@ -100,9 +95,6 @@ hardware_interface::CallbackReturn Ros2HardwareAdapter::on_configure(const rclcp
             gpiod::line_request::DIRECTION_INPUT,
             resistor
           };
-
-          // line.set_direction_input();
-          // line.set_flags(resistor);
           line.request(config);
 
           _gpio[gpio.name + '/' + state.name] = line;

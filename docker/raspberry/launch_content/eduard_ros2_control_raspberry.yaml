@@ -13,7 +13,7 @@
       x11:
         - interfaces:
           - dout_5
-          - pwm_6
+          - dout_6
           - dout_7
 
     state_interfaces:
@@ -21,7 +21,7 @@
         - interfaces:
           - din_8
           - din_9
-          - din_10
+          # - din_10
           - dout_11
           - dout_12
           - dout_13
@@ -30,6 +30,6 @@
           - din_2
           - din_3
           - din_4
-          - din_5
-          - pwm_6
-          - din_7
+          - dout_5
+          - dout_6
+          - dout_7
