@@ -78,7 +78,7 @@ def generate_launch_description():
     # Optional GPIO Hardware
     robot_controller = PathJoinSubstitution([
       './',
-      'eduard_ros2_control_iot2050.yaml'
+      'eduard_ros2_control_raspberry.yaml'
     ])
     control_node = Node(
         package="controller_manager",
@@ -86,14 +86,14 @@ def generate_launch_description():
         parameters=[robot_controller],
         namespace=edu_robot_namespace,
         output="both",
-        condition=LaunchConfigurationEquals('hardware_type', 'iot2050')
+        condition=LaunchConfigurationEquals('hardware_type', 'raspberry')
     )
     gpio_controller = Node(
       package="controller_manager",
       executable="spawner",
       arguments=["gpio_controller", "--param-file", robot_controller],
       namespace=edu_robot_namespace,
-      condition=LaunchConfigurationEquals('hardware_type', 'iot2050'),
+      condition=LaunchConfigurationEquals('hardware_type', 'raspberry'),
       output='both'
     )
 

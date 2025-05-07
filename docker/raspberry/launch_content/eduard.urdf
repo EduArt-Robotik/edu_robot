@@ -129,7 +129,7 @@
   <xacro:if value="${'raspberry' in '$(arg hardware)'}">
     <ros2_control name="eduard_iot2050_hardware" type='system'>
       <hardware>
-        <plugin>eduart/robot/hardware/can_gateway/Ros2HardwareAdapte</plugin>     
+        <plugin>eduart/robot/hardware/can_gateway/Ros2HardwareAdapter</plugin>     
       </hardware>
       <gpio name="x10">
         <state_interface name="din_8">
