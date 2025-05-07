@@ -36,12 +36,12 @@ else()
 endif()
 
 # pigpio
-if (EXISTS "/usr/local/include/pigpio.h")
+if (EXISTS "/usr/include/gpiod.hpp")
   message(STATUS "Found lib pigpio. Enable gpio hardware support for raspberry.")
-  set(HAVE_PIGPIO "TRUE")
+  set(HAVE_GPIOD "TRUE")
 else()
   message(STATUS "Couldn't find lib pigpio. Disable hardware support for raspberry.")
-  set(HAVE_PIGPIO "FALSE")  
+  set(HAVE_GPIOD "FALSE")  
 endif()
 
 ## Build Defined ROS Messages
@@ -75,7 +75,7 @@ add_subdirectory(src/lib/hardware)
 if (HAVE_MRAA)
   pluginlib_export_plugin_description_file(hardware_interface src/lib/hardware/iot_shield/ros2_control_eduard_iot.xml)
 endif()
-if (HAVE_PIGPIO)
+if (HAVE_GPIOD)
   pluginlib_export_plugin_description_file(hardware_interface src/lib/hardware/can_gateway/ros2_control_eduard_raspberry.xml)
 endif()
 

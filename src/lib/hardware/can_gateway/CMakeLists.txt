@@ -28,7 +28,7 @@ ament_target_dependencies(eduart-hardware-can
 list(APPEND BUILT_LIBRARIES eduart-hardware-can)
 
 # Export hardware plugins
-if (HAVE_PIGPIO)
+if (HAVE_GPIOD)
   add_library(ros2-control-eduard-raspberry SHARED
     ros2_hardware_adapter.cpp
   )

@@ -7,7 +7,7 @@
 
 #include <hardware_interface/system_interface.hpp>
 
-#include <pigpio.h>
+#include <gpiod.hpp>
 
 namespace eduart {
 namespace robot {
@@ -40,8 +40,8 @@ public:
     const rclcpp::Time & time, const rclcpp::Duration & period) override;
 
 private:
-  std::unordered_map<std::string, int> _gpio;
-  std::unordered_map<std::string, int> _pwm;
+  std::shared_ptr<gpiod::chip> _chip;
+  std::unordered_map<std::string, gpiod::line> _gpio;
 };
 
 } // end namespace can_gateway
