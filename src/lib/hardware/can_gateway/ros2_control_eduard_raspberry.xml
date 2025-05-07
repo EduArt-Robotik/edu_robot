@@ -1,0 +1,9 @@
+<library path="ros2-control-eduard-raspberry">
+  <class name="eduart/robot/hardware/can_gateway/Ros2HardwareAdapter"
+         type="eduart::robot::hardware::can_gateway::Ros2HardwareAdapter"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      Hardware Adapter for EduArt Eduard Pi 360.
+    </description>
+  </class>
+</library>

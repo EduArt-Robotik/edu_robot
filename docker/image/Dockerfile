@@ -16,6 +16,7 @@ RUN apt-get update \
       libnode-dev \
       cmake \
       libjson-c-dev \
+      libgpiod-dev \
     && apt-get install -y \
       ros-$ROS_DISTRO-hardware-interface \
     # todo master brauch is not good, but the only one how compiles.
@@ -24,7 +25,7 @@ RUN apt-get update \
     && mkdir build \
     && cd build \
     && cmake .. \
-    && make \
+    && make -j$(nproc) \
     && make install \
     # hack: was the fastest and most fluffy way
     && cp /usr/local/lib/libmraa.so* /usr/lib

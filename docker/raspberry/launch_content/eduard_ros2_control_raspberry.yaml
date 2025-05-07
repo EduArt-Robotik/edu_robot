@@ -1,0 +1,35 @@
+/**:
+  ros__parameters:
+    type: gpio_controllers/GpioCommandController
+    gpios:
+      - x10
+      - x11
+    command_interfaces:
+      x10:
+        - interfaces:
+          - dout_11
+          - dout_12
+          - dout_13
+      x11:
+        - interfaces:
+          - dout_5
+          - dout_6
+          - dout_7
+
+    state_interfaces:
+      x10:
+        - interfaces:
+          - din_8
+          - din_9
+          # - din_10
+          - dout_11
+          - dout_12
+          - dout_13
+      x11:
+        - interfaces:
+          - din_2
+          - din_3
+          - din_4
+          - dout_5
+          - dout_6
+          - dout_7
