@@ -127,8 +127,8 @@ hardware_interface::CallbackReturn Ros2HardwareAdapter::on_activate(const rclcpp
   for (const auto& [name, line] : _gpio) {
     if (line.direction() == gpiod::line::DIRECTION_OUTPUT) { 
       line.set_value(0);
-      set_command(name, 0);
-      set_state(name, 0);
+      set_command(name, 0.0);
+      set_state(name, 0.0);
     }
   }
 
@@ -152,10 +152,10 @@ hardware_interface::return_type Ros2HardwareAdapter::read(
     try {
       if (name.find("din") != std::string::npos) {
         // digital input
-        set_state(name, _gpio.at(name).get_value());
+        set_state(name, static_cast<double>(_gpio.at(name).get_value()));
       }
       else if (name.find("dout") != std::string::npos) {
-        set_state(name, _gpio.at(name).get_value());
+        set_state(name, static_cast<double>(_gpio.at(name).get_value()));
       }
     }
     catch (std::out_of_range& ex) {
