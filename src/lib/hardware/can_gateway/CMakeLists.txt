@@ -37,7 +37,8 @@ if (HAVE_GPIOD)
     $<INSTALL_INTERFACE:include>
   )
   target_link_libraries(ros2-control-eduard-raspberry
-    pigpio
+    gpiodcxx
+    gpiod
   )
   ament_target_dependencies(ros2-control-eduard-raspberry
     "pluginlib"

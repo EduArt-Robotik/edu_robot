@@ -37,10 +37,10 @@ endif()
 
 # pigpio
 if (EXISTS "/usr/include/gpiod.hpp")
-  message(STATUS "Found lib pigpio. Enable gpio hardware support for raspberry.")
+  message(STATUS "Found libgpiod. Enable gpio hardware support for raspberry.")
   set(HAVE_GPIOD "TRUE")
 else()
-  message(STATUS "Couldn't find lib pigpio. Disable hardware support for raspberry.")
+  message(STATUS "Couldn't find libgpiod. Disable hardware support for raspberry.")
   set(HAVE_GPIOD "FALSE")  
 endif()
 

@@ -57,8 +57,15 @@ hardware_interface::CallbackReturn Ros2HardwareAdapter::on_configure(const rclcp
           auto line = _chip->find_line(pin_name);
 
           // configure
-          line.set_direction_output(0);
-          line.set_flags(0);
+          gpiod::line_request config = {
+            "edu_robot",
+            gpiod::line_request::DIRECTION_OUTPUT,
+            0
+          };
+
+          // line.set_direction_output(0);
+          // line.set_flags(0);
+          line.request(config, 0);
 
           _gpio[gpio.name + '/' + command.name] = line;
         }
@@ -88,8 +95,15 @@ hardware_interface::CallbackReturn Ros2HardwareAdapter::on_configure(const rclcp
           auto line = _chip->find_line(pin_name);
           
           // configure
-          line.set_direction_input();
-          line.set_flags(resistor);
+          gpiod::line_request config = {
+            "edu_robot",
+            gpiod::line_request::DIRECTION_INPUT,
+            resistor
+          };
+
+          // line.set_direction_input();
+          // line.set_flags(resistor);
+          line.request(config);
 
           _gpio[gpio.name + '/' + state.name] = line;
         }
