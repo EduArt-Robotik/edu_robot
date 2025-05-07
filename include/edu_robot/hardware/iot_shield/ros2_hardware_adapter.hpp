@@ -21,7 +21,7 @@ namespace iot_shield {
 class Ros2HardwareAdapter : public hardware_interface::SystemInterface
 {
 public:
-  RCLCPP_SHARED_PTR_DEFINITIONS(Ros2HardwareAdapter);
+  RCLCPP_SHARED_PTR_DEFINITIONS(Ros2HardwareAdapter)
 
   hardware_interface::CallbackReturn on_init(
     const hardware_interface::HardwareInfo & info) override;

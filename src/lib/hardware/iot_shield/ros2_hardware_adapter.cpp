@@ -21,6 +21,7 @@ hardware_interface::CallbackReturn Ros2HardwareAdapter::on_init(const hardware_i
 hardware_interface::CallbackReturn Ros2HardwareAdapter::on_configure(const rclcpp_lifecycle::State & previous_state)
 {
   RCLCPP_INFO(get_logger(), __PRETTY_FUNCTION__);
+  (void)previous_state;
 
   for (const auto& gpio : info_.gpios) {
     // outputs
@@ -92,28 +93,20 @@ hardware_interface::CallbackReturn Ros2HardwareAdapter::on_configure(const rclcp
     }
   }
 
-  std::cout << "pwm:\n";
-  for (const auto& [name, egal] : _pwm) {
-    std::cout << name << std::endl;
-  }
-  std::cout << "analog:\n";
-  for (const auto& [name, egal] : _aio) {
-    std::cout << name << std::endl;
-  }
-
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
 hardware_interface::CallbackReturn Ros2HardwareAdapter::on_activate(const rclcpp_lifecycle::State & previous_state)
 {
   RCLCPP_INFO(get_logger(), "activating hardware and set it to default value");
+  (void)previous_state;
 
   // Setting Output Default Values, also Reflecting back State
   for (auto& [name, gpio] : _gpio) {
     if (gpio->readDir() == mraa::DIR_OUT) { 
       gpio->write(0);
-      set_command(name, 0);
-      set_state(name, 0);
+      set_command(name, 0.0);
+      set_state(name, 0.0);
     }
   }
   for (auto& [name, pwm] : _pwm) {
@@ -129,6 +122,7 @@ hardware_interface::CallbackReturn Ros2HardwareAdapter::on_activate(const rclcpp
 hardware_interface::CallbackReturn Ros2HardwareAdapter::on_deactivate(const rclcpp_lifecycle::State & previous_state)
 {
   RCLCPP_INFO(get_logger(), "deactivating hardware.");
+  (void)previous_state;
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
@@ -142,11 +136,11 @@ hardware_interface::return_type Ros2HardwareAdapter::read(
     try {
       if (name.find("din") != std::string::npos) {
         // digital input
-        set_state(name, _gpio.at(name)->read());
+        set_state(name, static_cast<double>(_gpio.at(name)->read()));
       }
       else if (name.find("analog") != std::string::npos) {
         // analog input
-        set_state(name, _aio.at(name)->readFloat());
+        set_state(name, static_cast<double>(_aio.at(name)->readFloat()));
       }
       else if (name.find("pwm") != std::string::npos) {
         set_state(name, get_command(name));
