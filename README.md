@@ -1,4 +1,4 @@
-# edu_robot - Control Software for IoT Shield and Ethernet Gateway
+# edu_robot - Control Software for IoT Shield, Ethernet Gateway and RaspberryPi Stack
 
 Welcome to the EduArt ROS2 robot control software. In first place, it provides a ROS2 node for controlling and monitoring EduArt robots, i.e., the robot Eduard in different hardware realizations like the IoT Bot, the IPC Bot or a custom build robot relying on our stackable drive system. There is also a [digital twin](https://github.com/EduArt-Robotik/edu_simulation) in the making, which is not yet feature complete. But, some basic interfaces are already implemented.
 
@@ -8,7 +8,7 @@ These packages are also designed for being used in a robot fleet setup. Basicall
 
 # EduArt's Robot - Eduard
 
-Eduard comes in two hardware realizations. Both using this control software. Below you will find documentation about how to install, update, control and monitor the robot.
+Eduard comes in three hardware realizations. Both using this control software. Below you will find documentation about how to install, update, control and monitor the robot.
 
 ![](documentation/image/eduard-orange.jpg)
 
@@ -53,6 +53,9 @@ Since version 0.5.0 it is possible to select the ROS2 middleware if edu_robot is
 
 ### Setup a Virtual Machine
 Have a look at [this guide](documentation/setup/virtualMachine.md) on how to setup a Virtual Machine (VM) to get started with your ROS2 development.
+
+### Setup a Time Server (NTP)
+[This guide](documentation/setup/ntpTimeServer.md) describes one way how to setup a NTP time server for your robot to synchronize the current time between your systems.
 
 ### As Siemens Industrial Application
 
