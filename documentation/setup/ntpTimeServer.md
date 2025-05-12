@@ -44,6 +44,12 @@ A robot might not have its own RTC (like Raspberry Pi 4 and earlier) or if it do
 # Solution: Providing your own Time
 Instead of relying on an online source to provide the current time, you can also use a source in your local network. For this you need to do two things. Setup a Server that can provide the current time and then configure your clients to use this self-hosted time server.
 
+The following image shows the setup:
+A laptop connects to the robots network (Eduard) and serves the current time. Clients, like the robot itself, can send NTP messages to the server to request the current time.
+The server can update its local time via the internet or keep it up to date via its RTC.
+
+![alt text](../image/ntpServer.png)
+
 The next two subsections describe the features and limitations of the time services `timesyncd` and `chrony`  and how they can be configured to fit our needs.
 
 ## timesyncd
