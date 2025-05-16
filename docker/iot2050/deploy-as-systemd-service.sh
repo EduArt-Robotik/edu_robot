@@ -16,8 +16,11 @@ sed -i "s|$tag|$docker_compose_file_path|g" $systemd_service_file
 echo "Installing systemd service on system"
 cp $systemd_service_file /etc/systemd/system/
 systemctl daemon-reload
+systemctl enable $systemd_service_file
+echo "Systemd service was installed and enabled, so it will start automatically at boot up."
 
 echo "With following commands you can control the Iot2050 systemd service:"
-echo "starting:         sudo systemctl start $systemd_service_file"
-echo "stopping:         sudo systemctl stop $systemd_service_file"
-echo "start at boot up: sudo systemctl enable $systemd_service_file"
+echo "starting:           sudo systemctl start $systemd_service_file"
+echo "stopping:           sudo systemctl stop $systemd_service_file"
+echo "enable autostart:   sudo systemctl enable $systemd_service_file"
+echo "disable autostart : sudo systemctl disable $systemd_service_file"
