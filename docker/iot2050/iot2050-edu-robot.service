@@ -1,0 +1,17 @@
+[Unit]
+Description=Service for controlling Iot Bot Hardware.
+PartOf=docker.service
+After=docker.service
+
+[Service]
+EnvironmentFile=/etc/environment
+Type=oneshot
+RemainAfterExit=yes
+# first stop and remove already running container
+ExecStartPre=/bin/docker compose -f <docker_compose_file_path>/docker-compose.yaml down
+# start container
+ExecStart=/bin/docker compose -f <docker_compose_file_path>/docker-compose.yaml up -d
+ExecStop=/bin/docker compose -f <docker_compose_file_path>/docker-compose.yaml down
+
+[Install]
+WantedBy=multi-user.target
