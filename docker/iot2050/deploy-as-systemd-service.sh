@@ -16,6 +16,7 @@ sed -i "s|$tag|$docker_compose_file_path|g" $systemd_service_file
 echo "Installing systemd service on system"
 cp $systemd_service_file /etc/systemd/system/
 systemctl daemon-reload
+systemctl start $systemd_service_file
 systemctl enable $systemd_service_file
 echo "Systemd service was installed and enabled, so it will start automatically at boot up."
 
