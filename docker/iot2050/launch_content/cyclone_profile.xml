@@ -7,7 +7,7 @@
     <Domain Id="any">
         <General>
             <Interfaces>
-                <NetworkInterface name="eno2" priority="10" multicast="false" />
+                <NetworkInterface name="eno2" priority="10" multicast="true" presence_required="true"/>
                 <NetworkInterface name="wlp1s0" priority="10" multicast="true" presence_required="false"/>
             </Interfaces>
             <AllowMulticast>true</AllowMulticast>
