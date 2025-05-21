@@ -34,12 +34,12 @@
       publishing_tf: true    
 
     # Axis
-    number_of_axes: 3    
+    number_of_axes: 1    
     axis_1:
       skid:
         length:
-          x: 0.14
-          y: 0.08
+          x: 0.0
+          y: 0.32
         wheel_diameter: 0.113
     axis_2:
       skid:
@@ -56,32 +56,14 @@
 
     # Motor Controller
     motor_controller_0:
-      can_id: 0
+      can_id: 
+        input: 1024
+        output: 1152
       control_frequency: 16000
       timeout_ms: 500
-      encoder_inverted: true
-      encoder_ratio: 2048.0
-      gear_ratio: 89.0
-      weight_low_pass_encoder: 0.8
-      weight_low_pass_set_point: 0.8      
-
-    motor_controller_1:
-      can_id: 1
-      control_frequency: 16000
-      timeout_ms: 500
-      encoder_inverted: true
-      encoder_ratio: 2048.0
-      gear_ratio: 89.0
-      weight_low_pass_encoder: 0.8
-      weight_low_pass_set_point: 0.8   
-
-    motor_controller_2:
-      can_id: 2
-      control_frequency: 16000
-      timeout_ms: 500
-      encoder_inverted: true
-      encoder_ratio: 2048.0
-      gear_ratio: 89.0
+      encoder_inverted: false
+      encoder_ratio: 64.0
+      gear_ratio: 70.0
       weight_low_pass_encoder: 0.8
       weight_low_pass_set_point: 0.8      
 
@@ -89,7 +71,7 @@
     motor_a:
       closed_loop: true
       index: 0
-      max_rpm: 90.0
+      max_rpm: 140.0
       pid:
         kd: 0.0
         ki: 7.0
@@ -98,45 +80,10 @@
     motor_b:
       closed_loop: true
       index: 0
-      max_rpm: 90.0
+      max_rpm: 140.0
       pid:
         kd: 0.0
         ki: 7.0
         kp: 0.5
 
-    motor_c:
-      closed_loop: true
-      index: 0
-      max_rpm: 90.0
-      pid:
-        kd: 0.0
-        ki: 7.0
-        kp: 0.5
-
-    motor_d:
-      closed_loop: true
-      index: 0
-      max_rpm: 90.0
-      pid:
-        kd: 0.0
-        ki: 7.0
-        kp: 0.5
-
-    motor_e:
-      closed_loop: true
-      index: 0
-      max_rpm: 90.0
-      pid:
-        kd: 0.0
-        ki: 7.0
-        kp: 0.5
-
-    motor_f:
-      closed_loop: true
-      index: 0
-      max_rpm: 90.0
-      pid:
-        kd: 0.0
-        ki: 7.0
-        kp: 0.5
-  
+ 
