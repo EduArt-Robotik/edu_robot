@@ -35,6 +35,14 @@ else()
   set(HAVE_MRAA "FALSE")
 endif()
 
+# pigpio
+if (EXISTS "/usr/include/gpiod.hpp")
+  message(STATUS "Found libgpiod. Enable gpio hardware support for raspberry.")
+  set(HAVE_GPIOD "TRUE")
+else()
+  message(STATUS "Couldn't find libgpiod. Disable hardware support for raspberry.")
+  set(HAVE_GPIOD "FALSE")  
+endif()
 
 ## Build Defined ROS Messages
 rosidl_generate_interfaces(${PROJECT_NAME}
@@ -67,6 +75,9 @@ add_subdirectory(src/lib/hardware)
 # Export hardware interface plugins
 if (HAVE_MRAA)
   pluginlib_export_plugin_description_file(hardware_interface src/lib/hardware/iot_shield/ros2_control_eduard_iot.xml)
+endif()
+if (HAVE_GPIOD)
+  pluginlib_export_plugin_description_file(hardware_interface src/lib/hardware/can_gateway/ros2_control_eduard_raspberry.xml)
 endif()
 
 # Building Nodes
