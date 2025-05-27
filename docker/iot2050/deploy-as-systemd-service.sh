@@ -18,6 +18,11 @@ cp $systemd_service_file /etc/systemd/system/
 echo "Add current file path \"$docker_compose_file_path\" to systemd service."
 sed -i "s|$tag|$docker_compose_file_path|g" /etc/systemd/system/$systemd_service_file
 
+# Do use docker compose command to install Docker image.
+echo "Pulling docker image..."
+docker compose up -d
+docker compose down
+
 # Starting up service.
 systemctl daemon-reload
 systemctl start $systemd_service_file

@@ -18,6 +18,11 @@ cp $systemd_service_file /etc/systemd/system/
 echo "Add current file path \"$docker_compose_file_path\" to systemd service."
 sed -i "s|$tag|$docker_compose_file_path|g" /etc/systemd/system/$systemd_service_file
 
+# Do use docker compose command to install Docker image.
+echo "Pulling docker image..."
+docker compose up -d
+docker compose down
+
 # Starting up service.
 systemctl daemon-reload
 systemctl start $systemd_service_file
@@ -25,7 +30,7 @@ systemctl enable $systemd_service_file
 echo "Systemd service was installed and enabled, so it will start automatically at boot up."
 
 # Printing info text.
-echo "With following commands you can control the Iot2050 systemd service:"
+echo "With following commands you can control the Raspberry systemd service:"
 echo "starting:           sudo systemctl start $systemd_service_file"
 echo "stopping:           sudo systemctl stop $systemd_service_file"
 echo "enable autostart:   sudo systemctl enable $systemd_service_file"
