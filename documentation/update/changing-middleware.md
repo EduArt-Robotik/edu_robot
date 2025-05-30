@@ -41,7 +41,9 @@ docker compose up
 ``` 
 
 ## Setting the Middleware for a local ROS2 Environment
-> **__Note:__** This is **not** necessary if changed the ROS2 middleware of the Docker containers to FastRTPS 
+> **Note:** This is **not** necessary if changed the ROS2 middleware of the Docker containers to FastRTPS
+
+> **Important:** If you want to use Cyclone DDS on your local machine, have a look at [this guide](https://github.com/EduArt-Robotik/edu_robot/blob/develop/documentation/update/cyclone-profiles.md) on how to setup a Cyclone profile!
 
 As already mentioned, every participant in the ROS2 network must use the same middleware due to compatibility issues. This also applies to command line tools (`ros2 topic list`, ...). It is therefore necessary to switch the middleware to CycloneDDS on the system on which ROS2 is used. 
 

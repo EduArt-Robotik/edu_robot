@@ -1,20 +1,40 @@
 /**:
   ros__parameters:
+    # General Parameters
+    use_sim_time: false
+
+    # Collision Avoidance    
     collision_avoidance:
       distance_reduce_velocity: 0.4
       distance_velocity_zero: 0.05
       enable: false
+
+    # Diagnostic
     diagnostic_updater:
       period: 1.0
+      use_fqn: false
+
+    # Sensors
     imu:
       fusion_weight: 0.029999999329447746
       mounting_orientation:
         pitch: -1.5707963705062866
         roll: -1.5707963705062866
         yaw: -1.5707963705062866
-      raw_data_mode: false
-      tf_frame_rotated: base_link
-    imupublish_tf: true
+
+    # TF2
+    tf:
+      base_frame: base_link
+      footprint_frame: base_footprint
+      publishing_interval_ms: 100
+    
+    # Odometry
+    odometry:
+      publishing_interval_ms: 100
+      publishing_tf: true    
+
+    # Axis
+    number_of_axes: 3    
     axis_1:
       skid:
         length:
@@ -34,6 +54,7 @@
           y: 0.08
         wheel_diameter: 0.113
 
+    # Motor Controller
     motor_controller_0:
       can_id: 0
       control_frequency: 16000
@@ -64,6 +85,7 @@
       weight_low_pass_encoder: 0.8
       weight_low_pass_set_point: 0.8      
 
+    # Motor
     motor_a:
       closed_loop: true
       index: 0
@@ -118,10 +140,3 @@
         ki: 7.0
         kp: 0.5
   
-    number_of_axes: 3
-    publish_tf_odom: true
-
-    tf_base_frame: base_link
-    tf_footprint_frame: base_footprint
-    use_sim_time: false
-

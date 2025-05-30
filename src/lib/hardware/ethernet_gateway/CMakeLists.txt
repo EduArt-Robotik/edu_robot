@@ -22,3 +22,7 @@ target_include_directories(eduart-ethernet-gateway PUBLIC
   $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
+list(APPEND BUILT_LIBRARIES eduart-ethernet-gateway)
+
+# Populating Built Libraries
+set(BUILT_LIBRARIES ${BUILT_LIBRARIES} PARENT_SCOPE)

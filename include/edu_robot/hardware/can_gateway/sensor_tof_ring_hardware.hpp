@@ -29,6 +29,7 @@ public:
       SensorTofHardware::Parameter parameter;
       std::string name;
       tf2::Transform transform;
+      bool virtual_range_sensor = false;
     };
     std::vector<TofSensor> tof_sensor;
     std::chrono::milliseconds measurement_interval{100};
@@ -47,16 +48,20 @@ public:
   static Parameter get_parameter(
     const std::string& name, const std::vector<std::string>& sensor_names, rclcpp::Node& ros_node);
   inline const Parameter& parameter() const { return _parameter; }
+  inline const std::map<std::string, std::shared_ptr<HardwareInterface>>& virtualRangeSensor() const {
+    return _virtual_range_sensor;
+  }
 
 private:
   void processStartMeasurement();
-  void processFinishMeasurement(const message::RxMessageDataBuffer& rx_buffer);
+  void processFinishMeasurement(std::uint8_t sensor_id);    // Gets called by individual Sensors when measurement is finished
   void processPointcloudMeasurement(sensor_msgs::msg::PointCloud2& point_cloud, const std::size_t sensor_index);
 
   const Parameter _parameter;
   rclcpp::Node& _ros_node;
   std::shared_ptr<CommunicatorNode> _communication_node;
   std::vector<std::shared_ptr<SensorTofHardware>> _sensor;
+  std::map<std::string, std::shared_ptr<HardwareInterface>> _virtual_range_sensor;
 
   struct {
     std::uint8_t frame_number = 0;

@@ -202,16 +202,27 @@ git clone --branch main https://github.com/EduArt-Robotik/edu_robot.git
 cd ~/edu_robot/docker/iot2050
 ```
 
-In this folder a docker compose file is located. It is used to launch the basic control software including joy node and a joy interpreter. Launch the software by:
+In this folder a docker compose file and a systemd service are located. It is used to launch the basic control software, including a joy node and a joy interpreter. Deploy and launch the software by:
 
 ```bash
-docker compose up
+sudo ./deploy-as-systemd-service.sh
 ```
 
-The software will be registered for auto start after the robot boots up. If you want to remove it from the autostart execute following command inside the same folder:
+The software will be registered for auto start after the robot boots up. If you want to remove it from the autostart execute following command:
 
 ```bash
-docker compose down
+sudo systemctl disable iot2050-edu-robot.service
+```
+
+The software could also be stopped, started or restarted using following commands:
+
+```bash
+# stop control software
+sudo systemctl stop iot2050-edu-robot.service
+# starts control software
+sudo systemctl start iot2050-edu-robot.service
+# restart control software
+sudo systemctl restart iot2050-edu-robot.service
 ```
 
 #### Modifying Parameter of Control Software

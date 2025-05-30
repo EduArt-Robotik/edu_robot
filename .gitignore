@@ -1,2 +1,4 @@
 .cache
+.cache/
+docker/image/edu_robot
 compile_commands.json

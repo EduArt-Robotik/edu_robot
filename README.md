@@ -1,10 +1,12 @@
 # edu_robot - Control Software for IoT Shield, Ethernet Gateway and RaspberryPi Stack
 
-Welcome to the EduArt ROS2 robot control software. In first place, it provides a ROS2 node for controlling and monitoring EduArt robots, i.e., the robot Eduard in different hardware realizations like the IoT Bot, the IPC Bot or a custom build robot relying on our stackable drive system. There is also a [digital twin](https://github.com/EduArt-Robotik/edu_simulation) in the making, which is not yet feature complete. But, some basic interfaces are already implemented.
+Welcome to the edu_robot repository! This innovative project controls EduArt robots and makes their functions available to users via standardized ROS interfaces. Regardless of the variant of EduArt robots you use, edu_robot enables consistent control and interaction. The ROS interfaces are designed in the identical way for all models, which considerably simplifies integration and use.
 
-These packages are also designed for being used in a robot fleet setup. Basically, they are able to handle multiple robot instances at the same time while using namespaces.
+An exciting feature of this project is the connection to the Gazebo simulator, which allows you to create a [digital twin](https://github.com/EduArt-Robotik/edu_simulation) of your robots. This gives you the opportunity to run simulations before using the robots in the real world, maximizing the efficiency and safety of your projects.
 
-> **_NOTE:_** For further help please visit our [Forum](https://forum.eduart-robotik.com) or drop a message to info@eduart-robotik.com.
+In addition, this repository provides comprehensive documentation for all EduArt robots. You will find detailed instructions on how to install, update and customize the features of your robots. Whether you are a beginner just entering the world of robotics or an experienced developer looking for customized solutions, our resources are designed to help you realize the full potential of your robots.
+
+For further support and assistance, please post in our [Forum](https://forum.eduart-robotik.com) or send us an e-mail at info@eduart-robotik.com. We look forward to helping you with your questions and concerns!
 
 # EduArt's Robot - Eduard
 
@@ -20,7 +22,9 @@ The software package 'edu_robot' provides ROS2 interface. For details please fol
 
 ## ROS2 Middleware
 
-Since version 0.5.0 it is possible to select the ROS2 middleware if edu_robot is used in a Docker container. If you want to configure it, you can do so by following [these instructions](documentation/update/changing-middleware.md).
+Since version 0.5.0 it is possible to select the ROS2 middleware if edu_robot is used in a Docker container. 
+If you want to configure it, you can do so by following [these instructions](documentation/update/changing-middleware.md). 
+To see when, how and why you need to setup a Cyclone profile, have a look at [this guide](https://github.com/EduArt-Robotik/edu_robot/blob/develop/documentation/update/cyclone-profiles.md).  
 
 ## Lighting Codes
 

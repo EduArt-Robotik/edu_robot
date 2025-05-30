@@ -11,9 +11,6 @@
 
 #include <Eigen/Geometry>
 
-#include <array>
-#include <tuple>
-#include <utility>
 #include <type_traits>
 
 namespace eduart {
@@ -87,25 +84,23 @@ public:
   using exchange_type = ExchangeType;
 
   struct Parameter {
-    Type filter_weight = 1.0;
+    float filter_weight = 1.0;
   };
 
-  LowPassFiler(const Parameter& parameter) : _parameter(parameter) { }
+  LowPassFiler(const Parameter& parameter) : _parameter(parameter) { clear(); }
 
   inline void clear() { impl::LowPassFilterOperation<Type, ExchangeType>::clear(_value); }
   inline ExchangeType getValue() const {
     return impl::LowPassFilterOperation<Type, ExchangeType>::getValue(_value);
   }
-  inline Type operator()(const Type& value) {
+  inline ExchangeType operator()(const ExchangeType& value) {
     update(value, _parameter.filter_weight);
     return getValue();
   }
 
 protected:
   void update(const ExchangeType& input, const float filter_weight) {
-    _value = impl::LowPassFilterOperation<Type, ExchangeType>::update(
-      input, _value, filter_weight
-    );
+    _value = impl::LowPassFilterOperation<Type, ExchangeType>::update(input, _value, filter_weight);
   }
 
   Parameter _parameter;

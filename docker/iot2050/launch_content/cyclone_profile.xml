@@ -7,7 +7,10 @@
     <Domain Id="any">
         <General>
             <Interfaces>
-                <NetworkInterface name="eno2" priority="10" multicast="true" />
+                <!-- Main interface connected to access point usually. -->
+                <NetworkInterface name="eno2" priority="10" multicast="true" presence_required="true"/>
+                <!-- Optional interface wifi card. -->
+                <NetworkInterface name="wlp1s0" priority="10" multicast="true" presence_required="false"/>
             </Interfaces>
             <AllowMulticast>true</AllowMulticast>
             <MaxMessageSize>65500B</MaxMessageSize>
