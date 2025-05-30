@@ -2,8 +2,8 @@ version: "3.0"
 
 services:
     eduard-iot2050:
-        image: eduartrobotik/eduart-robot:1.0.0
-        container_name: eduard-iotbot-1.0.0
+        image: eduartrobotik/eduart-robot:1.1.0
+        container_name: eduard-iotbot-1.1.0
         user: root
         restart: always
         privileged: true
