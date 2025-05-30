@@ -1,5 +1,8 @@
 /**:
   ros__parameters:
+    # General Parameters
+    use_sim_time: false
+
     # Collision Avoidance
     collision_avoidance:
       distance_reduce_velocity: 0.4
@@ -15,25 +18,24 @@
     imu:
       fusion_weight: 0.029999999329447746
       mounting_orientation:
-        pitch: -1.5707963705062866
         roll: -1.5707963705062866
+        pitch: -1.5707963705062866
         yaw: -1.5707963705062866
       publish_orientation_without_yaw_tf: true
       publish_tf: true
-      raw_data_mode: false
-      tf_frame_rotated: eduard/base_link
-      
-    # General Parameter
-    use_sim_time: false
     
+    # TF2
     tf:
       base_frame: base_link
       footprint_frame: base_footprint
-      
+      publishing_interval_ms: 50
+    
+    # Odometry
     odometry:
       publishing_interval_ms: 50
       publishing_tf: true
 
+    # Kinematic
     mecanum:
       length:
         x: 0.25
@@ -49,7 +51,7 @@
     # Motor
     motor_a:
       closed_loop: true
-      index: 0
+      index: 2
       max_rpm: 100.0
       pid:
         kd: 0.0
@@ -57,7 +59,7 @@
         kp: 0.5
     motor_b:
       closed_loop: true
-      index: 0
+      index: 1
       max_rpm: 100.0
       pid:
         kd: 0.0
@@ -65,7 +67,7 @@
         kp: 0.5
     motor_c:
       closed_loop: true
-      index: 0
+      index: 4
       max_rpm: 100.0
       pid:
         kd: 0.0
@@ -73,7 +75,7 @@
         kp: 0.5
     motor_d:
       closed_loop: true
-      index: 0
+      index: 3
       max_rpm: 100.0
       pid:
         kd: 0.0
@@ -91,6 +93,7 @@
       timeout_ms: 500
       weight_low_pass_encoder: 0.3
       weight_low_pass_set_point: 0.2
+
     motor_controller_1:
       can_id:
         input: 1025
@@ -109,6 +112,7 @@
         measurement_complete: 776
         trigger: 904
       front:
+        virtual_range_sensor: true
         fov:
           horizontal: 0.7853981852531433
           vertical: 0.7853981852531433
@@ -119,15 +123,16 @@
         sensor_id: 2
         transform:
           orientation:
-            pitch: 0.0
-            roll: -1.570796327
-            yaw: -1.570796327
+            roll: 1.570796327
+            pitch: -0.343829863        # -19,7° (TOF-sensor is angled on PCB)
+            yaw: 1.570796327
           translation:
             x: 0.17
             y: 0.063
             z: 0.045
       measurement_interval: 100
       rear:
+        virtual_range_sensor: true
         fov:
           horizontal: 0.7853981852531433
           vertical: 0.7853981852531433
@@ -138,9 +143,9 @@
         sensor_id: 1
         transform:
           orientation:
-            pitch: 1.570796327
             roll: 0.0
-            yaw: 3.141592654
+            pitch: 4.71238898
+            yaw: 0.0
           translation:
             x: -0.17
             y: 0.063
@@ -150,6 +155,7 @@
         measurement_complete: 776
         trigger: 904
       front:
+        virtual_range_sensor: true
         fov:
           horizontal: 0.7853981852531433
           vertical: 0.7853981852531433
@@ -160,15 +166,16 @@
         sensor_id: 2
         transform:
           orientation:
-            pitch: 0.0
-            roll: 1.570796327
-            yaw: 1.570796327
+            roll: -1.570796327
+            pitch: -0.343829863        # -19,7° (TOF-sensor is angled on PCB)
+            yaw: -1.570796327
           translation:
             x: 0.17
             y: -0.063
             z: 0.045
       measurement_interval: 100
       rear:
+        virtual_range_sensor: true
         fov:
           horizontal: 0.7853981852531433
           vertical: 0.7853981852531433
@@ -179,8 +186,8 @@
         sensor_id: 1
         transform:
           orientation:
-            pitch: 1.570796327
             roll: 0.0
+            pitch: 1.570796327
             yaw: 3.141592654
           translation:
             x: -0.17

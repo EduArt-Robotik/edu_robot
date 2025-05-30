@@ -8,10 +8,11 @@ add_library(eduart-hardware-can
   motor_controller_hardware.cpp
   imu_sensor_hardware.cpp
   lighting_hardware.cpp
-  range_sensor_hardware.cpp
+  sensor_virtual_range.cpp
   sensor_point_cloud_fusion.cpp
 )
 target_link_libraries(eduart-hardware-can
+  eduart-algorithm
   eduart-robot
   eduart-hardware
 )
@@ -25,3 +26,27 @@ ament_target_dependencies(eduart-hardware-can
   "tf2_ros"
   "tf2_sensor_msgs"
 )
+list(APPEND BUILT_LIBRARIES eduart-hardware-can)
+
+# Export hardware plugins
+if (HAVE_GPIOD)
+  add_library(ros2-control-eduard-raspberry SHARED
+    ros2_hardware_adapter.cpp
+  )
+  target_include_directories(ros2-control-eduard-raspberry PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+  )
+  target_link_libraries(ros2-control-eduard-raspberry
+    gpiodcxx
+    gpiod
+  )
+  ament_target_dependencies(ros2-control-eduard-raspberry
+    "pluginlib"
+    "hardware_interface"
+  )
+  list(APPEND BUILT_LIBRARIES ros2-control-eduard-raspberry)
+endif()
+
+# Populating Built Libraries
+set(BUILT_LIBRARIES ${BUILT_LIBRARIES} PARENT_SCOPE)

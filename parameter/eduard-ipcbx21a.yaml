@@ -1,0 +1,126 @@
+/**:
+  ros__parameters:
+    # General Parameters
+    use_sim_time: false
+
+    # Collision Avoidance
+    collision_avoidance:
+      enable: true
+      distance_reduce_velocity: 0.6
+      distance_velocity_zero: 0.05
+
+    # IMU Sensor
+    imu:
+      fusion_weight: 0.005
+      mounting_orientation:
+        pitch: 0.0 # todo: update transform
+        roll: 0.0
+        yaw: 0.0 
+      publish_tf: true
+      publish_orientation_without_yaw_tf : true      
+
+    # TF2
+    tf:
+      base_frame: base_link
+      footprint_frame: base_footprint
+      publishing_interval_ms: 100
+    
+    # Odometry
+    odometry:
+      publishing_interval_ms: 100
+      publishing_tf: true
+
+    # Motor Controller
+    motor_controller_0:
+      can_id: 0
+      control_frequency: 16000
+      timeout_ms: 500
+      encoder_inverted: true
+      encoder_ratio: 2048.0
+      gear_ratio: 89.0
+      weight_low_pass_encoder: 0.8
+      weight_low_pass_set_point: 0.8      
+
+    motor_controller_1:
+      can_id: 1
+      control_frequency: 16000
+      timeout_ms: 500
+      encoder_inverted: true
+      encoder_ratio: 2048.0
+      gear_ratio: 89.0
+      weight_low_pass_encoder: 0.8
+      weight_low_pass_set_point: 0.8   
+
+    # Motors
+    motor_a:
+      closed_loop: true
+      index: 2
+      max_rpm: 90.0
+      pid:
+        kd: 0.0
+        ki: 7.0
+        kp: 0.5
+  
+    motor_b:
+      closed_loop: true
+      index: 1
+      max_rpm: 90.0
+      pid:
+        kd: 0.0
+        ki: 7.0
+        kp: 0.5
+
+    motor_c:
+      closed_loop: true
+      index: 4
+      max_rpm: 90.0
+      pid:
+        kd: 0.0
+        ki: 7.0
+        kp: 0.5
+
+    motor_d:
+      closed_loop: true
+      index: 3
+      max_rpm: 90.0
+      pid:
+        kd: 0.0
+        ki: 7.0
+        kp: 0.5  
+
+    # Range Sensor
+    range:  
+      front:
+        left:
+          field_of_view: 0.1745329201221466
+          range_max: 5.0
+          range_min: 0.01
+        
+        right:
+          field_of_view: 0.1745329201221466
+          range_max: 5.0
+          range_min: 0.01
+
+      rear:    
+        left:
+          field_of_view: 0.1745329201221466
+          range_max: 5.0
+          range_min: 0.01
+
+        right:
+          field_of_view: 0.1745329201221466
+          range_max: 5.0
+          range_min: 0.01
+
+    # Drive Kinematic
+    skid:
+      length:
+        x: 0.25
+        y: 0.32
+      wheel_diameter: 0.17
+
+    mecanum:
+      length:
+        x: 0.25
+        y: 0.36
+      wheel_diameter: 0.1

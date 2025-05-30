@@ -4,7 +4,7 @@
 #include "edu_robot/hardware/can_gateway/motor_controller_hardware.hpp"
 #include "edu_robot/hardware/can_gateway/imu_sensor_hardware.hpp"
 #include "edu_robot/hardware/can_gateway/lighting_hardware.hpp"
-#include "edu_robot/hardware/can_gateway/range_sensor_hardware.hpp"
+#include "edu_robot/hardware/can_gateway/sensor_virtual_range.hpp"
 #include "edu_robot/hardware/can_gateway/sensor_tof_ring_hardware.hpp"
 #include "edu_robot/hardware/can_gateway/sensor_point_cloud_fusion.hpp"
 
@@ -76,20 +76,22 @@ HardwareComponentFactory& HardwareComponentFactory::addTofRingSensor(
   std::vector<std::shared_ptr<SensorPointCloud::SensorInterface>> ring = { left_ring, right_ring };
 
   _hardware[sensor_name] = std::make_shared<SensorPointCloudFusion>(ring);
+  _hardware.insert(left_ring->virtualRangeSensor().begin(), left_ring->virtualRangeSensor().end());
+  _hardware.insert(right_ring->virtualRangeSensor().begin(), right_ring->virtualRangeSensor().end());
 
   return *this;
 }
 
-HardwareComponentFactory& HardwareComponentFactory::addRangeSensor(
-  const std::string& sensor_name, const std::uint8_t id)
-{
-  auto range_sensor_hardware = std::make_shared<RangeSensorHardware>(
-    id, _shield->getExecuter(), _shield->getCommunicator(0)
-  );
-  // _shield->registerIotShieldRxDevice(range_sensor_hardware);
-  _hardware[sensor_name] = range_sensor_hardware;
-  return *this;
-} 
+// HardwareComponentFactory& HardwareComponentFactory::addRangeSensor(
+//   const std::string& sensor_name, const std::uint8_t id)
+// {
+//   auto range_sensor_hardware = std::make_shared<RangeSensorHardware>(
+//     id, _shield->getExecuter(), _shield->getCommunicator(0)
+//   );
+//   // _shield->registerIotShieldRxDevice(range_sensor_hardware);
+//   _hardware[sensor_name] = range_sensor_hardware;
+//   return *this;
+// } 
 
 HardwareComponentFactory& HardwareComponentFactory::addImuSensor(
   const std::string& sensor_name, const std::uint32_t can_id)

@@ -1,0 +1,199 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="$(arg robot_name)">
+  <xacro:arg name="robot_name" default="eduard"/>
+  <xacro:arg name="wheel_type" default="unknown"/>
+  <xacro:arg name="hardware" default="unknown"/>
+
+  <!-- Chassis -->
+  <link name="$(arg robot_name)/base_link">
+    <visual>
+      <xacro:if value="${'red' in '$(arg robot_name)'}">
+        <origin rpy="0 0 1.570796327" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://edu_robot_control/model/mesh/eduard-red-chassis.dae"/>
+        </geometry>
+      </xacro:if>
+      <xacro:if value="${'green' in '$(arg robot_name)'}">
+        <origin rpy="0 0 1.570796327" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://edu_robot_control/model/mesh/eduard-green-chassis.dae"/>
+        </geometry>
+      </xacro:if>
+      <xacro:if value="${'blue' in '$(arg robot_name)'}">
+        <origin rpy="0 0 1.570796327" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://edu_robot_control/model/mesh/eduard-blue-chassis.dae"/>
+        </geometry>
+      </xacro:if>            
+      <xacro:unless value="${('red' in '$(arg robot_name)') or ('green' in '$(arg robot_name)') or ('blue' in '$(arg robot_name)')}">
+        <geometry>
+          <mesh filename="package://edu_robot_control/model/mesh/eduard-chassis.dae"/>
+        </geometry>
+      </xacro:unless>
+    </visual>
+  </link>
+
+  <!-- Wheels -->
+  <!-- Front Left -->
+  <link name="$(arg robot_name)/wheel_front_left">
+    <visual>
+      <geometry>
+        <xacro:if value="${'offroad' in '$(arg wheel_type)'}">
+          <mesh filename="package://edu_robot_control/model/mesh/offroad-wheel-eduard.dae"/>
+        </xacro:if>
+        <!-- use mecanum wheels as default -->
+        <xacro:unless value="${'offroad' in '$(arg wheel_type)'}">
+          <mesh filename="package://edu_robot_control/model/mesh/mecanum-wheel-left-eduard.dae"/>
+        </xacro:unless>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="$(arg robot_name)/base_to_wheel_front_left" type="continuous">
+    <origin rpy="1.570796327 0 0" xyz="0.125 0.163 0.02"/>  
+    <parent link="$(arg robot_name)/base_link"/>
+    <child link="$(arg robot_name)/wheel_front_left"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <!-- Front Right -->
+  <link name="$(arg robot_name)/wheel_front_right">
+    <visual>
+      <geometry>
+        <xacro:if value="${'offroad' in '$(arg wheel_type)'}">
+          <mesh filename="package://edu_robot_control/model/mesh/offroad-wheel-eduard.dae"/>
+        </xacro:if>
+        <!-- use mecanum wheels as default -->
+        <xacro:unless value="${'offroad' in '$(arg wheel_type)'}">
+          <mesh filename="package://edu_robot_control/model/mesh/mecanum-wheel-right-eduard.dae"/>
+        </xacro:unless>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="$(arg robot_name)/base_to_wheel_front_right" type="continuous">
+    <origin rpy="-1.570796327 0 0" xyz="0.125 -0.163 0.02"/>
+    <parent link="$(arg robot_name)/base_link"/>
+    <child link="$(arg robot_name)/wheel_front_right"/>
+    <axis xyz="0 0 1"/>    
+  </joint>
+
+  <!-- Rear Left -->
+  <link name="$(arg robot_name)/wheel_rear_left">
+    <visual>
+      <geometry>
+        <xacro:if value="${'offroad' in '$(arg wheel_type)'}">
+          <mesh filename="package://edu_robot_control/model/mesh/offroad-wheel-eduard.dae"/>
+        </xacro:if>
+        <!-- use mecanum wheels as default -->
+        <xacro:unless value="${'offroad' in '$(arg wheel_type)'}">
+          <mesh filename="package://edu_robot_control/model/mesh/mecanum-wheel-right-eduard.dae"/>
+        </xacro:unless>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="$(arg robot_name)/base_to_wheel_rear_left" type="continuous">
+    <origin rpy="1.570796327 0 0" xyz="-0.125 0.163 0.02"/>
+    <parent link="$(arg robot_name)/base_link"/>
+    <child link="$(arg robot_name)/wheel_rear_left"/>
+    <axis xyz="0 0 1"/>    
+  </joint>
+
+  <!-- Rear Right -->
+  <link name="$(arg robot_name)/wheel_rear_right">
+    <visual>
+      <geometry>
+        <xacro:if value="${'offroad' in '$(arg wheel_type)'}">
+          <mesh filename="package://edu_robot_control/model/mesh/offroad-wheel-eduard.dae"/>
+        </xacro:if>
+        <!-- use mecanum wheels as default -->
+        <xacro:unless value="${'offroad' in '$(arg wheel_type)'}">
+          <mesh filename="package://edu_robot_control/model/mesh/mecanum-wheel-left-eduard.dae"/>
+        </xacro:unless>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="$(arg robot_name)/base_to_wheel_rear_right" type="continuous">
+    <parent link="$(arg robot_name)/base_link"/>
+    <child link="$(arg robot_name)/wheel_rear_right"/>
+    <origin rpy="-1.570796327 0 0" xyz="-0.125 -0.163 0.02"/>
+    <axis xyz="0 0 1"/>    
+  </joint>
+
+  <!-- GPIO Raspberry -->
+  <!-- digital input needs din in name -->
+  <!-- digital output needs dout in name -->
+  <!-- pwm output needs pwm in name -->
+  <xacro:if value="${'raspberry' in '$(arg hardware)'}">
+    <ros2_control name="eduard_iot2050_hardware" type='system'>
+      <hardware>
+        <plugin>eduart/robot/hardware/can_gateway/Ros2HardwareAdapter</plugin>     
+      </hardware>
+      <gpio name="x10">
+        <state_interface name="din_8">
+          <param name="pin">26</param>
+          <param name="resistor">pull_up</param>
+        </state_interface>
+
+        <state_interface name="din_9">
+          <param name="pin">27</param>
+          <param name="resistor">pull_up</param>
+        </state_interface>
+
+        <!-- port is used by SPI -->
+        <!-- <state_interface name="din_10">
+          <param name="pin">17</param>
+          <param name="resistor">pull_up</param>
+        </state_interface> -->
+
+        <command_interface name="dout_11">
+          <param name="pin">20</param>
+        </command_interface>
+        <state_interface name="dout_11"/>
+
+        <command_interface name="dout_12">
+          <param name="pin">19</param>
+        </command_interface>
+        <state_interface name="dout_12"/>
+
+        <command_interface name="dout_13">
+          <param name="pin">21</param>
+        </command_interface>
+        <state_interface name="dout_13"/>
+      </gpio>
+      <gpio name="x11">
+        <state_interface name="din_2">
+          <param name="pin">23</param>
+          <param name="resistor">pull_up</param>
+        </state_interface>
+
+        <state_interface name="din_3">
+          <param name="pin">22</param>
+          <param name="resistor">pull_up</param>
+        </state_interface>
+
+        <state_interface name="din_4">
+          <param name="pin">4</param>
+          <param name="resistor">pull_up</param>
+        </state_interface>
+
+        <command_interface name="dout_5">
+          <param name="pin">5</param>
+        </command_interface>
+        <state_interface name="dout_5"/>
+
+        <command_interface name="dout_6">
+          <param name="pin">12</param>
+        </command_interface>
+        <state_interface name="dout_6"/>
+
+        <command_interface name="dout_7">
+          <param name="pin">6</param>
+        </command_interface>
+        <state_interface name="dout_7"/>
+      </gpio>
+    </ros2_control>
+  </xacro:if>
+</robot>

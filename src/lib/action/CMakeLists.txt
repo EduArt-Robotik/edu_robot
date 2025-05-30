@@ -17,3 +17,7 @@ ament_target_dependencies(
   "diagnostic_msgs"
   "diagnostic_updater"  
 )
+list(APPEND BUILT_LIBRARIES eduart-action)
+
+# Populating Built Libraries
+set(BUILT_LIBRARIES ${BUILT_LIBRARIES} PARENT_SCOPE)

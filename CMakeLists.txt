@@ -10,6 +10,8 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_ros REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
+find_package(hardware_interface REQUIRED)
+find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
@@ -33,6 +35,14 @@ else()
   set(HAVE_MRAA "FALSE")
 endif()
 
+# pigpio
+if (EXISTS "/usr/include/gpiod.hpp")
+  message(STATUS "Found libgpiod. Enable gpio hardware support for raspberry.")
+  set(HAVE_GPIOD "TRUE")
+else()
+  message(STATUS "Couldn't find libgpiod. Disable hardware support for raspberry.")
+  set(HAVE_GPIOD "FALSE")  
+endif()
 
 ## Build Defined ROS Messages
 rosidl_generate_interfaces(${PROJECT_NAME}
@@ -53,12 +63,24 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 # Create a target that can be used by all buildiung targets when the custom message are required for them.
 rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
+# Building Libraries
 add_subdirectory(src/lib/action)
+add_subdirectory(src/lib/algorithm)
 add_subdirectory(src/lib/diagnostic)
 add_subdirectory(src/lib/robot)
 add_subdirectory(src/lib/processing_component)
 add_subdirectory(src/lib/bot)
 add_subdirectory(src/lib/hardware)
+
+# Export hardware interface plugins
+if (HAVE_MRAA)
+  pluginlib_export_plugin_description_file(hardware_interface src/lib/hardware/iot_shield/ros2_control_eduard_iot.xml)
+endif()
+if (HAVE_GPIOD)
+  pluginlib_export_plugin_description_file(hardware_interface src/lib/hardware/can_gateway/ros2_control_eduard_raspberry.xml)
+endif()
+
+# Building Nodes
 add_subdirectory(src/node)
 
 ## Installing of Content
@@ -73,14 +95,10 @@ install(
   DESTINATION share/${PROJECT_NAME}
 )
 
+message(STATUS "Nodes: ${BUILT_NODES}")
 install(
   TARGETS
-    eduard-iot-bot
-    eduard-ethernet-gateway-bot
-    universal-ethernet-gateway-bot
-    rebel-move-360-pi-bot
-    universal-360-pi-bot
-    eduard-360-pi-bot
+    ${BUILT_NODES}
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   # for humble...
@@ -89,18 +107,10 @@ install(
   RUNTIME DESTINATION lib/${PROJECT_NAME}
   INCLUDES DESTINATION include
 )
+message(STATUS "Libraries: ${BUILT_LIBRARIES}")
 install(
   TARGETS
-    eduart-bot
-    eduart-iotbot-shield
-    eduart-robot
-    processing-component
-    eduart-ethernet-gateway
-    eduart-action
-    eduart-diagnostic
-    igus
-    eduart-hardware
-    eduart-hardware-can
+    ${BUILT_LIBRARIES}
   EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
@@ -124,16 +134,7 @@ ament_export_include_directories(
   include
 )
 ament_export_libraries(
-  eduart-bot
-  eduart-iotbot-shield
-  eduart-robot
-  processing-component
-  eduart-ethernet-gateway
-  eduart-action
-  eduart-diagnostic
-  igus
-  eduart-hardware
-  eduart-hardware-can
+  ${BUILT_LIBRARIES}
 )
 ament_export_dependencies(
   rclcpp
@@ -148,6 +149,8 @@ ament_export_dependencies(
   diagnostic_updater
   Eigen3
   std_srvs
+  hardware_interface
+  pluginlib
 )
 ament_export_targets(
   export_${PROJECT_NAME}
