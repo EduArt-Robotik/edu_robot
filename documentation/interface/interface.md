@@ -54,3 +54,38 @@ Eduard is our main robot system. It consists from of four wheels, four lightings
 | Range Sensor Output Front Right | /range/front/right/range | sensor_msgs/msg/Range                |
 | Range Sensor Output Rear Left   | /range/rear/left/range   | sensor_msgs/msg/Range                |
 | Range Sensor Output Rear Right  | /range/rear/right/range  | sensor_msgs/msg/Range                |
+
+
+#  Lights
+In the standard configuration, it is not possible to switch the lighting modules individually. The lighting can be switched in groups (left and right) or completely.
+
+edu_robot listens to the topic <namespace>/set_lighting_color of type edu_robot/SetLightingColor.
+
+edu_robot listens to the topic <namespace>/set_lighting_color of type edu_robot/SetLightingColor. The message is structured as follows:
+
+```bash
+string lighting_name
+uint8 r
+uint8 g
+uint8 b
+std_msgs/Float32 brightness # sets the brightness in range of 0..1 (0%..100%)
+uint8 mode
+# use constants below for field mode
+uint8 OFF = 0
+uint8 DIM = 1
+uint8 FLASH = 2
+uint8 PULSATION = 3
+uint8 ROTATION = 4
+uint8 RUNNING = 5
+```
+
+The fields can have the following values:
+
+| **Name**               | **Description**                                                                 | **Possible Values**                                                                                                 |
+|------------------------|----------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------|
+| `msg.lighting_name`    | Lighting module name (lighting groups)                                          | • `left_side` (left lighting module)  <br> • `right_side` (right lighting module)  <br> • `all` (both sides equal) |
+| `msg.r`                | Red component                                                                    | 0…255 (0 = off, 255 = max intensity)                                                                                |
+| `msg.g`                | Green component                                                                  | 0…255 (0 = off, 255 = max intensity)                                                                                |
+| `msg.b`                | Blue component                                                                   | 0…255 (0 = off, 255 = max intensity)                                                                                |
+| `msg.brightness.data`  | Brightness                                                                       | 0…100 (0 = off, 100 = full brightness)                                                                              |
+| `msg.mode`             | Mode (important: enter the numeric value, not the name of the mode)             | • `0` = **off** <br> • `1` = **dim** (no color selection; behaves like white driving light) <br> • `2` = **flash** (only mode where individual sides can be selected; otherwise use `all`) <br> • `3` = **pulsation** (no color selection; behaves like white startup light) <br> • `4` = **rotation** (fast blinking, only valid with `all`) <br> • `5` = **running** |

@@ -17,6 +17,8 @@ The output will tell you if there is a new version of the code. In case 'already
 
 ## Update
 
+## Before 1. June 2025
+
 When a new version is available it can be launched by executing following command:
 
 ```bash
@@ -27,3 +29,20 @@ docker compose up
 The current executed container will be stopped and the new will be pulled and started. Thats it!
 
 > **Note**: if you leave the terminal using CTRL+C it could be necessary to reboot the robot, because the container stopped temporary.
+
+## After 1. June 2025
+
+When a new version is available it can be launched by executing following command:
+
+```bash
+cd ~/edu_robot/docker/iot2050
+sudo ./deploy-as-systemd-service.sh
+```
+
+After it was installed on the robot once using the deploy script it only needs to execute:
+
+```bash
+sudo systemctl restart iot2050-edu-robot.service
+```
+
+when an update is available.

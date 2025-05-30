@@ -51,7 +51,7 @@
     # Motor
     motor_a:
       closed_loop: true
-      index: 0
+      index: 2
       max_rpm: 100.0
       pid:
         kd: 0.0
@@ -59,7 +59,7 @@
         kp: 0.5
     motor_b:
       closed_loop: true
-      index: 0
+      index: 1
       max_rpm: 100.0
       pid:
         kd: 0.0
@@ -67,7 +67,7 @@
         kp: 0.5
     motor_c:
       closed_loop: true
-      index: 0
+      index: 4
       max_rpm: 100.0
       pid:
         kd: 0.0
@@ -75,7 +75,7 @@
         kp: 0.5
     motor_d:
       closed_loop: true
-      index: 0
+      index: 3
       max_rpm: 100.0
       pid:
         kd: 0.0
@@ -112,6 +112,7 @@
         measurement_complete: 776
         trigger: 904
       front:
+        virtual_range_sensor: true
         fov:
           horizontal: 0.7853981852531433
           vertical: 0.7853981852531433
@@ -131,6 +132,7 @@
             z: 0.045
       measurement_interval: 100
       rear:
+        virtual_range_sensor: true
         fov:
           horizontal: 0.7853981852531433
           vertical: 0.7853981852531433
@@ -142,8 +144,8 @@
         transform:
           orientation:
             roll: 0.0
-            pitch: 1.570796327
-            yaw: 3.141592654
+            pitch: 4.71238898
+            yaw: 0.0
           translation:
             x: -0.17
             y: 0.063
@@ -153,6 +155,7 @@
         measurement_complete: 776
         trigger: 904
       front:
+        virtual_range_sensor: true
         fov:
           horizontal: 0.7853981852531433
           vertical: 0.7853981852531433
@@ -172,6 +175,7 @@
             z: 0.045
       measurement_interval: 100
       rear:
+        virtual_range_sensor: true
         fov:
           horizontal: 0.7853981852531433
           vertical: 0.7853981852531433
