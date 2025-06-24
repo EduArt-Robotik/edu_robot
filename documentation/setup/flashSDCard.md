@@ -34,8 +34,10 @@ Con: A bit more work when creating the backup
   Example: `sudo dd if=/dev/sdb count=35866623 status=progress | gzip > backup.img.gz`
 
 ## Flashing SD Card
+The following shows two ways in which an image (whether self-created or downloaded) can be flashed to an SD card.
 
-In previous guides we used `dd` to flash the image onto the SD card.
+### RPi Imager (recommended)
+In previous guides we used [`dd`](#using-dd) to flash the image onto the SD card.
 However, to provide the same workflow for Windows and Linux, we now recommend to use the Pi Imager Software instead of `dd`.
 It provides a GUI and therefore leaves less room for errors.
 The software extracts the compressed image directly and supports archives like `.gz` or `.zip` on both Windows and Linux.
@@ -52,3 +54,32 @@ Your Settings now should look like this:
 The flashing process might take a couple of minutes. If you've created the image yourself and choose [Option 1](#option-1---copy-everything-including-empty-space), make sure the SD card you try to flash your image on is as big or bigger than the original card! If the flash process fails at ~98%, the size of the card was probably to small.
 
 > The partition on the flashed SD card doesn't need to be resized since the RPi will do this automatically upon boot
+
+### Using `dd`
+This method is aimed at more experienced users and is only available on Linux.
+
+First, find out the SD card device name on your Linux system. Connect the SD card by using an card reader. After the SD card is connected execute following command:
+
+```bash
+sudo dmesg
+```
+
+This prints the kernel messages on the terminal. Only the few latest are important. It should look like following:
+
+```bash
+[24180.935724] sd 3:0:0:4: [sdg] 124735488 512-byte logical blocks: (63.9 GB/59.5 GiB)
+[24180.974016]  sdg: sdg1
+```
+
+In this case, the device name is **sdg**. So we will use this to flash the image. Execute the following command to unzip the downloaded image and flash it to the SD card:
+
+```bash
+unzip -p IOT2050_Example_Image_V1.3.1.zip | sudo dd of=/dev/<device name like sdg> bs=4M status=progress
+```
+> Note: replace the device name with the name of your SD card. 
+
+After the process is finished it is good practice to synchronize the write-cache before removing the SD card.
+
+```bash
+sync
+```
