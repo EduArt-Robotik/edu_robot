@@ -2,39 +2,11 @@
 
 ## SD Card Image
 
-It is considered that the official ["Example Image V1.3.1"](https://support.industry.siemens.com/cs/document/109741799/downloads-f%C3%BCr-simatic-iot20x0?dti=0&lc=de-DE) provided by Siemens will be used for the IoT2050. If this is not the case there is no guarantee that the instructions below will work as expected.
+The following guide assumes that the official ["Example Image V1.3.1"](https://support.industry.siemens.com/cs/document/109741799/downloads-f%C3%BCr-simatic-iot20x0?dti=0&lc=de-DE) provided by Siemens is used for the IoT2050. 
+If this is not the case there is no guarantee that the instructions below will work as expected.
 
-### Flashing SD Card on Linux
-
-> **Note**: sudo privileges are required.
-
-On Linux the SD card can be flashed using two commands after the ["Example Image V1.3.1"](https://support.industry.siemens.com/cs/document/109741799/downloads-f%C3%BCr-simatic-iot20x0?dti=0&lc=de-DE) was downloaded.
-
-First estimate the SD card device name on your Linux system. Connect the SD card by using an card reader. After the SD card is connected execute following command:
-
-```bash
-sudo dmesg
-```
-
-This prints the kernel messages on the terminal. Only the few latest are important. It should look like following:
-
-```bash
-[24180.935724] sd 3:0:0:4: [sdg] 124735488 512-byte logical blocks: (63.9 GB/59.5 GiB)
-[24180.974016]  sdg: sdg1
-```
-
-In this case, the device name is **sdg**. So we will use this to flash the image. Execute
-
-```bash
-unzip -p IOT2050_Example_Image_V1.3.1.zip | sudo dd of=/dev/<device name like sdg> bs=4M status=progress
-sync
-```
-
-to unzip the downloaded image and flash it to the SD card. Note: replace the device name according your estimated one. Thats it! Now put the SD card into the IOT2050.
-
-### Flashing SD Card on Windows
-
-> **Note**: will be updated soon
+Please have a look at [this guide](../flashSDCard.md#flashing-sd-card) on how to flash the downloaded image onto the SD card. 
+After flashing, insert the SD card into the IOT2050.
 
 ### Booting Up First Time
 
