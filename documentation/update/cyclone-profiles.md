@@ -31,7 +31,7 @@ If this doesn't return `The daemon is not running` or `The daemon has been stopp
 3. Create a folder on your local system<br>
 Create a new folder for your profile with the following command:
 ```bash
-mkdir ~/.ros/middlewareSettings/
+mkdir ~/.ros/middleware/
 ```
 
 >Note: The filepath and naming is only a recommendation. You can store/name the file wherever and whatever you like.
@@ -39,10 +39,9 @@ mkdir ~/.ros/middlewareSettings/
 4. Create a new Cyclone profile <br>
 Use this command to create and edit a new file:
 ```bash
-nano ~/.ros/middlewareSettings/cyclone_profile_<interface_type>.xml
+nano ~/.ros/middleware/cyclone_profile.xml
 ```
-Since you probably have multiple available interfaces on your system (WIFI, ethernet,...) we recommend to create multiple Cyclone profiles for each of them. This makes it easier to choose between them at a later stage. To differenciate between the different profiles, append the type (e.g. `ethernet` or `wifi`) to the filename.<br> 
-
+You can use one cyclone profile to specify multiple interfaces.
 Paste the following content into your Cyclone profile:
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -54,7 +53,8 @@ xsi:schemaLocation="https://cdds.io/config https://raw.githubusercontent.com/ecl
     <Domain Id="any">
         <General>
             <Interfaces>
-                <NetworkInterface name="wlp2s0" priority="10" multicast="true" />
+                <NetworkInterface name="wlp0" priority="10" multicast="true" presence_required="false"/>
+                <NetworkInterface name="eth0" priority="11" multicast="true" presence_required="false"/>
             </Interfaces>
             <AllowMulticast>true</AllowMulticast>
             <MaxMessageSize>65500B</MaxMessageSize>
@@ -63,10 +63,10 @@ xsi:schemaLocation="https://cdds.io/config https://raw.githubusercontent.com/ecl
 </CycloneDDS>
 ```
 Edit the `name` so that it contains the name of the interface you'd like to to use. Save (`Ctrl+S`) and close (`Ctrl+X`) the file. <br>
+The `presence_required` option allows to specify an interface that might or might not be active. 
+This way you can add all your network interfaces to the profile and if one or multiple of them are inactive, ROS2 CycloneDDS is still fine. 
 
-You should now have one or multiple Cyclone profiles.
-
-5. Add the profile to your `.bashrc` <br>
+1. Add the profile to your `.bashrc` <br>
 You need to export a environment variable called `CYCLONEDDS_URI` to tell Cyclone which profile to use. For this, open your `.bashrc`:
 ```bash
 nano ~/.bashrc
@@ -76,19 +76,10 @@ Add this to the bottom of the file:
 
 ```bash
 #...
-export CYCLONEDDS_URI=~/.ros/middlewareSettings/cyclone_profile_wifi.xml
+export CYCLONEDDS_URI=~/.ros/middleware/cyclone_profile.xml
 ``` 
-Change the name of the profile that it matches yours. You can also prepare the export for different profiles and comment out all but one. This way you only need to edit a single line in your `.bashrc` to change the interface that Cyclone uses. This could look like this:
-```bash
-#...
-# Wifi
-export CYCLONEDDS_URI=~/.ros/.../cyclone_profile_wifi.xml
-# Ethernet
-# export CYCLONEDDS_URI=~/.ros/.../cyclone_profile_ethernet.xml
-# ...
-# export CYCLONEDDS_URI=~/.ros/...
-```
-Save (Ctrl + S) and close (Ctrl + C) the file.
+Change the name of the profile that it matches yours.
+Save (`Ctrl + S`) and close (`Ctrl + C`) the file.
 
 For existing terminals you need to source the `.bashrc` again. Alternatively you can close the terminal and open a new one:
 ```bash
@@ -111,7 +102,7 @@ cd ~/repos/edu_nodered_ros2_plugin/docker/raspberry/launch_content
 ```bash
 nano cyclone_profile.xml
 ``` 
-Enter the name of the interface you want to use. See the [previous guide](#create-a-cyclone-profile-for-a-local-system) on how to do that. Afterwards, save and exit the file.
+Enter the name of the interface you want to use. See the [previous chapter](#create-a-cyclone-profile-for-a-local-system) on how to do that. Afterwards, save and exit the file.
 
 3. Restart your container
 If the container was already running you need to restart it fully. For this, we navigate on folder upwards to the `docker-compose.yaml`
