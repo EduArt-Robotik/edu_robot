@@ -76,9 +76,6 @@ MotorControllerHardware::MotorControllerHardware(
   _communication_node->createRxDataEndPoint<RxDataEndPoint, ShieldResponse>(
     std::bind(&MotorControllerHardware::processRxData, this, std::placeholders::_1), 3
   );
-  _communication_node->addSendingJob(
-    std::bind(&MotorControllerHardware::processSending, this), 100ms
-  );
 }            
 
 MotorControllerHardware::~MotorControllerHardware()
@@ -200,6 +197,12 @@ void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
       static_cast<float>(_parameter.timeout.count()) * 1000.0f, 0);
     _communication_node->sendRequest(std::move(request), 100ms);
   }
+
+  // start continuous UART communication
+  // note: start after initialization to avoid mixed up commands (sending job runs on different thread!)
+  _communication_node->addSendingJob(
+    std::bind(&MotorControllerHardware::processSending, this), 100ms
+  );
 }
 
 } // end namespace iot_shield
