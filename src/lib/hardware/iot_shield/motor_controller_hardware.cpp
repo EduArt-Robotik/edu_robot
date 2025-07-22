@@ -186,6 +186,12 @@ void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
   }
 
   {
+    auto request = Request::make_request<uart::message::SetFlag<UART::COMMAND::SET::INVERT_ENCODER>>(
+      _parameter.encoder_inverted, 0, 0, 0);
+    _communication_node->sendRequest(std::move(request), 100ms);
+  }
+
+  {
     auto request = Request::make_request<uart::message::SetValueF<UART::COMMAND::SET::CONTROL_FREQUENCY>>(
       _parameter.control_frequency, 0);
     _communication_node->sendRequest(std::move(request), 100ms);

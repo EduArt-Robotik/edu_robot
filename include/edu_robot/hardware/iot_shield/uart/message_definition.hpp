@@ -46,6 +46,13 @@ using SetValueU = MessageFrame<element::Command<UartCommand>,
                                element::Uint32,  // unsigned int value
                                element::Uint32>; // spacer
 
+template <Byte UartCommand>
+using SetFlag = MessageFrame<element::Command<UartCommand>,
+                             element::Uint8,   // flag
+                             element::Uint8,   // spacer
+                             element::Int16,   // spacer
+                             element::Uint32>; // spacer
+
 using SetImuRawDataMode = MessageFrame<element::Command<UART::COMMAND::SET::IMU_RAW_DATA>,
                                        element::Uint8,   // enable flag
                                        element::Uint8,   // spacer
