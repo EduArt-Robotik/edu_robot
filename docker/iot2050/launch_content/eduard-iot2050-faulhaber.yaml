@@ -33,7 +33,7 @@
       publish_orientation_without_yaw_tf : true
 
     # Motor Controller
-    motor_a:
+    motor_controller:
       control_frequency: 16000
       timeout_ms: 500
       encoder_inverted: true
@@ -46,7 +46,7 @@
     motor_a:
       closed_loop: true
       index: 0
-      max_rpm: 100.0
+      max_rpm: 90.0
       pid:
         kd: 0.0
         ki: 5.0
@@ -54,7 +54,7 @@
     motor_b:
       closed_loop: true
       index: 0
-      max_rpm: 100.0
+      max_rpm: 90.0
       pid:
         kd: 0.0
         ki: 5.0
@@ -62,7 +62,7 @@
     motor_c:
       closed_loop: true
       index: 0
-      max_rpm: 100.0
+      max_rpm: 90.0
       pid:
         kd: 0.0
         ki: 5.0
@@ -70,7 +70,7 @@
     motor_d:
       closed_loop: true
       index: 0
-      max_rpm: 100.0
+      max_rpm: 90.0
       pid:
         kd: 0.0
         ki: 5.0
