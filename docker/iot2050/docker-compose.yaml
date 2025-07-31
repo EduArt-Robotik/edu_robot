@@ -2,8 +2,8 @@ version: "3.0"
 
 services:
     eduard-iot2050:
-        image: eduartrobotik/eduart-robot:1.0.0
-        container_name: eduard-iotbot-1.0.0
+        image: eduartrobotik/eduart-robot:1.0.1
+        container_name: eduard-iotbot-1.0.1
         user: root
         restart: always
         privileged: true
@@ -13,6 +13,7 @@ services:
         environment:
             - EDU_ROBOT_NAMESPACE=${EDU_ROBOT_NAMESPACE}
             - RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION}
+            - EDU_MOTOR_MODEL=${EDU_MOTOR_MODEL:-faulhaber}
             - CYCLONEDDS_URI=/home/user/ros/launch_content/cyclone_profile.xml         
         network_mode: "host"
         command: bash -c 'cd /home/user/ros/launch_content; ros2 launch eduard-iot2050.launch.py'

@@ -36,6 +36,7 @@ struct UART {
     static constexpr Byte ENABLE  = 0x01;
     static constexpr Byte DISABLE = 0x02;
     struct SET {
+      static constexpr Byte INVERT_ENCODER = 0x07;
       static constexpr Byte UART_TIMEOUT = 0x0c;
       static constexpr Byte IMU_RAW_DATA = 0x0a;
       static constexpr Byte RPM = 0x11;
