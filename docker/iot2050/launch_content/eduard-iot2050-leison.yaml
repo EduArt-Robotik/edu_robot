@@ -37,6 +37,7 @@
       control_frequency: 16000
       timeout_ms: 500
       encoder_inverted: true
+      inverted: true
       encoder_ratio: 2048.0
       gear_ratio: 100.0
       weight_low_pass_encoder: 0.2

@@ -36,7 +36,8 @@
     motor_controller:
       control_frequency: 16000
       timeout_ms: 500
-      encoder_inverted: true
+      encoder_inverted: false
+      inverted: false
       encoder_ratio: 2048.0
       gear_ratio: 89.0
       weight_low_pass_encoder: 0.3
