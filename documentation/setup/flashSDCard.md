@@ -53,7 +53,9 @@ Your Settings now should look like this:
 
 The flashing process might take a couple of minutes. If you've created the image yourself and choose [Option 1](#option-1---copy-everything-including-empty-space), make sure the SD card you try to flash your image on is as big or bigger than the original card! If the flash process fails at ~98%, the size of the card was probably to small.
 
-> The partition on the flashed SD card doesn't need to be resized since the RPi will do this automatically upon boot
+|<img src="../image/warning.png" width="100"/>     | Resizing after Flashing <br> Operating Systems (OS) for the RaspberryPi automatically extend their partition at the first boot to fill all free space on the SD Card. Normal desktop OS (like used for the IOT2050) don't do that so the user needs to resize the partition after flashing it on the SD-Card! For this, either boot into the system and do it from the inside or use *gparted* or *windows partition manager* to extend the partitions of the card.|
+|-----------------------------------------------------------------------|--------------------|
+
 
 ### Using `dd`
 This method is aimed at more experienced users and is only available on Linux.
