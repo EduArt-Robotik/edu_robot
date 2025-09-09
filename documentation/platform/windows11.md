@@ -147,3 +147,72 @@ The ROS2 daemon could be started by:
 ros2 daemon start
 ```
 
+### Troubleshooting
+
+#### Rendering Problem
+
+If you discover a low FPS rate combined with a high CPU usage, then it could be that the rendering is done by software only. To check if software-only rendering is used, please install the mesa utils:
+
+```bash
+sudo apt update
+sudo apt install mesa-utils
+```
+
+After using the glxinfo tool to query the used render device:
+
+```bash
+glxinfo -B
+```
+
+The following like information is displayed:
+
+```bash
+name of display: :0
+display: :0  screen: 0
+direct rendering: Yes
+Extended renderer info (GLX_MESA_query_renderer):
+    Vendor: Microsoft Corporation (0xffffffff)
+    Device: D3D12 (NVIDIA GeForce RTX 3080 Ti) (0xffffffff)
+    Version: 25.0.7
+    Accelerated: yes
+    Video memory: 28423MB
+    Unified memory: no
+    Preferred profile: core (0x1)
+    Max core profile version: 4.6
+    Max compat profile version: 4.6
+    Max GLES1 profile version: 1.1
+    Max GLES[23] profile version: 3.1
+Memory info (GL_ATI_meminfo):
+    VBO free memory - total: 11302 MB, largest block: 11302 MB
+    VBO free aux. memory - total: 0 MB, largest block: 0 MB
+    Texture free memory - total: 11302 MB, largest block: 11302 MB
+    Texture free aux. memory - total: 0 MB, largest block: 0 MB
+    Renderbuffer free memory - total: 11302 MB, largest block: 11302 MB
+    Renderbuffer free aux. memory - total: 0 MB, largest block: 0 MB
+Memory info (GL_NVX_gpu_memory_info):
+    Dedicated video memory: 12086 MB
+    Total available memory: 28423 MB
+    Currently available dedicated video memory: 11302 MB
+OpenGL vendor string: Microsoft Corporation
+OpenGL renderer string: D3D12 (NVIDIA GeForce RTX 3080 Ti)
+OpenGL core profile version string: 4.6 (Core Profile) Mesa 25.0.7-0ubuntu0.24.04.1
+OpenGL core profile shading language version string: 4.60
+OpenGL core profile context flags: (none)
+OpenGL core profile profile mask: core profile
+
+OpenGL version string: 4.6 (Compatibility Profile) Mesa 25.0.7-0ubuntu0.24.04.1
+OpenGL shading language version string: 4.60
+OpenGL context flags: (none)
+OpenGL profile mask: compatibility profile
+
+OpenGL ES profile version string: OpenGL ES 3.1 Mesa 25.0.7-0ubuntu0.24.04.1
+OpenGL ES profile shading language version string: OpenGL ES GLSL ES 3.10
+```
+
+In this case the GPU (RTX 3080 TI) is in use. It can be checked at the device entry. Also in the OpenGL rendering string. If you discover the **llvmpipe** than the software rendering is used. You can force the system to use the GPU by setting the following environment variable:
+
+```bash
+export GALLIUM_DRIVER=d3d12
+```
+
+in your bashrc.
