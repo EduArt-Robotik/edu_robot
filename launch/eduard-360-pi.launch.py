@@ -1,5 +1,5 @@
-from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch import LaunchDescription, LaunchContext
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction
 from launch.conditions import IfCondition, UnlessCondition
 from launch.substitutions import Command, LaunchConfiguration, EnvironmentVariable, PathJoinSubstitution
 from launch.launch_description_sources import PythonLaunchDescriptionSource
@@ -7,6 +7,24 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
+
+def get_motor_parameter_file(context: LaunchContext, motor_model_arg: LaunchConfiguration) -> str:
+    motor_model = motor_model_arg.perform(context)
+    print("Using motor model: ", motor_model)
+    if motor_model == 'leison':
+        # Leison motor
+        return PathJoinSubstitution([
+            FindPackageShare('edu_robot'),
+            'parameter',
+            'eduard_raspberry_motor_leison.yaml'
+        ]).perform(context)
+    else:
+        # Faulhaber motor
+        return PathJoinSubstitution([
+            FindPackageShare('edu_robot'),
+            'parameter',
+            'eduard_raspberry_motor_faulhaber.yaml'
+        ]).perform(context)
 
 def generate_launch_description():
     package_path = FindPackageShare('edu_robot')
@@ -16,11 +34,20 @@ def generate_launch_description():
       'eduard-360-pi-bot.yaml'
     ])
 
+    motor_model_arg = DeclareLaunchArgument(
+      'motor_model',
+      default_value='faulhaber',
+      description='Motor model to use (faulhaber or leison)'
+    )
+
     pi_bot = Node(
       package='edu_robot',
       executable='eduard-360-pi-bot',
       name='pi_bot',
-      parameters=[parameter_file],
+      parameters=[
+        parameter_file,
+        OpaqueFunction(function=get_motor_parameter_file, args=[LaunchConfiguration('motor_model')])
+      ],
       namespace=EnvironmentVariable('EDU_ROBOT_NAMESPACE', default_value="eduard"),      
       # prefix=['gdbserver localhost:3000'],
       output='screen'
@@ -37,7 +64,8 @@ def generate_launch_description():
     )    
 
     return LaunchDescription([
+      motor_model_arg,
       pi_bot,
-      aggregator
+      aggregator,
     ])
     
