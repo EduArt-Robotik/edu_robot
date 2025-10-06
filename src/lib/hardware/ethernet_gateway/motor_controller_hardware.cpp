@@ -160,10 +160,15 @@ void MotorControllerHardware<1>::processSending()
 
   const auto got = _communication_node->sendRequest(std::move(request), 200ms);
   _data.measured_rpm[0] = AcknowledgedMotorRpm::rpm0(got.response());
-  _data.measured_rpm[1] = 0.0;  
+  _data.measured_rpm[1] = 0.0;
 
   if (_callback_process_measurement == nullptr) {
     return;
+  }
+
+  // if motor rotates inverted, change direction
+  if (_parameter.inverted) {
+    invertRotation(_data.measured_rpm);
   }
 
   _callback_process_measurement(_data.measured_rpm, AcknowledgedMotorRpm::enabled(got.response()));

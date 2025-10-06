@@ -2,9 +2,7 @@
   ros__parameters:
     # Motor Controller
     motor_controller_0:
-      can_id:
-        input: 1024
-        output: 1152
+      can_id: 0
       control_frequency: 16000
       encoder_inverted: true
       encoder_ratio: 2048.0
@@ -14,9 +12,7 @@
       weight_low_pass_set_point: 0.2
 
     motor_controller_1:
-      can_id:
-        input: 1025
-        output: 1153
+      can_id: 1
       control_frequency: 16000
       encoder_inverted: true
       encoder_ratio: 2048.0

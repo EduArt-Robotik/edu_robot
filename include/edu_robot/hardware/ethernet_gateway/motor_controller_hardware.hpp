@@ -30,6 +30,7 @@ public:
     float threshold_stall_check = 0.25f;
     std::uint32_t control_frequency = 16000;
     bool encoder_inverted = false;
+    bool inverted = false;
     std::chrono::milliseconds timeout = 1000ms;
   
     float weight_low_pass_set_point = 0.2f;
@@ -61,7 +62,12 @@ public:
     std::lock_guard lock(_data.mutex);
     _data.rpm = rpm;
     _data.stamp_last_rpm_set = std::chrono::system_clock::now();
-    _data.timeout = false;    
+    _data.timeout = false;
+    
+    // if motor rotates inverted, change direction    
+    if (_parameter.inverted) {
+      invertRotation(_data.rpm);
+    }
   }
   void initialize(const Motor::Parameter& parameter) override;
 
@@ -78,7 +84,7 @@ public:
     ros_node.declare_parameter<int>(
       name + ".control_frequency", default_parameter.control_frequency);
     ros_node.declare_parameter<int>(
-      name + ".timeout_ms", default_parameter.timeout.count());  
+      name + ".timeout_ms", default_parameter.timeout.count());
 
     ros_node.declare_parameter<float>(
       name + ".weight_low_pass_set_point", default_parameter.weight_low_pass_set_point);
@@ -86,6 +92,7 @@ public:
       name + ".weight_low_pass_encoder", default_parameter.weight_low_pass_encoder);
     ros_node.declare_parameter<bool>(
       name + ".encoder_inverted", default_parameter.encoder_inverted);
+    ros_node.declare_parameter<bool>(name + ".inverted", parameter.inverted);
 
     parameter.can_id = ros_node.get_parameter(name + ".can_id").as_int();
 
@@ -97,6 +104,7 @@ public:
     parameter.weight_low_pass_set_point = ros_node.get_parameter(name + ".weight_low_pass_set_point").as_double();
     parameter.weight_low_pass_encoder = ros_node.get_parameter(name + ".weight_low_pass_encoder").as_double();
     parameter.encoder_inverted = ros_node.get_parameter(name + ".encoder_inverted").as_bool();
+    parameter.inverted = ros_node.get_parameter(name + ".inverted").as_bool();
 
     return parameter;    
   }
@@ -104,6 +112,12 @@ public:
 private:
   void processRxData(const message::RxMessageDataBuffer& data);
   void processSending();
+  void invertRotation(std::vector<Rpm>& rpms)
+  {
+    for (auto& rpm : rpms) {
+      rpm = rpm * -1.0;
+    }
+  }
 
   const Parameter _parameter;
   std::shared_ptr<CommunicatorNode> _communication_node;

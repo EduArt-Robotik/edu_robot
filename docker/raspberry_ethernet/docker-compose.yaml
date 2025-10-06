@@ -16,7 +16,7 @@ services:
             - EDU_MOTOR_MODEL=${EDU_MOTOR_MODEL:-faulhaber}
             - CYCLONEDDS_URI=/home/user/ros/launch_content/cyclone_profile.xml      
         network_mode: "host"
-        command: bash -c 'cd /home/user/ros/launch_content; ros2 launch eduard-ipc127e.launch.py'
+        command: bash -c 'cd /home/user/ros/launch_content; ros2 launch eduard-raspberry-ethernet.launch.py'
         volumes:
             - './launch_content:/home/user/ros/launch_content:r'
         devices:
