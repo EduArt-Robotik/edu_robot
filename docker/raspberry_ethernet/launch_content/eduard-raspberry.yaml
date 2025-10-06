@@ -1,0 +1,73 @@
+/**:
+  ros__parameters:
+    # General Parameters
+    use_sim_time: false
+
+    # Collision Avoidance
+    collision_avoidance:
+      enable: true
+      distance_reduce_velocity: 0.6
+      distance_velocity_zero: 0.05
+
+    # Diagnostic
+    diagnostic_updater:
+      period: 1.0
+      use_fqn: false
+
+    # IMU Sensor
+    imu:
+      fusion_weight: 0.005
+      mounting_orientation:
+        pitch: 0.0
+        roll: 0.0
+        yaw: 0.0 
+      publish_tf: true
+      publish_orientation_without_yaw_tf : true
+
+    # TF2
+    tf:
+      base_frame: base_link
+      footprint_frame: base_footprint
+      publishing_interval_ms: 100
+    
+    # Odometry
+    odometry:
+      publishing_interval_ms: 100
+      publishing_tf: true        
+
+    # Range Sensor
+    range:  
+      front:
+        left:
+          field_of_view: 0.1745329201221466
+          range_max: 5.0
+          range_min: 0.01
+        
+        right:
+          field_of_view: 0.1745329201221466
+          range_max: 5.0
+          range_min: 0.01
+
+      rear:    
+        left:
+          field_of_view: 0.1745329201221466
+          range_max: 5.0
+          range_min: 0.01
+
+        right:
+          field_of_view: 0.1745329201221466
+          range_max: 5.0
+          range_min: 0.01
+
+    # Drive Kinematic
+    skid:
+      length:
+        x: 0.25
+        y: 0.32
+      wheel_diameter: 0.17
+
+    mecanum:
+      length:
+        x: 0.25
+        y: 0.36
+      wheel_diameter: 0.1
