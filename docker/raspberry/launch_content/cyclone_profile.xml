@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CycloneDDS
+  xmlns="https://cdds.io/config"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="https://cdds.io/config https://raw.githubusercontent.com/eclipse-cyclonedds/cyclonedds/master/etc/cyclonedds.xsd"
+>
+    <Domain Id="any">
+        <General>
+            <Interfaces>
+                <!-- Main interface connected to access point usually. -->
+                <NetworkInterface name="eth0" priority="10" multicast="true" presence_required="true"/>
+                <!-- Optional interface wifi card. -->
+                <NetworkInterface name="wlan0" priority="10" multicast="true" presence_required="false"/>
+            </Interfaces>
+            <AllowMulticast>true</AllowMulticast>
+            <MaxMessageSize>65500B</MaxMessageSize>
+        </General>
+    </Domain>
+</CycloneDDS>
