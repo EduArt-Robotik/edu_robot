@@ -76,8 +76,8 @@ MotorControllerHardware::MotorControllerHardware(
   , _parameter(parameter)
   , _communication_node(std::make_shared<CommunicatorNode>(executer, communicator))
   , _data{
-      {4, 0.0},
-      {4, 0.0},
+      {0.0, 0.0, 0.0, 0.0},
+      {0.0, 0.0, 0.0, 0.0},
       std::chrono::system_clock::now(),
       true,
       {}
@@ -114,7 +114,7 @@ void MotorControllerHardware::processRxData(const uart::message::RxMessageDataBu
     invert_rotation(_data.measured_rpm);
   }
 
-  _callback_process_measurement(_data.measured_rpm, !_data.timeout);
+    _callback_process_measurement(_data.measured_rpm, !_data.timeout);
 }
 
 // is called by the main thread
