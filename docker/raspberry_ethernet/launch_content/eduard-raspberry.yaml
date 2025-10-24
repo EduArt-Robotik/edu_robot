@@ -20,7 +20,7 @@
       mounting_orientation:
         pitch: 0.0
         roll: 0.0
-        yaw: 0.0 
+        yaw: 3.14159 
       publish_tf: true
       publish_orientation_without_yaw_tf : true
 
