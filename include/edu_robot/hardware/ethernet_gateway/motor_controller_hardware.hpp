@@ -44,8 +44,8 @@ public:
     , _parameter(parameter)
     , _communication_node(std::make_shared<CommunicatorNode>(executer, communicator))
     , _data{
-        { NUM_CHANNELS, 0.0 },
-        { NUM_CHANNELS, 0.0 },
+        std::vector<Rpm>( NUM_CHANNELS, 0.0 ),
+        std::vector<Rpm>( NUM_CHANNELS, 0.0 ),
         std::chrono::system_clock::now(),
         true,
         { }

@@ -205,6 +205,11 @@ void MotorControllerHardware<2>::processSending()
     return;
   }
 
+  // if motor rotates inverted, change direction
+  if (_parameter.inverted) {
+    invertRotation(_data.measured_rpm);
+  }
+
   _callback_process_measurement(_data.measured_rpm, AcknowledgedMotorRpm::enabled(got.response()));  
 }
 
