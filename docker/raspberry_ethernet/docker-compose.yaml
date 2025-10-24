@@ -2,8 +2,8 @@ version: "3.0"
 
 services:
     eduard-ipc127e:
-        image: eduartrobotik/eduart-robot:1.0.1
-        container_name: eduard-raspberry-ethernet-1.0.1
+        image: eduartrobotik/eduart-robot:1.0.2
+        container_name: eduard-raspberry-ethernet-1.0.2
         user: user
         restart: always
         privileged: true
