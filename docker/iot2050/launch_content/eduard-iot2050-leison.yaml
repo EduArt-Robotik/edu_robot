@@ -33,47 +33,48 @@
       publish_orientation_without_yaw_tf : true
 
     # Motor Controller
-    motor_a:
+    motor_controller:
       control_frequency: 16000
       timeout_ms: 500
       encoder_inverted: true
+      inverted: true
       encoder_ratio: 2048.0
-      gear_ratio: 89.0
-      weight_low_pass_encoder: 0.3
-      weight_low_pass_set_point: 0.2
+      gear_ratio: 100.0
+      weight_low_pass_encoder: 0.2
+      weight_low_pass_set_point: 0.5
 
     # Motor
     motor_a:
       closed_loop: true
       index: 0
-      max_rpm: 100.0
+      max_rpm: 80.0
       pid:
         kd: 0.0
-        ki: 5.0
+        ki: 20.0
         kp: 0.5
     motor_b:
       closed_loop: true
       index: 0
-      max_rpm: 100.0
+      max_rpm: 80.0
       pid:
         kd: 0.0
-        ki: 5.0
+        ki: 20.0
         kp: 0.5
     motor_c:
       closed_loop: true
       index: 0
-      max_rpm: 100.0
+      max_rpm: 80.0
       pid:
         kd: 0.0
-        ki: 5.0
+        ki: 20.0
         kp: 0.5
     motor_d:
       closed_loop: true
       index: 0
-      max_rpm: 100.0
+      max_rpm: 80.0
       pid:
         kd: 0.0
-        ki: 5.0
+        ki: 20.0
         kp: 0.5
 
     # Range Sensor

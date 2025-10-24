@@ -13,11 +13,22 @@ from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
 
 def generate_launch_description():
+    motor_model = os.environ.get('EDU_MOTOR_MODEL', 'faulhaber')
     package_path = FindPackageShare('edu_robot')
-    parameter_file = PathJoinSubstitution([
-      './',
-      'eduard-iot2050.yaml'
-    ])
+
+    # pick corresponding parameter file
+    if motor_model == 'leison':
+      # Leison motor
+      parameter_file = PathJoinSubstitution([
+        './',
+        'eduard-iot2050-leison.yaml'
+      ])      
+    else:
+      # Faulhaber motor
+      parameter_file = PathJoinSubstitution([
+        './',
+        'eduard-iot2050-faulhaber.yaml'
+      ])
 
     eduard_iot2050 = Node(
       package='edu_robot',
