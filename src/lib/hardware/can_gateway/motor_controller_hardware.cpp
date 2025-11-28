@@ -174,8 +174,8 @@ MotorControllerHardware::MotorControllerHardware(
   , _parameter(parameter)
   , _communication_node(std::make_shared<CommunicatorNode>(executer, communicator))
   , _data{
-      { 2, 0.0 },
-      { 2, 0.0 },
+      { 0.0, 0.0 },
+      { 0.0, 0.0 },
       std::chrono::system_clock::now(),
       true,
       { }

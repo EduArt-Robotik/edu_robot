@@ -61,7 +61,7 @@
         output: 1152
       control_frequency: 16000
       timeout_ms: 500
-      encoder_inverted: true
+      encoder_inverted: false
       inverted: true
       encoder_ratio: 2048.0
       gear_ratio: 100.0
@@ -74,7 +74,7 @@
         output: 1153
       control_frequency: 16000
       timeout_ms: 500
-      encoder_inverted: true
+      encoder_inverted: false
       inverted: true
       encoder_ratio: 2048.0
       gear_ratio: 100.0
