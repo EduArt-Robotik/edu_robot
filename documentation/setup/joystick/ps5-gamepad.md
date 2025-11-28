@@ -34,7 +34,8 @@ The connection process so far should look like this. Your joystick is now recogn
 Connect the controller using the following commands and its MAC address. If needed, press the PlayStation button again when the light signals stop flashing.
 
 ```console
-$ pair XX:XX:XX:XX:XX:XX 
+$ pair XX:XX:XX:XX:XX:XX
+$ # wait a few seconds then when asked write "yes"
 $ trust XX:XX:XX:XX:XX:XX 
 $ connect XX:XX:XX:XX:XX:XX
 $ exit 

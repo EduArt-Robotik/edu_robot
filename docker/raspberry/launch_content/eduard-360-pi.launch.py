@@ -1,3 +1,5 @@
+import os
+
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.conditions import IfCondition, UnlessCondition
@@ -9,17 +11,36 @@ from launch_ros.parameter_descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
+    motor_model = os.environ.get('EDU_MOTOR_MODEL', 'faulhaber')
     package_path = FindPackageShare('edu_robot')
     parameter_file = PathJoinSubstitution([
       '.',
       'eduard-360-pi-bot.yaml'
     ])
 
+    # pick corresponding parameter file
+    if motor_model == 'leison':
+      # Leison motor
+      motor_parameter_file = PathJoinSubstitution([
+        './',
+        'motor_leison.yaml'
+      ])      
+    else:
+      # Faulhaber motor
+      motor_parameter_file = PathJoinSubstitution([
+        './',
+        'motor_faulhaber.yaml'
+      ])
+
+
     pi_bot = Node(
       package='edu_robot',
       executable='eduard-360-pi-bot',
       name='pi_bot',
-      parameters=[parameter_file],
+      parameters=[
+        parameter_file,
+        motor_parameter_file
+      ],
       namespace=EnvironmentVariable('EDU_ROBOT_NAMESPACE', default_value="eduard"),      
       # prefix=['gdbserver localhost:3000'],
       output='screen'

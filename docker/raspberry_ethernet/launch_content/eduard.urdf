@@ -1,0 +1,124 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="$(arg robot_name)">
+  <xacro:arg name="robot_name" default="eduard"/>
+  <xacro:arg name="wheel_type" default="unknown"/>
+  <xacro:arg name="hardware" default="unknown"/>
+
+  <!-- Chassis -->
+  <link name="$(arg robot_name)/base_link">
+    <visual>
+      <xacro:if value="${'red' in '$(arg robot_name)'}">
+        <origin rpy="0 0 1.570796327" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://edu_robot_control/model/mesh/eduard-red-chassis.dae"/>
+        </geometry>
+      </xacro:if>
+      <xacro:if value="${'green' in '$(arg robot_name)'}">
+        <origin rpy="0 0 1.570796327" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://edu_robot_control/model/mesh/eduard-green-chassis.dae"/>
+        </geometry>
+      </xacro:if>
+      <xacro:if value="${'blue' in '$(arg robot_name)'}">
+        <origin rpy="0 0 1.570796327" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://edu_robot_control/model/mesh/eduard-blue-chassis.dae"/>
+        </geometry>
+      </xacro:if>            
+      <xacro:unless value="${('red' in '$(arg robot_name)') or ('green' in '$(arg robot_name)') or ('blue' in '$(arg robot_name)')}">
+        <geometry>
+          <mesh filename="package://edu_robot_control/model/mesh/eduard-chassis.dae"/>
+        </geometry>
+      </xacro:unless>
+    </visual>
+  </link>
+
+  <!-- Wheels -->
+  <!-- Front Left -->
+  <link name="$(arg robot_name)/wheel_front_left">
+    <visual>
+      <geometry>
+        <xacro:if value="${'offroad' in '$(arg wheel_type)'}">
+          <mesh filename="package://edu_robot_control/model/mesh/offroad-wheel-eduard.dae"/>
+        </xacro:if>
+        <!-- use mecanum wheels as default -->
+        <xacro:unless value="${'offroad' in '$(arg wheel_type)'}">
+          <mesh filename="package://edu_robot_control/model/mesh/mecanum-wheel-left-eduard.dae"/>
+        </xacro:unless>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="$(arg robot_name)/base_to_wheel_front_left" type="continuous">
+    <origin rpy="1.570796327 0 0" xyz="0.125 0.163 0.02"/>  
+    <parent link="$(arg robot_name)/base_link"/>
+    <child link="$(arg robot_name)/wheel_front_left"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <!-- Front Right -->
+  <link name="$(arg robot_name)/wheel_front_right">
+    <visual>
+      <geometry>
+        <xacro:if value="${'offroad' in '$(arg wheel_type)'}">
+          <mesh filename="package://edu_robot_control/model/mesh/offroad-wheel-eduard.dae"/>
+        </xacro:if>
+        <!-- use mecanum wheels as default -->
+        <xacro:unless value="${'offroad' in '$(arg wheel_type)'}">
+          <mesh filename="package://edu_robot_control/model/mesh/mecanum-wheel-right-eduard.dae"/>
+        </xacro:unless>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="$(arg robot_name)/base_to_wheel_front_right" type="continuous">
+    <origin rpy="-1.570796327 0 0" xyz="0.125 -0.163 0.02"/>
+    <parent link="$(arg robot_name)/base_link"/>
+    <child link="$(arg robot_name)/wheel_front_right"/>
+    <axis xyz="0 0 1"/>    
+  </joint>
+
+  <!-- Rear Left -->
+  <link name="$(arg robot_name)/wheel_rear_left">
+    <visual>
+      <geometry>
+        <xacro:if value="${'offroad' in '$(arg wheel_type)'}">
+          <mesh filename="package://edu_robot_control/model/mesh/offroad-wheel-eduard.dae"/>
+        </xacro:if>
+        <!-- use mecanum wheels as default -->
+        <xacro:unless value="${'offroad' in '$(arg wheel_type)'}">
+          <mesh filename="package://edu_robot_control/model/mesh/mecanum-wheel-right-eduard.dae"/>
+        </xacro:unless>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="$(arg robot_name)/base_to_wheel_rear_left" type="continuous">
+    <origin rpy="1.570796327 0 0" xyz="-0.125 0.163 0.02"/>
+    <parent link="$(arg robot_name)/base_link"/>
+    <child link="$(arg robot_name)/wheel_rear_left"/>
+    <axis xyz="0 0 1"/>    
+  </joint>
+
+  <!-- Rear Right -->
+  <link name="$(arg robot_name)/wheel_rear_right">
+    <visual>
+      <geometry>
+        <xacro:if value="${'offroad' in '$(arg wheel_type)'}">
+          <mesh filename="package://edu_robot_control/model/mesh/offroad-wheel-eduard.dae"/>
+        </xacro:if>
+        <!-- use mecanum wheels as default -->
+        <xacro:unless value="${'offroad' in '$(arg wheel_type)'}">
+          <mesh filename="package://edu_robot_control/model/mesh/mecanum-wheel-left-eduard.dae"/>
+        </xacro:unless>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="$(arg robot_name)/base_to_wheel_rear_right" type="continuous">
+    <parent link="$(arg robot_name)/base_link"/>
+    <child link="$(arg robot_name)/wheel_rear_right"/>
+    <origin rpy="-1.570796327 0 0" xyz="-0.125 -0.163 0.02"/>
+    <axis xyz="0 0 1"/>    
+  </joint>
+</robot>

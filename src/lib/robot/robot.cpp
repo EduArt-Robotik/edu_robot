@@ -516,33 +516,43 @@ void Robot::processWatchDogBarking()
 
 void Robot::setLightingForMode(const RobotMode mode)
 {
-  auto search = _lightings.find("all");
+  try {
+    auto search = _lightings.find("all");
 
-  if (search == _lightings.end()) {
-    RCLCPP_WARN(get_logger(), "Can't set lighting to indicate inactive mode. Lighting \"all\" was not found.");
-    return;
+    if (search == _lightings.end()) {
+      RCLCPP_WARN(get_logger(), "Can't set lighting to indicate inactive mode. Lighting \"all\" was not found.");
+      return;
+    }
+
+    switch (mode) {
+      case RobotMode::UNCONFIGURED:
+      case RobotMode::INACTIVE:
+        search->second->setColor(Color{10, 10, 10}, Lighting::Mode::RUNNING);
+        break;
+
+      case RobotMode::REMOTE_CONTROLLED:
+        search->second->setColor(Color{34, 34, 34}, Lighting::Mode::DIM);
+        break;
+
+      case RobotMode::AUTONOMOUS:
+        search->second->setColor(Color{25, 25, 25}, Lighting::Mode::FLASH);
+        break;
+
+      case RobotMode::CHARGING:
+        search->second->setColor(Color{0, 25, 0}, Lighting::Mode::FLASH);
+        break;
+
+      default:
+        break;
+    }
   }
-
-  switch (mode) {
-    case RobotMode::UNCONFIGURED:
-    case RobotMode::INACTIVE:
-      search->second->setColor(Color{10, 10, 10}, Lighting::Mode::RUNNING);
-      break;
-
-    case RobotMode::REMOTE_CONTROLLED:
-      search->second->setColor(Color{34, 34, 34}, Lighting::Mode::DIM);
-      break;
-
-    case RobotMode::AUTONOMOUS:
-      search->second->setColor(Color{25, 25, 25}, Lighting::Mode::FLASH);
-      break;
-
-    case RobotMode::CHARGING:
-      search->second->setColor(Color{0, 25, 0}, Lighting::Mode::FLASH);
-      break;
-    
-    default:
-      break;
+  catch (HardwareError& ex) {
+    RCLCPP_ERROR_STREAM(get_logger(), "Hardware error occurred while trying to set new values for lighting \"all\"."
+                                      << " what() = " << ex.what());                                      
+  }
+  catch (std::exception& ex) {
+    RCLCPP_ERROR_STREAM(get_logger(), "Error occurred while trying to set new values for lighting \"all\"."
+                                      << " what() = " << ex.what());     
   }
 }
 

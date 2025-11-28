@@ -26,6 +26,13 @@ using namespace std::chrono_literals;
 using uart::Request;
 using uart::message::ShieldResponse;
 
+static void invert_rotation(std::vector<Rpm>& rpms)
+{
+  for (auto& rpm : rpms) {
+    rpm = rpm * -1.0;
+  }
+}
+
 MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
   const std::string& name, const Parameter& default_parameter, rclcpp::Node& ros_node)
 {
@@ -46,6 +53,8 @@ MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
     name + ".weight_low_pass_encoder", default_parameter.weight_low_pass_encoder);
   ros_node.declare_parameter<bool>(
     name + ".encoder_inverted", default_parameter.encoder_inverted);
+  ros_node.declare_parameter<bool>(
+    name + ".inverted", parameter.inverted);
 
   parameter.gear_ratio = ros_node.get_parameter(name + ".gear_ratio").as_double();
   parameter.encoder_ratio = ros_node.get_parameter(name + ".encoder_ratio").as_double();
@@ -55,6 +64,7 @@ MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
   parameter.weight_low_pass_set_point = ros_node.get_parameter(name + ".weight_low_pass_set_point").as_double();
   parameter.weight_low_pass_encoder = ros_node.get_parameter(name + ".weight_low_pass_encoder").as_double();
   parameter.encoder_inverted = ros_node.get_parameter(name + ".encoder_inverted").as_bool();
+  parameter.inverted = ros_node.get_parameter(name + ".inverted").as_bool();
 
   return parameter;
 }
@@ -66,8 +76,8 @@ MotorControllerHardware::MotorControllerHardware(
   , _parameter(parameter)
   , _communication_node(std::make_shared<CommunicatorNode>(executer, communicator))
   , _data{
-      {4, 0.0},
-      {4, 0.0},
+      {0.0, 0.0, 0.0, 0.0},
+      {0.0, 0.0, 0.0, 0.0},
       std::chrono::system_clock::now(),
       true,
       {}
@@ -75,9 +85,6 @@ MotorControllerHardware::MotorControllerHardware(
 {
   _communication_node->createRxDataEndPoint<RxDataEndPoint, ShieldResponse>(
     std::bind(&MotorControllerHardware::processRxData, this, std::placeholders::_1), 3
-  );
-  _communication_node->addSendingJob(
-    std::bind(&MotorControllerHardware::processSending, this), 100ms
   );
 }            
 
@@ -95,11 +102,18 @@ void MotorControllerHardware::processRxData(const uart::message::RxMessageDataBu
   
   // std::lock_guard lock(_data.mutex);
   // no need for mutex lock, because measured rpm are only touched here
+  // somehow the iot shield rotates the motors in opposite direction, thats why the minus is needed
   std::scoped_lock lock(_data.mutex);
   _data.measured_rpm[0] = -uart::message::ShieldResponse::rpm0(data);
   _data.measured_rpm[1] = -uart::message::ShieldResponse::rpm1(data);
   _data.measured_rpm[2] = -uart::message::ShieldResponse::rpm2(data);
   _data.measured_rpm[3] = -uart::message::ShieldResponse::rpm3(data);
+
+  // if motor rotates inverted, change direction
+  if (_parameter.inverted) {
+    invert_rotation(_data.measured_rpm);
+  }
+
   _callback_process_measurement(_data.measured_rpm, !_data.timeout);
 }
 
@@ -114,6 +128,11 @@ void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
   _data.rpm = rpm;
   _data.stamp_last_rpm_set = std::chrono::system_clock::now();
   _data.timeout = false;
+
+  // if motor rotates inverted, change direction
+  if (_parameter.inverted) {
+    invert_rotation(_data.rpm);
+  }
 }
 
 void MotorControllerHardware::processSending()
@@ -188,6 +207,15 @@ void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
     _communication_node->sendRequest(std::move(request), 100ms);
   }
 
+  try {
+    auto request = Request::make_request<uart::message::SetFlag<UART::COMMAND::SET::INVERT_ENCODER>>(
+      _parameter.encoder_inverted, 0, 0, 0);
+    _communication_node->sendRequest(std::move(request), 100ms);
+  }
+  catch (...) {
+    // only available since IoT shield firmware version 1.0.1
+  }
+
   {
     auto request = Request::make_request<uart::message::SetValueF<UART::COMMAND::SET::CONTROL_FREQUENCY>>(
       _parameter.control_frequency, 0);
@@ -200,6 +228,12 @@ void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
       static_cast<float>(_parameter.timeout.count()) * 1000.0f, 0);
     _communication_node->sendRequest(std::move(request), 100ms);
   }
+
+  // start continuous UART communication
+  // note: start after initialization to avoid mixed up commands (sending job runs on different thread!)
+  _communication_node->addSendingJob(
+    std::bind(&MotorControllerHardware::processSending, this), 100ms
+  );
 }
 
 } // end namespace iot_shield

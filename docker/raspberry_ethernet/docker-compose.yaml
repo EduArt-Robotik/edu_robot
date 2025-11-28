@@ -1,10 +1,10 @@
 version: "3.0"
 
 services:
-    eduard-iot2050:
-        image: eduartrobotik/eduart-robot:1.1.0
-        container_name: eduard-iotbot-1.1.0
-        user: root
+    eduard-ipc127e:
+        image: eduartrobotik/eduart-robot:1.0.2
+        container_name: eduard-raspberry-ethernet-1.0.2
+        user: user
         restart: always
         privileged: true
         ipc: host
@@ -14,20 +14,20 @@ services:
             - EDU_ROBOT_NAMESPACE=${EDU_ROBOT_NAMESPACE}
             - RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION}
             - EDU_MOTOR_MODEL=${EDU_MOTOR_MODEL:-faulhaber}
-            - CYCLONEDDS_URI=/home/user/ros/launch_content/cyclone_profile.xml         
+            - CYCLONEDDS_URI=/home/user/ros/launch_content/cyclone_profile.xml      
         network_mode: "host"
-        command: bash -c 'cd /home/user/ros/launch_content; ros2 launch eduard-iot2050.launch.py'
+        command: bash -c 'cd /home/user/ros/launch_content; ros2 launch eduard-raspberry-ethernet.launch.py'
         volumes:
             - './launch_content:/home/user/ros/launch_content:r'
         devices:
             - '/dev:/dev'
-        group_add:
-            - dialout
 
     eduard-robot-control:
         image: eduartrobotik/eduart-robot-control:0.5.0
-        container_name: eduard-robot-control-iotbot-0.5.0
-        user: root
+        container_name: eduard-robot-control-raspberry-ethernet-0.5.0
+        user: user
+        group_add:
+            - "102"
         restart: always
         privileged: true
         ipc: host
@@ -36,11 +36,11 @@ services:
         environment:
             - EDU_ROBOT_NAMESPACE=${EDU_ROBOT_NAMESPACE}
             - RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION}
-            - CYCLONEDDS_URI=/home/user/ros/launch_content/cyclone_profile.xml         
+            - CYCLONEDDS_URI=/home/user/ros/launch_content/cyclone_profile.xml          
         network_mode: "host"
-        command: bash -c 'cd /home/user/ros/launch_content; ros2 launch robot_remote_control_iot2050.launch.py & ros2 launch eduard_robot_description.launch.py hardware_type:=iot2050'
-        volumes:
-            - './launch_content:/home/user/ros/launch_content:r'
-            - '/dev:/dev'
+        command: bash -c 'cd /home/user/ros/launch_content; ros2 launch robot_remote_control_raspberry.launch.py & ros2 launch eduard_robot_description.launch.py'
         devices:
             - '/dev:/dev'
+        volumes:
+            - '/dev:/dev'
+            - './launch_content:/home/user/ros/launch_content:r'            
