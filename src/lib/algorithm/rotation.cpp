@@ -19,6 +19,18 @@ AnglePiToPi quaternion_to_yaw(const Eigen::Quaterniond& q)
   return quaternion_to_yaw(message::to_ros(q));
 }
 
+geometry_msgs::msg::Quaternion yaw_to_quaternion(const Angle& yaw)
+{
+  geometry_msgs::msg::Quaternion q;
+
+  q.x = 0.0;
+  q.y = 0.0;
+  q.z = std::sin(yaw * 0.5);
+  q.w = std::cos(yaw * 0.5);
+
+  return q;
+}
+
 void eliminate_yaw(geometry_msgs::msg::Quaternion &q)
 {
   const AnglePiToPi yaw = quaternion_to_yaw(q);

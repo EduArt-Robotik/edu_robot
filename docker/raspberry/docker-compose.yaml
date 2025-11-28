@@ -2,8 +2,8 @@ version: "3.0"
 
 services:
     eduard-raspberry-pi:
-        image: eduartrobotik/eduart-robot:1.0.2
-        container_name: eduard-raspberry-1.0.2
+        image: eduartrobotik/eduart-robot:1.1.0
+        container_name: eduard-raspberry-1.1.0
         user: user
         restart: always
         privileged: true
