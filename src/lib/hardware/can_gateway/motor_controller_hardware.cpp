@@ -46,6 +46,13 @@ using can::message::motor_controller::SetTicksPerRevision;
 using can::message::motor_controller::SetRpmMax;
 using can::message::motor_controller::Response;
 
+static void invert_rotation(std::vector<Rpm>& rpms)
+{
+  for (auto& rpm : rpms) {
+    rpm = rpm * -1.0;
+  }
+}
+
 MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
   const std::string& name, const Parameter& default_parameter, rclcpp::Node& ros_node)
 {
@@ -71,6 +78,7 @@ MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
     name + ".weight_low_pass_encoder", default_parameter.weight_low_pass_encoder);
   ros_node.declare_parameter<bool>(
     name + ".encoder_inverted", default_parameter.encoder_inverted);
+  ros_node.declare_parameter<bool>(name + ".inverted", default_parameter.inverted);
 
   parameter.can_id.input = ros_node.get_parameter(name + ".can_id.input").as_int();
   parameter.can_id.output = ros_node.get_parameter(name + ".can_id.output").as_int();
@@ -83,6 +91,7 @@ MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
   parameter.weight_low_pass_set_point = ros_node.get_parameter(name + ".weight_low_pass_set_point").as_double();
   parameter.weight_low_pass_encoder = ros_node.get_parameter(name + ".weight_low_pass_encoder").as_double();
   parameter.encoder_inverted = ros_node.get_parameter(name + ".encoder_inverted").as_bool();
+  parameter.inverted = ros_node.get_parameter(name + ".inverted").as_bool();
 
   return parameter;
 }
@@ -184,7 +193,12 @@ void MotorControllerHardware::processRxData(const message::RxMessageDataBuffer &
   
   // measured rpm only used here
   _data.measured_rpm[0] = Response::rpm0(data);
-  _data.measured_rpm[1] = Response::rpm1(data);  
+  _data.measured_rpm[1] = Response::rpm1(data);
+
+  if (_parameter.inverted) {
+    invert_rotation(_data.measured_rpm);
+  }
+
   _callback_process_measurement(_data.measured_rpm, Response::enabled(data));
 }
 
@@ -210,7 +224,11 @@ void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
   std::scoped_lock lock(_data.mutex);
   _data.rpm = rpm;
   _data.stamp_last_rpm_set = std::chrono::system_clock::now();
-  _data.timeout = false;  
+  _data.timeout = false;
+
+  if (_parameter.inverted) {
+    invert_rotation(_data.rpm);
+  }
 }
 
 void MotorControllerHardware::processSending()
