@@ -8,6 +8,7 @@ from select import select
 import termios
 import tty
 import math
+from enum import Enum
 
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 from launch import LaunchDescription
@@ -21,6 +22,43 @@ from edu_robot.msg import Mode, RobotStatusReport
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 from std_srvs.srv import Trigger
+
+class OrientationQuadrant(Enum):
+  I=1   #   0° ..   90°
+  II=2  #  90° ..  180°
+  III=3 # -90° .. -180°
+  IV=4  #   0° ..  -90°
+
+def euler_to_radian(euler):
+  return (euler / 180.0) * math.pi
+
+def quaternion_to_yaw(q):
+  """Convert a quaternion (geometry_msgs/Quaternion) to yaw (radians). [-pi:pi]"""
+  x, y, z, w = q.x, q.y, q.z, q.w
+  return math.atan2(2.0 * (w * z + x * y), 1.0 - 2.0 * (y * y + z * z))
+
+def yaw_to_quadrant(yaw):
+  print('yaw = ', yaw)
+  if yaw >= euler_to_radian(0.0) and yaw < euler_to_radian(90.0):
+    return OrientationQuadrant.I
+  elif yaw >= euler_to_radian(90.0) and yaw <= euler_to_radian(180.0):
+    return OrientationQuadrant.II
+  elif yaw < euler_to_radian(0.0) and yaw >= euler_to_radian(-90.0):
+    return OrientationQuadrant.IV
+  elif yaw < euler_to_radian(-90.0) and yaw > euler_to_radian(-180.0):
+    return OrientationQuadrant.III
+  else:
+    raise "yaw angle out of range"
+
+def print_quadrant(quadrant):
+  if quadrant == OrientationQuadrant.I:
+    print('quadrant I')
+  elif quadrant == OrientationQuadrant.II:
+    print('quadrant II')
+  elif quadrant == OrientationQuadrant.III:
+    print('quadrant III')
+  elif quadrant == OrientationQuadrant.IV:
+    print('quadrant IV')     
 
 @pytest.mark.launch_test
 def generate_test_description():
@@ -141,18 +179,45 @@ class SystemTestIotBotOdometry(unittest.TestCase):
     stamp_last_sent = time()
     stamp_start = stamp_last_sent
     wait_time_twist = 1.0 / 10.0 # 10 Hz
-    goal_distance = math.pi
-    slow_down_distance = 0.1
+    last_quadrant = OrientationQuadrant.I
+    velocity_abs = math.pi / 2.0
+    velocity = velocity_abs
+    through_zero = True
 
     print('Driving One Meter in X Direction')
     while rclpy.ok():
       # Rotate in 
-      position_diff = self.odom_msg.pose.pose.position.x - goal_distance
-      velocity_x = 0.3 if abs(position_diff) > slow_down_distance else 0.1
+      print('')
+      quadrant = yaw_to_quadrant(quaternion_to_yaw(self.odom_msg.pose.pose.orientation))
+
+      print('current quadrant: ')
+      print_quadrant(quadrant)
+      print('last quadrant: ')
+      print_quadrant(last_quadrant)
+
+      # Detecting zero crossing
+      if quadrant == OrientationQuadrant.I and last_quadrant == OrientationQuadrant.IV:
+        print('from IV to I')
+        through_zero = True
+      elif quadrant == OrientationQuadrant.IV and last_quadrant == OrientationQuadrant.I:
+        print('from I to IV')
+        through_zero = True
+
+      # Detecting 180° crossing
+      if quadrant == OrientationQuadrant.II and last_quadrant == OrientationQuadrant.III and through_zero:
+        print('from III to II')
+        through_zero = False
+        velocity = velocity_abs
+      elif quadrant == OrientationQuadrant.III and last_quadrant == OrientationQuadrant.II and through_zero:
+        print('from II to III')
+        through_zero = False
+        velocity = -velocity_abs
+
+      last_quadrant = quadrant
 
       # Sending Twist with 10 Hz
       if time() - stamp_last_sent > wait_time_twist:
-        twist_msg.linear.x = velocity_x
+        twist_msg.angular.z = velocity
         self.pub_twist.publish(twist_msg)
         stamp_last_sent = time()
 
