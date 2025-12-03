@@ -206,6 +206,26 @@ using SetTicksPerRevision = MessageFrame<PROTOCOL::MOTOR::COMMAND::TICKS_PER_REV
 using SetRpmMax = MessageFrame<PROTOCOL::MOTOR::COMMAND::SET_RPM_MAX,
                                element::Float>; // max rpm value for both motors
 
+using GetFirmware = GetterCommandFrame<PROTOCOL::MOTOR::COMMAND::GET_FIRMWARE>;
+
+template <Byte CommandByte, class... Elements>
+struct ParameterResponse : public message::MessageFrame<element::Command<PROTOCOL::MOTOR::COMMAND::RESPONSE_MOTOR_PARAMETER>,
+                                                        element::Command<CommandByte | 0x80>,
+                                                        Elements...>
+{ };
+
+struct Firmware : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_FIRMWARE, element::Uint16, element::Uint16, element::Uint16> {
+  inline static constexpr std::uint16_t major(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<2>(rx_buffer);
+  }
+  inline static constexpr std::uint16_t minor(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<3>(rx_buffer);
+  }
+  inline static constexpr std::uint16_t patch(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<4>(rx_buffer);
+  }
+};
+
 struct Response : public message::MessageFrame<element::Uint8, // command
                                                Rpm,            // measured rpm motor 0
                                                Rpm,            // measured rpm motor 1

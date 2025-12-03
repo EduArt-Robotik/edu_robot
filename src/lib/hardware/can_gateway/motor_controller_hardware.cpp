@@ -44,6 +44,10 @@ using can::message::motor_controller::SetCtlInputFilter;
 using can::message::motor_controller::SetGearRatio;
 using can::message::motor_controller::SetTicksPerRevision;
 using can::message::motor_controller::SetRpmMax;
+
+using can::message::motor_controller::GetFirmware;
+
+using can::message::motor_controller::Firmware;
 using can::message::motor_controller::Response;
 
 MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
@@ -87,15 +91,10 @@ MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
   return parameter;
 }
 
-void initialize_controller(
+void initialize_controller_firmware_v0_2(
   const Motor::Parameter& parameter, const MotorControllerHardware::Parameter& hardware_parameter,
   std::shared_ptr<CommunicatorNode> communication_node)
 {
-  // Initial Motor Controller Hardware
-  if (false == parameter.isValid()) {
-    throw std::invalid_argument("Given parameter are not valid. Cancel initialization of motor controller.");
-  }
-
   {
     auto request = Request::make_request<SetTimeout>(
       hardware_parameter.can_id.input, hardware_parameter.timeout.count());
@@ -158,6 +157,16 @@ void initialize_controller(
   }
 }
 
+void initialize_controller_firmware_v0_3(
+  const Motor::Parameter& parameter, const MotorControllerHardware::Parameter& hardware_parameter,
+  std::shared_ptr<CommunicatorNode> communication_node)
+{
+
+}
+
+
+
+
 MotorControllerHardware::MotorControllerHardware(
   const std::string& name, const Parameter& parameter, std::shared_ptr<Executer> executer,
   std::shared_ptr<Communicator> communicator)
@@ -190,8 +199,29 @@ void MotorControllerHardware::processRxData(const message::RxMessageDataBuffer &
 
 void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
 {
-  initialize_controller(parameter, _parameter, _communication_node);
+  // Initial Motor Controller Hardware
+  if (false == parameter.isValid()) {
+    throw std::invalid_argument("Given parameter are not valid. Cancel initialization of motor controller.");
+  }
 
+  try {
+    auto request = Request::make_request<GetFirmware>(_parameter.can_id.input, 0);
+    const auto got = _communication_node->sendRequest(std::move(request), 200ms);
+
+    const auto major = Firmware::major(got.response());
+    const auto minor = Firmware::minor(got.response());
+    const auto patch = Firmware::patch(got.response());
+
+    RCLCPP_INFO(rclcpp::get_logger("MotorControllerHardware"), "detected motor controller firmware v%u.%u.%u", major, minor, patch);
+    initialize_controller_firmware_v0_3(parameter, _parameter, _communication_node);
+  }
+  catch (...) {
+    // firmware version request failed --> fall back to v0.2.x initialization
+    RCLCPP_WARN(rclcpp::get_logger("MotorControllerHardware"), "could not get motor controller firmware version. assume v0.2.x");
+    initialize_controller_firmware_v0_2(parameter, _parameter, _communication_node);
+  }
+
+  // Starting Continuous Communication with Motor Controller
   _communication_node->addSendingJob(
     std::bind(&MotorControllerHardware::processSending, this), 50ms
   );
