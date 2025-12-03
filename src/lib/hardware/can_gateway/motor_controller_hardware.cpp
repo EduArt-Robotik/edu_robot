@@ -27,28 +27,7 @@ using namespace std::chrono_literals;
 using can::Request;
 using can::CanRxDataEndPoint;
 
-using can::message::motor_controller::Enable;
-using can::message::motor_controller::Disable;
-using can::message::motor_controller::SetTimeout;
-using can::message::motor_controller::SetInvertedEncoder;
-using can::message::motor_controller::SetPwm;
-using can::message::motor_controller::SetRpm;
-using can::message::motor_controller::SetOpenLoop;
-using can::message::motor_controller::SetClosedLoop;
-using can::message::motor_controller::SetFrequency;
-using can::message::motor_controller::SetCtlKp;
-using can::message::motor_controller::SetCtlKi;
-using can::message::motor_controller::SetCtlKd;
-using can::message::motor_controller::SetCtlAntiWindUp;
-using can::message::motor_controller::SetCtlInputFilter;
-using can::message::motor_controller::SetGearRatio;
-using can::message::motor_controller::SetTicksPerRevision;
-using can::message::motor_controller::SetRpmMax;
-
-using can::message::motor_controller::GetFirmware;
-
-using can::message::motor_controller::Firmware;
-using can::message::motor_controller::Response;
+using namespace can::message::motor_controller;
 
 MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
   const std::string& name, const Parameter& default_parameter, rclcpp::Node& ros_node)
@@ -101,58 +80,58 @@ void initialize_controller_firmware_v0_2(
     communication_node->sendRequest(std::move(request), 100ms);
   }
   {
-    auto request = Request::make_request<SetInvertedEncoder>(
+    auto request = Request::make_request<v1::SetInvertedEncoder>(
       hardware_parameter.can_id.input, hardware_parameter.encoder_inverted);
     communication_node->sendRequest(std::move(request), 100ms);
   }  
   {
     if (parameter.closed_loop) {
-      auto request = Request::make_request<SetClosedLoop>(hardware_parameter.can_id.input);
+      auto request = Request::make_request<v1::SetClosedLoop>(hardware_parameter.can_id.input);
       communication_node->sendRequest(std::move(request), 100ms);
     }
     else {
-      auto request = Request::make_request<SetOpenLoop>(hardware_parameter.can_id.input);
+      auto request = Request::make_request<v1::SetOpenLoop>(hardware_parameter.can_id.input);
       communication_node->sendRequest(std::move(request), 100ms);    
     }
   }
   {
-    auto request = Request::make_request<SetFrequency>(
+    auto request = Request::make_request<v1::SetFrequency>(
       hardware_parameter.can_id.input, hardware_parameter.control_frequency);
     communication_node->sendRequest(std::move(request), 100ms);
   }
   {
-    auto request = Request::make_request<SetCtlKp>(hardware_parameter.can_id.input, parameter.kp);
+    auto request = Request::make_request<v1::SetCtlKp>(hardware_parameter.can_id.input, parameter.kp);
     communication_node->sendRequest(std::move(request), 100ms);
   }
   {
-    auto request = Request::make_request<SetCtlKi>(hardware_parameter.can_id.input, parameter.ki);
+    auto request = Request::make_request<v1::SetCtlKi>(hardware_parameter.can_id.input, parameter.ki);
     communication_node->sendRequest(std::move(request), 100ms);
   }
   {
-    auto request = Request::make_request<SetCtlKd>(hardware_parameter.can_id.input, parameter.kd);
+    auto request = Request::make_request<v1::SetCtlKd>(hardware_parameter.can_id.input, parameter.kd);
     communication_node->sendRequest(std::move(request), 100ms);
   }
   {
-    auto request = Request::make_request<SetCtlAntiWindUp>(hardware_parameter.can_id.input, true);
+    auto request = Request::make_request<v1::SetCtlAntiWindUp>(hardware_parameter.can_id.input, true);
     communication_node->sendRequest(std::move(request), 100ms);
   }
   {
-    auto request = Request::make_request<SetCtlInputFilter>(
+    auto request = Request::make_request<v1::SetCtlInputFilter>(
       hardware_parameter.can_id.input, hardware_parameter.weight_low_pass_set_point);
     communication_node->sendRequest(std::move(request), 100ms);
   }
   {
-    auto request = Request::make_request<SetGearRatio>(
+    auto request = Request::make_request<v1::SetGearRatio>(
       hardware_parameter.can_id.input, hardware_parameter.gear_ratio);
     communication_node->sendRequest(std::move(request), 100ms);
   }
   {
-    auto request = Request::make_request<SetTicksPerRevision>(
+    auto request = Request::make_request<v1::SetTicksPerRevision>(
       hardware_parameter.can_id.input, hardware_parameter.encoder_ratio);
     communication_node->sendRequest(std::move(request), 100ms);
   }
   {
-    auto request = Request::make_request<SetRpmMax>(hardware_parameter.can_id.input, parameter.max_rpm);
+    auto request = Request::make_request<v1::SetRpmMax>(hardware_parameter.can_id.input, parameter.max_rpm);
     communication_node->sendRequest(std::move(request), 100ms);
   }
 }
@@ -205,13 +184,13 @@ void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
   }
 
   try {
-    auto request = Request::make_request_with_response<GetFirmware>(
+    auto request = Request::make_request_with_response<v2::GetFirmware>(
       _parameter.can_id.input, _parameter.can_id.output, 0);
     const auto got = _communication_node->sendRequest(std::move(request), 200ms);
 
-    const auto major = Firmware::major(got.response());
-    const auto minor = Firmware::minor(got.response());
-    const auto patch = Firmware::patch(got.response());
+    const auto major = v2::Firmware::major(got.response());
+    const auto minor = v2::Firmware::minor(got.response());
+    const auto patch = v2::Firmware::patch(got.response());
 
     RCLCPP_INFO(rclcpp::get_logger("MotorControllerHardware"), "detected motor controller firmware v%u.%u.%u", major, minor, patch);
     initialize_controller_firmware_v0_3(parameter, _parameter, _communication_node);
@@ -232,7 +211,7 @@ void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
   );
 }
 
-void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
+void MotorControllerHardware::processSetValue(const std::vector<robot::Rpm>& rpm)
 {
   if (rpm.size() < 2) {
     throw std::runtime_error("Given RPM vector is too small.");

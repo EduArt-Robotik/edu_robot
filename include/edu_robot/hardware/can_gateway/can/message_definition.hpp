@@ -177,14 +177,16 @@ using Enable = MessageFrame<PROTOCOL::MOTOR::COMMAND::ENABLE>;
 using Disable = MessageFrame<PROTOCOL::MOTOR::COMMAND::DISABLE>;
 using SetTimeout = MessageFrame<PROTOCOL::MOTOR::COMMAND::SET_TIMEOUT,
                                 element::Uint16>; // timeout in ms
-using SetInvertedEncoder = MessageFrame<PROTOCOL::MOTOR::COMMAND::INVERT_ENCODER,
-                                        element::Uint8>; // flag inverted encoder
 using SetPwm = MessageFrame<PROTOCOL::MOTOR::COMMAND::SET_PWM,
                             Pwm,  // pwm value motor 0
                             Pwm>; // pwm value motor 1
 using SetRpm = MessageFrame<PROTOCOL::MOTOR::COMMAND::SET_RPM,
                             Rpm,  // rpm value motor 0
                             Rpm>; // rpm value motor 1
+
+namespace v1 {
+using SetInvertedEncoder = MessageFrame<PROTOCOL::MOTOR::COMMAND::INVERT_ENCODER,
+                                        element::Uint8>; // flag inverted encoder
 using SetOpenLoop = MessageFrame<PROTOCOL::MOTOR::COMMAND::OPEN_LOOP>;
 using SetClosedLoop = MessageFrame<PROTOCOL::MOTOR::COMMAND::CLOSE_LOOP>;
 using SetFrequency = MessageFrame<PROTOCOL::MOTOR::COMMAND::FREQUENCY,
@@ -205,7 +207,9 @@ using SetTicksPerRevision = MessageFrame<PROTOCOL::MOTOR::COMMAND::TICKS_PER_REV
                                          element::Float>; // ticks per revision for encoder
 using SetRpmMax = MessageFrame<PROTOCOL::MOTOR::COMMAND::SET_RPM_MAX,
                                element::Float>; // max rpm value for both motors
+} // end namespace v1
 
+namespace v2 {
 using GetFirmware = GetterCommandFrame<PROTOCOL::MOTOR::COMMAND::GET_FIRMWARE>;
 
 template <Byte CommandByte, class... Elements>
@@ -216,15 +220,18 @@ struct ParameterResponse : public message::MessageFrame<element::Command<PROTOCO
 
 struct Firmware : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_FIRMWARE, element::Uint16, element::Uint16, element::Uint16> {
   inline static constexpr std::uint16_t major(const RxMessageDataBuffer& rx_buffer) {
-    return deserialize<2>(rx_buffer);
-  }
-  inline static constexpr std::uint16_t minor(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<3>(rx_buffer);
   }
-  inline static constexpr std::uint16_t patch(const RxMessageDataBuffer& rx_buffer) {
+  inline static constexpr std::uint16_t minor(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<4>(rx_buffer);
   }
+  inline static constexpr std::uint16_t patch(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<5>(rx_buffer);
+  }
 };
+
+// struct 
+} // end namespace v2
 
 struct Response : public message::MessageFrame<element::Uint8, // command
                                                Rpm,            // measured rpm motor 0
