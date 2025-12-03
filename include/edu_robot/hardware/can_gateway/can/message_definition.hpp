@@ -210,7 +210,7 @@ using GetFirmware = GetterCommandFrame<PROTOCOL::MOTOR::COMMAND::GET_FIRMWARE>;
 
 template <Byte CommandByte, class... Elements>
 struct ParameterResponse : public message::MessageFrame<element::Command<PROTOCOL::MOTOR::COMMAND::RESPONSE_MOTOR_PARAMETER>,
-                                                        element::Command<CommandByte | 0x80>,
+                                                        element::Command<CommandByte>,
                                                         Elements...>
 { };
 

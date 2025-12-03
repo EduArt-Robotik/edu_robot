@@ -276,7 +276,7 @@ struct GetterCommandFrame : public MessageFrame<element::Command<CommandByte>, E
   inline static constexpr auto makeSearchPattern(const std::uint32_t can_address) {
     using MessageType = typename MessageFrame<
       element::Command<PROTOCOL::MOTOR::COMMAND::RESPONSE_MOTOR_PARAMETER>,
-      element::Command<CommandByte | 0x80>,
+      element::Command<CommandByte>,
       Elements...
     >::MessageType;
 

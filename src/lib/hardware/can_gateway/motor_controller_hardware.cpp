@@ -205,7 +205,8 @@ void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
   }
 
   try {
-    auto request = Request::make_request<GetFirmware>(_parameter.can_id.input, 0);
+    auto request = Request::make_request_with_response<GetFirmware>(
+      _parameter.can_id.input, _parameter.can_id.output, 0);
     const auto got = _communication_node->sendRequest(std::move(request), 200ms);
 
     const auto major = Firmware::major(got.response());
@@ -217,7 +218,7 @@ void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
   }
   catch (...) {
     // firmware version request failed --> fall back to v0.2.x initialization
-    RCLCPP_WARN(rclcpp::get_logger("MotorControllerHardware"), "could not get motor controller firmware version. assume v0.2.x");
+    RCLCPP_INFO(rclcpp::get_logger("MotorControllerHardware"), "could not get motor controller firmware version. assume v0.2.x");
     initialize_controller_firmware_v0_2(parameter, _parameter, _communication_node);
   }
 
