@@ -47,7 +47,7 @@ public:
   ~MotorControllerHardware() override = default;
 
   void processSetValue(const std::vector<Rpm>& rpm) override;
-  void initialize(const Motor::Parameter& parameter) override;
+  void initialize(const std::vector<Motor::Parameter>& parameter) override;
   void enable();
   void disable();
   void reset();

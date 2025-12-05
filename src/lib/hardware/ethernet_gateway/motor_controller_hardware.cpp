@@ -34,11 +34,14 @@ using udp::message::AcknowledgedMotorRpm;
 
 template <std::size_t NUM_CHANNELS>
 void initialize_controller(
-  const Motor::Parameter& parameter, const typename MotorControllerHardware<NUM_CHANNELS>::Parameter& hardware_parameter,
+  const std::vector<Motor::Parameter>& parameter, const typename MotorControllerHardware<NUM_CHANNELS>::Parameter& hardware_parameter,
   std::shared_ptr<CommunicatorNode> communicator_node)
 {
   // Initial Motor Controller Hardware
-  if (false == parameter.isValid()) {
+  if (parameter.size() < 1) {
+    throw std::runtime_error("can motor controller hardware layer expect exactly 2 motors.");
+  }
+  if (false == parameter[0].isValid()) {
     throw std::invalid_argument("Given parameter are not valid. Cancel initialization of motor controller.");
   }
 
@@ -48,7 +51,7 @@ void initialize_controller(
       0,
       hardware_parameter.can_id,
       hardware_parameter.gear_ratio,
-      parameter.max_rpm,
+      parameter[0].max_rpm,
       hardware_parameter.threshold_stall_check,
       hardware_parameter.weight_low_pass_set_point,
       hardware_parameter.control_frequency,
@@ -80,11 +83,11 @@ void initialize_controller(
     auto request = EthernetRequest::make_request<SetPidControllerParameter>(
       0,
       hardware_parameter.can_id,
-      parameter.kp,
-      parameter.ki,
-      parameter.kd,
-     -parameter.max_rpm,
-      parameter.max_rpm,
+      parameter[0].kp,
+      parameter[0].ki,
+      parameter[0].kd,
+     -parameter[0].max_rpm,
+      parameter[0].max_rpm,
       hardware_parameter.weight_low_pass_set_point,
       true
     );
@@ -214,7 +217,7 @@ void MotorControllerHardware<2>::processSending()
 }
 
 template <>
-void MotorControllerHardware<1>::initialize(const Motor::Parameter& parameter)
+void MotorControllerHardware<1>::initialize(const std::vector<Motor::Parameter>& parameter)
 {
   initialize_controller<1>(parameter, _parameter, _communication_node);
   _communication_node->addSendingJob(
@@ -223,7 +226,7 @@ void MotorControllerHardware<1>::initialize(const Motor::Parameter& parameter)
 }
 
 template <>
-void MotorControllerHardware<2>::initialize(const Motor::Parameter& parameter)
+void MotorControllerHardware<2>::initialize(const std::vector<Motor::Parameter>& parameter)
 {
   initialize_controller<2>(parameter, _parameter, _communication_node);
   _communication_node->addSendingJob(

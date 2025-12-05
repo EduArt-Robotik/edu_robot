@@ -50,6 +50,11 @@ struct PROTOCOL {
       static constexpr Byte GET_MOTOR_GEAR_RATIO2 = GEAR_RATIO2 | 0x80;
       static constexpr Byte GET_TICKS_PER_REVISION = TICKS_PER_REVISION | 0x80;
       static constexpr Byte GET_TICKS_PER_REVISION2 = TICKS_PER_REVISION2 | 0x80;
+      static constexpr Byte GET_CTL_KP = CTL_KP | 0x80;
+      static constexpr Byte GET_CTL_KI = CTL_KI | 0x80;
+      static constexpr Byte GET_CTL_KD = CTL_KD | 0x80;
+      static constexpr Byte GET_CTL_ANTI_WIND_UP = CTL_ANTI_WIND_UP | 0x80;
+      static constexpr Byte GET_CTL_INPUT_FILTER = CTL_INPUT_FILTER | 0x80;
 
       static constexpr Byte RESPONSE_MOTOR_RPM = 0xa0;
       static constexpr Byte RESPONSE_MOTOR_POS = 0xa1;

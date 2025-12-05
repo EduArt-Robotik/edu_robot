@@ -207,10 +207,13 @@ void MotorControllerHardware::processRxData(const can::message::RxMessageDataBuf
   }
 }
 
-void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
+void MotorControllerHardware::initialize(const std::vector<Motor::Parameter>& parameter)
 {
   // Initialising Motor Controller Hardware
-  if (false == parameter.isValid()) {
+  if (parameter.size() < 1) {
+    throw std::runtime_error("can motor controller hardware layer expect exactly 1 motor.");
+  }
+  if (false == parameter[0].isValid()) {
     throw std::invalid_argument("Given parameter are not valid. Cancel initialization of motor controller.");
   }
 

@@ -34,8 +34,7 @@ public:
     bool encoder_inverted = false;
     std::chrono::milliseconds timeout = 1000ms;
   
-    float weight_low_pass_set_point = 0.2f;
-    float weight_low_pass_encoder   = 0.3f;
+    float input_filter_weight = 0.2f;
   };
 
   MotorControllerHardware(
@@ -44,7 +43,7 @@ public:
   ~MotorControllerHardware() override = default;
 
   void processSetValue(const std::vector<Rpm>& rpm) override;
-  void initialize(const Motor::Parameter& parameter) override;
+  void initialize(const std::vector<Motor::Parameter>& parameter) override;
   void enable();
   void disable();
 

@@ -282,6 +282,13 @@ struct GetterCommandFrame : public MessageFrame<element::Command<CommandByte>, E
 
     return element::impl::make_message_search_pattern<0, 1, 2>(can_address, MessageType{});
   }
+  inline static TxMessageDataBuffer serialize(
+    const std::uint32_t can_address, const typename Elements::type&... element_value)
+  {
+    return MessageFrame<element::Command<CommandByte>, Elements...>::serialize(
+      can_address, 0, element_value...
+    );
+  }  
 };
 
 template <class... Elements>

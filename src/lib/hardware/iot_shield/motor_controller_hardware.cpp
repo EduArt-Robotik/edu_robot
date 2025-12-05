@@ -158,10 +158,13 @@ void MotorControllerHardware::processSending()
   _communication_node->sendRequest(std::move(request), 100ms);
 }
 
-void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
+void MotorControllerHardware::initialize(const std::vector<Motor::Parameter>& parameter)
 {
   // Initial Motor Controller Hardware
-  if (false == parameter.isValid()) {
+  if (parameter.size() < 4) {
+    throw std::invalid_argument("Given parameter vector is empty. Cancel initialization of motor controller.");
+  }
+  if (false == parameter[0].isValid()) {
     throw std::invalid_argument("Given parameter are not valid. Cancel initialization of motor controller.");
   }
 
@@ -169,38 +172,34 @@ void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
 
   {
     auto request = Request::make_request<uart::message::SetValueF<UART::COMMAND::SET::KP>>(
-      parameter.kp, 0);
+      parameter[0].kp, 0);
     _communication_node->sendRequest(std::move(request), 100ms);
   }
-
   {
-    auto request = Request::make_request<uart::message::SetValueF<UART::COMMAND::SET::KI>>(parameter.ki, 0);
+    auto request = Request::make_request<uart::message::SetValueF<UART::COMMAND::SET::KI>>(
+      parameter[0].ki, 0);
     _communication_node->sendRequest(std::move(request), 100ms);
   }
-
   {
-    auto request = Request::make_request<uart::message::SetValueF<UART::COMMAND::SET::KD>>(parameter.kd, 0);
+    auto request = Request::make_request<uart::message::SetValueF<UART::COMMAND::SET::KD>>(
+      parameter[0].kd, 0);
     _communication_node->sendRequest(std::move(request), 100ms);
   }
-
   {
     auto request = Request::make_request<uart::message::SetValueF<UART::COMMAND::SET::SET_POINT_LOW_PASS>>(
       _parameter.weight_low_pass_set_point, 0);
     _communication_node->sendRequest(std::move(request), 100ms);
   }
-
   {
     auto request = Request::make_request<uart::message::SetValueF<UART::COMMAND::SET::ENCODER_LOW_PASS>>(
     _parameter.weight_low_pass_encoder, 0);
     _communication_node->sendRequest(std::move(request), 100ms);
   }
-
   {
     auto request = Request::make_request<uart::message::SetValueF<UART::COMMAND::SET::GEAR_RATIO>>(
       _parameter.gear_ratio, 0);
     _communication_node->sendRequest(std::move(request), 100ms);
   }
-
   {
     auto request = Request::make_request<uart::message::SetValueF<UART::COMMAND::SET::TICKS_PER_REV>>(
       _parameter.encoder_ratio, 0);

@@ -45,7 +45,7 @@ public:
   ~MotorControllerHardware() override;
 
   void processSetValue(const std::vector<Rpm>& rpm) override;
-  void initialize(const Motor::Parameter& parameter) override;
+  void initialize(const std::vector<Motor::Parameter>& parameter) override;
 
   static Parameter get_parameter(const std::string& name, const Parameter& default_parameter, rclcpp::Node& ros_node);
 
