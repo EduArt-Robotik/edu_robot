@@ -28,8 +28,7 @@ def generate_launch_description():
 
     # get motor model
     motor_model_arg = DeclareLaunchArgument(
-      'motor_model',
-      default_value='faulhaber',
+      'motor_model', default_value=os.getenv('EDU_MOTOR_MODEL', default='faulhaber'),
       description='Motor model to use (faulhaber or leison)'
     )
 
