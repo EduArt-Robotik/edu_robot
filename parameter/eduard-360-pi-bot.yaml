@@ -48,7 +48,24 @@
         x: 0.25
         y: 0.3199999928474426
       wheel_diameter: 0.17000000178813934
-      
+
+    # Motor Controller
+    motor_controller_0:
+      # motor_a and motor_b are connected to this controller
+      can_id:
+        # DIP switches set to 0
+        input: 1024
+        output: 1152
+      control_frequency: 16000
+
+    motor_controller_1:
+      # motor_c and motor_d are connected to this controller
+      can_id:
+        # DIP switches set to 1
+        input: 1025
+        output: 1153
+      control_frequency: 16000
+
     # TOF Sensors
     tof_sensor_ring_left:
       can_id:

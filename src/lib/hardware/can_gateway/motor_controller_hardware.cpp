@@ -134,9 +134,9 @@ void initialize_controller_firmware_v0_2(
   handler.set_parameter<SetTimeout>(hardware_parameter.timeout.count());
   handler.set_parameter<v1::SetInvertedEncoder>(hardware_parameter.encoder_inverted);
   handler.set_parameter<SetFrequency>(hardware_parameter.control_frequency);
-  handler.set_parameter<v1::SetCtlKp>(parameter[0].kp);
-  handler.set_parameter<v1::SetCtlKi>(parameter[0].ki);
-  handler.set_parameter<v1::SetCtlKd>(parameter[0].kd);
+  handler.set_parameter<v1::SetCtlKp>(parameter[0].pid.kp);
+  handler.set_parameter<v1::SetCtlKi>(parameter[0].pid.ki);
+  handler.set_parameter<v1::SetCtlKd>(parameter[0].pid.kd);
   handler.set_parameter<v1::SetCtlAntiWindUp>(true);
   handler.set_parameter<v1::SetCtlInputFilter>(hardware_parameter.input_filter_weight);
   handler.set_parameter<v1::SetGearRatio>(hardware_parameter.gear_ratio);
@@ -169,9 +169,9 @@ void initialize_controller_firmware_v0_3(
     handler.set_channel_parameter<v2::SetCtlInputFilter>(hardware_parameter.input_filter_weight, channel);
     handler.set_channel_parameter<v2::SetClosedLoop>(parameter[channel].closed_loop, channel);
     handler.set_channel_parameter<v2::SetRpmMax>(parameter[channel].max_rpm, channel);
-    handler.set_channel_parameter<v2::SetCtlKp>(parameter[channel].kp, channel);
-    handler.set_channel_parameter<v2::SetCtlKi>(parameter[channel].ki, channel);
-    handler.set_channel_parameter<v2::SetCtlKd>(parameter[channel].kd, channel);
+    handler.set_channel_parameter<v2::SetCtlKp>(parameter[channel].pid.kp, channel);
+    handler.set_channel_parameter<v2::SetCtlKi>(parameter[channel].pid.ki, channel);
+    handler.set_channel_parameter<v2::SetCtlKd>(parameter[channel].pid.kd, channel);
   }
 
   // checking set parameter by reading them back
@@ -184,9 +184,9 @@ void initialize_controller_firmware_v0_3(
     handler.valid_channel_parameter<v2::GetCtlInputFilter, v2::CtlInputFilter>(hardware_parameter.input_filter_weight, channel);
     handler.valid_channel_parameter<v2::GetClosedLoop, v2::ClosedLoop>(parameter[channel].closed_loop, channel);
     handler.valid_channel_parameter<v2::GetRpmMax, v2::RpmMax>(parameter[channel].max_rpm, channel);
-    handler.valid_channel_parameter<v2::GetCtlKp, v2::CtlKp>(parameter[channel].kp, channel);
-    handler.valid_channel_parameter<v2::GetCtlKi, v2::CtlKi>(parameter[channel].ki, channel);
-    handler.valid_channel_parameter<v2::GetCtlKd, v2::CtlKd>(parameter[channel].kd, channel);
+    handler.valid_channel_parameter<v2::GetCtlKp, v2::CtlKp>(parameter[channel].pid.kp, channel);
+    handler.valid_channel_parameter<v2::GetCtlKi, v2::CtlKi>(parameter[channel].pid.ki, channel);
+    handler.valid_channel_parameter<v2::GetCtlKd, v2::CtlKd>(parameter[channel].pid.kd, channel);
   }
 }
 

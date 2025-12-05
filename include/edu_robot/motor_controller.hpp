@@ -110,6 +110,7 @@ private:
   std::string _name;
   std::size_t _id;
   std::vector<Motor> _motor;
+  std::vector<Rpm> _set_rpm;
   std::vector<Rpm> _measured_rpm;
   std::shared_ptr<HardwareInterface> _hardware_interface;
 

@@ -12,12 +12,23 @@
 namespace eduart {
 namespace robot {
 
+// invert rpm values based on motor inversion parameter
+static void invert_rpm_or_not(const std::vector<Motor>& motor, std::vector<Rpm>& rpm)
+{
+  for (std::size_t i = 0; i < motor.size(); ++i) {
+    if (motor[i].parameter().inverted) {
+      rpm[i] = -rpm[i];
+    }
+  }
+}
+
 MotorController::MotorController(
   const std::string& name, const std::size_t id, std::vector<Motor>&& motors, rclcpp::Node& ros_node,
     std::shared_ptr<HardwareInterface> hardware_interface)
   : _name(name)
   , _id(id)
   , _motor(motors)
+  , _set_rpm(_motor.size(), 0.0)
   , _measured_rpm(_motor.size(), 0.0)
   , _hardware_interface(hardware_interface)
   , _clock(ros_node.get_clock())
@@ -46,17 +57,22 @@ void MotorController::setRpm(const std::vector<Rpm>& rpm)
   _last_processing = now;
 
   // set rpm
+  _set_rpm = rpm;
+  invert_rpm_or_not(_motor, _set_rpm);
   _hardware_interface->processSetValue(rpm);
 }
 
+// Process measurement data from hardware interface. Maybe it is called from another thread.
 void MotorController::processMeasurementData(const std::vector<Rpm>& rpm, const bool enabled_flag)
 {
   std::lock_guard guard(_mutex_access_data);
   bool all_enabled = true;
   const auto now = _clock->now();
+  _measured_rpm = rpm;
+  invert_rpm_or_not(_motor, _measured_rpm);
 
   for (std::size_t i = 0; i < _motor.size(); ++i) {
-    _motor[i].processMeasurementData(rpm[i], enabled_flag, now);
+    _motor[i].processMeasurementData(_measured_rpm[i], enabled_flag, now);
     _measured_rpm[i] = _motor[i].measuredRpm();
     all_enabled &= _motor[i].isEnabled();
   }

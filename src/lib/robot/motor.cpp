@@ -10,21 +10,42 @@ Motor::Parameter Motor::get_parameter(
   std::replace(prefix.begin(), prefix.end(), '/', '.');
   Motor::Parameter parameter;
 
+  // parameter declaration
+  // general motor parameters
   ros_node.declare_parameter<bool>(prefix + ".closed_loop", default_parameter.closed_loop);
+  ros_node.declare_parameter<bool>(prefix + ".inverted", default_parameter.inverted);
   ros_node.declare_parameter<int>(prefix + ".index", 0);
   ros_node.declare_parameter<float>(name + ".max_rpm", default_parameter.max_rpm);
+  ros_node.declare_parameter<float>(prefix + ".gear_ratio", default_parameter.gear_ratio);
 
-  ros_node.declare_parameter<float>(prefix + ".pid.kp", default_parameter.kp);
-  ros_node.declare_parameter<float>(prefix + ".pid.ki", default_parameter.ki);
-  ros_node.declare_parameter<float>(prefix + ".pid.kd", default_parameter.kd);
+  // pid parameters
+  ros_node.declare_parameter<float>(prefix + ".pid.kp", default_parameter.pid.kp);
+  ros_node.declare_parameter<float>(prefix + ".pid.ki", default_parameter.pid.ki);
+  ros_node.declare_parameter<float>(prefix + ".pid.kd", default_parameter.pid.kd);
   
+  // encoder parameters
+  ros_node.declare_parameter<bool>(
+    prefix + ".encoder.inverted", default_parameter.encoder.inverted);
+  ros_node.declare_parameter<int>(
+    prefix + ".encoder.ticks_per_revolution", default_parameter.encoder.ticks_per_revolution);
+  
+  // getting parameter values
+  // general motor parameters
   parameter.closed_loop = ros_node.get_parameter(prefix + ".closed_loop").as_bool();
+  parameter.inverted = ros_node.get_parameter(prefix + ".inverted").as_bool();
   parameter.index = ros_node.get_parameter(prefix + ".index").as_int();
   parameter.max_rpm = ros_node.get_parameter(name + ".max_rpm").as_double();
+  parameter.gear_ratio = ros_node.get_parameter(prefix + ".gear_ratio").as_double();
 
-  parameter.kp = ros_node.get_parameter(prefix + ".pid.kp").as_double();
-  parameter.ki = ros_node.get_parameter(prefix + ".pid.ki").as_double();
-  parameter.kd = ros_node.get_parameter(prefix + ".pid.kd").as_double();
+  // pid parameters
+  parameter.pid.kp = ros_node.get_parameter(prefix + ".pid.kp").as_double();
+  parameter.pid.ki = ros_node.get_parameter(prefix + ".pid.ki").as_double();
+  parameter.pid.kd = ros_node.get_parameter(prefix + ".pid.kd").as_double();
+
+  // encoder parameters
+  parameter.encoder.inverted = ros_node.get_parameter(prefix + ".encoder.inverted").as_bool();
+  parameter.encoder.ticks_per_revolution = static_cast<std::uint32_t>(
+    ros_node.get_parameter(prefix + ".encoder.ticks_per_revolution").as_int());
 
   return parameter;
 }

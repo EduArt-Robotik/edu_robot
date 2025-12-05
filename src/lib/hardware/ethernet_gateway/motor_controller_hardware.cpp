@@ -83,9 +83,9 @@ void initialize_controller(
     auto request = EthernetRequest::make_request<SetPidControllerParameter>(
       0,
       hardware_parameter.can_id,
-      parameter[0].kp,
-      parameter[0].ki,
-      parameter[0].kd,
+      parameter[0].pid.kp,
+      parameter[0].pid.ki,
+      parameter[0].pid.kd,
      -parameter[0].max_rpm,
       parameter[0].max_rpm,
       hardware_parameter.weight_low_pass_set_point,

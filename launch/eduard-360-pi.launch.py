@@ -1,32 +1,15 @@
 import os
 
 from launch import LaunchDescription, LaunchContext
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction, LogInfo
 from launch.conditions import IfCondition, UnlessCondition
-from launch.substitutions import Command, LaunchConfiguration, EnvironmentVariable, PathJoinSubstitution
+from launch.substitutions import Command, LaunchConfiguration, EnvironmentVariable, PathJoinSubstitution, PythonExpression
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
 
-def get_motor_parameter_file(context: LaunchContext, motor_model_arg: LaunchConfiguration) -> str:
-    motor_model = motor_model_arg.perform(context)
-    print("Using motor model: ", motor_model)
-    if motor_model == 'leison':
-        # Leison motor
-        return PathJoinSubstitution([
-            FindPackageShare('edu_robot'),
-            'parameter',
-            'eduard_raspberry_motor_leison.yaml'
-        ]).perform(context)
-    else:
-        # Faulhaber motor
-        return PathJoinSubstitution([
-            FindPackageShare('edu_robot'),
-            'parameter',
-            'eduard_raspberry_motor_faulhaber.yaml'
-        ]).perform(context)
 
 def generate_launch_description():
     # get general parameters
@@ -51,13 +34,19 @@ def generate_launch_description():
     )
 
     # Eduard 360 Pi Bot Node
+    motor_parameter_file_path = PathJoinSubstitution([
+      package_path,
+      'parameter',
+      PythonExpression(["'motor_faulhaber.yaml' if '", LaunchConfiguration('motor_model'), "' == 'faulhaber' else 'motor_leison.yaml'"])
+    ])
+
     pi_bot = Node(
       package='edu_robot',
       executable='eduard-360-pi-bot',
       name='pi_bot',
       parameters=[
         parameter_file,
-        OpaqueFunction(function=get_motor_parameter_file, args=[LaunchConfiguration('motor_model')])
+        motor_parameter_file_path
       ],
       namespace=edu_robot_namespace,      
       # prefix=['gdbserver localhost:3000'],
@@ -77,6 +66,7 @@ def generate_launch_description():
     return LaunchDescription([
       edu_robot_namespace_arg,
       motor_model_arg,
+      LogInfo(msg=["Using motor parameter file: ", motor_parameter_file_path]),
       pi_bot,
       aggregator,
     ])
