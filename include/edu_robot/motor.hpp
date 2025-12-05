@@ -44,8 +44,8 @@ public:
     } pid;
 
     struct Encoder {
-      bool inverted = false;                     // encoder direction inverted
-      std::uint32_t ticks_per_revolution = 4096; // encoder ticks per revolution, four times encoder CPR
+      bool inverted = false;      // encoder direction inverted
+      std::uint32_t ratio = 4096; // encoder ticks per revolution, four times encoder CPR
     } encoder;
 
     bool isValid() const {

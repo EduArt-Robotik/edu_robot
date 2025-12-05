@@ -27,7 +27,7 @@ Motor::Parameter Motor::get_parameter(
   ros_node.declare_parameter<bool>(
     prefix + ".encoder.inverted", default_parameter.encoder.inverted);
   ros_node.declare_parameter<int>(
-    prefix + ".encoder.ticks_per_revolution", default_parameter.encoder.ticks_per_revolution);
+    prefix + ".encoder.ratio", default_parameter.encoder.ratio);
   
   // getting parameter values
   // general motor parameters
@@ -44,8 +44,8 @@ Motor::Parameter Motor::get_parameter(
 
   // encoder parameters
   parameter.encoder.inverted = ros_node.get_parameter(prefix + ".encoder.inverted").as_bool();
-  parameter.encoder.ticks_per_revolution = static_cast<std::uint32_t>(
-    ros_node.get_parameter(prefix + ".encoder.ticks_per_revolution").as_int());
+  parameter.encoder.ratio = static_cast<std::uint32_t>(
+    ros_node.get_parameter(prefix + ".encoder.ratio").as_int());
 
   return parameter;
 }

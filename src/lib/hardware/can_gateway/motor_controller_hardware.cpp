@@ -96,31 +96,18 @@ MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
     name + ".can_id.input", default_parameter.can_id.input);
   ros_node.declare_parameter<int>(
     name + ".can_id.output", default_parameter.can_id.output);
-
-  ros_node.declare_parameter<float>(
-    name + ".gear_ratio", default_parameter.gear_ratio);
-  ros_node.declare_parameter<float>(
-    name + ".encoder_ratio", default_parameter.encoder_ratio);
   ros_node.declare_parameter<int>(
     name + ".control_frequency", default_parameter.control_frequency);
   ros_node.declare_parameter<int>(
     name + ".timeout_ms", default_parameter.timeout.count());  
-
   ros_node.declare_parameter<float>(
     name + ".input_filter_weight", default_parameter.input_filter_weight);
-  ros_node.declare_parameter<bool>(
-    name + ".encoder_inverted", default_parameter.encoder_inverted);
 
   parameter.can_id.input = ros_node.get_parameter(name + ".can_id.input").as_int();
   parameter.can_id.output = ros_node.get_parameter(name + ".can_id.output").as_int();
-
-  parameter.gear_ratio = ros_node.get_parameter(name + ".gear_ratio").as_double();
-  parameter.encoder_ratio = ros_node.get_parameter(name + ".encoder_ratio").as_double();
   parameter.control_frequency = ros_node.get_parameter(name + ".control_frequency").as_int();
   parameter.timeout = std::chrono::milliseconds(ros_node.get_parameter(name + ".timeout_ms").as_int());
-
   parameter.input_filter_weight = ros_node.get_parameter(name + ".input_filter_weight").as_double();
-  parameter.encoder_inverted = ros_node.get_parameter(name + ".encoder_inverted").as_bool();
 
   return parameter;
 }
@@ -132,15 +119,15 @@ void initialize_controller_firmware_v0_2(
   parameter_handler handler(hardware_parameter, communication_node);
 
   handler.set_parameter<SetTimeout>(hardware_parameter.timeout.count());
-  handler.set_parameter<v1::SetInvertedEncoder>(hardware_parameter.encoder_inverted);
+  handler.set_parameter<v1::SetInvertedEncoder>(parameter[0].encoder.inverted);
   handler.set_parameter<SetFrequency>(hardware_parameter.control_frequency);
   handler.set_parameter<v1::SetCtlKp>(parameter[0].pid.kp);
   handler.set_parameter<v1::SetCtlKi>(parameter[0].pid.ki);
   handler.set_parameter<v1::SetCtlKd>(parameter[0].pid.kd);
   handler.set_parameter<v1::SetCtlAntiWindUp>(true);
   handler.set_parameter<v1::SetCtlInputFilter>(hardware_parameter.input_filter_weight);
-  handler.set_parameter<v1::SetGearRatio>(hardware_parameter.gear_ratio);
-  handler.set_parameter<v1::SetTicksPerRevision>(hardware_parameter.encoder_ratio);
+  handler.set_parameter<v1::SetGearRatio>(parameter[0].gear_ratio);
+  handler.set_parameter<v1::SetTicksPerRevision>(parameter[0].encoder.ratio);
   handler.set_parameter<v1::SetRpmMax>(parameter[0].max_rpm);
 
   if (parameter[0].closed_loop) {
@@ -163,9 +150,9 @@ void initialize_controller_firmware_v0_3(
   handler.set_parameter<SetTimeout>(hardware_parameter.timeout.count());
 
   for (std::size_t channel = 0; channel < parameter.size(); ++channel) {
-    handler.set_channel_parameter<v2::SetGearRatio>(hardware_parameter.gear_ratio, channel);
-    handler.set_channel_parameter<v2::SetTicksPerRevision>(hardware_parameter.encoder_ratio, channel);
-    handler.set_channel_parameter<v2::SetInvertedEncoder>(hardware_parameter.encoder_inverted, channel);
+    handler.set_channel_parameter<v2::SetGearRatio>(parameter[channel].gear_ratio, channel);
+    handler.set_channel_parameter<v2::SetTicksPerRevision>(parameter[channel].encoder.ratio, channel);
+    handler.set_channel_parameter<v2::SetInvertedEncoder>(parameter[channel].encoder.inverted, channel);
     handler.set_channel_parameter<v2::SetCtlInputFilter>(hardware_parameter.input_filter_weight, channel);
     handler.set_channel_parameter<v2::SetClosedLoop>(parameter[channel].closed_loop, channel);
     handler.set_channel_parameter<v2::SetRpmMax>(parameter[channel].max_rpm, channel);
@@ -178,9 +165,9 @@ void initialize_controller_firmware_v0_3(
   handler.valid_parameter<v2::GetTimeout, v2::Timeout>(hardware_parameter.timeout.count());
 
   for (std::size_t channel = 0; channel < parameter.size(); ++channel) {
-    handler.valid_channel_parameter<v2::GetGearRatio, v2::GearRatio>(hardware_parameter.gear_ratio, channel);
-    handler.valid_channel_parameter<v2::GetTicksPerRevision, v2::TicksPerRevision>(hardware_parameter.encoder_ratio, channel);
-    handler.valid_channel_parameter<v2::GetInvertedEncoder, v2::InvertedEncoder>(hardware_parameter.encoder_inverted, channel);
+    handler.valid_channel_parameter<v2::GetGearRatio, v2::GearRatio>(parameter[channel].gear_ratio, channel);
+    handler.valid_channel_parameter<v2::GetTicksPerRevision, v2::TicksPerRevision>(parameter[channel].encoder.ratio, channel);
+    handler.valid_channel_parameter<v2::GetInvertedEncoder, v2::InvertedEncoder>(parameter[channel].encoder.inverted, channel);
     handler.valid_channel_parameter<v2::GetCtlInputFilter, v2::CtlInputFilter>(hardware_parameter.input_filter_weight, channel);
     handler.valid_channel_parameter<v2::GetClosedLoop, v2::ClosedLoop>(parameter[channel].closed_loop, channel);
     handler.valid_channel_parameter<v2::GetRpmMax, v2::RpmMax>(parameter[channel].max_rpm, channel);

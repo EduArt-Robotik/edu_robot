@@ -27,13 +27,8 @@ class MotorControllerHardware : public MotorController::HardwareInterface
 {
 public:
   struct Parameter {
-    float gear_ratio = 89.0f;
-    float encoder_ratio = 2048.0f;
-    float threshold_stall_check = 0.25f;
     std::uint32_t control_frequency = 16000;
     std::chrono::milliseconds timeout = 1000ms;
-    bool encoder_inverted = false;               // encoder measures rotation inverted
-    bool inverted = false;                       // motor rotates inverted
     
     float weight_low_pass_set_point = 0.2f;
     float weight_low_pass_encoder   = 0.3f;    

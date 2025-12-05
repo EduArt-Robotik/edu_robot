@@ -25,16 +25,13 @@ class MotorControllerHardware : public MotorController::HardwareInterface
 public:
   struct Parameter {
     std::uint8_t can_id = 0;
-    float gear_ratio = 89.0f;
-    float encoder_ratio = 2048.0f;
-    float threshold_stall_check = 0.25f;
     std::uint32_t control_frequency = 16000;
-    bool encoder_inverted = false;
-    bool inverted = false;
     std::chrono::milliseconds timeout = 1000ms;
   
-    float weight_low_pass_set_point = 0.2f;
-    float weight_low_pass_encoder   = 0.3f;    
+    float input_filter_weight = 0.5f;
+    float threshold_stall_check = 0.25f; // not used in ethernet gateway
+
+    bool isValid() const { return input_filter_weight >= 0.0f && input_filter_weight <= 1.0f; }
   };
 
   MotorControllerHardware(
@@ -112,12 +109,6 @@ public:
 private:
   void processRxData(const message::RxMessageDataBuffer& data);
   void processSending();
-  void invertRotation(std::vector<Rpm>& rpms)
-  {
-    for (auto& rpm : rpms) {
-      rpm = rpm * -1.0;
-    }
-  }
 
   const Parameter _parameter;
   std::shared_ptr<CommunicatorNode> _communication_node;

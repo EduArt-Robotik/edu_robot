@@ -165,13 +165,11 @@ MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
   ros_node.declare_parameter<float>(
     motor_controller_name + ".low_pass_set_point.filter_weight",
     default_parameter.low_pass_set_point.filter_weight);
-  ros_node.declare_parameter<float>(motor_controller_name + ".gear_ratio", default_parameter.gear_ratio);
 
   parameter.set_parameter = ros_node.get_parameter(motor_controller_name + ".set_parameter").as_bool();
   parameter.can_id = ros_node.get_parameter(motor_controller_name + ".can_id").as_int();
   parameter.low_pass_set_point.filter_weight = ros_node.get_parameter(
     motor_controller_name + ".low_pass_set_point.filter_weight").as_double();
-  parameter.gear_ratio = ros_node.get_parameter(motor_controller_name + ".gear_ratio").as_double();
 
   return parameter;
 }
@@ -189,6 +187,7 @@ MotorControllerHardware::MotorControllerHardware(
       true,
       { },
       algorithm::LowPassFiler<float>(parameter.low_pass_set_point),
+      2.127659574,
       std::chrono::system_clock::now(),
       0,
       0
@@ -243,6 +242,7 @@ void MotorControllerHardware::initialize(const std::vector<Motor::Parameter>& pa
 
     _processing_data.last_position = AcknowledgedVelocity::position(got.response());
     _processing_data.stamp_last_received = std::chrono::system_clock::now();
+    _processing_data.gear_ratio = parameter[0].gear_ratio;
   }
 
   // Start Processing
@@ -288,7 +288,7 @@ void MotorControllerHardware::processSending()
   }
 
   // low pass filter input set point
-  _processing_data.low_pass_set_point(-_processing_data.rpm[0].rps() * 10.0f * _parameter.gear_ratio);
+  _processing_data.low_pass_set_point(-_processing_data.rpm[0].rps() * 10.0f * _processing_data.gear_ratio);
 
   // sending velocity
   auto request = Request::make_request<SetVelocity>(
@@ -313,7 +313,7 @@ void MotorControllerHardware::processSending()
 
   // Measured rpm value has to be negated, because motor is turing left with positive rpm value.
   std::scoped_lock lock(_processing_data.mutex);
-  _processing_data.measured_rpm[0] = Rpm::fromRps(rotation_per_seconds / _parameter.gear_ratio) * -1.0f;
+  _processing_data.measured_rpm[0] = Rpm::fromRps(rotation_per_seconds / _processing_data.gear_ratio) * -1.0f;
   _processing_data.last_position = current_position;
   _processing_data.stamp_last_received = stamp_received;
 
