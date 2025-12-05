@@ -299,6 +299,12 @@ struct InvertedEncoder : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_
   inline static constexpr bool isInverted(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<3>(rx_buffer) != 0;
   }
+  inline static constexpr bool value(const RxMessageDataBuffer& rx_buffer) {
+    return isInverted(rx_buffer);
+  }
+  inline static constexpr const char* name() {
+    return "inverted encoder";
+  }
 };
 
 struct ClosedLoop : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_CLOSED_LOOP,
@@ -310,6 +316,12 @@ struct ClosedLoop : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_CLOSE
   }
   inline static constexpr bool isClosedLoop(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<3>(rx_buffer) != 0;
+  }
+  inline static constexpr bool value(const RxMessageDataBuffer& rx_buffer) {
+    return isClosedLoop(rx_buffer);
+  }
+  inline static constexpr const char* name() {
+    return "closed loop";
   }
 };
 
@@ -323,6 +335,12 @@ struct CtlKp : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_CTL_KP,
   inline static constexpr float kp(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<3>(rx_buffer);
   }
+  inline static constexpr float value(const RxMessageDataBuffer& rx_buffer) {
+    return kp(rx_buffer);
+  }
+  inline static constexpr const char* name() {
+    return "controller kp";
+  }
 };
 
 struct CtlKi : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_CTL_KI,
@@ -334,6 +352,12 @@ struct CtlKi : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_CTL_KI,
   }
   inline static constexpr float ki(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<3>(rx_buffer);
+  }
+  inline static constexpr float value(const RxMessageDataBuffer& rx_buffer) {
+    return ki(rx_buffer);
+  }
+  inline static constexpr const char* name() {
+    return "controller ki";
   }
 };
 
@@ -347,6 +371,12 @@ struct CtlKd : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_CTL_KD,
   inline static constexpr float kd(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<3>(rx_buffer);
   }
+  inline static constexpr float value(const RxMessageDataBuffer& rx_buffer) {
+    return kd(rx_buffer);
+  }
+  inline static constexpr const char* name() {
+    return "controller kd";
+  }
 };
 
 struct CtlAntiWindUp : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_CTL_ANTI_WIND_UP,
@@ -358,6 +388,12 @@ struct CtlAntiWindUp : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_CT
   }
   inline static constexpr bool isAntiWindUpEnabled(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<3>(rx_buffer) != 0;
+  }
+  inline static constexpr bool value(const RxMessageDataBuffer& rx_buffer) {
+    return isAntiWindUpEnabled(rx_buffer);
+  }
+  inline static constexpr const char* name() {
+    return "controller anti wind up";
   }
 };
 
@@ -371,6 +407,12 @@ struct CtlInputFilter : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_C
   inline static constexpr float weight(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<3>(rx_buffer);
   }
+  inline static constexpr float value(const RxMessageDataBuffer& rx_buffer) {
+    return weight(rx_buffer);
+  }
+  inline static constexpr const char* name() {
+    return "controller input filter weight";
+  }
 };
 
 struct GearRatio : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_MOTOR_GEAR_RATIO,
@@ -382,6 +424,12 @@ struct GearRatio : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_MOTOR_
   }
   inline static constexpr float gearRatio(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<3>(rx_buffer);
+  }
+  inline static constexpr float value(const RxMessageDataBuffer& rx_buffer) {
+    return gearRatio(rx_buffer);
+  }
+  inline static constexpr const char* name() {
+    return "gear ratio";
   }
 };
 
@@ -395,6 +443,12 @@ struct TicksPerRevision : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET
   inline static constexpr float ticksPerRevision(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<3>(rx_buffer);
   }
+  inline static constexpr float value(const RxMessageDataBuffer& rx_buffer) {
+    return ticksPerRevision(rx_buffer);
+  }
+  inline static constexpr const char* name() {
+    return "ticks per revision";
+  }
 };
 
 struct RpmMax : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_RPM_MAX,
@@ -407,6 +461,12 @@ struct RpmMax : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_RPM_MAX,
   inline static constexpr float maxRpm(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<3>(rx_buffer);
   }
+  inline static constexpr float value(const RxMessageDataBuffer& rx_buffer) {
+    return maxRpm(rx_buffer);
+  }
+  inline static constexpr const char* name() {
+    return "max rpm";
+  }
 };
 
 struct Timeout : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_TIMEOUT,
@@ -414,6 +474,12 @@ struct Timeout : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_TIMEOUT,
 {
   inline static constexpr std::uint16_t timeoutMs(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<2>(rx_buffer);
+  }
+  inline static constexpr std::uint16_t value(const RxMessageDataBuffer& rx_buffer) {
+    return timeoutMs(rx_buffer);
+  }
+  inline static constexpr const char* name() {
+    return "timeout";
   }
 };
 
