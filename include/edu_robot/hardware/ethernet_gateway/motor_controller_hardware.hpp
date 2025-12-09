@@ -60,11 +60,6 @@ public:
     _data.rpm = rpm;
     _data.stamp_last_rpm_set = std::chrono::system_clock::now();
     _data.timeout = false;
-    
-    // if motor rotates inverted, change direction    
-    if (_parameter.inverted) {
-      invertRotation(_data.rpm);
-    }
   }
   void initialize(const std::vector<Motor::Parameter>& parameter) override;
 
@@ -73,35 +68,17 @@ public:
     MotorControllerHardware::Parameter parameter;
 
     ros_node.declare_parameter<int>(name + ".can_id", default_parameter.can_id);
-
-    ros_node.declare_parameter<float>(
-      name + ".gear_ratio", default_parameter.gear_ratio);
-    ros_node.declare_parameter<float>(
-      name + ".encoder_ratio", default_parameter.encoder_ratio);
     ros_node.declare_parameter<int>(
       name + ".control_frequency", default_parameter.control_frequency);
     ros_node.declare_parameter<int>(
       name + ".timeout_ms", default_parameter.timeout.count());
-
     ros_node.declare_parameter<float>(
-      name + ".weight_low_pass_set_point", default_parameter.weight_low_pass_set_point);
-    ros_node.declare_parameter<float>(
-      name + ".weight_low_pass_encoder", default_parameter.weight_low_pass_encoder);
-    ros_node.declare_parameter<bool>(
-      name + ".encoder_inverted", default_parameter.encoder_inverted);
-    ros_node.declare_parameter<bool>(name + ".inverted", parameter.inverted);
+      name + ".input_filter_weight", default_parameter.input_filter_weight);
 
     parameter.can_id = ros_node.get_parameter(name + ".can_id").as_int();
-
-    parameter.gear_ratio = ros_node.get_parameter(name + ".gear_ratio").as_double();
-    parameter.encoder_ratio = ros_node.get_parameter(name + ".encoder_ratio").as_double();
     parameter.control_frequency = ros_node.get_parameter(name + ".control_frequency").as_int();
     parameter.timeout = std::chrono::milliseconds(ros_node.get_parameter(name + ".timeout_ms").as_int());
-
-    parameter.weight_low_pass_set_point = ros_node.get_parameter(name + ".weight_low_pass_set_point").as_double();
-    parameter.weight_low_pass_encoder = ros_node.get_parameter(name + ".weight_low_pass_encoder").as_double();
-    parameter.encoder_inverted = ros_node.get_parameter(name + ".encoder_inverted").as_bool();
-    parameter.inverted = ros_node.get_parameter(name + ".inverted").as_bool();
+    parameter.input_filter_weight = ros_node.get_parameter(name + ".input_filter_weight").as_double();
 
     return parameter;    
   }

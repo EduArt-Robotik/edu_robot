@@ -26,13 +26,6 @@ using namespace std::chrono_literals;
 using uart::Request;
 using uart::message::ShieldResponse;
 
-static void invert_rotation(std::vector<Rpm>& rpms)
-{
-  for (auto& rpm : rpms) {
-    rpm = rpm * -1.0;
-  }
-}
-
 MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
   const std::string& name, const Parameter& default_parameter, rclcpp::Node& ros_node)
 {
