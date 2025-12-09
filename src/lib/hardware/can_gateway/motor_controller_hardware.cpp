@@ -144,36 +144,41 @@ void initialize_controller_firmware_v0_3(
   const std::vector<Motor::Parameter>& parameter, const MotorControllerHardware::Parameter& hardware_parameter,
   std::shared_ptr<CommunicatorNode> communication_node)
 {
-  parameter_handler handler(hardware_parameter, communication_node);
+  try {
+    parameter_handler handler(hardware_parameter, communication_node);
 
-  // setting parameters
-  handler.set_parameter<SetTimeout>(hardware_parameter.timeout.count());
+    // setting parameters
+    handler.set_parameter<SetTimeout>(hardware_parameter.timeout.count());
 
-  for (std::size_t channel = 0; channel < parameter.size(); ++channel) {
-    handler.set_channel_parameter<v2::SetGearRatio>(parameter[channel].gear_ratio, channel);
-    handler.set_channel_parameter<v2::SetTicksPerRevision>(parameter[channel].encoder.ratio, channel);
-    handler.set_channel_parameter<v2::SetInvertedEncoder>(parameter[channel].encoder.inverted, channel);
-    handler.set_channel_parameter<v2::SetCtlInputFilter>(hardware_parameter.input_filter_weight, channel);
-    handler.set_channel_parameter<v2::SetClosedLoop>(parameter[channel].closed_loop, channel);
-    handler.set_channel_parameter<v2::SetRpmMax>(parameter[channel].max_rpm, channel);
-    handler.set_channel_parameter<v2::SetCtlKp>(parameter[channel].pid.kp, channel);
-    handler.set_channel_parameter<v2::SetCtlKi>(parameter[channel].pid.ki, channel);
-    handler.set_channel_parameter<v2::SetCtlKd>(parameter[channel].pid.kd, channel);
+    for (std::size_t channel = 0; channel < parameter.size(); ++channel) {
+      handler.set_channel_parameter<v2::SetGearRatio>(parameter[channel].gear_ratio, channel);
+      handler.set_channel_parameter<v2::SetTicksPerRevision>(parameter[channel].encoder.ratio, channel);
+      handler.set_channel_parameter<v2::SetInvertedEncoder>(parameter[channel].encoder.inverted, channel);
+      handler.set_channel_parameter<v2::SetCtlInputFilter>(hardware_parameter.input_filter_weight, channel);
+      handler.set_channel_parameter<v2::SetClosedLoop>(parameter[channel].closed_loop, channel);
+      handler.set_channel_parameter<v2::SetRpmMax>(parameter[channel].max_rpm, channel);
+      handler.set_channel_parameter<v2::SetCtlKp>(parameter[channel].pid.kp, channel);
+      handler.set_channel_parameter<v2::SetCtlKi>(parameter[channel].pid.ki, channel);
+      handler.set_channel_parameter<v2::SetCtlKd>(parameter[channel].pid.kd, channel);
+    }
+
+    // checking set parameter by reading them back
+    handler.valid_parameter<v2::GetTimeout, v2::Timeout>(hardware_parameter.timeout.count());
+
+    for (std::size_t channel = 0; channel < parameter.size(); ++channel) {
+      handler.valid_channel_parameter<v2::GetGearRatio, v2::GearRatio>(parameter[channel].gear_ratio, channel);
+      handler.valid_channel_parameter<v2::GetTicksPerRevision, v2::TicksPerRevision>(parameter[channel].encoder.ratio, channel);
+      handler.valid_channel_parameter<v2::GetInvertedEncoder, v2::InvertedEncoder>(parameter[channel].encoder.inverted, channel);
+      handler.valid_channel_parameter<v2::GetCtlInputFilter, v2::CtlInputFilter>(hardware_parameter.input_filter_weight, channel);
+      handler.valid_channel_parameter<v2::GetClosedLoop, v2::ClosedLoop>(parameter[channel].closed_loop, channel);
+      handler.valid_channel_parameter<v2::GetRpmMax, v2::RpmMax>(parameter[channel].max_rpm, channel);
+      handler.valid_channel_parameter<v2::GetCtlKp, v2::CtlKp>(parameter[channel].pid.kp, channel);
+      handler.valid_channel_parameter<v2::GetCtlKi, v2::CtlKi>(parameter[channel].pid.ki, channel);
+      handler.valid_channel_parameter<v2::GetCtlKd, v2::CtlKd>(parameter[channel].pid.kd, channel);
+    }
   }
-
-  // checking set parameter by reading them back
-  handler.valid_parameter<v2::GetTimeout, v2::Timeout>(hardware_parameter.timeout.count());
-
-  for (std::size_t channel = 0; channel < parameter.size(); ++channel) {
-    handler.valid_channel_parameter<v2::GetGearRatio, v2::GearRatio>(parameter[channel].gear_ratio, channel);
-    handler.valid_channel_parameter<v2::GetTicksPerRevision, v2::TicksPerRevision>(parameter[channel].encoder.ratio, channel);
-    handler.valid_channel_parameter<v2::GetInvertedEncoder, v2::InvertedEncoder>(parameter[channel].encoder.inverted, channel);
-    handler.valid_channel_parameter<v2::GetCtlInputFilter, v2::CtlInputFilter>(hardware_parameter.input_filter_weight, channel);
-    handler.valid_channel_parameter<v2::GetClosedLoop, v2::ClosedLoop>(parameter[channel].closed_loop, channel);
-    handler.valid_channel_parameter<v2::GetRpmMax, v2::RpmMax>(parameter[channel].max_rpm, channel);
-    handler.valid_channel_parameter<v2::GetCtlKp, v2::CtlKp>(parameter[channel].pid.kp, channel);
-    handler.valid_channel_parameter<v2::GetCtlKi, v2::CtlKi>(parameter[channel].pid.ki, channel);
-    handler.valid_channel_parameter<v2::GetCtlKd, v2::CtlKd>(parameter[channel].pid.kd, channel);
+  catch (std::exception& ex) {
+    RCLCPP_ERROR(rclcpp::get_logger("MotorControllerHardware"), "what = %s.", ex.what());
   }
 }
 

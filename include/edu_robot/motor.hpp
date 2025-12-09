@@ -49,7 +49,7 @@ public:
     } encoder;
 
     bool isValid() const {
-      return pid.isValid() && max_rpm >= 0.0f;
+      return pid.isValid() && max_rpm >= 0.0f && gear_ratio > 0;
     }
   };
 

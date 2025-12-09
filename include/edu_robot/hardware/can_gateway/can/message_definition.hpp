@@ -294,10 +294,10 @@ struct InvertedEncoder : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_
                                                   element::Uint8> // flag inverted encoder
 {
   inline static constexpr std::uint8_t channel(const RxMessageDataBuffer& rx_buffer) {
-    return deserialize<2>(rx_buffer);
+    return deserialize<3>(rx_buffer);
   }
   inline static constexpr bool isInverted(const RxMessageDataBuffer& rx_buffer) {
-    return deserialize<3>(rx_buffer) != 0;
+    return deserialize<4>(rx_buffer) != 0;
   }
   inline static constexpr bool value(const RxMessageDataBuffer& rx_buffer) {
     return isInverted(rx_buffer);
@@ -312,10 +312,10 @@ struct ClosedLoop : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_CLOSE
                                                element::Uint8> // flag closed loop
 {
   inline static constexpr std::uint8_t channel(const RxMessageDataBuffer& rx_buffer) {
-    return deserialize<2>(rx_buffer);
+    return deserialize<3>(rx_buffer);
   }
   inline static constexpr bool isClosedLoop(const RxMessageDataBuffer& rx_buffer) {
-    return deserialize<3>(rx_buffer) != 0;
+    return deserialize<4>(rx_buffer) != 0;
   }
   inline static constexpr bool value(const RxMessageDataBuffer& rx_buffer) {
     return isClosedLoop(rx_buffer);
@@ -330,10 +330,10 @@ struct CtlKp : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_CTL_KP,
                                          element::Float> // controller kp value
 {
   inline static constexpr std::uint8_t channel(const RxMessageDataBuffer& rx_buffer) {
-    return deserialize<2>(rx_buffer);
+    return deserialize<3>(rx_buffer);
   }
   inline static constexpr float kp(const RxMessageDataBuffer& rx_buffer) {
-    return deserialize<3>(rx_buffer);
+    return deserialize<4>(rx_buffer);
   }
   inline static constexpr float value(const RxMessageDataBuffer& rx_buffer) {
     return kp(rx_buffer);
@@ -348,10 +348,10 @@ struct CtlKi : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_CTL_KI,
                                          element::Float> // controller ki value
 {
   inline static constexpr std::uint8_t channel(const RxMessageDataBuffer& rx_buffer) {
-    return deserialize<2>(rx_buffer);
+    return deserialize<3>(rx_buffer);
   }
   inline static constexpr float ki(const RxMessageDataBuffer& rx_buffer) {
-    return deserialize<3>(rx_buffer);
+    return deserialize<4>(rx_buffer);
   }
   inline static constexpr float value(const RxMessageDataBuffer& rx_buffer) {
     return ki(rx_buffer);
@@ -366,10 +366,10 @@ struct CtlKd : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_CTL_KD,
                                          element::Float> // controller kd value
 {
   inline static constexpr std::uint8_t channel(const RxMessageDataBuffer& rx_buffer) {
-    return deserialize<2>(rx_buffer);
+    return deserialize<3>(rx_buffer);
   }
   inline static constexpr float kd(const RxMessageDataBuffer& rx_buffer) {
-    return deserialize<3>(rx_buffer);
+    return deserialize<4>(rx_buffer);
   }
   inline static constexpr float value(const RxMessageDataBuffer& rx_buffer) {
     return kd(rx_buffer);
@@ -384,10 +384,10 @@ struct CtlAntiWindUp : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_CT
                                                  element::Uint8> // flag controller anti wind up
 {
   inline static constexpr std::uint8_t channel(const RxMessageDataBuffer& rx_buffer) {
-    return deserialize<2>(rx_buffer);
+    return deserialize<3>(rx_buffer);
   }
   inline static constexpr bool isAntiWindUpEnabled(const RxMessageDataBuffer& rx_buffer) {
-    return deserialize<3>(rx_buffer) != 0;
+    return deserialize<4>(rx_buffer) != 0;
   }
   inline static constexpr bool value(const RxMessageDataBuffer& rx_buffer) {
     return isAntiWindUpEnabled(rx_buffer);
@@ -402,10 +402,10 @@ struct CtlInputFilter : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_C
                                                   element::Float> // controller input filter weight
 {
   inline static constexpr std::uint8_t channel(const RxMessageDataBuffer& rx_buffer) {
-    return deserialize<2>(rx_buffer);
+    return deserialize<3>(rx_buffer);
   }
   inline static constexpr float weight(const RxMessageDataBuffer& rx_buffer) {
-    return deserialize<3>(rx_buffer);
+    return deserialize<4>(rx_buffer);
   }
   inline static constexpr float value(const RxMessageDataBuffer& rx_buffer) {
     return weight(rx_buffer);
@@ -420,10 +420,10 @@ struct GearRatio : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_MOTOR_
                                               element::Float> // gear ratio value for both motors
 {
   inline static constexpr std::uint8_t channel(const RxMessageDataBuffer& rx_buffer) {
-    return deserialize<2>(rx_buffer);
+    return deserialize<3>(rx_buffer);
   }
   inline static constexpr float gearRatio(const RxMessageDataBuffer& rx_buffer) {
-    return deserialize<3>(rx_buffer);
+    return deserialize<4>(rx_buffer);
   }
   inline static constexpr float value(const RxMessageDataBuffer& rx_buffer) {
     return gearRatio(rx_buffer);
@@ -438,10 +438,10 @@ struct TicksPerRevision : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET
                                                      element::Float> // ticks per revision for encoder
 {
   inline static constexpr std::uint8_t channel(const RxMessageDataBuffer& rx_buffer) {
-    return deserialize<2>(rx_buffer);
+    return deserialize<3>(rx_buffer);
   }
   inline static constexpr float ticksPerRevision(const RxMessageDataBuffer& rx_buffer) {
-    return deserialize<3>(rx_buffer);
+    return deserialize<4>(rx_buffer);
   }
   inline static constexpr float value(const RxMessageDataBuffer& rx_buffer) {
     return ticksPerRevision(rx_buffer);
@@ -456,10 +456,10 @@ struct RpmMax : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_RPM_MAX,
                                           element::Float> // max rpm value for both motors
 {
   inline static constexpr std::uint8_t channel(const RxMessageDataBuffer& rx_buffer) {
-    return deserialize<2>(rx_buffer);
+    return deserialize<3>(rx_buffer);
   }
   inline static constexpr float maxRpm(const RxMessageDataBuffer& rx_buffer) {
-    return deserialize<3>(rx_buffer);
+    return deserialize<4>(rx_buffer);
   }
   inline static constexpr float value(const RxMessageDataBuffer& rx_buffer) {
     return maxRpm(rx_buffer);
@@ -473,7 +473,7 @@ struct Timeout : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_TIMEOUT,
                                            element::Uint16> // timeout in ms
 {
   inline static constexpr std::uint16_t timeoutMs(const RxMessageDataBuffer& rx_buffer) {
-    return deserialize<2>(rx_buffer);
+    return deserialize<3>(rx_buffer);
   }
   inline static constexpr std::uint16_t value(const RxMessageDataBuffer& rx_buffer) {
     return timeoutMs(rx_buffer);

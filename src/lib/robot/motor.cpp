@@ -26,7 +26,7 @@ Motor::Parameter Motor::get_parameter(
   // encoder parameters
   ros_node.declare_parameter<bool>(
     prefix + ".encoder.inverted", default_parameter.encoder.inverted);
-  ros_node.declare_parameter<int>(
+  ros_node.declare_parameter<float>(
     prefix + ".encoder.ratio", default_parameter.encoder.ratio);
   
   // getting parameter values
@@ -45,7 +45,7 @@ Motor::Parameter Motor::get_parameter(
   // encoder parameters
   parameter.encoder.inverted = ros_node.get_parameter(prefix + ".encoder.inverted").as_bool();
   parameter.encoder.ratio = static_cast<std::uint32_t>(
-    ros_node.get_parameter(prefix + ".encoder.ratio").as_int());
+    ros_node.get_parameter(prefix + ".encoder.ratio").as_double());
 
   return parameter;
 }
