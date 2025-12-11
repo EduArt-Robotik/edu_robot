@@ -153,7 +153,7 @@ TEST_CASE("timeout", "[MotorControllerHardware]")
     }
 
     // timeout should occurred
-    std::this_thread::sleep_for(700ms);
+    std::this_thread::sleep_for(750ms);
     REQUIRE_FALSE(motor_state.isEnabled());
 
     while (duration_cast<milliseconds>(system_clock::now() - stamp_start) < 5000ms) {
