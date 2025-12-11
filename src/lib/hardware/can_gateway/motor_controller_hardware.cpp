@@ -63,7 +63,7 @@ void valid_parameter(const Value& expected_value) {
 
   if (value != expected_value) {
     throw HardwareError(
-      State::MOTOR_ERROR, std::string("Failed to set timeout parameter \"") + ResponseMessage::name() + "\"."
+      State::MOTOR_ERROR, std::string("Failed to set parameter \"") + ResponseMessage::name() + "\"."
     );
   }  
 }
