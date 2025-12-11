@@ -1,15 +1,10 @@
 #define CATCH_CONFIG_MAIN
 
-#include <catch2/catch_version_macros.hpp>
-
-#ifdef CATCH_VERSION_MAJOR
-#if CATCH_VERSION_MAJOR >= 3
+#if __has_include(<catch2/catch_all.hpp>)
 #include <catch2/catch_all.hpp>
 #else
 #include <catch2/catch.hpp>
 #endif
-#endif
-
 
 #include <edu_robot/hardware/can_gateway/can_communication_device.hpp>
 #include <edu_robot/hardware/can_gateway/motor_controller_hardware.hpp>

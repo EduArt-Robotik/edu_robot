@@ -32,7 +32,10 @@ void Executer::start()
 void Executer::stop()
 {
   _is_running = false;
-  _executer.join();
+
+  if (_executer.joinable()) {
+    _executer.join();
+  }
 }
 
 void Executer::addJob(std::function<void()> do_job_function, const std::chrono::microseconds time_interval)

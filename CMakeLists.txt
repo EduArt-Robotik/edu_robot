@@ -133,6 +133,12 @@ if(BUILD_TESTING)
 
   # todo: move add subdirectory down to a CMakeLists in test or something
   add_subdirectory(src/test/sub_system)
+
+  install(
+    TARGETS
+      sub_system_test_can_motor_controller
+    RUNTIME DESTINATION bin    
+  )
 endif()
 
 ament_export_include_directories(
