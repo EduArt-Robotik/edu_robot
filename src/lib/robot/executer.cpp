@@ -58,7 +58,7 @@ void Executer::addJob(std::function<void()> do_job_function, const std::chrono::
 
 void Executer::run()
 {
-  while (_is_running && rclcpp::ok()) {
+  while (_is_running) {
     // process all jobs if nothing to do sleep
     bool did_something = false;
     const auto stamp_now = std::chrono::system_clock::now();

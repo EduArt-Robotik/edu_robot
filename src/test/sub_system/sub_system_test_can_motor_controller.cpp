@@ -6,6 +6,8 @@
 #include <catch2/catch.hpp>
 #endif
 
+#include <rclcpp/rclcpp.hpp>
+
 #include <edu_robot/hardware/can_gateway/can_communication_device.hpp>
 #include <edu_robot/hardware/can_gateway/motor_controller_hardware.hpp>
 
@@ -63,6 +65,9 @@ TEST_CASE("parameter_handling", "[MotorControllerHardware]")
     }
   };
 
+  // start testing
+  executer->start();
+
   SECTION("parameter_combination_one") {
     // initial motors with 
     std::vector<Motor::Parameter> parameter_motor_set = { parameter_motor_a, parameter_motor_b };
@@ -109,9 +114,15 @@ TEST_CASE("timeout", "[MotorControllerHardware]")
   auto executer = std::make_shared<Executer>(1ms);
   MotorControllerHardware controller("can_motor_controller", parameter_hardware, executer, communicator);
 
+  // register callback for getting feedback
   controller.registerCallbackProcessMeasurementData(
     std::bind(&MotorState::callbackFeedback, &motor_state, std::placeholders::_1, std::placeholders::_2)
   );
+  // use default parameter for initialization
+  controller.initialize(std::vector<Motor::Parameter>(2));
+
+  // start testing
+  executer->start();
 
   SECTION("no timeout") {
     const auto stamp_start = system_clock::now();
