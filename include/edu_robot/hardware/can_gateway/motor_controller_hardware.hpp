@@ -32,6 +32,7 @@ public:
     float threshold_stall_check = 0.25f;
     std::uint32_t control_frequency = 16000;
     bool encoder_inverted = false;
+    bool inverted = false;    
     std::chrono::milliseconds timeout = 1000ms;
   
     float weight_low_pass_set_point = 0.2f;
