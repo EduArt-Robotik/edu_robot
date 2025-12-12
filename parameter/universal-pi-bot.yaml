@@ -56,88 +56,32 @@
 
     # Motor Controller
     motor_controller_0:
+      # motor_a and motor_b are connected to this controller
       can_id:
+        # DIP switches set to 0
         input: 1024
         output: 1152
       control_frequency: 16000
-      timeout_ms: 500
-      encoder_inverted: false
-      inverted: true
-      encoder_ratio: 2048.0
-      gear_ratio: 100.0
-      weight_low_pass_encoder: 0.2
-      weight_low_pass_set_point: 0.5
+      timeout: 500 # ms
+      input_filter_weight: 0.5   
 
     motor_controller_1:
+      # motor_a and motor_b are connected to this controller
       can_id:
+        # DIP switches set to 1
         input: 1025
         output: 1153
       control_frequency: 16000
-      timeout_ms: 500
-      encoder_inverted: false
-      inverted: true
-      encoder_ratio: 2048.0
-      gear_ratio: 100.0
-      weight_low_pass_encoder: 0.2
-      weight_low_pass_set_point: 0.5
+      timeout: 500 # ms
+      input_filter_weight: 0.5 
 
-    # motor_controller_2:
-    #   can_id: 2
-    #   control_frequency: 16000
-    #   timeout_ms: 500
-    #   encoder_inverted: true
-    #   encoder_ratio: 2048.0
-    #   gear_ratio: 89.0
-    #   weight_low_pass_encoder: 0.8
-    #   weight_low_pass_set_point: 0.8      
-
-    # Motor
-    motor_a:
-      closed_loop: true
-      index: 0
-      max_rpm: 80.0
-      pid:
-        kd: 0.0
-        ki: 20.0
-        kp: 0.5
-    motor_b:
-      closed_loop: true
-      index: 0
-      max_rpm: 80.0
-      pid:
-        kd: 0.0
-        ki: 20.0
-        kp: 0.5
-    motor_c:
-      closed_loop: true
-      index: 0
-      max_rpm: 80.0
-      pid:
-        kd: 0.0
-        ki: 20.0
-        kp: 0.5
-    motor_d:
-      closed_loop: true
-      index: 0
-      max_rpm: 80.0
-      pid:
-        kd: 0.0
-        ki: 20.0
-        kp: 0.5
-    motor_e:
-      closed_loop: true
-      index: 0
-      max_rpm: 80.0
-      pid:
-        kd: 0.0
-        ki: 20.0
-        kp: 0.5
-    motor_f:
-      closed_loop: true
-      index: 0
-      max_rpm: 80.0
-      pid:
-        kd: 0.0
-        ki: 20.0
-        kp: 0.5
+    motor_controller_2:
+      # motor_a and motor_b are connected to this controller
+      can_id:
+        # DIP switches set to 2
+        input: 1026
+        output: 1154
+      control_frequency: 16000
+      timeout: 500 # ms
+      input_filter_weight: 0.5   
   

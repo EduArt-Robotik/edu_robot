@@ -27,24 +27,65 @@ using namespace std::chrono_literals;
 using can::Request;
 using can::CanRxDataEndPoint;
 
-using can::message::motor_controller::Enable;
-using can::message::motor_controller::Disable;
-using can::message::motor_controller::SetTimeout;
-using can::message::motor_controller::SetInvertedEncoder;
-using can::message::motor_controller::SetPwm;
-using can::message::motor_controller::SetRpm;
-using can::message::motor_controller::SetOpenLoop;
-using can::message::motor_controller::SetClosedLoop;
-using can::message::motor_controller::SetFrequency;
-using can::message::motor_controller::SetCtlKp;
-using can::message::motor_controller::SetCtlKi;
-using can::message::motor_controller::SetCtlKd;
-using can::message::motor_controller::SetCtlAntiWindUp;
-using can::message::motor_controller::SetCtlInputFilter;
-using can::message::motor_controller::SetGearRatio;
-using can::message::motor_controller::SetTicksPerRevision;
-using can::message::motor_controller::SetRpmMax;
-using can::message::motor_controller::Response;
+using namespace can::message::motor_controller;
+
+/**
+ * Parameter Handler for Motor Controller Parameter Setting and Validation
+ */
+struct parameter_handler {
+  parameter_handler(
+    const MotorControllerHardware::Parameter& hardware_parameter,
+    const std::shared_ptr<CommunicatorNode> communication_node)
+  : _hardware_parameter(hardware_parameter)
+  , _communication_node(communication_node)
+{ }
+
+template <typename SetMessage, typename Value>
+void set_parameter(const Value& value) {
+  auto request = Request::make_request<SetMessage>(
+    _hardware_parameter.can_id.input, value);
+  _communication_node->sendRequest(std::move(request), 100ms);    
+}
+
+template <typename SetMessage, typename Value>
+void set_channel_parameter(const Value& value, const std::size_t channel) {
+  auto request = Request::make_request<SetMessage>(
+    _hardware_parameter.can_id.input, value, channel);
+  _communication_node->sendRequest(std::move(request), 100ms);
+}
+
+template <typename GetMessage, typename ResponseMessage, typename Value>
+void valid_parameter(const Value& expected_value) {
+  auto request = Request::make_request_with_response<GetMessage>(
+    _hardware_parameter.can_id.input, _hardware_parameter.can_id.output);
+  const auto got = _communication_node->sendRequest(std::move(request), 200ms);
+  const auto value = ResponseMessage::value(got.response());
+
+  if (value != expected_value) {
+    throw HardwareError(
+      State::MOTOR_ERROR, std::string("Failed to set parameter \"") + ResponseMessage::name() + "\"."
+    );
+  }  
+}
+
+template <typename GetMessage, typename ResponseMessage, typename Value>
+void valid_channel_parameter(const Value& expected_value, const std::size_t channel) {
+  auto request = Request::make_request_with_response<GetMessage>(
+    _hardware_parameter.can_id.input, _hardware_parameter.can_id.output, channel);
+  const auto got = _communication_node->sendRequest(std::move(request), 200ms);
+  const auto value = ResponseMessage::value(got.response());
+
+  if (value != expected_value) {
+    throw HardwareError(
+      State::MOTOR_ERROR, std::string("Failed to set channel parameter \"") + ResponseMessage::name() + "\"."
+    );
+  }
+}
+
+private:
+  const MotorControllerHardware::Parameter& _hardware_parameter;
+  const std::shared_ptr<CommunicatorNode> _communication_node;
+};
 
 static void invert_rotation(std::vector<Rpm>& rpms)
 {
@@ -62,110 +103,94 @@ MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
     name + ".can_id.input", default_parameter.can_id.input);
   ros_node.declare_parameter<int>(
     name + ".can_id.output", default_parameter.can_id.output);
-
-  ros_node.declare_parameter<float>(
-    name + ".gear_ratio", default_parameter.gear_ratio);
-  ros_node.declare_parameter<float>(
-    name + ".encoder_ratio", default_parameter.encoder_ratio);
   ros_node.declare_parameter<int>(
     name + ".control_frequency", default_parameter.control_frequency);
   ros_node.declare_parameter<int>(
     name + ".timeout_ms", default_parameter.timeout.count());  
-
   ros_node.declare_parameter<float>(
-    name + ".weight_low_pass_set_point", default_parameter.weight_low_pass_set_point);
-  ros_node.declare_parameter<float>(
-    name + ".weight_low_pass_encoder", default_parameter.weight_low_pass_encoder);
-  ros_node.declare_parameter<bool>(
-    name + ".encoder_inverted", default_parameter.encoder_inverted);
-  ros_node.declare_parameter<bool>(name + ".inverted", default_parameter.inverted);
+    name + ".input_filter_weight", default_parameter.input_filter_weight);
 
   parameter.can_id.input = ros_node.get_parameter(name + ".can_id.input").as_int();
   parameter.can_id.output = ros_node.get_parameter(name + ".can_id.output").as_int();
-
-  parameter.gear_ratio = ros_node.get_parameter(name + ".gear_ratio").as_double();
-  parameter.encoder_ratio = ros_node.get_parameter(name + ".encoder_ratio").as_double();
   parameter.control_frequency = ros_node.get_parameter(name + ".control_frequency").as_int();
   parameter.timeout = std::chrono::milliseconds(ros_node.get_parameter(name + ".timeout_ms").as_int());
-
-  parameter.weight_low_pass_set_point = ros_node.get_parameter(name + ".weight_low_pass_set_point").as_double();
-  parameter.weight_low_pass_encoder = ros_node.get_parameter(name + ".weight_low_pass_encoder").as_double();
-  parameter.encoder_inverted = ros_node.get_parameter(name + ".encoder_inverted").as_bool();
-  parameter.inverted = ros_node.get_parameter(name + ".inverted").as_bool();
+  parameter.input_filter_weight = ros_node.get_parameter(name + ".input_filter_weight").as_double();
 
   return parameter;
 }
 
-void initialize_controller(
-  const Motor::Parameter& parameter, const MotorControllerHardware::Parameter& hardware_parameter,
+void initialize_controller_firmware_v0_2(
+  const std::vector<Motor::Parameter>& parameter, const MotorControllerHardware::Parameter& hardware_parameter,
   std::shared_ptr<CommunicatorNode> communication_node)
 {
-  // Initial Motor Controller Hardware
-  if (false == parameter.isValid()) {
-    throw std::invalid_argument("Given parameter are not valid. Cancel initialization of motor controller.");
-  }
+  parameter_handler handler(hardware_parameter, communication_node);
 
-  {
-    auto request = Request::make_request<SetTimeout>(
-      hardware_parameter.can_id.input, hardware_parameter.timeout.count());
+  handler.set_parameter<SetTimeout>(hardware_parameter.timeout.count());
+  handler.set_parameter<v1::SetInvertedEncoder>(parameter[0].encoder.inverted);
+  handler.set_parameter<SetFrequency>(hardware_parameter.control_frequency);
+  handler.set_parameter<v1::SetCtlKp>(parameter[0].pid.kp);
+  handler.set_parameter<v1::SetCtlKi>(parameter[0].pid.ki);
+  handler.set_parameter<v1::SetCtlKd>(parameter[0].pid.kd);
+  handler.set_parameter<v1::SetCtlAntiWindUp>(true);
+  handler.set_parameter<v1::SetCtlInputFilter>(hardware_parameter.input_filter_weight);
+  handler.set_parameter<v1::SetGearRatio>(parameter[0].gear_ratio);
+  handler.set_parameter<v1::SetTicksPerRevision>(parameter[0].encoder.ratio);
+  handler.set_parameter<v1::SetRpmMax>(parameter[0].max_rpm);
+
+  if (parameter[0].closed_loop) {
+    auto request = Request::make_request<v1::SetClosedLoop>(hardware_parameter.can_id.input);
     communication_node->sendRequest(std::move(request), 100ms);
   }
-  {
-    auto request = Request::make_request<SetInvertedEncoder>(
-      hardware_parameter.can_id.input, hardware_parameter.encoder_inverted);
-    communication_node->sendRequest(std::move(request), 100ms);
-  }  
-  {
-    if (parameter.closed_loop) {
-      auto request = Request::make_request<SetClosedLoop>(hardware_parameter.can_id.input);
-      communication_node->sendRequest(std::move(request), 100ms);
-    }
-    else {
-      auto request = Request::make_request<SetOpenLoop>(hardware_parameter.can_id.input);
-      communication_node->sendRequest(std::move(request), 100ms);    
-    }
-  }
-  {
-    auto request = Request::make_request<SetFrequency>(
-      hardware_parameter.can_id.input, hardware_parameter.control_frequency);
-    communication_node->sendRequest(std::move(request), 100ms);
-  }
-  {
-    auto request = Request::make_request<SetCtlKp>(hardware_parameter.can_id.input, parameter.kp);
-    communication_node->sendRequest(std::move(request), 100ms);
-  }
-  {
-    auto request = Request::make_request<SetCtlKi>(hardware_parameter.can_id.input, parameter.ki);
-    communication_node->sendRequest(std::move(request), 100ms);
-  }
-  {
-    auto request = Request::make_request<SetCtlKd>(hardware_parameter.can_id.input, parameter.kd);
-    communication_node->sendRequest(std::move(request), 100ms);
-  }
-  {
-    auto request = Request::make_request<SetCtlAntiWindUp>(hardware_parameter.can_id.input, true);
-    communication_node->sendRequest(std::move(request), 100ms);
-  }
-  {
-    auto request = Request::make_request<SetCtlInputFilter>(
-      hardware_parameter.can_id.input, hardware_parameter.weight_low_pass_set_point);
-    communication_node->sendRequest(std::move(request), 100ms);
-  }
-  {
-    auto request = Request::make_request<SetGearRatio>(
-      hardware_parameter.can_id.input, hardware_parameter.gear_ratio);
-    communication_node->sendRequest(std::move(request), 100ms);
-  }
-  {
-    auto request = Request::make_request<SetTicksPerRevision>(
-      hardware_parameter.can_id.input, hardware_parameter.encoder_ratio);
-    communication_node->sendRequest(std::move(request), 100ms);
-  }
-  {
-    auto request = Request::make_request<SetRpmMax>(hardware_parameter.can_id.input, parameter.max_rpm);
-    communication_node->sendRequest(std::move(request), 100ms);
+  else {
+    auto request = Request::make_request<v1::SetOpenLoop>(hardware_parameter.can_id.input);
+    communication_node->sendRequest(std::move(request), 100ms);    
   }
 }
+
+void initialize_controller_firmware_v0_3(
+  const std::vector<Motor::Parameter>& parameter, const MotorControllerHardware::Parameter& hardware_parameter,
+  std::shared_ptr<CommunicatorNode> communication_node)
+{
+  try {
+    parameter_handler handler(hardware_parameter, communication_node);
+
+    // setting parameters
+    handler.set_parameter<SetTimeout>(hardware_parameter.timeout.count());
+
+    for (std::size_t channel = 0; channel < parameter.size(); ++channel) {
+      handler.set_channel_parameter<v2::SetGearRatio>(parameter[channel].gear_ratio, channel);
+      handler.set_channel_parameter<v2::SetTicksPerRevision>(parameter[channel].encoder.ratio, channel);
+      handler.set_channel_parameter<v2::SetInvertedEncoder>(parameter[channel].encoder.inverted, channel);
+      handler.set_channel_parameter<v2::SetCtlInputFilter>(hardware_parameter.input_filter_weight, channel);
+      handler.set_channel_parameter<v2::SetClosedLoop>(parameter[channel].closed_loop, channel);
+      handler.set_channel_parameter<v2::SetRpmMax>(parameter[channel].max_rpm, channel);
+      handler.set_channel_parameter<v2::SetCtlKp>(parameter[channel].pid.kp, channel);
+      handler.set_channel_parameter<v2::SetCtlKi>(parameter[channel].pid.ki, channel);
+      handler.set_channel_parameter<v2::SetCtlKd>(parameter[channel].pid.kd, channel);
+    }
+
+    // checking set parameter by reading them back
+    handler.valid_parameter<v2::GetTimeout, v2::Timeout>(hardware_parameter.timeout.count());
+
+    for (std::size_t channel = 0; channel < parameter.size(); ++channel) {
+      handler.valid_channel_parameter<v2::GetGearRatio, v2::GearRatio>(parameter[channel].gear_ratio, channel);
+      handler.valid_channel_parameter<v2::GetTicksPerRevision, v2::TicksPerRevision>(parameter[channel].encoder.ratio, channel);
+      handler.valid_channel_parameter<v2::GetInvertedEncoder, v2::InvertedEncoder>(parameter[channel].encoder.inverted, channel);
+      handler.valid_channel_parameter<v2::GetCtlInputFilter, v2::CtlInputFilter>(hardware_parameter.input_filter_weight, channel);
+      handler.valid_channel_parameter<v2::GetClosedLoop, v2::ClosedLoop>(parameter[channel].closed_loop, channel);
+      handler.valid_channel_parameter<v2::GetRpmMax, v2::RpmMax>(parameter[channel].max_rpm, channel);
+      handler.valid_channel_parameter<v2::GetCtlKp, v2::CtlKp>(parameter[channel].pid.kp, channel);
+      handler.valid_channel_parameter<v2::GetCtlKi, v2::CtlKi>(parameter[channel].pid.ki, channel);
+      handler.valid_channel_parameter<v2::GetCtlKd, v2::CtlKd>(parameter[channel].pid.kd, channel);
+    }
+  }
+  catch (std::exception& ex) {
+    RCLCPP_ERROR(rclcpp::get_logger("MotorControllerHardware"), "what = %s.", ex.what());
+  }
+}
+
+
+
 
 MotorControllerHardware::MotorControllerHardware(
   const std::string& name, const Parameter& parameter, std::shared_ptr<Executer> executer,
@@ -202,10 +227,32 @@ void MotorControllerHardware::processRxData(const message::RxMessageDataBuffer &
   _callback_process_measurement(_data.measured_rpm, Response::enabled(data));
 }
 
-void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
+void MotorControllerHardware::initialize(const std::vector<Motor::Parameter>& parameters)
 {
-  initialize_controller(parameter, _parameter, _communication_node);
+  // Initial Motor Controller Hardware
+  if (parameters.size() != motors()) {
+    throw std::invalid_argument("given number of motors is wrong.");
+  }
 
+  try {
+    auto request = Request::make_request_with_response<v2::GetFirmware>(
+      _parameter.can_id.input, _parameter.can_id.output);
+    const auto got = _communication_node->sendRequest(std::move(request), 200ms);
+
+    const auto major = v2::Firmware::major(got.response());
+    const auto minor = v2::Firmware::minor(got.response());
+    const auto patch = v2::Firmware::patch(got.response());
+
+    RCLCPP_INFO(rclcpp::get_logger("MotorControllerHardware"), "detected motor controller firmware v%u.%u.%u", major, minor, patch);
+    initialize_controller_firmware_v0_3(parameters, _parameter, _communication_node);
+  }
+  catch (...) {
+    // firmware version request failed --> fall back to v0.2.x initialization
+    RCLCPP_INFO(rclcpp::get_logger("MotorControllerHardware"), "could not get motor controller firmware version. assume v0.2.x");
+    initialize_controller_firmware_v0_2(parameters, _parameter, _communication_node);
+  }
+
+  // Starting Continuous Communication with Motor Controller
   _communication_node->addSendingJob(
     std::bind(&MotorControllerHardware::processSending, this), 50ms
   );
@@ -215,7 +262,7 @@ void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
   );
 }
 
-void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
+void MotorControllerHardware::processSetValue(const std::vector<robot::Rpm>& rpm)
 {
   if (rpm.size() < 2) {
     throw std::runtime_error("Given RPM vector is too small.");

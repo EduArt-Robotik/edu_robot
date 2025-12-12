@@ -177,18 +177,21 @@ using Enable = MessageFrame<PROTOCOL::MOTOR::COMMAND::ENABLE>;
 using Disable = MessageFrame<PROTOCOL::MOTOR::COMMAND::DISABLE>;
 using SetTimeout = MessageFrame<PROTOCOL::MOTOR::COMMAND::SET_TIMEOUT,
                                 element::Uint16>; // timeout in ms
-using SetInvertedEncoder = MessageFrame<PROTOCOL::MOTOR::COMMAND::INVERT_ENCODER,
-                                        element::Uint8>; // flag inverted encoder
 using SetPwm = MessageFrame<PROTOCOL::MOTOR::COMMAND::SET_PWM,
                             Pwm,  // pwm value motor 0
                             Pwm>; // pwm value motor 1
 using SetRpm = MessageFrame<PROTOCOL::MOTOR::COMMAND::SET_RPM,
                             Rpm,  // rpm value motor 0
                             Rpm>; // rpm value motor 1
-using SetOpenLoop = MessageFrame<PROTOCOL::MOTOR::COMMAND::OPEN_LOOP>;
-using SetClosedLoop = MessageFrame<PROTOCOL::MOTOR::COMMAND::CLOSE_LOOP>;
 using SetFrequency = MessageFrame<PROTOCOL::MOTOR::COMMAND::FREQUENCY,
                                   element::Uint32>; // motor control frequency in Hz
+
+namespace v1 {
+using SetInvertedEncoder = MessageFrame<PROTOCOL::MOTOR::COMMAND::INVERT_ENCODER,
+                                        element::Uint8>; // flag inverted encoder
+using SetOpenLoop = MessageFrame<PROTOCOL::MOTOR::COMMAND::OPEN_LOOP>;
+using SetClosedLoop = MessageFrame<PROTOCOL::MOTOR::COMMAND::CLOSE_LOOP>;
+
 using SetCtlKp = MessageFrame<PROTOCOL::MOTOR::COMMAND::CTL_KP,
                               element::Float>; // controller kp value
 using SetCtlKi = MessageFrame<PROTOCOL::MOTOR::COMMAND::CTL_KI,
@@ -205,6 +208,282 @@ using SetTicksPerRevision = MessageFrame<PROTOCOL::MOTOR::COMMAND::TICKS_PER_REV
                                          element::Float>; // ticks per revision for encoder
 using SetRpmMax = MessageFrame<PROTOCOL::MOTOR::COMMAND::SET_RPM_MAX,
                                element::Float>; // max rpm value for both motors
+} // end namespace v1
+
+namespace v2 {
+using GetFirmware = GetterCommandFrame<PROTOCOL::MOTOR::COMMAND::GET_FIRMWARE>;
+using SetInvertedEncoder = MessageFrame<PROTOCOL::MOTOR::COMMAND::INVERT_ENCODER,
+                                        element::Uint8,  // flag inverted encoder
+                                        element::Uint8>; // motor channel
+using SetClosedLoop = MessageFrame<PROTOCOL::MOTOR::COMMAND::CLOSE_LOOP,
+                                   element::Uint8,  // closed loop flag
+                                   element::Uint8>; // motor channel
+using SetCtlKp = MessageFrame<PROTOCOL::MOTOR::COMMAND::CTL_KP,
+                              element::Float,  // controller kp value
+                              element::Uint8>; // motor channel
+using SetCtlKi = MessageFrame<PROTOCOL::MOTOR::COMMAND::CTL_KI,
+                              element::Float,  // controller ki value
+                              element::Uint8>; // motor channel
+using SetCtlKd = MessageFrame<PROTOCOL::MOTOR::COMMAND::CTL_KD,
+                              element::Float, // controller kd value
+                              element::Uint8>; // motor channel
+using SetCtlAntiWindUp = MessageFrame<PROTOCOL::MOTOR::COMMAND::CTL_ANTI_WIND_UP,
+                                      element::Uint8, // flag controller anti wind up
+                                      element::Uint8>; // motor channel
+using SetCtlInputFilter = MessageFrame<PROTOCOL::MOTOR::COMMAND::CTL_INPUT_FILTER,
+                                       element::Float, // controller input filter weight
+                                       element::Uint8>; // motor channel
+using SetGearRatio = MessageFrame<PROTOCOL::MOTOR::COMMAND::GEAR_RATIO,
+                                  element::Float, // gear ratio value for both motors
+                                  element::Uint8>; // motor channel
+using SetTicksPerRevision = MessageFrame<PROTOCOL::MOTOR::COMMAND::TICKS_PER_REVISION,
+                                         element::Float, // ticks per revision for encoder
+                                          element::Uint8>; // motor channel
+using SetRpmMax = MessageFrame<PROTOCOL::MOTOR::COMMAND::SET_RPM_MAX,
+                               element::Float, // max rpm value for both motors
+                               element::Uint8>; // motor channel
+
+// Getting Parameter Commands
+using GetInvertedEncoder = GetterCommandFrame<PROTOCOL::MOTOR::COMMAND::GET_INVERTED_ENCODER,
+                                              element::Uint8>; // motor channel
+using GetClosedLoop = GetterCommandFrame<PROTOCOL::MOTOR::COMMAND::GET_CLOSED_LOOP,
+                                         element::Uint8>; // motor channel
+using GetCtlKp = GetterCommandFrame<PROTOCOL::MOTOR::COMMAND::GET_CTL_KP,
+                                    element::Uint8>; // motor channel
+using GetCtlKi = GetterCommandFrame<PROTOCOL::MOTOR::COMMAND::GET_CTL_KI,
+                                    element::Uint8>; // motor channel
+using GetCtlKd = GetterCommandFrame<PROTOCOL::MOTOR::COMMAND::GET_CTL_KD,
+                                    element::Uint8>; // motor channel
+using GetCtlAntiWindUp = GetterCommandFrame<PROTOCOL::MOTOR::COMMAND::GET_CTL_ANTI_WIND_UP,
+                                            element::Uint8>; // motor channel
+using GetCtlInputFilter = GetterCommandFrame<PROTOCOL::MOTOR::COMMAND::GET_CTL_INPUT_FILTER,
+                                             element::Uint8>; // motor channel
+using GetGearRatio = GetterCommandFrame<PROTOCOL::MOTOR::COMMAND::GET_MOTOR_GEAR_RATIO,
+                                        element::Uint8>; // motor channel
+using GetTicksPerRevision = GetterCommandFrame<PROTOCOL::MOTOR::COMMAND::GET_TICKS_PER_REVISION,
+                                               element::Uint8>; // motor channel
+using GetRpmMax = GetterCommandFrame<PROTOCOL::MOTOR::COMMAND::GET_RPM_MAX,
+                                     element::Uint8>; // motor channel
+using GetTimeout = GetterCommandFrame<PROTOCOL::MOTOR::COMMAND::GET_TIMEOUT>;
+
+// Response Message Definitions
+template <Byte CommandByte, class... Elements>
+struct ParameterResponse : public message::MessageFrame<element::Command<PROTOCOL::MOTOR::COMMAND::RESPONSE_MOTOR_PARAMETER>,
+                                                        element::Command<CommandByte>,
+                                                        Elements...>
+{ };
+
+struct Firmware : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_FIRMWARE,
+                                           element::Uint16, // major
+                                           element::Uint16, // minor
+                                           element::Uint16> // patch
+{
+  inline static constexpr std::uint16_t major(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<3>(rx_buffer);
+  }
+  inline static constexpr std::uint16_t minor(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<4>(rx_buffer);
+  }
+  inline static constexpr std::uint16_t patch(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<5>(rx_buffer);
+  }
+};
+
+struct InvertedEncoder : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_INVERTED_ENCODER,
+                                                  element::Uint8, // motor channel
+                                                  element::Uint8> // flag inverted encoder
+{
+  inline static constexpr std::uint8_t channel(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<3>(rx_buffer);
+  }
+  inline static constexpr bool isInverted(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<4>(rx_buffer) != 0;
+  }
+  inline static constexpr bool value(const RxMessageDataBuffer& rx_buffer) {
+    return isInverted(rx_buffer);
+  }
+  inline static constexpr const char* name() {
+    return "inverted encoder";
+  }
+};
+
+struct ClosedLoop : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_CLOSED_LOOP,
+                                               element::Uint8, // motor channel
+                                               element::Uint8> // flag closed loop
+{
+  inline static constexpr std::uint8_t channel(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<3>(rx_buffer);
+  }
+  inline static constexpr bool isClosedLoop(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<4>(rx_buffer) != 0;
+  }
+  inline static constexpr bool value(const RxMessageDataBuffer& rx_buffer) {
+    return isClosedLoop(rx_buffer);
+  }
+  inline static constexpr const char* name() {
+    return "closed loop";
+  }
+};
+
+struct CtlKp : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_CTL_KP,
+                                         element::Uint8, // motor channel
+                                         element::Float> // controller kp value
+{
+  inline static constexpr std::uint8_t channel(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<3>(rx_buffer);
+  }
+  inline static constexpr float kp(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<4>(rx_buffer);
+  }
+  inline static constexpr float value(const RxMessageDataBuffer& rx_buffer) {
+    return kp(rx_buffer);
+  }
+  inline static constexpr const char* name() {
+    return "controller kp";
+  }
+};
+
+struct CtlKi : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_CTL_KI,
+                                         element::Uint8, // motor channel
+                                         element::Float> // controller ki value
+{
+  inline static constexpr std::uint8_t channel(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<3>(rx_buffer);
+  }
+  inline static constexpr float ki(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<4>(rx_buffer);
+  }
+  inline static constexpr float value(const RxMessageDataBuffer& rx_buffer) {
+    return ki(rx_buffer);
+  }
+  inline static constexpr const char* name() {
+    return "controller ki";
+  }
+};
+
+struct CtlKd : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_CTL_KD,
+                                         element::Uint8, // motor channel
+                                         element::Float> // controller kd value
+{
+  inline static constexpr std::uint8_t channel(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<3>(rx_buffer);
+  }
+  inline static constexpr float kd(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<4>(rx_buffer);
+  }
+  inline static constexpr float value(const RxMessageDataBuffer& rx_buffer) {
+    return kd(rx_buffer);
+  }
+  inline static constexpr const char* name() {
+    return "controller kd";
+  }
+};
+
+struct CtlAntiWindUp : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_CTL_ANTI_WIND_UP,
+                                                 element::Uint8, // motor channel
+                                                 element::Uint8> // flag controller anti wind up
+{
+  inline static constexpr std::uint8_t channel(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<3>(rx_buffer);
+  }
+  inline static constexpr bool isAntiWindUpEnabled(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<4>(rx_buffer) != 0;
+  }
+  inline static constexpr bool value(const RxMessageDataBuffer& rx_buffer) {
+    return isAntiWindUpEnabled(rx_buffer);
+  }
+  inline static constexpr const char* name() {
+    return "controller anti wind up";
+  }
+};
+
+struct CtlInputFilter : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_CTL_INPUT_FILTER,
+                                                  element::Uint8, // motor channel
+                                                  element::Float> // controller input filter weight
+{
+  inline static constexpr std::uint8_t channel(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<3>(rx_buffer);
+  }
+  inline static constexpr float weight(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<4>(rx_buffer);
+  }
+  inline static constexpr float value(const RxMessageDataBuffer& rx_buffer) {
+    return weight(rx_buffer);
+  }
+  inline static constexpr const char* name() {
+    return "controller input filter weight";
+  }
+};
+
+struct GearRatio : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_MOTOR_GEAR_RATIO,
+                                              element::Uint8, // motor channel
+                                              element::Float> // gear ratio value for both motors
+{
+  inline static constexpr std::uint8_t channel(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<3>(rx_buffer);
+  }
+  inline static constexpr float gearRatio(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<4>(rx_buffer);
+  }
+  inline static constexpr float value(const RxMessageDataBuffer& rx_buffer) {
+    return gearRatio(rx_buffer);
+  }
+  inline static constexpr const char* name() {
+    return "gear ratio";
+  }
+};
+
+struct TicksPerRevision : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_TICKS_PER_REVISION,
+                                                     element::Uint8, // motor channel
+                                                     element::Float> // ticks per revision for encoder
+{
+  inline static constexpr std::uint8_t channel(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<3>(rx_buffer);
+  }
+  inline static constexpr float ticksPerRevision(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<4>(rx_buffer);
+  }
+  inline static constexpr float value(const RxMessageDataBuffer& rx_buffer) {
+    return ticksPerRevision(rx_buffer);
+  }
+  inline static constexpr const char* name() {
+    return "ticks per revision";
+  }
+};
+
+struct RpmMax : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_RPM_MAX,
+                                          element::Uint8, // motor channel
+                                          element::Float> // max rpm value for both motors
+{
+  inline static constexpr std::uint8_t channel(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<3>(rx_buffer);
+  }
+  inline static constexpr float maxRpm(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<4>(rx_buffer);
+  }
+  inline static constexpr float value(const RxMessageDataBuffer& rx_buffer) {
+    return maxRpm(rx_buffer);
+  }
+  inline static constexpr const char* name() {
+    return "max rpm";
+  }
+};
+
+struct Timeout : public ParameterResponse<PROTOCOL::MOTOR::COMMAND::GET_TIMEOUT,
+                                           element::Uint16> // timeout in ms
+{
+  inline static constexpr std::uint16_t timeoutMs(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<3>(rx_buffer);
+  }
+  inline static constexpr std::uint16_t value(const RxMessageDataBuffer& rx_buffer) {
+    return timeoutMs(rx_buffer);
+  }
+  inline static constexpr const char* name() {
+    return "timeout";
+  }
+};
+
+} // end namespace v2
 
 struct Response : public message::MessageFrame<element::Uint8, // command
                                                Rpm,            // measured rpm motor 0

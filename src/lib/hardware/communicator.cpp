@@ -86,7 +86,7 @@ static bool is_same(const Left& lhs, const Right& rhs) {
     return true;
   }
   if (lhs.size() > rhs.size()) {
-    return false;;
+    return false;
   }
 
   bool is_same = true;

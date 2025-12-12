@@ -31,7 +31,6 @@ public:
     bool set_parameter = false;  //> sets and flashes parameter to motor controller hardware (EEPROM)
     std::uint32_t can_id = 0x18; //> can id used by this controller
     algorithm::LowPassFiler<float>::Parameter low_pass_set_point = {0.5f};
-    float gear_ratio = 2.127659574;
 
     std::uint16_t max_missed_communications = 1000;
     std::uint16_t max_lag = 1200;
@@ -47,7 +46,7 @@ public:
   ~MotorControllerHardware() override = default;
 
   void processSetValue(const std::vector<Rpm>& rpm) override;
-  void initialize(const Motor::Parameter& parameter) override;
+  void initialize(const std::vector<Motor::Parameter>& parameter) override;
   void enable();
   void disable();
   void reset();
@@ -72,6 +71,7 @@ private:
     std::mutex mutex;
 
     algorithm::LowPassFiler<float> low_pass_set_point;
+    float gear_ratio = 2.127659574;
     std::chrono::time_point<std::chrono::system_clock> stamp_last_received;
     std::int32_t last_position;
     std::uint8_t error_code;

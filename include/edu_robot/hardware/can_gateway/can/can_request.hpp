@@ -29,6 +29,14 @@ public:
     const auto response_message = Message::makeSearchPattern(can_address);
     return Request(request_message, response_message);
   }
+  template <class Message, class... Arguments>
+  inline static Request make_request_with_response(
+    const std::uint32_t can_address_device, const std::uint32_t can_address_host, Arguments&&... args)
+ {
+    auto request_message = Message::serialize(can_address_device, std::forward<Arguments>(args)...);
+    const auto response_message = Message::makeSearchPattern(can_address_host);
+    return Request(request_message, response_message);
+  }  
   Request(Request&&) = default;
 
 private:

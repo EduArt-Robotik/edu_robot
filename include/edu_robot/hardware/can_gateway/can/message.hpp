@@ -7,6 +7,8 @@
 
 #include <edu_robot/hardware/message_buffer.hpp>
 
+#include "edu_robot/hardware/can_gateway/can/protocol.hpp"
+
 #include <cstddef>
 #include <cstdint>
 #include <array>
@@ -246,10 +248,7 @@ struct Message : public std::tuple<Elements...>
 template <class... Elements>
 struct MessageFrame : public Message<element::CanAddress, Elements...>
 {
-protected:
   using MessageType = Message<element::CanAddress, Elements...>;
-
-public:
   using MessageType::size;
 
   inline static TxMessageDataBuffer serialize(
@@ -267,6 +266,29 @@ public:
   inline static constexpr std::uint32_t canId(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<0>(rx_buffer);
   }
+};
+
+template <Byte CommandByte, class... Elements>
+struct GetterCommandFrame : public MessageFrame<element::Command<CommandByte>, Elements...>
+{
+  using MessageFrame<element::Command<CommandByte>, Elements...>::size;
+
+  inline static constexpr auto makeSearchPattern(const std::uint32_t can_address) {
+    using MessageType = typename MessageFrame<
+      element::Command<PROTOCOL::MOTOR::COMMAND::RESPONSE_MOTOR_PARAMETER>,
+      element::Command<CommandByte>,
+      Elements...
+    >::MessageType;
+
+    return element::impl::make_message_search_pattern<0, 1, 2>(can_address, MessageType{});
+  }
+  inline static TxMessageDataBuffer serialize(
+    const std::uint32_t can_address, const typename Elements::type&... element_value)
+  {
+    return MessageFrame<element::Command<CommandByte>, Elements...>::serialize(
+      can_address, 0, element_value...
+    );
+  }  
 };
 
 template <class... Elements>

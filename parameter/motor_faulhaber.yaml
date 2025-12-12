@@ -1,0 +1,70 @@
+/**:
+  ros__parameters:
+    # Motor
+    motor_a:
+      index: 2
+      max_rpm: 90.0
+      gear_ratio: 89.0
+      inverted: false
+      closed_loop: true
+      pid:
+        kd: 0.0
+        ki: 15.0
+        kp: 0.5
+      encoder:
+        inverted: true
+        # encoder ticks per revolution
+        # --> positive and negative edges are counted + two channels
+        # --> encoder ratio is 4 times the number of ticks per revolution
+        ratio: 2048.0 # 512 ticks per revolution
+
+    motor_b:
+      index: 1
+      max_rpm: 90.0
+      gear_ratio: 89.0
+      inverted: false
+      closed_loop: true
+      pid:
+        kd: 0.0
+        ki: 15.0
+        kp: 0.5
+      encoder:
+        inverted: true
+        # encoder ticks per revolution
+        # --> positive and negative edges are counted + two channels
+        # --> encoder ratio is 4 times the number of ticks per revolution
+        ratio: 2048.0 # 512 ticks per revolution
+
+    motor_c:
+      index: 4
+      max_rpm: 90.0
+      gear_ratio: 89.0
+      inverted: false
+      closed_loop: true
+      pid:
+        kd: 0.0
+        ki: 15.0
+        kp: 0.5
+      encoder:
+        inverted: true
+        # encoder ticks per revolution
+        # --> positive and negative edges are counted + two channels
+        # --> encoder ratio is 4 times the number of ticks per revolution
+        ratio: 2048.0 # 512 ticks per revolution
+
+    motor_d:
+      index: 3
+      max_rpm: 90.0
+      gear_ratio: 89.0
+      inverted: false
+      closed_loop: true
+      pid:
+        kd: 0.0
+        ki: 15.0
+        kp: 0.5
+      encoder:
+        inverted: true
+        # encoder ticks per revolution
+        # --> positive and negative edges are counted + two channels
+        # --> encoder ratio is 4 times the number of ticks per revolution
+        ratio: 2048.0 # 512 ticks per revolution

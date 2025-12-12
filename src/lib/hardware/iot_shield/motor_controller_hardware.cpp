@@ -26,45 +26,24 @@ using namespace std::chrono_literals;
 using uart::Request;
 using uart::message::ShieldResponse;
 
-static void invert_rotation(std::vector<Rpm>& rpms)
-{
-  for (auto& rpm : rpms) {
-    rpm = rpm * -1.0;
-  }
-}
-
 MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
   const std::string& name, const Parameter& default_parameter, rclcpp::Node& ros_node)
 {
   MotorControllerHardware::Parameter parameter;
 
-  ros_node.declare_parameter<float>(
-    name + ".gear_ratio", default_parameter.gear_ratio);
-  ros_node.declare_parameter<float>(
-    name + ".encoder_ratio", default_parameter.encoder_ratio);
   ros_node.declare_parameter<int>(
     name + ".control_frequency", default_parameter.control_frequency);
   ros_node.declare_parameter<int>(
     name + ".timeout_ms", default_parameter.timeout.count());  
-
   ros_node.declare_parameter<float>(
     name + ".weight_low_pass_set_point", default_parameter.weight_low_pass_set_point);
   ros_node.declare_parameter<float>(
     name + ".weight_low_pass_encoder", default_parameter.weight_low_pass_encoder);
-  ros_node.declare_parameter<bool>(
-    name + ".encoder_inverted", default_parameter.encoder_inverted);
-  ros_node.declare_parameter<bool>(
-    name + ".inverted", parameter.inverted);
 
-  parameter.gear_ratio = ros_node.get_parameter(name + ".gear_ratio").as_double();
-  parameter.encoder_ratio = ros_node.get_parameter(name + ".encoder_ratio").as_double();
   parameter.control_frequency = ros_node.get_parameter(name + ".control_frequency").as_int();
   parameter.timeout = std::chrono::milliseconds(ros_node.get_parameter(name + ".timeout_ms").as_int());
-
   parameter.weight_low_pass_set_point = ros_node.get_parameter(name + ".weight_low_pass_set_point").as_double();
   parameter.weight_low_pass_encoder = ros_node.get_parameter(name + ".weight_low_pass_encoder").as_double();
-  parameter.encoder_inverted = ros_node.get_parameter(name + ".encoder_inverted").as_bool();
-  parameter.inverted = ros_node.get_parameter(name + ".inverted").as_bool();
 
   return parameter;
 }
@@ -109,11 +88,6 @@ void MotorControllerHardware::processRxData(const uart::message::RxMessageDataBu
   _data.measured_rpm[2] = -uart::message::ShieldResponse::rpm2(data);
   _data.measured_rpm[3] = -uart::message::ShieldResponse::rpm3(data);
 
-  // if motor rotates inverted, change direction
-  if (_parameter.inverted) {
-    invert_rotation(_data.measured_rpm);
-  }
-
   _callback_process_measurement(_data.measured_rpm, !_data.timeout);
 }
 
@@ -128,11 +102,6 @@ void MotorControllerHardware::processSetValue(const std::vector<Rpm>& rpm)
   _data.rpm = rpm;
   _data.stamp_last_rpm_set = std::chrono::system_clock::now();
   _data.timeout = false;
-
-  // if motor rotates inverted, change direction
-  if (_parameter.inverted) {
-    invert_rotation(_data.rpm);
-  }
 }
 
 void MotorControllerHardware::processSending()
@@ -158,10 +127,13 @@ void MotorControllerHardware::processSending()
   _communication_node->sendRequest(std::move(request), 100ms);
 }
 
-void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
+void MotorControllerHardware::initialize(const std::vector<Motor::Parameter>& parameter)
 {
   // Initial Motor Controller Hardware
-  if (false == parameter.isValid()) {
+  if (parameter.size() < 4) {
+    throw std::invalid_argument("Given parameter vector is empty. Cancel initialization of motor controller.");
+  }
+  if (false == parameter[0].isValid()) {
     throw std::invalid_argument("Given parameter are not valid. Cancel initialization of motor controller.");
   }
 
@@ -169,51 +141,50 @@ void MotorControllerHardware::initialize(const Motor::Parameter& parameter)
 
   {
     auto request = Request::make_request<uart::message::SetValueF<UART::COMMAND::SET::KP>>(
-      parameter.kp, 0);
+      parameter[0].pid.kp, 0);
     _communication_node->sendRequest(std::move(request), 100ms);
   }
-
   {
-    auto request = Request::make_request<uart::message::SetValueF<UART::COMMAND::SET::KI>>(parameter.ki, 0);
+    auto request = Request::make_request<uart::message::SetValueF<UART::COMMAND::SET::KI>>(
+      parameter[0].pid.ki, 0);
     _communication_node->sendRequest(std::move(request), 100ms);
   }
-
   {
-    auto request = Request::make_request<uart::message::SetValueF<UART::COMMAND::SET::KD>>(parameter.kd, 0);
+    auto request = Request::make_request<uart::message::SetValueF<UART::COMMAND::SET::KD>>(
+      parameter[0].pid.kd, 0);
     _communication_node->sendRequest(std::move(request), 100ms);
   }
-
   {
     auto request = Request::make_request<uart::message::SetValueF<UART::COMMAND::SET::SET_POINT_LOW_PASS>>(
       _parameter.weight_low_pass_set_point, 0);
     _communication_node->sendRequest(std::move(request), 100ms);
   }
-
   {
     auto request = Request::make_request<uart::message::SetValueF<UART::COMMAND::SET::ENCODER_LOW_PASS>>(
     _parameter.weight_low_pass_encoder, 0);
     _communication_node->sendRequest(std::move(request), 100ms);
   }
-
   {
     auto request = Request::make_request<uart::message::SetValueF<UART::COMMAND::SET::GEAR_RATIO>>(
-      _parameter.gear_ratio, 0);
+      parameter[0].gear_ratio, 0);
     _communication_node->sendRequest(std::move(request), 100ms);
   }
-
   {
     auto request = Request::make_request<uart::message::SetValueF<UART::COMMAND::SET::TICKS_PER_REV>>(
-      _parameter.encoder_ratio, 0);
+      parameter[0].encoder.ratio, 0);
     _communication_node->sendRequest(std::move(request), 100ms);
   }
 
   try {
+    // available since IoT shield firmware version 1.0.1
     auto request = Request::make_request<uart::message::SetFlag<UART::COMMAND::SET::INVERT_ENCODER>>(
-      _parameter.encoder_inverted, 0, 0, 0);
+      parameter[0].encoder.inverted, 0, 0, 0);
     _communication_node->sendRequest(std::move(request), 100ms);
+    RCLCPP_INFO(rclcpp::get_logger("MotorControllerHardware"), "firmware version >= 1.0.1 detected.");
   }
   catch (...) {
-    // only available since IoT shield firmware version 1.0.1
+    // ignore error, this means that the firmware does not support this command
+    RCLCPP_INFO(rclcpp::get_logger("MotorControllerHardware"), "firmware version <= 1.0.0 detected.");
   }
 
   {

@@ -25,16 +25,13 @@ class MotorControllerHardware : public MotorController::HardwareInterface
 public:
   struct Parameter {
     std::uint8_t can_id = 0;
-    float gear_ratio = 89.0f;
-    float encoder_ratio = 2048.0f;
-    float threshold_stall_check = 0.25f;
     std::uint32_t control_frequency = 16000;
-    bool encoder_inverted = false;
-    bool inverted = false;
     std::chrono::milliseconds timeout = 1000ms;
   
-    float weight_low_pass_set_point = 0.2f;
-    float weight_low_pass_encoder   = 0.3f;    
+    float input_filter_weight = 0.5f;
+    float threshold_stall_check = 0.25f; // not used in ethernet gateway
+
+    bool isValid() const { return input_filter_weight >= 0.0f && input_filter_weight <= 1.0f; }
   };
 
   MotorControllerHardware(
@@ -63,48 +60,25 @@ public:
     _data.rpm = rpm;
     _data.stamp_last_rpm_set = std::chrono::system_clock::now();
     _data.timeout = false;
-    
-    // if motor rotates inverted, change direction    
-    if (_parameter.inverted) {
-      invertRotation(_data.rpm);
-    }
   }
-  void initialize(const Motor::Parameter& parameter) override;
+  void initialize(const std::vector<Motor::Parameter>& parameter) override;
 
   static Parameter get_parameter(const std::string& name, const Parameter& default_parameter, rclcpp::Node& ros_node)
   {
     MotorControllerHardware::Parameter parameter;
 
     ros_node.declare_parameter<int>(name + ".can_id", default_parameter.can_id);
-
-    ros_node.declare_parameter<float>(
-      name + ".gear_ratio", default_parameter.gear_ratio);
-    ros_node.declare_parameter<float>(
-      name + ".encoder_ratio", default_parameter.encoder_ratio);
     ros_node.declare_parameter<int>(
       name + ".control_frequency", default_parameter.control_frequency);
     ros_node.declare_parameter<int>(
       name + ".timeout_ms", default_parameter.timeout.count());
-
     ros_node.declare_parameter<float>(
-      name + ".weight_low_pass_set_point", default_parameter.weight_low_pass_set_point);
-    ros_node.declare_parameter<float>(
-      name + ".weight_low_pass_encoder", default_parameter.weight_low_pass_encoder);
-    ros_node.declare_parameter<bool>(
-      name + ".encoder_inverted", default_parameter.encoder_inverted);
-    ros_node.declare_parameter<bool>(name + ".inverted", parameter.inverted);
+      name + ".input_filter_weight", default_parameter.input_filter_weight);
 
     parameter.can_id = ros_node.get_parameter(name + ".can_id").as_int();
-
-    parameter.gear_ratio = ros_node.get_parameter(name + ".gear_ratio").as_double();
-    parameter.encoder_ratio = ros_node.get_parameter(name + ".encoder_ratio").as_double();
     parameter.control_frequency = ros_node.get_parameter(name + ".control_frequency").as_int();
     parameter.timeout = std::chrono::milliseconds(ros_node.get_parameter(name + ".timeout_ms").as_int());
-
-    parameter.weight_low_pass_set_point = ros_node.get_parameter(name + ".weight_low_pass_set_point").as_double();
-    parameter.weight_low_pass_encoder = ros_node.get_parameter(name + ".weight_low_pass_encoder").as_double();
-    parameter.encoder_inverted = ros_node.get_parameter(name + ".encoder_inverted").as_bool();
-    parameter.inverted = ros_node.get_parameter(name + ".inverted").as_bool();
+    parameter.input_filter_weight = ros_node.get_parameter(name + ".input_filter_weight").as_double();
 
     return parameter;    
   }
@@ -112,12 +86,6 @@ public:
 private:
   void processRxData(const message::RxMessageDataBuffer& data);
   void processSending();
-  void invertRotation(std::vector<Rpm>& rpms)
-  {
-    for (auto& rpm : rpms) {
-      rpm = rpm * -1.0;
-    }
-  }
 
   const Parameter _parameter;
   std::shared_ptr<CommunicatorNode> _communication_node;

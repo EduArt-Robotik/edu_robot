@@ -27,16 +27,10 @@ public:
       std::uint32_t output = 0x480;
     } can_id;
 
-    float gear_ratio = 89.0f;
-    float encoder_ratio = 2048.0f;
-    float threshold_stall_check = 0.25f;
     std::uint32_t control_frequency = 16000;
-    bool encoder_inverted = false;
-    bool inverted = false;    
     std::chrono::milliseconds timeout = 1000ms;
   
-    float weight_low_pass_set_point = 0.2f;
-    float weight_low_pass_encoder   = 0.3f;
+    float input_filter_weight = 0.5f;
   };
 
   MotorControllerHardware(
@@ -45,7 +39,7 @@ public:
   ~MotorControllerHardware() override = default;
 
   void processSetValue(const std::vector<Rpm>& rpm) override;
-  void initialize(const Motor::Parameter& parameter) override;
+  void initialize(const std::vector<Motor::Parameter>& parameter) override;
   void enable();
   void disable();
 
