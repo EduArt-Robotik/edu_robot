@@ -16,7 +16,7 @@ def generate_launch_description():
     parameter_file = os.path.join(
       package_path,
       'parameter',
-      'universal_bot.yaml'
+      'universal-pi-bot.yaml'
     )
 
     # robot namespace

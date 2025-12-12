@@ -34,20 +34,20 @@
       publishing_tf: true    
 
     # Axis
-    number_of_axes: 3    
+    number_of_axes: 2  
     axis_1:
       skid:
         length:
           x: 0.14
           y: 0.08
         wheel_diameter: 0.113
+    # axis_2:
+    #   skid:
+    #     length:
+    #       x: 0.0
+    #       y: 0.27
+    #     wheel_diameter: 0.113
     axis_2:
-      skid:
-        length:
-          x: 0.0
-          y: 0.27
-        wheel_diameter: 0.113
-    axis_3:
       skid:
         length:
           x: -0.14
@@ -84,15 +84,4 @@
       control_frequency: 16000
       timeout: 500 # ms
       input_filter_weight: 0.5   
-
-    # Motor
-    motor_a:
-      closed_loop: true
-      index: 0
-      max_rpm: 90.0
-      pid:
-        kd: 0.0
-        ki: 7.0
-        kp: 0.5
-
   
