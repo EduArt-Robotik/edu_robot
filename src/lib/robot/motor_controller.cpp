@@ -59,7 +59,7 @@ void MotorController::setRpm(const std::vector<Rpm>& rpm)
   // set rpm
   _set_rpm = rpm;
   invert_rpm_or_not(_motor, _set_rpm);
-  _hardware_interface->processSetValue(rpm);
+  _hardware_interface->processSetValue(_set_rpm);
 }
 
 // Process measurement data from hardware interface. Maybe it is called from another thread.

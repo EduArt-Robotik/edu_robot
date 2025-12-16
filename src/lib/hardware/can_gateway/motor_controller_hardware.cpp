@@ -87,13 +87,6 @@ private:
   const std::shared_ptr<CommunicatorNode> _communication_node;
 };
 
-static void invert_rotation(std::vector<Rpm>& rpms)
-{
-  for (auto& rpm : rpms) {
-    rpm = rpm * -1.0;
-  }
-}
-
 MotorControllerHardware::Parameter MotorControllerHardware::get_parameter(
   const std::string& name, const Parameter& default_parameter, rclcpp::Node& ros_node)
 {
@@ -220,10 +213,6 @@ void MotorControllerHardware::processRxData(const message::RxMessageDataBuffer &
   _data.measured_rpm[0] = Response::rpm0(data);
   _data.measured_rpm[1] = Response::rpm1(data);
 
-  if (_parameter.inverted) {
-    invert_rotation(_data.measured_rpm);
-  }
-
   _callback_process_measurement(_data.measured_rpm, Response::enabled(data));
 }
 
@@ -272,10 +261,6 @@ void MotorControllerHardware::processSetValue(const std::vector<robot::Rpm>& rpm
   _data.rpm = rpm;
   _data.stamp_last_rpm_set = std::chrono::system_clock::now();
   _data.timeout = false;
-
-  if (_parameter.inverted) {
-    invert_rotation(_data.rpm);
-  }
 }
 
 void MotorControllerHardware::processSending()
