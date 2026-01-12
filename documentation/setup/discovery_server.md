@@ -9,10 +9,9 @@ For more background and details please visit this [page](https://docs.ros.org/en
 The server can be launched by following command:
 
 ```bash
-fastdds discovery --server-id 0
+fastdds discovery --server-id 0 --ip-address=192.168.0.101 --port=11811
 ```
 
-If you are using an EduArt robot it can be enabled by setting the environment variable **EDU_ENABLE_DISCOVERY_SERVER**, for example in the file /etc/environment, to **1**. In this case the eduard docker container will launch a discovery server. All other containers will listen to that discovery server.
+If you are using an EduArt robot it can be enabled by setting the environment variable **ROS_DISCOVERY_SERVER**, for example in the file /etc/environment, to **ip_address:port**. In this case the eduard docker container will launch a discovery server. All other containers will listen to that discovery server.
 
-> **Important**: if the robot's ip address differs from 192.168.0.100 then it has to be adapted.
 

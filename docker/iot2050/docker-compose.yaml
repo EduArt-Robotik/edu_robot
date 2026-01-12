@@ -13,10 +13,11 @@ services:
         environment:
             - EDU_ROBOT_NAMESPACE=${EDU_ROBOT_NAMESPACE}
             - RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION}
+            - ROS_DISCOVERY_SERVER
             - EDU_MOTOR_MODEL=${EDU_MOTOR_MODEL:-faulhaber}
-            - CYCLONEDDS_URI=/home/user/ros/launch_content/cyclone_profile.xml         
+            - CYCLONEDDS_URI=/home/user/ros/launch_content/cyclone_profile.xml  
         network_mode: "host"
-        command: bash -c 'cd /home/user/ros/launch_content; ros2 launch eduard-iot2050.launch.py'
+        command: bash -c 'cd /home/user/ros/launch_content; ros2 launch eduard-iot2050.launch.py & ./discovery_server.sh'
         volumes:
             - './launch_content:/home/user/ros/launch_content:r'
         devices:
@@ -36,6 +37,7 @@ services:
         environment:
             - EDU_ROBOT_NAMESPACE=${EDU_ROBOT_NAMESPACE}
             - RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION}
+            - ROS_DISCOVERY_SERVER
             - CYCLONEDDS_URI=/home/user/ros/launch_content/cyclone_profile.xml         
         network_mode: "host"
         command: bash -c 'cd /home/user/ros/launch_content; ros2 launch robot_remote_control_iot2050.launch.py & ros2 launch eduard_robot_description.launch.py hardware_type:=iot2050'
