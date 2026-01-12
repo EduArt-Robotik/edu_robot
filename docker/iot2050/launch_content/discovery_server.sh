@@ -48,4 +48,7 @@ fi
 
 # starting up the discovery server with given IP address
 echo "Starting ROS 2 Discovery Server..."
+echo "on ip address = $EXTRACTED_IP"
+echo "using port = $EXTRACTED_PORT"
+
 fastdds discovery --server-id 0 --ip-address=$EXTRACTED_IP --port=$EXTRACTED_PORT
