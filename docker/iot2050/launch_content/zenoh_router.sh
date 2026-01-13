@@ -11,5 +11,5 @@ fi
 echo "Detected \"rmw_zenoh_cpp\" as RMW implementation was selected."
 echo "Starting zenoh router for ROS 2 communication..."
 
-export ZENOH_ROUTER_CONFIG_URI="./zenoh_router_config.json"
-ros2 run rmw_zenoh_cpp zenohd
+export ZENOH_ROUTER_CONFIG_URI="./zenoh_router_config.json5"
+ros2 run rmw_zenoh_cpp rmw_zenohd

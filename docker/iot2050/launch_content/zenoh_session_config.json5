@@ -15,7 +15,9 @@
       interface: "auto"
     }
   },
-  shared_memory: {
-    enabled: true
-  }  
+  transport: {
+    shared_memory: {
+      enabled: true
+    }
+  }
 }
