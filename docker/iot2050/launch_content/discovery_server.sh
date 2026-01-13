@@ -41,8 +41,13 @@ if [ -z "$ROS_DISCOVERY_SERVER" ]; then
   exit 0
 fi
 
+if [[ $RMW_IMPLEMENTATION != "rmw_fastrtps_cpp" ]]; then
+  echo "RMW_IMPLEMENTATION must be set to \"rmw_fastrtps_cpp\"!"
+  exit 1
+fi
+
 if ! extract_ip_and_port "$ROS_DISCOVERY_SERVER"; then
-  echo "Invalid ROS_DISCOVERY_SERVER format. Use IP_ADDRESS:PORT"
+  echo "Invalid ROS_DISCOVERY_SERVER format. Use IP_ADDRESS:PORT!"
   exit 1
 fi
 
