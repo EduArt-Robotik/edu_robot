@@ -1,0 +1,22 @@
+/// Zenoh Router Configuration File
+/// Brings up an router that is listening on port 7447
+{
+  mode: "router",
+  listeners: {
+    endpoints: [
+      "tcp/0.0.0.0:7447" // Allow connections on all network interfaces
+    ]
+  },
+
+  // Experimental...
+  scouting: {
+    multicast: {
+      enabled: true,
+      address: "224.0.0.224:7446",
+      interface: "auto"
+    }
+  },
+  shared_memory: {
+    enabled: true
+  }
+}

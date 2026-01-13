@@ -16,8 +16,9 @@ services:
             - ROS_DISCOVERY_SERVER
             - EDU_MOTOR_MODEL=${EDU_MOTOR_MODEL:-faulhaber}
             - CYCLONEDDS_URI=/home/user/ros/launch_content/cyclone_profile.xml  
+            - ZENOH_SESSION_CONFIG_URI=/home/user/ros/launch_content/zenoh_session_config.json5
         network_mode: "host"
-        command: bash -c 'cd /home/user/ros/launch_content; ros2 launch eduard-iot2050.launch.py & ./discovery_server.sh'
+        command: bash -c 'cd /home/user/ros/launch_content; ros2 launch eduard-iot2050.launch.py & ./discovery_server.sh & ./zenoh_router.sh'
         volumes:
             - './launch_content:/home/user/ros/launch_content:r'
         devices:

@@ -1,0 +1,21 @@
+/// Configurattion for all zenoh participants
+{
+  mode: "peer",
+  connect: {
+    endpoints: [
+      "tcp/localhost:7447" // Connect to the local zenoh router
+    ]
+  },
+
+  // Experimental...
+  scouting: {
+    multicast: {
+      enabled: true,
+      address: "224.0.0.224:7446",
+      interface: "auto"
+    }
+  },
+  shared_memory: {
+    enabled: true
+  }  
+}
