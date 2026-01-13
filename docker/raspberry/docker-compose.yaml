@@ -2,8 +2,8 @@ version: "3.0"
 
 services:
     eduard-raspberry-pi:
-        image: eduartrobotik/eduart-robot:1.0.2
-        container_name: eduard-raspberry-1.0.2
+        image: eduartrobotik/eduart-robot:1.0.3
+        container_name: eduard-raspberry-1.0.3
         user: user
         restart: always
         privileged: true
@@ -21,8 +21,8 @@ services:
             - '/dev:/dev'
 
     eduard-robot-control:
-        image: eduartrobotik/eduart-robot-control:0.5.0
-        container_name: eduard-robot-control-raspberry-0.5.0
+        image: eduartrobotik/eduart-robot-control:0.5.3
+        container_name: eduard-robot-control-raspberry-0.5.3
         user: user
         group_add:
             - "102"
