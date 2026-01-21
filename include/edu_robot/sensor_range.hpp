@@ -32,7 +32,6 @@ namespace robot {
  *        hardware layer.
  */
 class SensorRange : public Sensor
-                  , public processing::ProcessingComponentOutput<float>
 {
 public:
   struct Parameter {

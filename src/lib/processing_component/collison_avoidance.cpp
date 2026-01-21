@@ -8,26 +8,32 @@ CollisionAvoidance::CollisionAvoidance(const Parameter parameter, rclcpp::Node& 
   : ProcessingComponent("collision avoidance", ros_node)
   , _parameter(parameter)
 {
-
+  createInput<float>("range.front.right", 10);
+  createInput<float>("range.front.left", 10);
+  createInput<float>("range.rear.right", 10);
+  createInput<float>("range.rear.left", 10);
 }
 
-void CollisionAvoidance::processInput(const float& value, const ProcessingComponentOutput<float>* sender)
+void CollisionAvoidance::process()
 {
-  _sent_distances[sender] = value;
-  float min_front_distance = std::numeric_limits<float>::max();
-  float min_rear_distance  = std::numeric_limits<float>::max();
-
-  for (const auto& distance : _sent_distances) {
-    if (distance.first->name().find("front") != std::string::npos) {
-      min_front_distance = std::min(min_front_distance, distance.second);
-    }
-    else if (distance.first->name().find("rear") != std::string::npos) {
-      min_rear_distance = std::min(min_rear_distance, distance.second);
-    }
-    else {
-      throw std::invalid_argument("Collision Avoidance: connected outputs need \"front\" or \"rear\" in their name.");
-    }
+  // first empty queue and only get last value, because only last one counts
+  // if there is no new value present than the last received will be used to compute the reduce factor
+  for (auto& port = input("range.front.right"); port.hasValue();) {
+    _last_distance_front_right = port.getValue().get<float>();
   }
+  for (auto& port = input("range.front.left"); port.hasValue();) {
+    _last_distance_front_left = port.getValue().get<float>();
+  }  
+  for (auto& port = input("range.rear.right"); port.hasValue();) {
+    _last_distance_rear_right = port.getValue().get<float>();
+  }  
+  for (auto& port = input("range.rear.left"); port.hasValue();) {
+    _last_distance_rear_left = port.getValue().get<float>();
+  }  
+
+  // estimate the two closest distances
+  float min_front_distance = std::min(_last_distance_front_left, _last_distance_front_right);
+  float min_rear_distance  = std::min(_last_distance_rear_left, _last_distance_rear_right);
 
   _velocity_reduce_factor_front = calculateReduceFactor(min_front_distance, _parameter);
   _velocity_reduce_factor_rear  = calculateReduceFactor(min_rear_distance, _parameter);

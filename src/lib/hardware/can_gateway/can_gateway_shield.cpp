@@ -21,14 +21,18 @@ using hardware::can_gateway::CanCommunicationDevice;
 using hardware::can_gateway::can::CanRxDataEndPoint;
 
 CanGatewayShield::CanGatewayShield(char const* const can_device)
-  : processing::ProcessingComponentOutput<float>("can_gateway_shield")
-  , _communicator{
+  : _communicator{
       std::make_shared<Communicator>(
         std::make_shared<CanCommunicationDevice>(can_device, CanCommunicationDevice::CanType::CAN), 1ms),
       nullptr,
       nullptr
     }
 {
+  // Output for Measurements
+  createOutput<float>("system.voltage");
+  createOutput<float>("system.current");
+  createOutput<float>("system.temperature");
+
   // Configuring Diagnostic
   _clock = std::make_shared<rclcpp::Clock>();
   _diagnostic.voltage = std::make_shared<diagnostic::MeanDiagnostic<float, std::less<float>>>(

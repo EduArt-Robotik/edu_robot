@@ -26,7 +26,7 @@ static SensorRange::Parameter get_range_sensor_parameter(
   parameter.range_min = ros_node.get_parameter(prefix + ".range_min").as_double();
   parameter.range_max = ros_node.get_parameter(prefix + ".range_max").as_double();
 
-  return parameter;  
+  return parameter;
 }
 
 
@@ -34,7 +34,6 @@ SensorRange::SensorRange(const std::string& name, const std::string& frame_id, c
                          const tf2::Transform sensor_transform, const Parameter parameter, rclcpp::Node& ros_node,
                          std::shared_ptr<SensorInterface> hardware_interface)
   : Sensor(name, frame_id, reference_frame_id, sensor_transform)
-  , processing::ProcessingComponentOutput<float>(name)
   , _parameter(get_range_sensor_parameter(name, parameter, ros_node))
   , _publisher(ros_node.create_publisher<sensor_msgs::msg::Range>(name + "/range", rclcpp::SensorDataQoS()))
   , _clock(ros_node.get_clock())
@@ -44,6 +43,8 @@ SensorRange::SensorRange(const std::string& name, const std::string& frame_id, c
       "processing dt", "ms", 20, 300, 1000, 50, 100)
     )
 {
+  createOutput<float>("range");
+
   _hardware_interface->registerCallbackProcessMeasurementData(
     std::bind(&SensorRange::processMeasurementData, this, std::placeholders::_1)
   );
@@ -69,7 +70,7 @@ void SensorRange::processMeasurementData(const float measurement)
   msg.range           = measurement;
 
   _publisher->publish(msg);
-  sendInputValue(measurement);
+  output("range").setValue(measurement);
 }
 
 diagnostic::Diagnostic SensorRange::processDiagnosticsImpl()
