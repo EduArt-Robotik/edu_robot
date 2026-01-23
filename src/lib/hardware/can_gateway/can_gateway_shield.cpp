@@ -1,10 +1,12 @@
 #include "edu_robot/hardware/can_gateway/can_gateway_shield.hpp"
-#include "edu_robot/executer.hpp"
 #include "edu_robot/hardware/can_gateway/can_communication_device.hpp"
 #include "edu_robot/hardware/can_gateway/motor_controller_hardware.hpp"
 #include "edu_robot/hardware/can_gateway/can/message_definition.hpp"
 #include "edu_robot/hardware/can_gateway/can/can_rx_data_endpoint.hpp"
 #include "edu_robot/hardware/communicator_node.hpp"
+
+#include <edu_robot/executer.hpp>
+#include <edu_robot/event.hpp>
 
 #include <memory>
 #include <mutex>
@@ -32,6 +34,7 @@ CanGatewayShield::CanGatewayShield(char const* const can_device)
   createOutput<float>("system.voltage");
   createOutput<float>("system.current");
   createOutput<float>("system.temperature");
+  createOutput<Event>("event");
 
   // Configuring Diagnostic
   _clock = std::make_shared<rclcpp::Clock>();
@@ -72,6 +75,12 @@ CanGatewayShield::CanGatewayShield(char const* const can_device_0, char const* c
   _communication_node->createRxDataEndPoint<CanRxDataEndPoint, can::message::power_management::Response>(
     0x580,
     std::bind(&CanGatewayShield::processPowerManagementBoardResponse, this, std::placeholders::_1)
+  );
+  _communication_node->createRxDataEndPoint<CanRxDataEndPoint, can::message::power_management::ShutdownCommand>(
+    0x580,
+    [this](const message::RxMessageDataBuffer &){ 
+      output("event")->setValue(Event::SHUTDOWN);
+    }
   );
   _communication_node->createRxDataEndPoint<CanRxDataEndPoint, can::message::can_gateway_shield::Response>(
     0x381,

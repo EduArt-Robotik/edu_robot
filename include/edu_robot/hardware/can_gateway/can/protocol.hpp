@@ -66,6 +66,9 @@ struct PROTOCOL {
       static constexpr Byte CURRENT = 0x01;
       static constexpr Byte VOLTAGE = 0x02;
     };
+    struct COMMAND {
+      static constexpr Byte SHUTDOWN = 0x10; // \todo define shutdown command
+    };
   };
   struct LIGHTING {
     struct COMMAND {

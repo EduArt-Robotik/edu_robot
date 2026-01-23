@@ -2,6 +2,7 @@ add_library(processing-component
   collison_avoidance.cpp
   odometry_estimator.cpp
   processing_component.cpp
+  shutting_downer.cpp
 )
 target_link_libraries(processing-component
   Eigen3::Eigen
