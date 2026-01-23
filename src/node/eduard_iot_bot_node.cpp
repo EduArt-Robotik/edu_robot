@@ -57,7 +57,7 @@ public:
     // Configure IoT Shield.
     // \todo move it into shield somehow.
     const bool imu_data_mode = std::dynamic_pointer_cast<eduart::robot::SensorImu>(_sensors.at("imu"))->parameter().raw_data_mode;
-    iot_shield->registerComponentInput(_detect_charging_component);
+    iot_shield->output("system.voltage")->connect(_detect_charging_component->input("voltage"));
     iot_shield->setImuRawDataMode(imu_data_mode);
     
     // Start up with robot mode INACTIVE.

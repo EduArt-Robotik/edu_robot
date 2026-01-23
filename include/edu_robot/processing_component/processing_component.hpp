@@ -78,6 +78,10 @@ public:
   static PortInput make(const std::string& name, const std::size_t max_queue_size = 10) {
     return PortInput(name, max_queue_size, DataType());
   }
+  template <typename DataType>
+  static std::shared_ptr<PortInput> make_shared(const std::string& name, const std::size_t max_queue_size = 10) {
+    return std::shared_ptr<PortInput>(new PortInput(name, max_queue_size, DataType()));
+  }
 
   Data getValue();
   inline bool hasValue() const {
@@ -123,6 +127,10 @@ public:
   static PortOutput make(const std::string& name) {
     return PortOutput(name, DataType());
   }
+  template <typename DataType>
+  static std::shared_ptr<PortOutput> make_shared(const std::string& name) {
+    return std::shared_ptr<PortOutput>(new PortOutput(name, DataType()));
+  }  
 
 private:
   template <typename DataType>
@@ -140,16 +148,16 @@ public:
   // DataSourceComponent(const DataSourceComponent&) = default;
   virtual ~DataSourceComponent() = default;
 
-  PortOutput& output(const std::string& name);
+  std::shared_ptr<PortOutput> output(const std::string& name);
 
 protected:
   template <typename DataType>
   void createOutput(const std::string& name) {
-    _outputs.emplace(name, std::move(PortOutput::make<DataType>(name)));
+    _outputs[name] = PortOutput::make_shared<DataType>(name);
   }
 
 private:
-  std::unordered_map<std::string, PortOutput> _outputs;
+  std::unordered_map<std::string, std::shared_ptr<PortOutput>> _outputs;
 };
 
 class ProcessingComponent : public DataSourceComponent
@@ -167,18 +175,16 @@ public:
 
   const std::string& name() const { return _name; }
   virtual void process() = 0;
+  std::shared_ptr<PortInput> input(const std::string& name);
 
 private:
   std::string _name;
-  std::unordered_map<std::string, PortInput> _inputs;
+  std::unordered_map<std::string, std::shared_ptr<PortInput>> _inputs;
 
 protected:
-  PortInput& input(const std::string& name);
-
   template <typename DataType>
   void createInput(const std::string& name, const std::size_t queue_size = 10) {
-    auto port = PortInput::make<DataType>(name, queue_size);
-    _inputs.emplace(name, std::move(port));
+    _inputs[name] = PortInput::make_shared<DataType>(name, queue_size);
   }
 
   std::shared_ptr<rclcpp::Clock> _clock;

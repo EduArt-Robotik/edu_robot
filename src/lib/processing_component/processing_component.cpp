@@ -56,12 +56,12 @@ void PortOutput::disconnect(std::shared_ptr<PortInput> input)
 }
 
 
-PortInput& ProcessingComponent::input(const std::string& name)
+std::shared_ptr<PortInput> ProcessingComponent::input(const std::string& name)
 {
   return _inputs.at(name);
 }
 
-PortOutput& DataSourceComponent::output(const std::string& name)
+std::shared_ptr<PortOutput> DataSourceComponent::output(const std::string& name)
 {
   return _outputs.at(name);
 }

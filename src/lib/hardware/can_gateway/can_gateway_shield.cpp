@@ -116,10 +116,11 @@ void CanGatewayShield::processPowerManagementBoardResponse(const message::RxMess
   }
   if (Response::isCurrent(data)) {
     _status_report.current.mcu = Response::value(data);
+    output("system.current")->setValue(_status_report.current.mcu);
   }
   else if (Response::isVoltage(data)) {
     _status_report.voltage.mcu = Response::value(data);
-    sendInputValue(_status_report.voltage.mcu);
+    output("system.voltage")->setValue(_status_report.voltage.mcu);
   }
   else {
     throw HardwareError(State::CAN_SOCKET_ERROR, "wrong message received");
@@ -148,6 +149,7 @@ void CanGatewayShield::processCanGatewayShieldResponse(const message::RxMessageD
 
   std::scoped_lock lock(_mutex);
   _status_report.temperature = Response::temperature(data);
+  output("system.temperature")->setValue(_status_report.temperature);
 
   // Do Diagnostics
   const auto now = _clock->now();

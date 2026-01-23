@@ -18,17 +18,17 @@ void CollisionAvoidance::process()
 {
   // first empty queue and only get last value, because only last one counts
   // if there is no new value present than the last received will be used to compute the reduce factor
-  for (auto& port = input("range.front.right"); port.hasValue();) {
-    _last_distance_front_right = port.getValue().get<float>();
+  for (auto port = input("range.front.right"); port->hasValue();) {
+    _last_distance_front_right = port->getValue().get<float>();
   }
-  for (auto& port = input("range.front.left"); port.hasValue();) {
-    _last_distance_front_left = port.getValue().get<float>();
+  for (auto port = input("range.front.left"); port->hasValue();) {
+    _last_distance_front_left = port->getValue().get<float>();
   }  
-  for (auto& port = input("range.rear.right"); port.hasValue();) {
-    _last_distance_rear_right = port.getValue().get<float>();
+  for (auto port = input("range.rear.right"); port->hasValue();) {
+    _last_distance_rear_right = port->getValue().get<float>();
   }  
-  for (auto& port = input("range.rear.left"); port.hasValue();) {
-    _last_distance_rear_left = port.getValue().get<float>();
+  for (auto port = input("range.rear.left"); port->hasValue();) {
+    _last_distance_rear_left = port->getValue().get<float>();
   }  
 
   // estimate the two closest distances

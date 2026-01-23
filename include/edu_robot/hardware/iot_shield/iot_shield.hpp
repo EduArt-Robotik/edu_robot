@@ -30,7 +30,7 @@ namespace iot_shield {
 class IotShieldRxDevice;
 
 class IotShield : public HardwareRobotInterface
-                , public processing::ProcessingComponentOutput<float>
+                , public processing::DataSourceComponent
 {
 public:
   IotShield(char const* const device_name);

@@ -27,11 +27,15 @@ using uart::message::UART;
 using namespace std::chrono_literals;
 
 IotShield::IotShield(char const* const device_name)
-  : processing::ProcessingComponentOutput<float>("iot_shield")
-  , _communicator(std::make_shared<Communicator>(std::make_shared<UartCommunicationDevice>(device_name), 8ms))
+  : _communicator(std::make_shared<Communicator>(std::make_shared<UartCommunicationDevice>(device_name), 8ms))
   , _executer(std::make_shared<Executer>())
   , _communication_node(std::make_shared<CommunicatorNode>(_executer, _communicator))
 {
+  // Outputs
+  createOutput<float>("system.voltage");
+  createOutput<float>("system.current");
+  createOutput<float>("system.temperature");
+
   // Configuring Diagnostic
   _clock = std::make_shared<rclcpp::Clock>();
   _diagnostic.voltage = std::make_shared<diagnostic::MeanDiagnostic<float, std::less<float>>>(
@@ -107,7 +111,9 @@ void IotShield::processStatusReport(const message::RxMessageDataBuffer& data)
     _report.temperature = ShieldResponse::temperature(buffer);
   }
 
-  sendInputValue(_report.voltage.mcu);
+  output("system.voltage")->setValue(_report.voltage.mcu);
+  output("system.current")->setValue(_report.current.mcu);
+  output("system.temperature")->setValue(_report.temperature);
 
   // Do Diagnostics
   const auto now = _clock->now();

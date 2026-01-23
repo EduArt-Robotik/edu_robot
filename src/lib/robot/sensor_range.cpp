@@ -70,7 +70,7 @@ void SensorRange::processMeasurementData(const float measurement)
   msg.range           = measurement;
 
   _publisher->publish(msg);
-  output("range").setValue(measurement);
+  output("range")->setValue(measurement);
 }
 
 diagnostic::Diagnostic SensorRange::processDiagnosticsImpl()
