@@ -142,10 +142,14 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<HardwareRobotInterfa
     _parameter.collision_avoidance,
     *this
   );
+  _processing_components.push_back(_collision_avoidance_component);
+
   _detect_charging_component = std::make_shared<processing::DetectCharging>(
     processing::DetectCharging::Parameter{},
     *this
   );
+  _processing_components.push_back(_detect_charging_component);
+
   _odometry_component = std::make_shared<processing::OdometryEstimator>(
     processing::OdometryEstimator::Parameter{},
     *this
@@ -156,7 +160,7 @@ Robot::Robot(const std::string& robot_name, std::unique_ptr<HardwareRobotInterfa
   _timer_tf_publishing = create_wall_timer(
     _parameter.tf.publishing_interval, std::bind(&Robot::processTfPublishing, this)
   );
-  _timer_watch_dog = create_wall_timer(500ms, std::bind(&Robot::processWatchDogBarking, this));
+  _timer_process = create_wall_timer(50ms, std::bind(&Robot::process, this));
   _timer_odometry = create_wall_timer(
     _parameter.odometry.publishing_interval, std::bind(&Robot::publishingOdometry, this)
   );
@@ -476,14 +480,16 @@ void Robot::processTfPublishing()
   }
 }
 
-void Robot::processWatchDogBarking()
+void Robot::process()
 {
-  // HACK: is used to check conditions of the robot
-  // _mode = Mode::INACTIVE;
-  // setLightingForMode(_mode);
   try {
     // Handling of actions.
     _action_manager->process();
+
+    // Processing Components
+    for (const auto& component : _processing_components) {
+      component->process();
+    }
 
     // Charging Detection
     static bool last_state = false;

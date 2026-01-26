@@ -133,10 +133,12 @@ if(BUILD_TESTING)
 
   # todo: move add subdirectory down to a CMakeLists in test or something
   add_subdirectory(src/test/sub_system)
+  add_subdirectory(src/test/unit_test)
 
   install(
     TARGETS
       sub_system_test_can_motor_controller
+      test_angle
     RUNTIME DESTINATION bin    
   )
 endif()
