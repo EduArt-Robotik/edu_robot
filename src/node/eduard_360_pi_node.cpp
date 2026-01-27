@@ -60,7 +60,11 @@ public:
 
     // Initialize using created factory
     initialize(factory);
+
+    // Connect Hardware Related Components
     shield->output("system.voltage")->connect(_detect_charging_component->input("voltage"));
+
+    // Switch to inactive mode (default)
     _mode_state_machine.switchToMode(eduart::robot::RobotMode::INACTIVE);
   }
 };

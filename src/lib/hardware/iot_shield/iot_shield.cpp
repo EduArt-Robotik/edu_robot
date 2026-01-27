@@ -1,13 +1,13 @@
 #include "edu_robot/hardware/iot_shield/iot_shield.hpp"
-#include "edu_robot/executer.hpp"
-#include "edu_robot/hardware/communicator_node.hpp"
 #include "edu_robot/hardware/iot_shield/uart/message.hpp"
 #include "edu_robot/hardware/iot_shield/uart/message_definition.hpp"
 #include "edu_robot/hardware/iot_shield/uart/uart_request.hpp"
 #include "edu_robot/hardware/iot_shield/uart_communication_device.hpp"
-#include "edu_robot/hardware/rx_data_endpoint.hpp"
 
+#include <edu_robot/hardware/rx_data_endpoint.hpp>
 #include <edu_robot/hardware/communicator.hpp>
+#include <edu_robot/hardware/communicator_node.hpp>
+#include <edu_robot/hardware/network_communication_device.hpp>
 
 #include <edu_robot/robot_status_report.hpp>
 
@@ -26,10 +26,39 @@ using uart::message::UART;
 
 using namespace std::chrono_literals;
 
+IotShield::IotShield(const Parameter& parameter)
+  : _parameter(parameter)
+  , _executer(std::make_shared<Executer>())
+{
+  if (_parameter.via_tcp_connection) {
+    _communicator = std::make_shared<Communicator>(
+      std::make_shared<NetworkCommunicationDevice>(_parameter.tcp_host, _parameter.tcp_port), 8ms
+    );
+  }
+  else {
+    _communicator = std::make_shared<Communicator>(
+      std::make_shared<UartCommunicationDevice>(_parameter.uart_device.c_str()), 8ms
+    );
+  }
+  _communication_node = std::make_shared<CommunicatorNode>(_executer, _communicator);
+  construct();
+}
+
 IotShield::IotShield(char const* const device_name)
   : _communicator(std::make_shared<Communicator>(std::make_shared<UartCommunicationDevice>(device_name), 8ms))
   , _executer(std::make_shared<Executer>())
   , _communication_node(std::make_shared<CommunicatorNode>(_executer, _communicator))
+{
+  construct();
+}
+
+IotShield::~IotShield()
+{
+  disable();
+  _executer->stop();
+}
+
+void IotShield::construct()
 {
   // Outputs
   createOutput<float>("system.voltage");
@@ -63,12 +92,6 @@ IotShield::IotShield(char const* const device_name)
 
   // Starting Processing
   _executer->start();
-}
-
-IotShield::~IotShield()
-{
-  disable();
-  _executer->stop();
 }
 
 void IotShield::enable()

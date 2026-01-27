@@ -83,6 +83,9 @@ endif()
 # Building Nodes
 add_subdirectory(src/node)
 
+# Building Tools
+add_subdirectory(src/tools)
+
 ## Installing of Content
 install(
   DIRECTORY include/
@@ -106,6 +109,12 @@ install(
   # for galactic...
   RUNTIME DESTINATION lib/${PROJECT_NAME}
   INCLUDES DESTINATION include
+)
+message(STATUS "Tools: ${BUILT_TOOLS}")
+install(
+  TARGETS
+    ${BUILT_TOOLS}
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 message(STATUS "Libraries: ${BUILT_LIBRARIES}")
 install(

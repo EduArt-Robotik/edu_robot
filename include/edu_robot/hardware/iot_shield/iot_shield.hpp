@@ -5,8 +5,7 @@
  */
 #pragma once
 
-#include "edu_robot/executer.hpp"
-#include "edu_robot/hardware/iot_shield/uart/message.hpp"
+#include <edu_robot/executer.hpp>
 
 #include <edu_robot/hardware_robot_interface.hpp>
 #include <edu_robot/robot_status_report.hpp>
@@ -33,6 +32,14 @@ class IotShield : public HardwareRobotInterface
                 , public processing::DataSourceComponent
 {
 public:
+  struct Parameter {
+    std::string uart_device = "/dev/ttyS1";
+    bool via_tcp_connection = false;
+    std::string tcp_host = "192.168.0.100";
+    int tcp_port = 5000;
+  };
+
+  IotShield(const Parameter& parameter);
   IotShield(char const* const device_name);
   ~IotShield() override;
   void enable() override;
@@ -44,12 +51,16 @@ public:
   inline void setImuRawDataMode(const bool raw_data_mode) {
     _imu_raw_data_mode = raw_data_mode;
   }
+  static Parameter get_parameter(
+    const std::string& shield_name, const Parameter& default_parameter, rclcpp::Node& ros_node);
 
 private:
+  void construct();
   void processStatusReport(const message::RxMessageDataBuffer& data);
 
   diagnostic::Diagnostic processDiagnosticsImpl() override;
 
+  const Parameter _parameter;
   std::shared_ptr<Communicator> _communicator;
   std::shared_ptr<Executer> _executer;
   std::shared_ptr<CommunicatorNode> _communication_node;
