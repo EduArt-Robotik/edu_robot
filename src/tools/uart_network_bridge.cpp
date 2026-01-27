@@ -191,14 +191,10 @@ private:
       // reading until 32 bytes are read
       int bytes_read = 0;
 
-      while (bytes_read < static_cast<int>(buffer.size()) && _running && _client_fd >= 0) {
-        int chunk = _uart->read(buffer.data() + bytes_read, buffer.size() - bytes_read);
-        if (chunk > 0) {
-          bytes_read += chunk;
-        } else {
-          // error or no more data
-          break;
-        }
+      while (bytes_read < static_cast<int>(buffer.size()) && _uart->dataAvailable(100) && _running && _client_fd >= 0) {
+        bytes_read += _uart->read(
+          static_cast<char*>(static_cast<void*>(buffer.data())) + bytes_read, 1
+        );
       }
 
       if (bytes_read == buffer_size) {

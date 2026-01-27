@@ -26,6 +26,26 @@ using uart::message::UART;
 
 using namespace std::chrono_literals;
 
+IotShield::Parameter IotShield::get_parameter(
+  const std::string &shield_name, const Parameter &default_parameter, rclcpp::Node &ros_node)
+{
+  return default_parameter;
+
+  ros_node.declare_parameter<std::string>(shield_name + ".uart_device", default_parameter.uart_device);
+  ros_node.declare_parameter<bool>(shield_name + ".via_tcp_connection", default_parameter.via_tcp_connection);
+  ros_node.declare_parameter<std::string>(shield_name + ".tcp_host", default_parameter.tcp_host);
+  ros_node.declare_parameter<int>(shield_name + ".tcp_port", default_parameter.tcp_port);
+
+  Parameter parameter = default_parameter;
+
+  parameter.uart_device = ros_node.get_parameter(shield_name + ".uart_device").as_string();
+  parameter.via_tcp_connection = ros_node.get_parameter(shield_name + ".via_tcp_connection").as_bool();
+  parameter.tcp_host = ros_node.get_parameter(shield_name + ".tcp_host").as_string();
+  parameter.tcp_port = ros_node.get_parameter(shield_name + ".tcp_port").as_int();
+
+  return parameter;
+}
+
 IotShield::IotShield(const Parameter& parameter)
   : _parameter(parameter)
   , _executer(std::make_shared<Executer>())

@@ -25,8 +25,13 @@ public:
   EduardIotBot()
     : EduardV2(
         "eduard",
-        std::make_unique<IotShield>("/dev/ttyS1")
-    )
+        std::make_unique<IotShield>(IotShield::Parameter{
+          "/dev/ttyS1",
+          false,
+          "192.168.0.100",
+          5000
+        })
+      )
   {
     auto iot_shield = std::dynamic_pointer_cast<IotShield>(_hardware_interface);
     auto factory = IotBotHardwareComponentFactory(iot_shield);

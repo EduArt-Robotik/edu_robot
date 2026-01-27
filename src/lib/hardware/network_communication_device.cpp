@@ -67,9 +67,9 @@ NetworkCommunicationDevice::NetworkCommunicationDevice(
     );
   }
 
-  // Set socket to non-blocking mode for receive timeout
+  // Set socket to blocking mode
   int flags = fcntl(_socket_fd, F_GETFL, 0);
-  fcntl(_socket_fd, F_SETFL, flags | O_NONBLOCK);
+  fcntl(_socket_fd, F_SETFL, flags & ~O_NONBLOCK);
 
   RCLCPP_INFO(rclcpp::get_logger("NetworkCommunicationDevice"), "Successfully connected to %s:%d", host.c_str(), port);
 }
@@ -122,7 +122,7 @@ void NetworkCommunicationDevice::send(message::Byte const *const tx_buffer, cons
 
 message::RxMessageDataBuffer NetworkCommunicationDevice::receive()
 {
-  message::RxMessageDataBuffer rx_buffer;
+  message::RxMessageDataBuffer rx_buffer(_max_message_size);
 
   if (_socket_fd < 0) {
     throw HardwareError(
