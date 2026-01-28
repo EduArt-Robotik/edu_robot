@@ -131,11 +131,8 @@ message::RxMessageDataBuffer NetworkCommunicationDevice::receive()
   }
 
   // Read all available data as one message
-  ssize_t bytes = recv(
-    _socket_fd, 
-    static_cast<char*>(static_cast<void*>(rx_buffer.data())),
-    rx_buffer.size(), 
-    0
+  const ssize_t bytes = recv(
+    _socket_fd, static_cast<char*>(static_cast<void*>(rx_buffer.data())), rx_buffer.size(), 0
   );
   
   if (bytes < 0) {
