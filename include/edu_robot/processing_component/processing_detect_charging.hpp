@@ -30,7 +30,7 @@ public:
 
   void process() override
   {
-    for (auto port = input("system.voltage"); port->hasValue();) {
+    for (auto port = input("voltage"); port->hasValue();) {
       _is_charging = port->getValue().get<float>() >= _parameter.voltage_threshold;
     }
   }
