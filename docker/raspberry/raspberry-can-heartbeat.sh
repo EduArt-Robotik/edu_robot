@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Sends an heartbeat message over CAN bus to indicate Raspberry is running.
 IFACE="eduart-can2"
-CAN_ID="580"         # Power Management Board Output ID
+CAN_ID="500"         # Power Management Board Input ID
 SEQ_NUM=01           # Heartbeat Sequence Number
 SLEEP_SEC=1          # 1 second interval
 CAN_SYS_HEARTBEAT=FD # Heartbeat Command Byte

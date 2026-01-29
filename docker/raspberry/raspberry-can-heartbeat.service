@@ -5,7 +5,7 @@ After=docker.service
 
 [Service]
 EnvironmentFile=/etc/environment
-Type=oneshot
+Type=simple
 RemainAfterExit=no
 # Starting Heartbeat. Script is running until it receives a SIGINT.
 ExecStart=/usr/local/bin/raspberry-can-heartbeat.sh
