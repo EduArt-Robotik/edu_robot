@@ -9,6 +9,8 @@
 
 #include <edu_robot/event.hpp>
 
+#include <functional>
+
 namespace eduart {
 namespace robot {
 namespace processing {
@@ -16,9 +18,12 @@ namespace processing {
 class ShutingDowner : public ProcessingComponent
 {
 public:
-  ShutingDowner(rclcpp::Node& ros_node);
+  ShutingDowner(rclcpp::Node& ros_node, const std::function<void()> indicate_shutdown_callback = nullptr);
 
   void process() override;
+
+private:
+  std::function<void()> _indicate_shutdown_callback;
 };
 
 } // end namespace processing

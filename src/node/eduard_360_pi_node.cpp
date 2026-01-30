@@ -65,7 +65,10 @@ public:
     // Connect Hardware Related Components
     shield->output("system.voltage")->connect(_detect_charging_component->input("voltage"));
     
-    auto shutting_downer = std::make_shared<eduart::robot::processing::ShutingDowner>(*this);
+    // \todo: shutting downer component should be moved to Eduard base class
+    auto shutting_downer = std::make_shared<eduart::robot::processing::ShutingDowner>(*this , [this](){
+      _mode_state_machine.switchToMode(eduart::robot::RobotMode::SHUTTING_DOWN);
+    });
     shield->output("event")->connect(shutting_downer->input("event"));
     _processing_components.push_back(shutting_downer);
 

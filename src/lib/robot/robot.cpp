@@ -606,6 +606,12 @@ void Robot::configureStateMachine()
     _hardware_interface->disable();
     setLightingForMode(RobotMode::CHARGING);
   });
+
+  // Shutting Down Mode
+  _mode_state_machine.setModeActivationOperation(RobotMode::SHUTTING_DOWN, [this](){
+    _hardware_interface->disable();
+    setLightingForMode(RobotMode::SHUTTING_DOWN);
+  });
 }
 
 std::string Robot::getFrameIdPrefix() const
