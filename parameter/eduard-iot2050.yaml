@@ -33,7 +33,7 @@
       publish_orientation_without_yaw_tf : true
 
     # Motor Controller
-    motor_a:
+    motor_controller:
       control_frequency: 16000
       timeout_ms: 500
       weight_low_pass_encoder: 0.3

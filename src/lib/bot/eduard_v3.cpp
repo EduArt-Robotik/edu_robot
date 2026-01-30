@@ -1,10 +1,18 @@
 #include "edu_robot/bot/eduard_v3.hpp"
 
 #include <edu_robot/sensor_point_cloud.hpp>
+#include <algorithm>
 
 namespace eduart {
 namespace robot {
 namespace bot {
+
+static std::string get_port_name(const std::string& sensor_name)
+{
+  std::string result = sensor_name;
+  std::replace(result.begin(), result.end(), '/', '.');
+  return result;
+}
 
 EduardV3::EduardV3(
   const std::string& robot_name, std::unique_ptr<HardwareRobotInterface> hardware_interface, const std::string& ns)
@@ -45,7 +53,9 @@ void EduardV3::initialize(eduart::robot::HardwareComponentFactory& factory)
       factory.hardware().at(range_sensor_name[i])->cast<robot::SensorRange::SensorInterface>()
     );
     registerSensor(range_sensor);
-    range_sensor->registerComponentInput(_collision_avoidance_component);
+    range_sensor->output("range")->connect(
+      _collision_avoidance_component->input(get_port_name(range_sensor_name[i]))
+    );
     factory.hardware().at(range_sensor_name[i])->cast<robot::SensorRange::SensorInterface>()->initialize(range_sensor_parameter);
   }
 

@@ -1,13 +1,13 @@
 #include "edu_robot/hardware/iot_shield/iot_shield.hpp"
-#include "edu_robot/executer.hpp"
-#include "edu_robot/hardware/communicator_node.hpp"
 #include "edu_robot/hardware/iot_shield/uart/message.hpp"
 #include "edu_robot/hardware/iot_shield/uart/message_definition.hpp"
 #include "edu_robot/hardware/iot_shield/uart/uart_request.hpp"
 #include "edu_robot/hardware/iot_shield/uart_communication_device.hpp"
-#include "edu_robot/hardware/rx_data_endpoint.hpp"
 
+#include <edu_robot/hardware/rx_data_endpoint.hpp>
 #include <edu_robot/hardware/communicator.hpp>
+#include <edu_robot/hardware/communicator_node.hpp>
+#include <edu_robot/hardware/network_communication_device.hpp>
 
 #include <edu_robot/robot_status_report.hpp>
 
@@ -26,12 +26,65 @@ using uart::message::UART;
 
 using namespace std::chrono_literals;
 
+IotShield::Parameter IotShield::get_parameter(
+  const std::string &shield_name, const Parameter &default_parameter, rclcpp::Node &ros_node)
+{
+  return default_parameter;
+
+  ros_node.declare_parameter<std::string>(shield_name + ".uart_device", default_parameter.uart_device);
+  ros_node.declare_parameter<bool>(shield_name + ".via_tcp_connection", default_parameter.via_tcp_connection);
+  ros_node.declare_parameter<std::string>(shield_name + ".tcp_host", default_parameter.tcp_host);
+  ros_node.declare_parameter<int>(shield_name + ".tcp_port", default_parameter.tcp_port);
+
+  Parameter parameter = default_parameter;
+
+  parameter.uart_device = ros_node.get_parameter(shield_name + ".uart_device").as_string();
+  parameter.via_tcp_connection = ros_node.get_parameter(shield_name + ".via_tcp_connection").as_bool();
+  parameter.tcp_host = ros_node.get_parameter(shield_name + ".tcp_host").as_string();
+  parameter.tcp_port = ros_node.get_parameter(shield_name + ".tcp_port").as_int();
+
+  return parameter;
+}
+
+IotShield::IotShield(const Parameter& parameter)
+  : _parameter(parameter)
+  , _executer(std::make_shared<Executer>())
+{
+  if (_parameter.via_tcp_connection) {
+    _communicator = std::make_shared<Communicator>(
+      std::make_shared<NetworkCommunicationDevice>(_parameter.tcp_host, _parameter.tcp_port), 8ms
+    );
+  }
+  else {
+    _communicator = std::make_shared<Communicator>(
+      std::make_shared<UartCommunicationDevice>(_parameter.uart_device.c_str()), 8ms
+    );
+  }
+  _communication_node = std::make_shared<CommunicatorNode>(_executer, _communicator);
+  construct();
+}
+
 IotShield::IotShield(char const* const device_name)
-  : processing::ProcessingComponentOutput<float>("iot_shield")
-  , _communicator(std::make_shared<Communicator>(std::make_shared<UartCommunicationDevice>(device_name), 8ms))
+  : _communicator(std::make_shared<Communicator>(std::make_shared<UartCommunicationDevice>(device_name), 8ms))
   , _executer(std::make_shared<Executer>())
   , _communication_node(std::make_shared<CommunicatorNode>(_executer, _communicator))
 {
+  construct();
+}
+
+IotShield::~IotShield()
+{
+  disable();
+  _executer->stop();
+}
+
+void IotShield::construct()
+{
+  // Outputs
+  createOutput<float>("system.voltage");
+  createOutput<float>("system.current");
+  createOutput<float>("system.temperature");
+
   // Configuring Diagnostic
   _clock = std::make_shared<rclcpp::Clock>();
   _diagnostic.voltage = std::make_shared<diagnostic::MeanDiagnostic<float, std::less<float>>>(
@@ -59,12 +112,6 @@ IotShield::IotShield(char const* const device_name)
 
   // Starting Processing
   _executer->start();
-}
-
-IotShield::~IotShield()
-{
-  disable();
-  _executer->stop();
 }
 
 void IotShield::enable()
@@ -107,7 +154,9 @@ void IotShield::processStatusReport(const message::RxMessageDataBuffer& data)
     _report.temperature = ShieldResponse::temperature(buffer);
   }
 
-  sendInputValue(_report.voltage.mcu);
+  output("system.voltage")->setValue(_report.voltage.mcu);
+  output("system.current")->setValue(_report.current.mcu);
+  output("system.temperature")->setValue(_report.temperature);
 
   // Do Diagnostics
   const auto now = _clock->now();

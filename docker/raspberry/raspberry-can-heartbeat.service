@@ -1,0 +1,14 @@
+[Unit]
+Description=Service sending an heartbeat command via CAN bus to indicate system is up and running.
+PartOf=docker.service
+After=docker.service
+
+[Service]
+EnvironmentFile=/etc/environment
+Type=simple
+RemainAfterExit=no
+# Starting Heartbeat. Script is running until it receives a SIGINT.
+ExecStart=/usr/local/bin/raspberry-can-heartbeat.sh
+
+[Install]
+WantedBy=multi-user.target

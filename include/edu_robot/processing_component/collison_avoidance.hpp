@@ -18,7 +18,6 @@ namespace robot {
 namespace processing {
 
 class CollisionAvoidance : public ProcessingComponent
-                         , public ProcessingComponentInput<float>
 {
 public:
   struct Parameter {
@@ -29,7 +28,7 @@ public:
   CollisionAvoidance(const Parameter parameter, rclcpp::Node& ros_node);
   ~CollisionAvoidance() override = default;
 
-  void processInput(const float& value, const ProcessingComponentOutput<float>* sender) override;
+  void process() override;
   inline float getVelocityReduceFactorFront() const { return _velocity_reduce_factor_front; }
   inline float getVelocityReduceFactorRear() const { return _velocity_reduce_factor_rear; }
 
@@ -37,9 +36,12 @@ private:
   static float calculateReduceFactor(const float input_velocity, const Parameter& parameter);
 
   const Parameter _parameter;
+  float _last_distance_front_right = std::numeric_limits<float>::max();
+  float _last_distance_front_left  = std::numeric_limits<float>::max();
+  float _last_distance_rear_right  = std::numeric_limits<float>::max();
+  float _last_distance_rear_left   = std::numeric_limits<float>::max();
   float _velocity_reduce_factor_front = 1.0f;
-  float _velocity_reduce_factor_rear = 1.0f;
-  std::map<const ProcessingComponentOutput<float>*, float> _sent_distances;
+  float _velocity_reduce_factor_rear  = 1.0f;
 };                        
 
 } // end namespace processing

@@ -9,6 +9,7 @@ uint8 INACTIVE=1
 uint8 REMOTE_CONTROLLED=2
 uint8 AUTONOMOUS=4
 uint8 CHARGING=8
+uint8 SHUTTING_DOWN=16
 
 # kinematic mode
 uint8 SKID_DRIVE=1

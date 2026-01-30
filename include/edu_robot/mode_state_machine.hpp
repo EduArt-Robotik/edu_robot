@@ -7,6 +7,7 @@
 
 #include "edu_robot/mode.hpp"
 
+#include <functional>
 #include <map>
 
 namespace eduart {
@@ -16,6 +17,8 @@ namespace mode {
 // Defines if a mode transition is possible. By default no transition is allowed. By specializing the template
 // transitions can be enabled.
 template <RobotMode From, RobotMode To> struct can_switch_to_mode { static constexpr bool value = false; };
+
+template <RobotMode From> struct can_switch_to_mode<From, RobotMode::SHUTTING_DOWN> { static constexpr bool value = true; };
 
 template <> struct can_switch_to_mode<RobotMode::UNCONFIGURED, RobotMode::INACTIVE>      { static constexpr bool value = true; };
 
@@ -32,7 +35,7 @@ template <> struct can_switch_to_mode<RobotMode::AUTONOMOUS, RobotMode::INACTIVE
 template <> struct can_switch_to_mode<RobotMode::AUTONOMOUS, RobotMode::REMOTE_CONTROLLED> { static constexpr bool value = true; };
 template <> struct can_switch_to_mode<RobotMode::AUTONOMOUS, RobotMode::CHARGING>          { static constexpr bool value = true; };
 
-template <> struct can_switch_to_mode<RobotMode::CHARGING, RobotMode::INACTIVE> { static constexpr bool value = true; };
+template <> struct can_switch_to_mode<RobotMode::CHARGING, RobotMode::INACTIVE>      { static constexpr bool value = true; };
 
 // Defines which feature is needed for robot mode.
 template <RobotMode Mode, FeatureMode Feature> struct does_need_feature { static constexpr bool value = false; };
@@ -148,7 +151,7 @@ private:
   std::map<RobotMode, DeactivationOperation> _deactivation_operation;
 };
 
-using StateMachine = ModeStateMachine<RobotMode::UNCONFIGURED, RobotMode::INACTIVE, RobotMode::REMOTE_CONTROLLED, RobotMode::AUTONOMOUS, RobotMode::CHARGING>;
+using StateMachine = ModeStateMachine<RobotMode::UNCONFIGURED, RobotMode::INACTIVE, RobotMode::REMOTE_CONTROLLED, RobotMode::AUTONOMOUS, RobotMode::CHARGING, RobotMode::SHUTTING_DOWN>;
 
 } // end namespace robot
 } // end namespace eduart

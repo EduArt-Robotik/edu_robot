@@ -4,6 +4,7 @@
  * Author: Christian Wendt (christian.wendt@eduart-robotik.com)
  */
 #include "edu_robot/hardware/can_gateway/motor_controller_hardware.hpp"
+#include "edu_robot/processing_component/shuting_downer.hpp"
 
 #include <edu_robot/bot/eduard_v3.hpp>
 
@@ -60,7 +61,18 @@ public:
 
     // Initialize using created factory
     initialize(factory);
-    shield->registerComponentInput(_detect_charging_component);
+
+    // Connect Hardware Related Components
+    shield->output("system.voltage")->connect(_detect_charging_component->input("voltage"));
+    
+    // \todo: shutting downer component should be moved to Eduard base class
+    auto shutting_downer = std::make_shared<eduart::robot::processing::ShutingDowner>(*this , [this](){
+      _mode_state_machine.switchToMode(eduart::robot::RobotMode::SHUTTING_DOWN);
+    });
+    shield->output("event")->connect(shutting_downer->input("event"));
+    _processing_components.push_back(shutting_downer);
+
+    // Switch to inactive mode (default)
     _mode_state_machine.switchToMode(eduart::robot::RobotMode::INACTIVE);
   }
 };

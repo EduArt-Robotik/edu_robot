@@ -523,6 +523,18 @@ struct Response : public message::MessageFrame<element::Uint8, // measurement ty
   }
 };
 
+struct ShutdownCommand : public message::MessageFrame<element::Command<PROTOCOL::POWER_MANAGEMENT::COMMAND::SHUTDOWN>>
+{
+  // needed for add shutdown command to search pattern
+  inline static constexpr auto makeSearchPattern(const std::uint32_t can_address) {
+    using MessageType = typename MessageFrame<
+      element::Command<PROTOCOL::POWER_MANAGEMENT::COMMAND::SHUTDOWN>
+    >::MessageType;
+
+    return element::impl::make_message_search_pattern<0, 1>(can_address, MessageType{});
+  }  
+};
+
 } // end namespace_power_management
 
 namespace can_gateway_shield {

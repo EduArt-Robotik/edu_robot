@@ -25,8 +25,13 @@ public:
   EduardIotBot()
     : EduardV2(
         "eduard",
-        std::make_unique<IotShield>("/dev/ttyS1")
-    )
+        std::make_unique<IotShield>(IotShield::Parameter{
+          "/dev/ttyS1",
+          false,
+          "192.168.0.100",
+          5000
+        })
+      )
   {
     auto iot_shield = std::dynamic_pointer_cast<IotShield>(_hardware_interface);
     auto factory = IotBotHardwareComponentFactory(iot_shield);
@@ -57,7 +62,7 @@ public:
     // Configure IoT Shield.
     // \todo move it into shield somehow.
     const bool imu_data_mode = std::dynamic_pointer_cast<eduart::robot::SensorImu>(_sensors.at("imu"))->parameter().raw_data_mode;
-    iot_shield->registerComponentInput(_detect_charging_component);
+    iot_shield->output("system.voltage")->connect(_detect_charging_component->input("voltage"));
     iot_shield->setImuRawDataMode(imu_data_mode);
     
     // Start up with robot mode INACTIVE.

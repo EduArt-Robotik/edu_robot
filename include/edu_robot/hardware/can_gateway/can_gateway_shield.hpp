@@ -28,7 +28,7 @@ namespace can_gateway {
 class MotorControllerHardware;
 
 class CanGatewayShield : public HardwareRobotInterface
-                       , public processing::ProcessingComponentOutput<float>
+                       , public processing::DataSourceComponent
                        , public std::enable_shared_from_this<CanGatewayShield>
 {
 public:

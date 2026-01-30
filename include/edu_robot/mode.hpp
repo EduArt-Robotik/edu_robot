@@ -13,6 +13,7 @@ enum class RobotMode {
   REMOTE_CONTROLLED         = edu_robot::msg::Mode::REMOTE_CONTROLLED,
   AUTONOMOUS                = edu_robot::msg::Mode::AUTONOMOUS,
   CHARGING                  = edu_robot::msg::Mode::CHARGING,
+  SHUTTING_DOWN             = edu_robot::msg::Mode::SHUTTING_DOWN,
   // MASK_UNSET_DRIVING_MODE   = edu_robot::msg::Mode::MASK_UNSET_DRIVING_MODE,
 };
 
