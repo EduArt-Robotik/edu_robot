@@ -548,6 +548,10 @@ void Robot::setLightingForMode(const RobotMode mode)
         search->second->setColor(Color{0, 25, 0}, Lighting::Mode::FLASH);
         break;
 
+      case RobotMode::SHUTTING_DOWN:
+        search->second->setColor(Color{0, 0, 25}, Lighting::Mode::FLASH);
+        break;
+
       default:
         break;
     }

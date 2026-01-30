@@ -21,21 +21,26 @@ template <RobotMode From, RobotMode To> struct can_switch_to_mode { static const
 template <RobotMode From> struct can_switch_to_mode<From, RobotMode::SHUTTING_DOWN> { static constexpr bool value = true; };
 
 template <> struct can_switch_to_mode<RobotMode::UNCONFIGURED, RobotMode::INACTIVE>      { static constexpr bool value = true; };
+template <> struct can_switch_to_mode<RobotMode::UNCONFIGURED, RobotMode::SHUTTING_DOWN> { static constexpr bool value = true; };
 
 template <> struct can_switch_to_mode<RobotMode::INACTIVE, RobotMode::REMOTE_CONTROLLED> { static constexpr bool value = true; };
 template <> struct can_switch_to_mode<RobotMode::INACTIVE, RobotMode::AUTONOMOUS>        { static constexpr bool value = true; };
 template <> struct can_switch_to_mode<RobotMode::INACTIVE, RobotMode::CHARGING>          { static constexpr bool value = true; };
+template <> struct can_switch_to_mode<RobotMode::INACTIVE, RobotMode::SHUTTING_DOWN>     { static constexpr bool value = true; };
 
 template <> struct can_switch_to_mode<RobotMode::REMOTE_CONTROLLED, RobotMode::INACTIVE>          { static constexpr bool value = true; };
 template <> struct can_switch_to_mode<RobotMode::REMOTE_CONTROLLED, RobotMode::AUTONOMOUS>        { static constexpr bool value = true; };
 template <> struct can_switch_to_mode<RobotMode::REMOTE_CONTROLLED, RobotMode::CHARGING>          { static constexpr bool value = true; };
 template <> struct can_switch_to_mode<RobotMode::REMOTE_CONTROLLED, RobotMode::REMOTE_CONTROLLED> { static constexpr bool value = true; };
+template <> struct can_switch_to_mode<RobotMode::REMOTE_CONTROLLED, RobotMode::SHUTTING_DOWN>     { static constexpr bool value = true; };
 
 template <> struct can_switch_to_mode<RobotMode::AUTONOMOUS, RobotMode::INACTIVE>          { static constexpr bool value = true; };
 template <> struct can_switch_to_mode<RobotMode::AUTONOMOUS, RobotMode::REMOTE_CONTROLLED> { static constexpr bool value = true; };
 template <> struct can_switch_to_mode<RobotMode::AUTONOMOUS, RobotMode::CHARGING>          { static constexpr bool value = true; };
+template <> struct can_switch_to_mode<RobotMode::AUTONOMOUS, RobotMode::SHUTTING_DOWN>     { static constexpr bool value = true; };
 
-template <> struct can_switch_to_mode<RobotMode::CHARGING, RobotMode::INACTIVE> { static constexpr bool value = true; };
+template <> struct can_switch_to_mode<RobotMode::CHARGING, RobotMode::INACTIVE>      { static constexpr bool value = true; };
+template <> struct can_switch_to_mode<RobotMode::CHARGING, RobotMode::SHUTTING_DOWN> { static constexpr bool value = true; };
 
 // Defines which feature is needed for robot mode.
 template <RobotMode Mode, FeatureMode Feature> struct does_need_feature { static constexpr bool value = false; };
