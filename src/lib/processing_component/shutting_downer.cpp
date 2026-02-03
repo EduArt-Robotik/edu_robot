@@ -23,7 +23,7 @@ void ShutingDowner::process()
         _indicate_shutdown_callback();
       }
       
-      if (system("sudo systemctl poweroff")) { // its okay to use unsafe function here. Requires sudo rights anyway.
+      if (system("sudo nsenter -t 1 -m -u -n -i /sbin/poweroff")) { // its okay to use unsafe function here. Requires sudo rights anyway.
         RCLCPP_ERROR(rclcpp::get_logger("ShutingDowner"), "Failed to shutdown the system!");
       }
     }
