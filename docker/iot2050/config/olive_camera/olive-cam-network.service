@@ -1,0 +1,9 @@
+[Unit]
+Description=Service that bridge and configure the network for Olive cameras.
+After=network.target
+
+[Service]
+Type=forking
+RemainAfterExit=yes
+ExecStart=/bin/sh /opt/eduart/olive-cam-network-setup.sh
+ExecStop=/bin/sh /opt/eduart/olive-cam-disconnect.sh

@@ -1,0 +1,4 @@
+#SUBSYSTEM=="usb", ACTION=="add", ATTRS{idVendor}=="1d6b", ATTRS{idProduct}=="0104", TAG+="systemd", ENV{SYSTEMD_WANTS}="olive-cam-network.service"
+SUBSYSTEM=="usb", ACTION=="add", ATTRS{idVendor}=="1d6b", ATTRS{idProduct}=="0104", RUN+="/usr/bin/systemctl start olive-cam-network.service"
+SUBSYSTEM=="usb", ACTION=="remove", ATTRS{idVendor}=="1d6b", ATTRS{idProduct}=="0104", RUN+="/usr/bin/systemctl stop olive-cam-network.service"
+#SUBSYSTEM=="usb", ACTION=="remove", ATTRS{idVendor}=="1d6b", ATTRS{idProduct}=="0104", TAG+="systemd", ENV{SYSTEMD_WANTS}="olive-cam-network.service"
