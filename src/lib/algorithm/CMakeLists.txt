@@ -1,6 +1,7 @@
 add_library(eduart-algorithm
   rotation.cpp
   geometry.cpp
+  pid_controller.cpp
 )
 target_link_libraries(eduart-algorithm
   "${cpp_typesupport_target}"
