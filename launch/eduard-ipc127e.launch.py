@@ -24,7 +24,10 @@ def generate_launch_description():
       package='edu_robot',
       executable='eduard-ethernet-gateway-bot',
       name='eduard',
-      parameters=[parameter_file],
+      parameters=[
+          parameter_file,
+          {'wheel_type': EnvironmentVariable('EDU_ROBOT_WHEEL_TYPE', default_value='mecanum')}
+      ],
       namespace=EnvironmentVariable('EDU_ROBOT_NAMESPACE', default_value="eduard"),
       # prefix=['gdbserver localhost:3000'],
       output='screen',

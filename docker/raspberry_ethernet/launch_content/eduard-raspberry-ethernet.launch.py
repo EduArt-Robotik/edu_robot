@@ -70,7 +70,8 @@ def generate_launch_description():
       name='eduard',
       parameters=[
         parameter_file,
-        motor_parameter_file
+        motor_parameter_file,
+        {'wheel_type': EnvironmentVariable('EDU_ROBOT_WHEEL_TYPE', default_value='mecanum')}
         # ParameterFile(OpaqueFunction(function=get_motor_parameter_file, args=[LaunchConfiguration('motor_model')]))
       ],
       namespace=edu_robot_namespace,
