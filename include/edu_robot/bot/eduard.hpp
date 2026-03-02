@@ -23,6 +23,30 @@ struct COLOR {
   };
 };
 
+struct WHEEL {
+  enum TYPE {
+    offroad,  // this is equivalent to skid
+    mecanum
+  };
+
+  static std::string to_string(TYPE t) {
+    switch(t) {
+      case offroad: return "offroad";
+      default:      return "mecanum";
+    }
+  }
+
+  static TYPE from_string(const std::string &s) {
+    std::string lower = s;
+    std::transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char c) {
+      return std::tolower(c);
+    });
+
+    if (lower == "offroad") return offroad;
+    else return mecanum;
+  }
+};
+
 class Eduard : public robot::Robot
 {
 public:
@@ -40,7 +64,8 @@ public:
         float y = 0.36f;
       } length;
       float wheel_diameter = 0.1f;
-    } mecanum;    
+    } mecanum;
+    WHEEL::TYPE wheel_type = WHEEL::TYPE::mecanum;    
   };
 
   Eduard(

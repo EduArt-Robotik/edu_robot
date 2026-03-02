@@ -57,7 +57,8 @@ def generate_launch_description():
       name='pi_bot',
       parameters=[
         parameter_file,
-        OpaqueFunction(function=get_motor_parameter_file, args=[LaunchConfiguration('motor_model')])
+        OpaqueFunction(function=get_motor_parameter_file, args=[LaunchConfiguration('motor_model')]),
+        {'wheel_type': EnvironmentVariable('EDU_ROBOT_WHEEL_TYPE', default_value='mecanum')}
       ],
       namespace=edu_robot_namespace,      
       # prefix=['gdbserver localhost:3000'],

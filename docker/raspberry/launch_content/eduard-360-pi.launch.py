@@ -39,7 +39,8 @@ def generate_launch_description():
       name='pi_bot',
       parameters=[
         parameter_file,
-        motor_parameter_file
+        motor_parameter_file,
+        {'wheel_type': EnvironmentVariable('EDU_ROBOT_WHEEL_TYPE', default_value='mecanum')}
       ],
       namespace=EnvironmentVariable('EDU_ROBOT_NAMESPACE', default_value="eduard"),      
       # prefix=['gdbserver localhost:3000'],

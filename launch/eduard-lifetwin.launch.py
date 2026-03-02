@@ -23,7 +23,10 @@ def generate_launch_description():
       package='edu_robot',
       executable='ethernet-gateway',
       name='eduard',
-      parameters=[parameter_file],
+      parameters=[
+          parameter_file,
+          {'wheel_type': EnvironmentVariable('EDU_ROBOT_WHEEL_TYPE', default_value='mecanum')}
+      ],
       namespace=EnvironmentVariable('EDU_ROBOT_NAMESPACE', default_value="eduard"),
       remappings=[
         ('cmd_vel', 'not_used/edu_robot/cmd_vel')  

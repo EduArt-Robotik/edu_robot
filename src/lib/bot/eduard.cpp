@@ -34,6 +34,8 @@ static Eduard::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
   ros_node.declare_parameter<float>("mecanum.length.y", parameter.mecanum.length.y);
   ros_node.declare_parameter<float>("mecanum.wheel_diameter", parameter.mecanum.wheel_diameter);
 
+  ros_node.declare_parameter<std::string>("wheel_type", WHEEL::to_string(parameter.wheel_type));
+
   // Reading Parameters
   parameter.skid.length.x = ros_node.get_parameter("skid.length.x").as_double();
   parameter.skid.length.y = ros_node.get_parameter("skid.length.y").as_double();
@@ -42,6 +44,8 @@ static Eduard::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
   parameter.mecanum.length.x = ros_node.get_parameter("mecanum.length.x").as_double();
   parameter.mecanum.length.y = ros_node.get_parameter("mecanum.length.y").as_double();
   parameter.mecanum.wheel_diameter = ros_node.get_parameter("mecanum.wheel_diameter").as_double();
+
+  parameter.wheel_type = WHEEL::from_string(ros_node.get_parameter("wheel_type").as_string());
 
   return parameter;
 }
@@ -109,11 +113,20 @@ void Eduard::initialize(eduart::robot::HardwareComponentFactory& factory)
   imu_parameter.rotated_frame = getFrameIdPrefix() + Robot::_parameter.tf.base_frame;
   imu_parameter = SensorImu::get_parameter("imu", imu_parameter, *this);
 
+  // compute imu translation based on wheel type and wheel diameter
+  double imuZ = 0.0;
+  if (_parameter.wheel_type == WHEEL::TYPE::offroad) {
+    imuZ = _parameter.skid.wheel_diameter / 2;
+  } else {
+    imuZ = _parameter.mecanum.wheel_diameter / 2;
+  }
+  imuZ -= 0.02; // according to urdf robot model, the wheels are mounted 0.02 above base_link; base_link itself has no translation (only rotation) in reference to imu/base
+
   auto imu_sensor = std::make_shared<robot::SensorImu>(
     "imu",
     getFrameIdPrefix() + "imu/base",
     getFrameIdPrefix() + Robot::_parameter.tf.footprint_frame,
-    tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.0, 0.0, 0.04)),
+    tf2::Transform(tf2::Quaternion(0.0, 0.0, 0.0, 1.0), tf2::Vector3(0.0, 0.0, imuZ)),
     imu_parameter,
     getTfBroadcaster(),
     *this,
