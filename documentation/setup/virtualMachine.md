@@ -101,7 +101,10 @@ git clone https://github.com/EduArt-Robotik/edu_robot_control.git
    - *xacro* ([link](https://github.com/ros/xacro)):
      - For Humble: `sudo apt install ros-humble-xacro`
      - For Jazzy: `sudo apt install ros-jazzy-xacro`
-5. Change into the root directory of the workspace: `cd ..`
+   - *hardware-interface*
+     - Für Humble: `sudo apt install ros-humble-hardware-interface`
+     - Für Jazzy: `sudo apt install ros-jazzy-hardware-interface`
+5. Change into the root directory of the workspace: `cd ~/ros2`
 6. Build the packages: `colcon build --symlink-install`
 7. Add the workspace to your `bashrc` file
    - Open the file with *Nano*: `nano ~/.bashrc`
