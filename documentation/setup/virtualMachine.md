@@ -71,6 +71,7 @@ Guest additions are needed for e.g. fullscreen
    - Add the following at the bottom of the file:
      - For Humble: `source /opt/ros/humble/setup.bash`
      - For Jazzy: `source /opt/ros/jazzy/setup.bash`
+     - Or universally: `source /opt/ros/$ROS_DISTRO/setup.bash` <br>This will automatically detect the installed ROS2 version
 3. Close the terminal and open a new one. Test if the ros commands (e.g. `ros2 topic list`) work.
 
 # 8. Install the Cyclone DDS Middleware
