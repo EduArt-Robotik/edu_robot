@@ -163,7 +163,7 @@ hardware_interface::return_type Ros2HardwareAdapter::read(
     }
     catch (std::exception& ex) {
       RCLCPP_ERROR(get_logger(), "error occurred during port operation on \"%s\". what = %s.", name.c_str(), ex.what());
-    }    
+    }
   }
 
   return hardware_interface::return_type::OK;
