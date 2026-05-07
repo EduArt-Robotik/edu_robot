@@ -183,16 +183,19 @@
 
         <command_interface name="dout_5">
           <param name="pin">5</param>
+          <param name="initial_value">0</param>
         </command_interface>
         <state_interface name="dout_5"/>
 
         <command_interface name="dout_6">
           <param name="pin">12</param>
+          <param name="initial_value">0</param>
         </command_interface>
         <state_interface name="dout_6"/>
 
         <command_interface name="dout_7">
           <param name="pin">6</param>
+          <param name="initial_value">0</param>
         </command_interface>
         <state_interface name="dout_7"/>
       </gpio>
