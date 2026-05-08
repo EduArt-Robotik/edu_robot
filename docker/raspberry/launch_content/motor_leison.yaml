@@ -12,7 +12,7 @@
         ki: 15.0
         kp: 0.5
       encoder:
-        inverted: true
+        inverted: false
         # encoder ticks per revolution
         # --> positive and negative edges are counted + two channels
         # --> encoder ratio is 4 times the number of ticks per revolution
@@ -29,7 +29,7 @@
         ki: 15.0
         kp: 0.5
       encoder:
-        inverted: true
+        inverted: false
         # encoder ticks per revolution
         # --> positive and negative edges are counted + two channels
         # --> encoder ratio is 4 times the number of ticks per revolution
@@ -46,7 +46,7 @@
         ki: 15.0
         kp: 0.5
       encoder:
-        inverted: true
+        inverted: false
         # encoder ticks per revolution
         # --> positive and negative edges are counted + two channels
         # --> encoder ratio is 4 times the number of ticks per revolution
@@ -63,7 +63,7 @@
         ki: 15.0
         kp: 0.5
       encoder:
-        inverted: true
+        inverted: false
         # encoder ticks per revolution
         # --> positive and negative edges are counted + two channels
         # --> encoder ratio is 4 times the number of ticks per revolution

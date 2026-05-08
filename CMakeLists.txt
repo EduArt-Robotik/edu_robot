@@ -36,7 +36,7 @@ else()
 endif()
 
 # pigpio
-if (EXISTS "/usr/include/gpiod.hpp")
+if (EXISTS "/usr/include/lgpio.h")
   message(STATUS "Found libgpiod. Enable gpio hardware support for raspberry.")
   set(HAVE_GPIOD "TRUE")
 else()

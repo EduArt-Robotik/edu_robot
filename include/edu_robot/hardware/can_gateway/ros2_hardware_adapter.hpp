@@ -7,8 +7,6 @@
 
 #include <hardware_interface/system_interface.hpp>
 
-#include <gpiod.hpp>
-
 namespace eduart {
 namespace robot {
 namespace hardware {
@@ -40,8 +38,10 @@ public:
     const rclcpp::Time & time, const rclcpp::Duration & period) override;
 
 private:
-  std::shared_ptr<gpiod::chip> _chip;
-  std::unordered_map<std::string, gpiod::line> _gpio;
+  int _gpio_handle = -1;
+  std::unordered_map<std::string, int> _gpio_pin;
+  std::unordered_map<std::string, float> _gpio_initial_value;
+  std::unordered_map<std::string, float> _pwm_frequency;
 };
 
 } // end namespace can_gateway

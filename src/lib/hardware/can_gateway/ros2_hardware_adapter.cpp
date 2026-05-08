@@ -1,17 +1,17 @@
 #include "edu_robot/hardware/can_gateway/ros2_hardware_adapter.hpp"
 
-#include <iostream>
+#include <lgpio.h>
 
 namespace eduart {
 namespace robot {
 namespace hardware {
 namespace can_gateway {
 
-static std::bitset<32> resolve_resistor_mode(const std::string& mode) {
-  static std::unordered_map<std::string, std::bitset<32>> mapping_resistor_mode = {
-    {"pull_up"  , gpiod::line_request::FLAG_BIAS_PULL_UP},
-    {"pull_down", gpiod::line_request::FLAG_BIAS_PULL_DOWN},
-    {"none"     , gpiod::line_request::FLAG_BIAS_DISABLE}
+static int resolve_resistor_mode(const std::string& mode) {
+  static std::unordered_map<std::string, int> mapping_resistor_mode = {
+    {"pull_up"  , LG_SET_PULL_UP},
+    {"pull_down", LG_SET_PULL_DOWN},
+    {"none"     , 0}
   };
   
   return mapping_resistor_mode.at(mode);
@@ -25,10 +25,9 @@ Ros2HardwareAdapter::~Ros2HardwareAdapter()
 hardware_interface::CallbackReturn Ros2HardwareAdapter::on_init(const hardware_interface::HardwareInfo & info)
 {
   hardware_interface::SystemInterface::on_init(info);
+  _gpio_handle = lgGpiochipOpen(0);
 
-  _chip = std::make_shared<gpiod::chip>("gpiochip0", gpiod::chip::OPEN_BY_NAME);
-
-  return  _chip == nullptr ? hardware_interface::CallbackReturn::ERROR : hardware_interface::CallbackReturn::SUCCESS;
+  return  _gpio_handle < 0 ? hardware_interface::CallbackReturn::ERROR : hardware_interface::CallbackReturn::SUCCESS;
 }
 
 hardware_interface::CallbackReturn Ros2HardwareAdapter::on_configure(const rclcpp_lifecycle::State& previous_state)
@@ -42,27 +41,45 @@ hardware_interface::CallbackReturn Ros2HardwareAdapter::on_configure(const rclcp
       try {
         if (command.name.find("pwm") != std::string::npos) {
           // pwm pin
-          // const int pin = std::stoi(command.parameters.at("pin"));
-          // const unsigned int period_us = std::stoul(command.parameters.at("period_us"));
-          // const unsigned int frequency = static_cast<unsigned int>(1.0 / (period_us * 1e-6));
+          const int pin = std::stoi(command.parameters.at("pin"));
+          const int frequency = std::stoi(command.parameters.at("frequency"));
+          const float duty_cycle = std::stof(command.parameters.at("initial_value"));
 
-          RCLCPP_ERROR(get_logger(), "pwm is not supported at the moment");
+          if (duty_cycle < 0.0f || duty_cycle > 1.0f) {
+            throw std::invalid_argument("initial_value for pwm must be between 0.0 and 1.0");
+          }
+          if (frequency <= 0) {
+            throw std::invalid_argument("frequency for pwm must be greater than 0");
+          }
+
+          // configure, pwm output, with given frequency and initial duty cycle, no offset and continuous mode
+          if (lgTxPwm(_gpio_handle, pin, frequency, duty_cycle * 100.0f, 0, 0) < 0) {
+            RCLCPP_ERROR(get_logger(), "could not claim GPIO pin %d for PWM output", pin);
+          }
+          else {
+            RCLCPP_INFO(
+              get_logger(), "claimed GPIO pin %d for PWM output with frequency %d and initial duty cycle %f",
+              pin, frequency, duty_cycle
+            );
+            _gpio_pin[command.name] = pin;
+            _gpio_initial_value[command.name] = duty_cycle;
+            _pwm_frequency[command.name] = frequency;
+          }
         }
         else if (command.name.find("dout") != std::string::npos) {
           // digital output pin
           const int pin = std::stoi(command.parameters.at("pin"));
-          const std::string pin_name = "GPIO" + std::to_string(pin);
-          auto line = _chip->find_line(pin_name);
+          const bool initial_value = static_cast<bool>(std::stoi(command.parameters.at("initial_value")));
 
-          // configure
-          gpiod::line_request config = {
-            "edu_robot",
-            gpiod::line_request::DIRECTION_OUTPUT,
-            0
-          };
-          line.request(config, 0);
-
-          _gpio[gpio.name + '/' + command.name] = line;
+          // configure, output, no resistor, initial value
+          if (lgGpioClaimOutput(_gpio_handle, 0, pin, initial_value) < 0) {
+            RCLCPP_ERROR(get_logger(), "could not claim GPIO pin %d for output", pin);
+          }
+          else {
+            RCLCPP_INFO(get_logger(), "claimed GPIO pin %d for output with initial value %d", pin, initial_value);
+            _gpio_pin[command.name] = pin;
+            _gpio_initial_value[command.name] = initial_value;
+          }
         }
       }
       catch (std::out_of_range& ex) {
@@ -86,18 +103,18 @@ hardware_interface::CallbackReturn Ros2HardwareAdapter::on_configure(const rclcp
           // digital input
           const int pin = std::stoi(state.parameters.at("pin"));
           const auto resistor = resolve_resistor_mode(state.parameters.at("resistor"));
-          const std::string pin_name = "GPIO" + std::to_string(pin);
-          auto line = _chip->find_line(pin_name);
           
           // configure
-          gpiod::line_request config = {
-            "edu_robot",
-            gpiod::line_request::DIRECTION_INPUT,
-            resistor
-          };
-          line.request(config);
-
-          _gpio[gpio.name + '/' + state.name] = line;
+          if (lgGpioClaimInput(_gpio_handle, resistor, pin) < 0) {
+            RCLCPP_ERROR(get_logger(), "could not claim GPIO pin %d for input", pin);
+          }
+          else {
+            RCLCPP_INFO(
+              get_logger(), "claimed GPIO pin %d for input with resistor mode %s",
+              pin, state.parameters.at("resistor").c_str()
+            );
+            _gpio_pin[state.name] = pin;
+          }
         }
       }
       catch (std::out_of_range& ex) {
@@ -124,11 +141,13 @@ hardware_interface::CallbackReturn Ros2HardwareAdapter::on_activate(const rclcpp
   RCLCPP_INFO(get_logger(), "activating hardware and set it to default value");
 
   // Setting Output Default Values, also Reflecting back State
-  for (const auto& [name, line] : _gpio) {
-    if (line.direction() == gpiod::line::DIRECTION_OUTPUT) { 
-      line.set_value(0);
-      set_command(name, 0.0);
-      set_state(name, 0.0);
+  for (const auto& [name, pin] : _gpio_pin) {
+    if (name.find("pwm") != std::string::npos) { 
+      const float initial_value = _gpio_initial_value.at(name);
+      const float frequency = _pwm_frequency.at(name);
+      lgTxPwm(_gpio_handle, pin, frequency, initial_value * 100.0f, 0, 0);
+      set_command(name, initial_value);
+      set_state(name, initial_value);
     }
   }
 
@@ -138,7 +157,12 @@ hardware_interface::CallbackReturn Ros2HardwareAdapter::on_activate(const rclcpp
 hardware_interface::CallbackReturn Ros2HardwareAdapter::on_deactivate(const rclcpp_lifecycle::State& previous_state)
 {
   (void)previous_state;
-  RCLCPP_INFO(get_logger(), "deactivating hardware.");
+  RCLCPP_INFO(get_logger(), "deactivating hardware by freeing all pins.");
+
+  for (const auto& [name, pin] : _gpio_pin) {
+    lgGpioFree(_gpio_handle, pin);
+  }
+
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
@@ -150,12 +174,15 @@ hardware_interface::return_type Ros2HardwareAdapter::read(
 
   for (const auto& [name, description] : gpio_state_interfaces_) {
     try {
-      if (name.find("din") != std::string::npos) {
-        // digital input
-        set_state(name, static_cast<double>(_gpio.at(name).get_value()));
+      if (name.find("din") != std::string::npos || name.find("dout") != std::string::npos) {
+        // digital io
+        const int pin = _gpio_pin.at(name);
+        const int value = lgGpioRead(_gpio_handle, pin);
+        set_state(name, static_cast<double>(value));
       }
-      else if (name.find("dout") != std::string::npos) {
-        set_state(name, static_cast<double>(_gpio.at(name).get_value()));
+      else if (name.find("pwm") != std::string::npos) {
+        // reflect pwm command as state
+        set_state(name, get_command(name));
       }
     }
     catch (std::out_of_range& ex) {
@@ -163,7 +190,7 @@ hardware_interface::return_type Ros2HardwareAdapter::read(
     }
     catch (std::exception& ex) {
       RCLCPP_ERROR(get_logger(), "error occurred during port operation on \"%s\". what = %s.", name.c_str(), ex.what());
-    }    
+    }
   }
 
   return hardware_interface::return_type::OK;
@@ -178,7 +205,23 @@ hardware_interface::return_type Ros2HardwareAdapter::write(const rclcpp::Time & 
     try {
       if (name.find("dout") != std::string::npos) {
         // digital output
-        _gpio.at(name).set_value(get_command(name));
+        if (lgGpioWrite(_gpio_handle, _gpio_pin.at(name), get_command(name)) < 0) {
+          throw std::runtime_error("failed to write value to gpio pin");
+        }
+      }
+      else if (name.find("pwm") != std::string::npos) {
+        // pwm output
+        const float duty_cycle = get_command(name);
+        const int frequency = _pwm_frequency.at(name);
+        const int pin = _gpio_pin.at(name);
+
+        if (duty_cycle < 0.0f || duty_cycle > 1.0f) {
+          throw std::invalid_argument("duty_cycle for pwm must be between 0.0 and 1.0");
+        }
+        if (lgTxPwm(_gpio_handle, pin, frequency, duty_cycle * 100.0f, 0, 0) < 0) {
+          throw std::runtime_error("failed to write value to pwm gpio pin");
+        }
+      
       }
     }
     catch (std::out_of_range& ex) {
