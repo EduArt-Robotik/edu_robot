@@ -59,16 +59,7 @@ And as last step configure the UART according following image ![](../../image/io
 
 ### GPIO
 
-GPIO is enabled and available with a default pin configuration defined in the [URDF](../../../docker/raspberry/launch_content/eduard.urdf)-file. Only required dependency is the lgpio daemon needs to be installed and launched:
 
-```bash
-# install needed including daemon
-sudo apt update
-sudo apt install lgpio
-# launch daemon
-sudo systemctl enable rgpiod
-sudo systemctl start rgpiod
-```
 
 ## Install Required Software
 
