@@ -127,7 +127,7 @@
   <!-- digital output needs dout in name -->
   <!-- pwm output needs pwm in name -->
   <xacro:if value="${'raspberry' in '$(arg hardware)'}">
-    <ros2_control name="eduard_iot2050_hardware" type='system'>
+    <ros2_control name="eduard_raspberry_hardware" type='system'>
       <hardware>
         <plugin>eduart/robot/hardware/can_gateway/Ros2HardwareAdapter</plugin>     
       </hardware>
@@ -151,16 +151,20 @@
 
         <command_interface name="dout_11">
           <param name="pin">20</param>
+          <param name="initial_value">0</param>
         </command_interface>
         <state_interface name="dout_11"/>
 
         <command_interface name="pwm_1">
           <param name="pin">19</param>
+          <param name="initial_value">0</param>
+          <param name="frequency">1000</param>
         </command_interface>
         <state_interface name="pwm_1"/>
 
         <command_interface name="dout_13">
           <param name="pin">21</param>
+          <param name="initial_value">0</param>
         </command_interface>
         <state_interface name="dout_13"/>
       </gpio>
@@ -190,6 +194,7 @@
         <command_interface name="pwm_0">
           <param name="pin">12</param>
           <param name="initial_value">0</param>
+          <param name="frequency">1000</param>
         </command_interface>
         <state_interface name="pwm_0"/>
 
