@@ -61,9 +61,9 @@ hardware_interface::CallbackReturn Ros2HardwareAdapter::on_configure(const rclcp
               get_logger(), "claimed GPIO pin %d for PWM output with frequency %d and initial duty cycle %f",
               pin, frequency, duty_cycle
             );
-            _gpio_pin[command.name] = pin;
-            _gpio_initial_value[command.name] = duty_cycle;
-            _pwm_frequency[command.name] = frequency;
+            _gpio_pin[gpio.name + '/' + command.name] = pin;
+            _gpio_initial_value[gpio.name + '/' + command.name] = duty_cycle;
+            _pwm_frequency[gpio.name + '/' + command.name] = frequency;
           }
         }
         else if (command.name.find("dout") != std::string::npos) {
@@ -77,8 +77,8 @@ hardware_interface::CallbackReturn Ros2HardwareAdapter::on_configure(const rclcp
           }
           else {
             RCLCPP_INFO(get_logger(), "claimed GPIO pin %d for output with initial value %d", pin, initial_value);
-            _gpio_pin[command.name] = pin;
-            _gpio_initial_value[command.name] = initial_value;
+            _gpio_pin[gpio.name + '/' + command.name] = pin;
+            _gpio_initial_value[gpio.name + '/' + command.name] = initial_value;
           }
         }
       }
@@ -113,7 +113,7 @@ hardware_interface::CallbackReturn Ros2HardwareAdapter::on_configure(const rclcp
               get_logger(), "claimed GPIO pin %d for input with resistor mode %s",
               pin, state.parameters.at("resistor").c_str()
             );
-            _gpio_pin[state.name] = pin;
+            _gpio_pin[gpio.name + '/' + state.name] = pin;
           }
         }
       }
