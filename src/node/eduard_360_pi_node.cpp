@@ -46,15 +46,14 @@ public:
       factory.addMotorController(motor_controller_name, hardware_parameter);
     }
     
-    // Lighting
-    factory.addLighting();
-
     // ToF Sensor Ring
     std::vector<std::string> tof_sensors_left  = {"front", "rear"};
     std::vector<std::string> tof_sensors_right = {"front", "rear"};
 
-    factory.addTofRingSensor(
-      "tof_sensor_ring", tof_sensors_left, tof_sensors_right, *this);
+    factory.addSensorRing("tof_sensor_ring", tof_sensors_left, tof_sensors_right, *this);
+
+    // Lighting (must be called after addSensorRing)
+    factory.addLighting();
 
     // IMU Sensor
     factory.addImuSensor("imu", 0x381);

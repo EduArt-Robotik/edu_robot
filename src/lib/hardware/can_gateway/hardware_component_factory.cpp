@@ -1,17 +1,28 @@
 #include "edu_robot/hardware/can_gateway/hardware_component_factory.hpp"
-#include "edu_robot/hardware/can_gateway/sensor_point_cloud_fusion.hpp"
 #include "edu_robot/hardware/can_gateway/sensor_tof_hardware.hpp"
 #include "edu_robot/hardware/can_gateway/motor_controller_hardware.hpp"
 #include "edu_robot/hardware/can_gateway/imu_sensor_hardware.hpp"
 #include "edu_robot/hardware/can_gateway/lighting_hardware.hpp"
-#include "edu_robot/hardware/can_gateway/sensor_virtual_range.hpp"
-#include "edu_robot/hardware/can_gateway/sensor_tof_ring_hardware.hpp"
-#include "edu_robot/hardware/can_gateway/sensor_point_cloud_fusion.hpp"
+#include "edu_robot/hardware/can_gateway/sensor_tof_sensor_ring_adapter.hpp"
+#include "edu_robot/hardware/can_gateway/sensor_virtual_range_adapter.hpp"
+
+#include <sensorring/SensorRingFactory.hpp>
+#include <sensorring/manager/MeasurementManager.hpp>
+#include <sensorring/manager/ManagerParams.hpp>
+#include <sensorring/math/Math.hpp>
 
 #include <edu_robot/hardware/can_gateway/can_gateway_shield.hpp>
+#include <edu_robot/sensor.hpp>
+
+#include <rclcpp/node.hpp>
+#include <rclcpp/logging.hpp>
+
+#include <tf2/LinearMath/Matrix3x3.h>
 
 #include <memory>
-#include <rclcpp/node.hpp>
+#include <stdexcept>
+#include <unordered_map>
+#include <vector>
 
 namespace eduart {
 namespace robot {
@@ -20,18 +31,48 @@ namespace can_gateway {
 
 HardwareComponentFactory& HardwareComponentFactory::addLighting()
 {
+  if (!_measurement_manager) {
+    throw std::logic_error(
+      "HardwareComponentFactory::addLighting(): addSensorRing() must be called before addLighting()");
+  }
+
   const std::array<std::string, 5> lighting_name = {"all", "head", "back", "left_side", "right_side"};
 
-  LightingHardwareManager::instance().initialize(
-    _shield->getExecuter(), _shield->getCommunicator(2), _shield->getCommunicator(1)
-  );
+  // Build zone-to-light-index mapping based on enumeration order:
+  //   lights[0 .. n_left-1]     → left ring  (eduart-can2, added first)
+  //   lights[n_left .. total-1] → right ring (eduart-can1, added second)
+  const std::size_t n_left  = _left_ring_sensor_count;
+  const std::size_t total   = _measurement_manager->lights().size();
+  const std::size_t n_right = total - n_left;
+
+  std::unordered_map<std::string, std::vector<int>> zone_map;
+
+  // "all"
+  for (std::size_t i = 0; i < total; ++i) {
+    zone_map["all"].push_back(static_cast<int>(i));
+  }
+  // "left_side"
+  for (std::size_t i = 0; i < n_left; ++i) {
+    zone_map["left_side"].push_back(static_cast<int>(i));
+  }
+  // "right_side"
+  for (std::size_t i = n_left; i < total; ++i) {
+    zone_map["right_side"].push_back(static_cast<int>(i));
+  }
+  // "head": front-most board of each ring
+  if (n_left > 0) { zone_map["head"].push_back(0); }
+  if (n_right > 0) { zone_map["head"].push_back(static_cast<int>(total - 1)); }
+  // "back": rear-most board of each ring (middle index of each half)
+  if (n_left > 0) { zone_map["back"].push_back(static_cast<int>(n_left / 2)); }
+  if (n_right > 0) { zone_map["back"].push_back(static_cast<int>(n_left + n_right / 2)); }
+
+  LightingHardwareManager::instance().initialize(_measurement_manager, zone_map);
 
   for (const auto& name : lighting_name) {
     _hardware[name] = LightingHardwareManager::instance().lighting(name);
   }
-
   return *this;
-} 
+}
 
 HardwareComponentFactory& HardwareComponentFactory::addMotorController(
   const std::string& controller_name, const MotorControllerHardware::Parameter& parameter)
@@ -56,28 +97,119 @@ HardwareComponentFactory& HardwareComponentFactory::addTofSensor(
   return *this;
 }
 
-HardwareComponentFactory& HardwareComponentFactory::addTofRingSensor(
-  const std::string& sensor_name, const std::vector<std::string>& left_ring_sensors,
-  const std::vector<std::string>& right_ring_sensors, rclcpp::Node& ros_node)
+HardwareComponentFactory& HardwareComponentFactory::addSensorRing(
+  const std::string& sensor_name, const std::vector<std::string>& left_sensor_names,
+  const std::vector<std::string>& right_sensor_names, rclcpp::Node& ros_node)
 {
-  const auto parameter_left_sensors = SensorTofRingHardware::get_parameter(
-    sensor_name + "_left", left_ring_sensors, ros_node
-  );
-  const auto parameter_right_sensors = SensorTofRingHardware::get_parameter(
-    sensor_name + "_right", right_ring_sensors, ros_node
-  );
+  sensorring::ring::SensorRingFactory factory(sensorring::ring::ValidationMode::Relaxed);
 
-  auto left_ring = std::make_shared<SensorTofRingHardware>(
-    sensor_name, parameter_left_sensors, ros_node, _shield->getExecuter(), _shield->getCommunicator(2)
-  );
-  auto right_ring = std::make_shared<SensorTofRingHardware>(
-    sensor_name, parameter_right_sensors, ros_node, _shield->getExecuter(), _shield->getCommunicator(1)
-  );
-  std::vector<std::shared_ptr<SensorPointCloud::SensorInterface>> ring = { left_ring, right_ring };
+  // Disable thermal sensor on Headlights
+  sensorring::device::HTPA32_Params default_htpa32_params;
+  default_htpa32_params.enable = false;
+  factory.setDefaultDeviceParams(default_htpa32_params);
 
-  _hardware[sensor_name] = std::make_shared<SensorPointCloudFusion>(ring);
-  _hardware.insert(left_ring->virtualRangeSensor().begin(), left_ring->virtualRangeSensor().end());
-  _hardware.insert(right_ring->virtualRangeSensor().begin(), right_ring->virtualRangeSensor().end());
+  // Collect all board transforms (declared once via get_transform_from_parameter) so they can be
+  // reused later for virtual range sensors without triggering ParameterAlreadyDeclaredException.
+  std::vector<tf2::Transform> all_transforms;
+
+  // Left ring → eduart-can1 (communicator index 1, added first so lights[0..n-1])
+  factory.addInterface({ sensorring::com::InterfaceType::SocketCan, "eduart-can1" });
+  const std::string left_prefix = sensor_name + "_left";
+  for (const auto& board_name : left_sensor_names) {
+    const tf2::Transform tf = Sensor::get_transform_from_parameter(
+      left_prefix + '.' + board_name, ros_node);
+    all_transforms.push_back(tf);
+
+    tf2::Matrix3x3 rot_matrix(tf.getRotation());
+    double roll, pitch, yaw;
+    rot_matrix.getRPY(roll, pitch, yaw);
+
+    sensorring::board::SensorBoardParams board;
+    board.translation = { tf.getOrigin().x(), tf.getOrigin().y(), tf.getOrigin().z() };
+    board.rotation    = {
+      sensorring::math::radiansToDegrees(roll),
+      sensorring::math::radiansToDegrees(pitch),
+      sensorring::math::radiansToDegrees(yaw)
+    };
+
+    // Require at least one Headlight and a Taillight. Factory ValidationMode is "Relaxed", so order doesn't matter.
+    if(board_name == "front") {
+      board.board_type = sensorring::board::SensorBoardType::Headlight;
+    } else if(board_name == "rear"){
+      board.board_type = sensorring::board::SensorBoardType::Taillight;
+    }
+
+    factory.expectBoard(board);
+  }
+
+  // Right ring → eduart-can0 (communicator index 0, added second so lights[n..])
+  factory.addInterface({ sensorring::com::InterfaceType::SocketCan, "eduart-can0" });
+  const std::string right_prefix = sensor_name + "_right";
+  for (const auto& board_name : right_sensor_names) {
+    const tf2::Transform tf = Sensor::get_transform_from_parameter(
+      right_prefix + '.' + board_name, ros_node);
+    all_transforms.push_back(tf);
+
+    tf2::Matrix3x3 rot_matrix(tf.getRotation());
+    double roll, pitch, yaw;
+    rot_matrix.getRPY(roll, pitch, yaw);
+
+    sensorring::board::SensorBoardParams board;
+    board.translation = { tf.getOrigin().x(), tf.getOrigin().y(), tf.getOrigin().z() };
+    board.rotation    = {
+      sensorring::math::radiansToDegrees(roll),
+      sensorring::math::radiansToDegrees(pitch),
+      sensorring::math::radiansToDegrees(yaw)
+    };
+
+    // Require at least one Headlight and a Taillight. Factory ValidationMode is "Relaxed", so order doesn't matter.
+    if(board_name == "front") {
+      board.board_type = sensorring::board::SensorBoardType::Headlight;
+    } else if(board_name == "rear"){
+      board.board_type = sensorring::board::SensorBoardType::Taillight;
+    }
+
+    factory.expectBoard(board);
+  }
+
+  sensorring::manager::ManagerParams params;
+  _measurement_manager = std::make_shared<sensorring::manager::MeasurementManager>(params, factory);
+  _left_ring_sensor_count = left_sensor_names.size();
+
+  const std::size_t total_sensors = left_sensor_names.size() + right_sensor_names.size();
+  _hardware[sensor_name] = std::make_shared<SensorTofSensorRingAdapter>(
+    _measurement_manager, total_sensors);
+
+  // Virtual range sensors — check per-board ROS parameter flag.
+  // Iterate over all_prefixes (known at config time) rather than depthSensors(),
+  // which may return an empty vector before the CAN ring has been discovered.
+  const std::vector<std::string> all_sensor_names = [&] {
+    std::vector<std::string> combined;
+    combined.insert(combined.end(), left_sensor_names.begin(), left_sensor_names.end());
+    combined.insert(combined.end(), right_sensor_names.begin(), right_sensor_names.end());
+    return combined;
+  }();
+  const std::vector<std::string> all_prefixes = [&] {
+    std::vector<std::string> combined;
+    for (const auto& name : left_sensor_names)  { combined.push_back(left_prefix  + '.' + name); }
+    for (const auto& name : right_sensor_names) { combined.push_back(right_prefix + '.' + name); }
+    return combined;
+  }();
+
+  for (std::size_t i = 0; i < all_prefixes.size(); ++i) {
+    const std::string param_path = all_prefixes[i] + ".virtual_range_sensor";
+    ros_node.declare_parameter<bool>(param_path, false);
+    const bool want_virtual_range = ros_node.get_parameter(param_path).as_bool();
+
+    if (want_virtual_range) {
+      // Reuse the transform already read above — do NOT call get_transform_from_parameter again,
+      // as that would re-declare the same parameters and throw ParameterAlreadyDeclaredException.
+      const std::string side = (i < left_sensor_names.size()) ? "left" : "right";
+      const std::string range_key = "range/" + all_sensor_names[i] + "/" + side;
+      _hardware[range_key] = std::make_shared<SensorVirtualRangeAdapter>(
+        _measurement_manager, static_cast<unsigned int>(i), all_transforms[i]);
+    }
+  }
 
   return *this;
 }
@@ -91,7 +223,7 @@ HardwareComponentFactory& HardwareComponentFactory::addTofRingSensor(
 //   // _shield->registerIotShieldRxDevice(range_sensor_hardware);
 //   _hardware[sensor_name] = range_sensor_hardware;
 //   return *this;
-// } 
+// }
 
 HardwareComponentFactory& HardwareComponentFactory::addImuSensor(
   const std::string& sensor_name, const std::uint32_t can_id)

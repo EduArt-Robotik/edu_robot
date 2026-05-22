@@ -8,12 +8,18 @@
 #include <edu_robot/hardware_component_factory.hpp>
 
 #include "edu_robot/hardware/can_gateway/sensor_tof_hardware.hpp"
-#include "edu_robot/hardware/can_gateway/sensor_tof_ring_hardware.hpp"
 #include "edu_robot/hardware/can_gateway/motor_controller_hardware.hpp"
 
 #include <cstdint>
 #include <memory>
 #include <string>
+
+// Forward declaration for sensorring type
+namespace eduart {
+namespace sensorring {
+namespace manager { class MeasurementManager; }
+} // end namespace sensorring
+} // end namespace eduart
 
 namespace eduart {
 namespace robot {
@@ -37,12 +43,24 @@ public:
     const std::string& sensor_name, const std::uint32_t can_id);
   HardwareComponentFactory& addTofSensor(
     const std::string& sensor_name, const SensorTofHardware::Parameter& parameter, rclcpp::Node& ros_node);
-  HardwareComponentFactory& addTofRingSensor(
-    const std::string& sensor_name, const std::vector<std::string>& left_ring_sensors,
-    const std::vector<std::string>& right_ring_sensors, rclcpp::Node& ros_node);
+
+  /**
+   * \brief Add a sensor ring (left + right) backed by edu_lib_sensorring when available,
+   *        falling back to the legacy SensorTofRingHardware otherwise.
+   *
+   * \note addSensorRing() must be called before addLighting() so that _measurement_manager
+   *       is populated when the lighting manager is initialized.
+   */
+  HardwareComponentFactory& addSensorRing(
+    const std::string& sensor_name, const std::vector<std::string>& left_sensor_names,
+    const std::vector<std::string>& right_sensor_names, rclcpp::Node& ros_node);
 
 protected:
   std::shared_ptr<CanGatewayShield> _shield;
+
+  // Populated by addSensorRing(); consumed by addLighting().
+  std::shared_ptr<sensorring::manager::MeasurementManager> _measurement_manager;
+  std::size_t _left_ring_sensor_count = 0u;
 };
 
 } // end namespace can_gateway

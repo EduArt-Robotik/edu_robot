@@ -5,13 +5,19 @@
  */
 #pragma once
 
-#include <cstdint>
 #include <edu_robot/lighting.hpp>
-
-#include <edu_robot/hardware/communicator_node.hpp>
 
 #include <memory>
 #include <map>
+#include <unordered_map>
+#include <vector>
+
+// Forward declaration for sensorring type
+namespace eduart {
+namespace sensorring {
+namespace manager { class MeasurementManager; }
+} // end namespace sensorring
+} // end namespace eduart
 
 namespace eduart {
 namespace robot {
@@ -48,10 +54,6 @@ private:
 public:
   friend LightingGroup;
 
-  struct Parameter {
-    std::uint32_t can_address = 0x200;
-  };
-
   ~LightingHardwareManager() = default;
 
   static LightingHardwareManager& instance() {
@@ -60,27 +62,30 @@ public:
     }
 
     return *_instance;
-
-    // alternative implementation
-    // static LightingHardwareManager manager;
-    // return manager;
   }
 
+  /**
+   * \brief Initialize via the sensor ring MeasurementManager.
+   *
+   * \param manager                The shared MeasurementManager that owns the sensor ring lights.
+   * \param zone_to_light_indices  Maps zone names ("all", "head", …) to light board indices in manager->lights().
+   */
   void initialize(
-    std::shared_ptr<Executer> executer, std::shared_ptr<Communicator> communicator_left, std::shared_ptr<Communicator> communicator_right);
+    std::shared_ptr<sensorring::manager::MeasurementManager> manager,
+    const std::unordered_map<std::string, std::vector<int>>& zone_to_light_indices);
+
   inline std::shared_ptr<Lighting::ComponentInterface> lighting(const std::string& name) {
     return _lighting_group.at(name);
   }
 
 private:
   void processSetValue(const std::string& name, const Color& color, const robot::Lighting::Mode& mode);
-  void syncLighting();
 
   inline static std::unique_ptr<LightingHardwareManager> _instance{nullptr};
 
-  const Parameter _parameter;
-  std::shared_ptr<CommunicatorNode> _communication_node_left;
-  std::shared_ptr<CommunicatorNode> _communication_node_right;
+  std::shared_ptr<sensorring::manager::MeasurementManager> _manager;
+  std::unordered_map<std::string, std::vector<int>> _zone_to_light_indices;
+
   std::map<std::string, std::shared_ptr<LightingGroup>> _lighting_group;
 };
 

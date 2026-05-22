@@ -15,7 +15,6 @@
 using eduart::robot::bot::UniversalBot;
 using eduart::robot::hardware::can_gateway::CanGatewayShield;
 using eduart::robot::hardware::can_gateway::HardwareComponentFactory;
-using eduart::robot::hardware::can_gateway::SensorTofRingHardware;
 using eduart::robot::hardware::can_gateway::MotorControllerHardware;
 
 class CanGatewayUniversalBot : public UniversalBot
