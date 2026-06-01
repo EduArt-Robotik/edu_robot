@@ -48,26 +48,28 @@ endif()
 
 # Sensor ring library
 set(SENSORRING_USE_USBTINGO OFF CACHE BOOL "" FORCE)
-find_package(sensorring QUIET)
-if(NOT sensorring_FOUND)
-  # Check for a local development copy of edu_lib_sensorring next to this workspace
-  set(LOCAL_SENSORRING_DIR "${PROJECT_SOURCE_DIR}/edu_lib_sensorring")
-  if(EXISTS "${LOCAL_SENSORRING_DIR}/CMakeLists.txt")
-    message(STATUS "edu_lib_sensorring: Using local copy at ${LOCAL_SENSORRING_DIR}")
-    add_subdirectory("${LOCAL_SENSORRING_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/sensorring_build" EXCLUDE_FROM_ALL)
-    set(sensorring_FOUND TRUE)
-  elseif(EXISTS "/usr/include/gpiod.hpp")
-    message(STATUS "edu_lib_sensorring: Raspberry Pi detected — fetching from GitHub...")
-    cmake_policy(SET CMP0135 NEW)
-    include(FetchContent)
-    FetchContent_Declare(
-      sensorring
-      URL https://github.com/EduArt-Robotik/edu_lib_sensorring/archive/refs/heads/develop.zip
-    )
-    FetchContent_MakeAvailable(sensorring)
-    set(sensorring_FOUND TRUE)
-  else()
-    message(STATUS "edu_lib_sensorring: Not found. Sensor ring hardware support disabled.")
+set(LOCAL_SENSORRING_DIR "${PROJECT_SOURCE_DIR}/edu_lib_sensorring")
+if(EXISTS "${LOCAL_SENSORRING_DIR}/CMakeLists.txt")
+  # Prefer the local submodule — avoids stale find_package hits from install dir.
+  message(STATUS "edu_lib_sensorring: Using local copy at ${LOCAL_SENSORRING_DIR}")
+  add_subdirectory("${LOCAL_SENSORRING_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/sensorring_build" EXCLUDE_FROM_ALL)
+  set(sensorring_FOUND TRUE)
+else()
+  find_package(sensorring QUIET)
+  if(NOT sensorring_FOUND)
+    if(EXISTS "/usr/include/gpiod.hpp")
+      message(STATUS "edu_lib_sensorring: Raspberry Pi detected — fetching from GitHub...")
+      cmake_policy(SET CMP0135 NEW)
+      include(FetchContent)
+      FetchContent_Declare(
+        sensorring
+        URL https://github.com/EduArt-Robotik/edu_lib_sensorring/archive/refs/heads/develop.zip
+      )
+      FetchContent_MakeAvailable(sensorring)
+      set(sensorring_FOUND TRUE)
+    else()
+      message(STATUS "edu_lib_sensorring: Not found. Sensor ring hardware support disabled.")
+    endif()
   endif()
 endif()
 if(sensorring_FOUND)
