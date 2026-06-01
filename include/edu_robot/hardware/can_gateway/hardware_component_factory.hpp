@@ -45,8 +45,7 @@ public:
     const std::string& sensor_name, const SensorTofHardware::Parameter& parameter, rclcpp::Node& ros_node);
 
   /**
-   * \brief Add a sensor ring (left + right) backed by edu_lib_sensorring when available,
-   *        falling back to the legacy SensorTofRingHardware otherwise.
+   * \brief Add a sensor ring (left + right) backed by edu_lib_sensorring.
    *
    * \note addSensorRing() must be called before addLighting() so that _measurement_manager
    *       is populated when the lighting manager is initialized.

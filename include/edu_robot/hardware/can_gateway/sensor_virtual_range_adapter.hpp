@@ -28,10 +28,7 @@ namespace can_gateway {
 
 /**
  * \brief Adapter that subscribes to a single depth sensor, converts the measurement
- *        to a PointCloud2, and feeds it into the existing SensorVirtualRange ground-plane
- *        filtering logic.
- *
- *        Replaces SensorVirtualRange wired through SensorTofHardware.
+ *        to a PointCloud2, and feeds it into the SensorVirtualRange.
  */
 class SensorVirtualRangeAdapter : public SensorRange::SensorInterface
 {

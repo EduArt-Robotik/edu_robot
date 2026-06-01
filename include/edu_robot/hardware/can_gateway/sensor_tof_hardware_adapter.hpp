@@ -29,8 +29,6 @@ namespace can_gateway {
 /**
  * \brief Adapter that subscribes to a single depth sensor of a MeasurementManager
  *        and publishes its measurements as a PointCloud2.
- *
- *        Replaces the standalone SensorTofHardware for the addTofSensor factory path.
  */
 class SensorTofHardwareAdapter : public SensorPointCloud::SensorInterface
 {

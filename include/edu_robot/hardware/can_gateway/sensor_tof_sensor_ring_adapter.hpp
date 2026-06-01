@@ -30,8 +30,6 @@ namespace can_gateway {
 /**
  * \brief Adapter that subscribes to all depth sensors of a MeasurementManager,
  *        accumulates one measurement cycle across all sensors, and publishes a merged PointCloud2.
- *
- *        Replaces SensorTofRingHardware (x2) + SensorPointCloudFusion.
  */
 class SensorTofSensorRingAdapter : public SensorPointCloud::SensorInterface
 {
