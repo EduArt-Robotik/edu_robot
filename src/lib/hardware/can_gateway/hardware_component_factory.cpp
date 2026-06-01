@@ -36,40 +36,56 @@ HardwareComponentFactory& HardwareComponentFactory::addLighting()
       "HardwareComponentFactory::addLighting(): addSensorRing() must be called before addLighting()");
   }
 
-  const std::array<std::string, 5> lighting_name = {"all", "head", "back", "left_side", "right_side"};
+  const std::size_t total = _measurement_manager->lights().size();
 
-  // Build zone-to-light-index mapping based on enumeration order:
-  //   lights[0 .. n_left-1]     → left ring  (eduart-can2, added first)
-  //   lights[n_left .. total-1] → right ring (eduart-can1, added second)
-  const std::size_t n_left  = _left_ring_sensor_count;
-  const std::size_t total   = _measurement_manager->lights().size();
-  const std::size_t n_right = total - n_left;
+  std::unordered_map<std::string, std::vector<std::size_t>> zone_map;
 
-  std::unordered_map<std::string, std::vector<int>> zone_map;
+  // Ensure all zone keys exist (LightingHardwareManager throws on unknown zones).
+  zone_map["all"];
+  zone_map["head"];
+  zone_map["back"];
+  zone_map["left_side"];
+  zone_map["right_side"];
 
-  // "all"
+  // "all" zone always contains every light.
   for (std::size_t i = 0; i < total; ++i) {
-    zone_map["all"].push_back(static_cast<int>(i));
+    zone_map["all"].push_back(i);
   }
-  // "left_side"
-  for (std::size_t i = 0; i < n_left; ++i) {
-    zone_map["left_side"].push_back(static_cast<int>(i));
-  }
-  // "right_side"
-  for (std::size_t i = n_left; i < total; ++i) {
-    zone_map["right_side"].push_back(static_cast<int>(i));
-  }
-  // "head": front-most board of each ring
-  if (n_left > 0) { zone_map["head"].push_back(0); }
-  if (n_right > 0) { zone_map["head"].push_back(static_cast<int>(total - 1)); }
-  // "back": rear-most board of each ring (middle index of each half)
-  if (n_left > 0) { zone_map["back"].push_back(static_cast<int>(n_left / 2)); }
-  if (n_right > 0) { zone_map["back"].push_back(static_cast<int>(n_left + n_right / 2)); }
 
-  LightingHardwareManager::instance().initialize(_measurement_manager, zone_map);
+  // Build per-zone mappings by iterating the bus/board topology.
+  // Light indices in lights() follow the same iteration order: buses → boards → devices.
+  std::size_t light_idx = 0;
+  auto buses = _measurement_manager->getRing()->getSensorBuses();
+  for (std::size_t bus_i = 0; bus_i < buses.size(); ++bus_i) {
+    auto bus = buses[bus_i];
+    if (!bus) continue;
+    const std::string side = (bus_i == 0) ? "left_side" : "right_side";
+    for (auto* board : bus->getSensorBoards()) {
+      for (auto* device : board->getDevices()) {
+        if (dynamic_cast<eduart::sensorring::device::Light*>(device)) {
+          zone_map[side].push_back(light_idx);
 
-  for (const auto& name : lighting_name) {
-    _hardware[name] = LightingHardwareManager::instance().lighting(name);
+          switch (board->getBoardType()) {
+          case eduart::sensorring::board::SensorBoardType::Headlight:
+            zone_map["head"].push_back(light_idx);
+            break;
+          case eduart::sensorring::board::SensorBoardType::Taillight:
+            zone_map["back"].push_back(light_idx);
+            break;
+          default:
+            break;
+          }
+          ++light_idx;
+        }
+      }
+    }
+  }
+
+  auto lighting_manager = std::make_shared<LightingHardwareManager>(_measurement_manager, std::move(zone_map));
+
+  const std::array<std::string, 5> lighting_names = {"all", "head", "back", "left_side", "right_side"};
+  for (const auto& name : lighting_names) {
+    _hardware[name] = std::make_shared<LightingGroup>(name, lighting_manager);
   }
   return *this;
 }
