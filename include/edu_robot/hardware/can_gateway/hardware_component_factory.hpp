@@ -37,8 +37,8 @@ public:
   HardwareComponentFactory& addLighting();
   HardwareComponentFactory& addMotorController(
     const std::string& controller_name, const MotorControllerHardware::Parameter& parameter);
-  HardwareComponentFactory& addRangeSensor(
-    const std::string& sensor_name, const std::uint8_t id);
+  //HardwareComponentFactory& addRangeSensor(
+  //  const std::string& sensor_name, const std::uint8_t id);
   HardwareComponentFactory& addImuSensor(
     const std::string& sensor_name, const std::uint32_t can_id);
   HardwareComponentFactory& addTofSensor(
