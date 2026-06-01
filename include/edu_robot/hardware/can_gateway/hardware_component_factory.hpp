@@ -60,7 +60,6 @@ protected:
 
   // Populated by addSensorRing(); consumed by addLighting().
   std::shared_ptr<sensorring::manager::MeasurementManager> _measurement_manager;
-  std::size_t _left_ring_sensor_count = 0u;
 };
 
 } // end namespace can_gateway
