@@ -117,7 +117,7 @@ HardwareComponentFactory& HardwareComponentFactory::addSensorRing(
   const std::string& sensor_name, const std::vector<std::string>& left_sensor_names,
   const std::vector<std::string>& right_sensor_names, rclcpp::Node& ros_node)
 {
-  sensorring::ring::SensorRingFactory factory(sensorring::ring::ValidationMode::Relaxed);
+  sensorring::SensorRingFactory factory(sensorring::ValidationMode::Relaxed);
 
   // Disable thermal sensor on Headlights
   sensorring::device::HTPA32_Params default_htpa32_params;
