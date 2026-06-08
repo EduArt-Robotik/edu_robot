@@ -157,6 +157,11 @@ void Communicator::processing()
         message::RxMessageDataBuffer rx_buffer;
         {
           std::unique_lock lock(_mutex_receiving_data);
+          if (_rx_buffer_queue.empty()) {
+            // Keep the flag consistent even if it was observed stale.
+            _new_received_data = false;
+            continue;
+          }
           rx_buffer = std::move(_rx_buffer_queue.front());
           _rx_buffer_queue.pop();
 
@@ -209,7 +214,13 @@ void Communicator::processing()
     }
 
     // Make a period of 1ms if nothing to do.
-    if (_rx_buffer_queue.empty()) {
+    bool is_rx_queue_empty;
+    {
+      std::lock_guard guard(_mutex_receiving_data);
+      is_rx_queue_empty = _rx_buffer_queue.empty();
+    }
+
+    if (is_rx_queue_empty) {
       if (std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - start) < 1ms) {
         const auto diff = 1ms - std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - start);
         std::this_thread::sleep_for(diff);      
