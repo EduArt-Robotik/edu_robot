@@ -25,7 +25,7 @@ ament_target_dependencies(eduard-ethernet-gateway-bot
 )
 set(BUILT_NODES ${BUILT_NODES} "eduard-ethernet-gateway-bot")
 
-### Universal Ehternet Gateway Bot
+### Universal Ethernet Gateway Bot
 add_executable(universal-ethernet-gateway-bot
   universal_ethernet_gateway_bot_node.cpp
 )
@@ -77,6 +77,19 @@ ament_target_dependencies(rebel-move-360-pi-bot
   "rclcpp"
 )
 set(BUILT_NODES ${BUILT_NODES} "rebel-move-360-pi-bot")
+
+### Thn Georg Bot
+add_executable(thn-georg-bot
+  thn_georg_bot_node.cpp
+)
+target_link_libraries(thn-georg-bot
+  eduart-ethernet-gateway
+  eduart-bot
+)
+ament_target_dependencies(thn-georg-bot
+  "rclcpp"
+)
+set(BUILT_NODES ${BUILT_NODES} "thn-georg-bot")
 
 # Populating Built Nodes
 set(BUILT_NODES ${BUILT_NODES} PARENT_SCOPE)

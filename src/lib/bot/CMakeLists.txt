@@ -5,6 +5,7 @@ add_library(eduart-bot
   eduard_v3.cpp
   universal_bot.cpp
   rebel_move.cpp
+  thn_georg.cpp
 )
 target_include_directories(eduart-bot
   PUBLIC
