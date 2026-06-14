@@ -69,6 +69,10 @@ Have a look at [this guide](documentation/setup/virtualMachine.md) on how to set
 
 * [SLAM and Nav2](documentation/nav2/setup_nav2.md)
 
+### Devices
+
+* [Olive USB Camera](documentation/device/olive-cam.md)
+
 # Controlling the Robot
 
 ## Controller
