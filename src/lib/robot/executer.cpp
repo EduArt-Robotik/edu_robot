@@ -5,6 +5,7 @@
 #include <mutex>
 #include <thread>
 
+#include <rclcpp/rclcpp.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 

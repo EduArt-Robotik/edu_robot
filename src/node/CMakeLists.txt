@@ -6,9 +6,7 @@ add_executable(eduard-iot-bot
 target_link_libraries(eduard-iot-bot
   eduart-iotbot-shield
   eduart-bot
-)
-ament_target_dependencies(eduard-iot-bot
-  "rclcpp"
+  rclcpp::rclcpp
 )
 set(BUILT_NODES ${BUILT_NODES} "eduard-iot-bot")
 
@@ -19,9 +17,7 @@ add_executable(eduard-ethernet-gateway-bot
 target_link_libraries(eduard-ethernet-gateway-bot
   eduart-ethernet-gateway
   eduart-bot
-)
-ament_target_dependencies(eduard-ethernet-gateway-bot
-  "rclcpp"
+  rclcpp::rclcpp
 )
 set(BUILT_NODES ${BUILT_NODES} "eduard-ethernet-gateway-bot")
 
@@ -32,9 +28,7 @@ add_executable(universal-ethernet-gateway-bot
 target_link_libraries(universal-ethernet-gateway-bot
   eduart-ethernet-gateway
   eduart-bot
-)
-ament_target_dependencies(universal-ethernet-gateway-bot
-  "rclcpp"
+  rclcpp::rclcpp
 )
 set(BUILT_NODES ${BUILT_NODES} "universal-ethernet-gateway-bot")
 
@@ -45,9 +39,7 @@ add_executable(eduard-360-pi-bot
 target_link_libraries(eduard-360-pi-bot
   eduart-bot
   eduart-hardware-can
-)
-ament_target_dependencies(eduard-360-pi-bot
-  "rclcpp"
+  rclcpp::rclcpp
 )
 set(BUILT_NODES ${BUILT_NODES} "eduard-360-pi-bot")
 
@@ -58,9 +50,7 @@ add_executable(universal-360-pi-bot
 target_link_libraries(universal-360-pi-bot
   eduart-bot
   eduart-hardware-can
-)
-ament_target_dependencies(universal-360-pi-bot
-  "rclcpp"
+  rclcpp::rclcpp
 )
 set(BUILT_NODES ${BUILT_NODES} "universal-360-pi-bot")
 
@@ -72,9 +62,7 @@ target_link_libraries(rebel-move-360-pi-bot
   igus
   eduart-bot
   eduart-hardware-can
-)
-ament_target_dependencies(rebel-move-360-pi-bot
-  "rclcpp"
+  rclcpp::rclcpp
 )
 set(BUILT_NODES ${BUILT_NODES} "rebel-move-360-pi-bot")
 

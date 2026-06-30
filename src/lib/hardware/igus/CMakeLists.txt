@@ -13,9 +13,7 @@ target_link_libraries(igus
   eduart-robot
   eduart-hardware
   eduart-hardware-can
-)
-ament_target_dependencies(igus
-  "rclcpp"
+  rclcpp::rclcpp
 )
 list(APPEND BUILT_LIBRARIES igus)
 

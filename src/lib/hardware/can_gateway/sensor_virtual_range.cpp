@@ -4,7 +4,7 @@
 #include <edu_robot/message/geometry.hpp>
 
 #include <sensor_msgs/point_cloud2_iterator.hpp>
-#include <tf2/LinearMath/Vector3.h>
+#include <tf2/LinearMath/Vector3.hpp>
 
 #include <Eigen/Geometry>
 
