@@ -52,33 +52,27 @@ HardwareComponentFactory& HardwareComponentFactory::addLighting()
     zone_map["all"].push_back(i);
   }
 
-  // Build per-zone mappings by iterating the bus/board topology.
-  // Light indices in lights() follow the same iteration order: buses → boards → devices.
+  // Build per-zone mappings by iterating all lights.
   std::size_t light_idx = 0;
-  auto buses = _measurement_manager->getRing()->getSensorBuses();
-  for (std::size_t bus_i = 0; bus_i < buses.size(); ++bus_i) {
-    auto bus = buses[bus_i];
-    if (!bus) continue;
-    const std::string side = (bus_i == 0) ? "left_side" : "right_side";
-    for (auto* board : bus->getSensorBoards()) {
-      for (auto* device : board->getDevices()) {
-        if (dynamic_cast<eduart::sensorring::device::Light*>(device)) {
-          zone_map[side].push_back(light_idx);
+  auto lights = _measurement_manager->lights();
+  for (const auto& light : lights) {
+    const std::string side = (light.getBoardContext()->orientation ==
+                              eduart::sensorring::board::Orientation::Left)
+                                 ? "left_side"
+                                 : "right_side";
+    zone_map[side].push_back(light_idx);
 
-          switch (board->getBoardType()) {
-          case eduart::sensorring::board::SensorBoardType::Headlight:
-            zone_map["head"].push_back(light_idx);
-            break;
-          case eduart::sensorring::board::SensorBoardType::Taillight:
-            zone_map["back"].push_back(light_idx);
-            break;
-          default:
-            break;
-          }
-          ++light_idx;
-        }
-      }
+    switch (light.getBoardContext()->board_type) {
+    case eduart::sensorring::board::SensorBoardType::Headlight:
+      zone_map["head"].push_back(light_idx);
+      break;
+    case eduart::sensorring::board::SensorBoardType::Taillight:
+      zone_map["back"].push_back(light_idx);
+      break;
+    default:
+      break;
     }
+    ++light_idx;
   }
 
   auto lighting_manager = std::make_shared<LightingHardwareManager>(_measurement_manager, std::move(zone_map));
