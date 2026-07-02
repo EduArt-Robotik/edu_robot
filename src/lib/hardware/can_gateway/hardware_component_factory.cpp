@@ -3,12 +3,15 @@
 #include "edu_robot/hardware/can_gateway/motor_controller_hardware.hpp"
 #include "edu_robot/hardware/can_gateway/imu_sensor_hardware.hpp"
 #include "edu_robot/hardware/can_gateway/lighting_hardware.hpp"
+#include "edu_robot/hardware/can_gateway/sensor_log_adapter.hpp"
 #include "edu_robot/hardware/can_gateway/sensor_tof_sensor_ring_adapter.hpp"
 #include "edu_robot/hardware/can_gateway/sensor_virtual_range_adapter.hpp"
+#include "sensorring/interface/InterfaceParams.hpp"
 
 #include <sensorring/SensorRingFactory.hpp>
-#include <sensorring/manager/MeasurementManager.hpp>
+#include <sensorring/logger/Logger.hpp>
 #include <sensorring/manager/ManagerParams.hpp>
+#include <sensorring/manager/MeasurementManager.hpp>
 #include <sensorring/math/Math.hpp>
 
 #include <edu_robot/hardware/can_gateway/can_gateway_shield.hpp>
@@ -111,6 +114,8 @@ HardwareComponentFactory& HardwareComponentFactory::addSensorRing(
   const std::string& sensor_name, const std::vector<std::string>& left_sensor_names,
   const std::vector<std::string>& right_sensor_names, rclcpp::Node& ros_node)
 {
+
+  SensorLogAdapter::getInstance()->initialize(ros_node);
   sensorring::SensorRingFactory factory(sensorring::ValidationMode::Relaxed);
 
   // Disable thermal sensor on Headlights
@@ -122,8 +127,8 @@ HardwareComponentFactory& HardwareComponentFactory::addSensorRing(
   // reused later for virtual range sensors without triggering ParameterAlreadyDeclaredException.
   std::vector<tf2::Transform> all_transforms;
 
-  // Left ring → eduart-can1 (communicator index 1, added first so lights[0..n-1])
-  factory.addInterface({ sensorring::com::InterfaceType::SocketCan, "eduart-can1" });
+  // Left ring → eduart-can0
+  factory.addInterface(sensorring::com::SocketCanParams("eduart-can0"));
   const std::string left_prefix = sensor_name + "_left";
   for (const auto& board_name : left_sensor_names) {
     const tf2::Transform tf = Sensor::get_transform_from_parameter(
@@ -135,25 +140,24 @@ HardwareComponentFactory& HardwareComponentFactory::addSensorRing(
     rot_matrix.getRPY(roll, pitch, yaw);
 
     sensorring::board::SensorBoardParams board;
+    board.orientation = sensorring::board::Orientation::Left;
     board.translation = { tf.getOrigin().x(), tf.getOrigin().y(), tf.getOrigin().z() };
-    board.rotation    = {
-      sensorring::math::radiansToDegrees(roll),
-      sensorring::math::radiansToDegrees(pitch),
-      sensorring::math::radiansToDegrees(yaw)
-    };
+    board.rotation = {sensorring::math::radiansToDegrees(roll),
+                      sensorring::math::radiansToDegrees(pitch),
+                      sensorring::math::radiansToDegrees(yaw)};
 
-    // Require at least one Headlight and a Taillight. Factory ValidationMode is "Relaxed", so order doesn't matter.
-    if(board_name == "front") {
+    // Require at least one Headlight and one Taillight. Factory ValidationMode is "Relaxed", so order and other boards don't matter.
+    if (board_name == "front") {
       board.board_type = sensorring::board::SensorBoardType::Headlight;
-    } else if(board_name == "rear"){
+    } else if (board_name == "rear") {
       board.board_type = sensorring::board::SensorBoardType::Taillight;
     }
 
     factory.expectBoard(board);
   }
 
-  // Right ring → eduart-can0 (communicator index 0, added second so lights[n..])
-  factory.addInterface({ sensorring::com::InterfaceType::SocketCan, "eduart-can0" });
+  // Right ring → eduart-can1
+  factory.addInterface(sensorring::com::SocketCanParams("eduart-can1"));
   const std::string right_prefix = sensor_name + "_right";
   for (const auto& board_name : right_sensor_names) {
     const tf2::Transform tf = Sensor::get_transform_from_parameter(
@@ -165,17 +169,16 @@ HardwareComponentFactory& HardwareComponentFactory::addSensorRing(
     rot_matrix.getRPY(roll, pitch, yaw);
 
     sensorring::board::SensorBoardParams board;
+    board.orientation = sensorring::board::Orientation::Right;
     board.translation = { tf.getOrigin().x(), tf.getOrigin().y(), tf.getOrigin().z() };
-    board.rotation    = {
-      sensorring::math::radiansToDegrees(roll),
-      sensorring::math::radiansToDegrees(pitch),
-      sensorring::math::radiansToDegrees(yaw)
-    };
+    board.rotation = {sensorring::math::radiansToDegrees(roll),
+                      sensorring::math::radiansToDegrees(pitch),
+                      sensorring::math::radiansToDegrees(yaw)};
 
-    // Require at least one Headlight and a Taillight. Factory ValidationMode is "Relaxed", so order doesn't matter.
-    if(board_name == "front") {
+    // Require at least one Headlight and one Taillight. Factory ValidationMode is "Relaxed", so order and other boards don't matter.
+    if (board_name == "front") {
       board.board_type = sensorring::board::SensorBoardType::Headlight;
-    } else if(board_name == "rear"){
+    } else if (board_name == "rear") {
       board.board_type = sensorring::board::SensorBoardType::Taillight;
     }
 
@@ -190,8 +193,6 @@ HardwareComponentFactory& HardwareComponentFactory::addSensorRing(
     _measurement_manager, total_sensors);
 
   // Virtual range sensors — check per-board ROS parameter flag.
-  // Iterate over all_prefixes (known at config time) rather than depthSensors(),
-  // which may return an empty vector before the CAN ring has been discovered.
   const std::vector<std::string> all_sensor_names = [&] {
     std::vector<std::string> combined;
     combined.insert(combined.end(), left_sensor_names.begin(), left_sensor_names.end());
