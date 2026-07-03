@@ -17,7 +17,7 @@ std::shared_ptr<sensor_msgs::msg::PointCloud2> make_point_cloud() {
   point_cloud->height = 1;
   point_cloud->width = 0;
   point_cloud->is_bigendian = false;
-  point_cloud->point_step = 4u * sizeof(float); // x, y, z, sigma
+  point_cloud->point_step = 5u * sizeof(float); // x, y, z, sigma, raw_distance
   point_cloud->row_step = 0u;
 
   sensor_msgs::msg::PointField field;
@@ -36,13 +36,16 @@ std::shared_ptr<sensor_msgs::msg::PointCloud2> make_point_cloud() {
   field.name = "sigma";
   field.offset = 12u;
   point_cloud->fields.push_back(field);
+  field.name = "raw_distance";
+  field.offset = 16u;
+  point_cloud->fields.push_back(field);
 
   return point_cloud;
 }
 
 void append_point_to_cloud(sensor_msgs::msg::PointCloud2 &point_cloud, float x,
-                           float y, float z, float sigma) {
-  const std::array<float, 4> values = {x, y, z, sigma};
+                           float y, float z, float sigma, float raw_distance) {
+  const std::array<float, 5> values = {x, y, z, sigma, raw_distance};
   const auto *bytes = reinterpret_cast<const uint8_t *>(values.data());
   point_cloud.data.insert(point_cloud.data.end(), bytes,
                           bytes + point_cloud.point_step);
