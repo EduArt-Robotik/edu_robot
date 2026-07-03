@@ -37,8 +37,6 @@ void append_points_to_cloud(sensor_msgs::msg::PointCloud2 &point_cloud,
 
 void finalize_cloud(sensor_msgs::msg::PointCloud2 &point_cloud,
                     const rclcpp::Time &stamp);
-void finalize_cloud(sensor_msgs::msg::PointCloud2 &point_cloud,
-                    const rclcpp::Time &stamp, uint32_t width);
 
 void clear_point_cloud(sensor_msgs::msg::PointCloud2 &point_cloud);
 

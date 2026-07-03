@@ -52,8 +52,7 @@ void SensorTofHardwareAdapter::onDepthMeasurement(
 
   clear_point_cloud(*_point_cloud);
   append_points_to_cloud(*_point_cloud, m.point_cloud.data);
-  finalize_cloud(*_point_cloud, rclcpp::Clock().now(),
-                 static_cast<uint32_t>(m.nr_valid_points));
+  finalize_cloud(*_point_cloud, rclcpp::Clock().now());
 
   if (_callback_process_measurement) {
     _callback_process_measurement(*_point_cloud);

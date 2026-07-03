@@ -47,19 +47,11 @@ void append_point_to_cloud(sensor_msgs::msg::PointCloud2 &point_cloud, float x,
                            float y, float z, float sigma, float raw_distance) {
   const std::array<float, 5> values = {x, y, z, sigma, raw_distance};
   const auto *bytes = reinterpret_cast<const uint8_t *>(values.data());
-  point_cloud.data.insert(point_cloud.data.end(), bytes,
-                          bytes + point_cloud.point_step);
+  point_cloud.data.insert(point_cloud.data.end(), bytes, bytes + point_cloud.point_step);
 }
 
-void finalize_cloud(sensor_msgs::msg::PointCloud2 &point_cloud,
-                    const rclcpp::Time &stamp) {
-  const auto width =
-      static_cast<uint32_t>(point_cloud.data.size() / point_cloud.point_step);
-  finalize_cloud(point_cloud, stamp, width);
-}
-
-void finalize_cloud(sensor_msgs::msg::PointCloud2 &point_cloud,
-                    const rclcpp::Time &stamp, uint32_t width) {
+void finalize_cloud(sensor_msgs::msg::PointCloud2 &point_cloud, const rclcpp::Time &stamp) {
+  const auto width = static_cast<uint32_t>(point_cloud.data.size() / point_cloud.point_step);
   point_cloud.header.stamp = stamp;
   point_cloud.width = width;
   point_cloud.row_step = point_cloud.point_step * point_cloud.width;
