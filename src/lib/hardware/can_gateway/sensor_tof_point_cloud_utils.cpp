@@ -1,0 +1,74 @@
+/**
+ * Copyright EduArt Robotik GmbH 2024
+ *
+ * Author: Hannes Duske (hannes.duske@eduart-robotik.com)
+ */
+#include "edu_robot/hardware/can_gateway/sensor_tof_point_cloud_utils.hpp"
+
+#include <sensor_msgs/msg/point_field.hpp>
+
+namespace eduart {
+namespace robot {
+namespace hardware {
+namespace can_gateway {
+
+std::shared_ptr<sensor_msgs::msg::PointCloud2> make_point_cloud() {
+  auto point_cloud = std::make_shared<sensor_msgs::msg::PointCloud2>();
+  point_cloud->height = 1;
+  point_cloud->width = 0;
+  point_cloud->is_bigendian = false;
+  point_cloud->point_step = 4u * sizeof(float); // x, y, z, sigma
+  point_cloud->row_step = 0u;
+
+  sensor_msgs::msg::PointField field;
+  field.datatype = sensor_msgs::msg::PointField::FLOAT32;
+  field.count = 1;
+
+  field.name = "x";
+  field.offset = 0u;
+  point_cloud->fields.push_back(field);
+  field.name = "y";
+  field.offset = 4u;
+  point_cloud->fields.push_back(field);
+  field.name = "z";
+  field.offset = 8u;
+  point_cloud->fields.push_back(field);
+  field.name = "sigma";
+  field.offset = 12u;
+  point_cloud->fields.push_back(field);
+
+  return point_cloud;
+}
+
+void append_point_to_cloud(sensor_msgs::msg::PointCloud2 &point_cloud, float x,
+                           float y, float z, float sigma) {
+  const std::array<float, 4> values = {x, y, z, sigma};
+  const auto *bytes = reinterpret_cast<const uint8_t *>(values.data());
+  point_cloud.data.insert(point_cloud.data.end(), bytes,
+                          bytes + point_cloud.point_step);
+}
+
+void finalize_cloud(sensor_msgs::msg::PointCloud2 &point_cloud,
+                    const rclcpp::Time &stamp) {
+  const auto width =
+      static_cast<uint32_t>(point_cloud.data.size() / point_cloud.point_step);
+  finalize_cloud(point_cloud, stamp, width);
+}
+
+void finalize_cloud(sensor_msgs::msg::PointCloud2 &point_cloud,
+                    const rclcpp::Time &stamp, uint32_t width) {
+  point_cloud.header.stamp = stamp;
+  point_cloud.width = width;
+  point_cloud.row_step = point_cloud.point_step * point_cloud.width;
+}
+
+void clear_point_cloud(sensor_msgs::msg::PointCloud2 &point_cloud) {
+  point_cloud.data.clear();
+  point_cloud.width = 0u;
+  point_cloud.row_step = 0u;
+}
+
+} // end namespace can_gateway
+} // end namespace hardware
+} // end namespace robot
+} // end namespace eduart

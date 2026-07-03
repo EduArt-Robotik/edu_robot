@@ -63,7 +63,7 @@ else()
       include(FetchContent)
       FetchContent_Declare(
         sensorring
-        URL https://github.com/EduArt-Robotik/edu_lib_sensorring/archive/refs/heads/develop.zip
+        URL https://github.com/EduArt-Robotik/edu_lib_sensorring/archive/refs/tags/v4.0.0-alpha.5.zip
       )
       FetchContent_MakeAvailable(sensorring)
       set(sensorring_FOUND TRUE)

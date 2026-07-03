@@ -59,17 +59,14 @@ HardwareComponentFactory& HardwareComponentFactory::addLighting()
   std::size_t light_idx = 0;
   auto lights = _measurement_manager->lights();
   for (const auto& light : lights) {
-    const std::string side = (light.getBoardContext()->orientation ==
-                              eduart::sensorring::board::Orientation::Left)
-                                 ? "left_side"
-                                 : "right_side";
+    const std::string side = (light.getBoardContext()->orientation == sensorring::board::Orientation::Left) ? "left_side" : "right_side";
     zone_map[side].push_back(light_idx);
 
     switch (light.getBoardContext()->board_type) {
-    case eduart::sensorring::board::SensorBoardType::Headlight:
+    case sensorring::board::SensorBoardType::Headlight:
       zone_map["head"].push_back(light_idx);
       break;
-    case eduart::sensorring::board::SensorBoardType::Taillight:
+    case sensorring::board::SensorBoardType::Taillight:
       zone_map["back"].push_back(light_idx);
       break;
     default:
@@ -127,70 +124,49 @@ HardwareComponentFactory& HardwareComponentFactory::addSensorRing(
   // reused later for virtual range sensors without triggering ParameterAlreadyDeclaredException.
   std::vector<tf2::Transform> all_transforms;
 
-  // Left ring → eduart-can0
-  factory.addInterface(sensorring::com::SocketCanParams("eduart-can0"));
+  const std::string right_prefix = sensor_name + "_right";
   const std::string left_prefix = sensor_name + "_left";
-  for (const auto& board_name : left_sensor_names) {
-    const tf2::Transform tf = Sensor::get_transform_from_parameter(
-      left_prefix + '.' + board_name, ros_node);
-    all_transforms.push_back(tf);
 
-    tf2::Matrix3x3 rot_matrix(tf.getRotation());
-    double roll, pitch, yaw;
-    rot_matrix.getRPY(roll, pitch, yaw);
+  const auto add_ring_boards = [&](const std::string& can_interface, const std::string& prefix,
+                                   const std::vector<std::string>& board_names, sensorring::board::Orientation orientation) {
+    factory.addInterface(sensorring::com::SocketCanParams(can_interface));
+    for (const auto& board_name : board_names) {
+      const tf2::Transform tf = Sensor::get_transform_from_parameter(prefix + '.' + board_name, ros_node);
+      all_transforms.push_back(tf);
 
-    sensorring::board::SensorBoardParams board;
-    board.orientation = sensorring::board::Orientation::Left;
-    board.translation = { tf.getOrigin().x(), tf.getOrigin().y(), tf.getOrigin().z() };
-    board.rotation = {sensorring::math::radiansToDegrees(roll),
-                      sensorring::math::radiansToDegrees(pitch),
-                      sensorring::math::radiansToDegrees(yaw)};
+      tf2::Matrix3x3 rot_matrix(tf.getRotation());
+      double roll, pitch, yaw;
+      rot_matrix.getRPY(roll, pitch, yaw);
 
-    // Require at least one Headlight and one Taillight. Factory ValidationMode is "Relaxed", so order and other boards don't matter.
-    if (board_name == "front") {
-      board.board_type = sensorring::board::SensorBoardType::Headlight;
-    } else if (board_name == "rear") {
-      board.board_type = sensorring::board::SensorBoardType::Taillight;
+      sensorring::board::SensorBoardParams board;
+      board.orientation = orientation;
+      board.translation = { tf.getOrigin().x(), tf.getOrigin().y(), tf.getOrigin().z() };
+      board.rotation = {sensorring::math::radiansToDegrees(roll),
+                        sensorring::math::radiansToDegrees(pitch),
+                        sensorring::math::radiansToDegrees(yaw)};
+
+      // Require at least one Headlight and one Taillight. Factory ValidationMode is "Relaxed", so order and other boards don't matter.
+      if (board_name == "front") {
+        board.board_type = sensorring::board::SensorBoardType::Headlight;
+      } else if (board_name == "rear") {
+        board.board_type = sensorring::board::SensorBoardType::Taillight;
+      }
+
+      factory.expectBoard(board);
     }
+  };
 
-    factory.expectBoard(board);
-  }
+  // Left ring → eduart-can0
+  add_ring_boards("eduart-can0", left_prefix, left_sensor_names, sensorring::board::Orientation::Left);
 
   // Right ring → eduart-can1
-  factory.addInterface(sensorring::com::SocketCanParams("eduart-can1"));
-  const std::string right_prefix = sensor_name + "_right";
-  for (const auto& board_name : right_sensor_names) {
-    const tf2::Transform tf = Sensor::get_transform_from_parameter(
-      right_prefix + '.' + board_name, ros_node);
-    all_transforms.push_back(tf);
-
-    tf2::Matrix3x3 rot_matrix(tf.getRotation());
-    double roll, pitch, yaw;
-    rot_matrix.getRPY(roll, pitch, yaw);
-
-    sensorring::board::SensorBoardParams board;
-    board.orientation = sensorring::board::Orientation::Right;
-    board.translation = { tf.getOrigin().x(), tf.getOrigin().y(), tf.getOrigin().z() };
-    board.rotation = {sensorring::math::radiansToDegrees(roll),
-                      sensorring::math::radiansToDegrees(pitch),
-                      sensorring::math::radiansToDegrees(yaw)};
-
-    // Require at least one Headlight and one Taillight. Factory ValidationMode is "Relaxed", so order and other boards don't matter.
-    if (board_name == "front") {
-      board.board_type = sensorring::board::SensorBoardType::Headlight;
-    } else if (board_name == "rear") {
-      board.board_type = sensorring::board::SensorBoardType::Taillight;
-    }
-
-    factory.expectBoard(board);
-  }
+  add_ring_boards("eduart-can1", right_prefix, right_sensor_names, sensorring::board::Orientation::Right);
 
   sensorring::manager::ManagerParams params;
   _measurement_manager = std::make_shared<sensorring::manager::MeasurementManager>(params, factory);
 
   const std::size_t total_sensors = left_sensor_names.size() + right_sensor_names.size();
-  _hardware[sensor_name] = std::make_shared<SensorTofSensorRingAdapter>(
-    _measurement_manager, total_sensors);
+  _hardware[sensor_name] = std::make_shared<SensorTofSensorRingAdapter>(_measurement_manager, total_sensors);
 
   // Virtual range sensors — check per-board ROS parameter flag.
   const std::vector<std::string> all_sensor_names = [&] {
