@@ -20,23 +20,21 @@ namespace can_gateway {
 
 std::shared_ptr<sensor_msgs::msg::PointCloud2> make_point_cloud();
 
-void append_point_to_cloud(sensor_msgs::msg::PointCloud2 &point_cloud, float x,
-                           float y, float z, float sigma, float raw_distance);
+void append_point_to_cloud(sensor_msgs::msg::PointCloud2 &point_cloud, float x, float y, float z, float sigma, float raw_distance, uint8_t sensor_idx);
 
 template <typename PointRange>
-void append_points_to_cloud(sensor_msgs::msg::PointCloud2 &point_cloud,
-                            const PointRange &points) {
+void append_points_to_cloud(sensor_msgs::msg::PointCloud2 &point_cloud, const PointRange &points) {
   for (const auto &pt : points) {
     append_point_to_cloud(point_cloud, static_cast<float>(pt.point.x()),
                           static_cast<float>(pt.point.y()),
                           static_cast<float>(pt.point.z()),
                           static_cast<float>(pt.sigma),
-                          static_cast<float>(pt.raw_distance));
+                          static_cast<float>(pt.raw_distance),
+                          static_cast<uint8_t>(pt.sensor_index));
   }
 }
 
-void finalize_cloud(sensor_msgs::msg::PointCloud2 &point_cloud,
-                    const rclcpp::Time &stamp);
+void finalize_cloud(sensor_msgs::msg::PointCloud2 &point_cloud, const rclcpp::Time &stamp);
 
 void clear_point_cloud(sensor_msgs::msg::PointCloud2 &point_cloud);
 

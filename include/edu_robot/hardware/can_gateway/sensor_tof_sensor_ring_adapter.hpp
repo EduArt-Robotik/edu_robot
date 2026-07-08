@@ -34,25 +34,20 @@ namespace can_gateway {
 class SensorTofSensorRingAdapter : public SensorPointCloud::SensorInterface
 {
 public:
-  SensorTofSensorRingAdapter(
-    std::shared_ptr<sensorring::manager::MeasurementManager> manager,
-    std::size_t expected_sensor_count);
+  SensorTofSensorRingAdapter(std::shared_ptr<sensorring::manager::MeasurementManager> manager);
   ~SensorTofSensorRingAdapter() override = default;
 
   void initialize(const SensorPointCloud::Parameter& parameter) override;
 
 private:
-  void onDepthMeasurement(const sensorring::measurement::DepthMeasurement& m);
-  void clearProcessing();
+  void onDepthMeasurement(const std::vector<sensorring::measurement::DepthMeasurement>& m);
 
   std::shared_ptr<sensorring::manager::MeasurementManager> _manager;
-  const std::size_t _expected_sensor_count;
 
   // Stored as unique_ptr to avoid including sensorring/subscription/Subscription.hpp here
   std::unique_ptr<sensorring::subscription::Subscription> _depth_sub;
 
   // Fusion state (protected by _data_mutex, accessed from the manager worker thread)
-  std::vector<bool> _received;
   std::shared_ptr<sensor_msgs::msg::PointCloud2> _point_cloud;
   std::mutex _data_mutex;
 };

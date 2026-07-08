@@ -164,9 +164,7 @@ HardwareComponentFactory& HardwareComponentFactory::addSensorRing(
 
   sensorring::manager::ManagerParams params;
   _measurement_manager = std::make_shared<sensorring::manager::MeasurementManager>(params, factory);
-
-  const std::size_t total_sensors = left_sensor_names.size() + right_sensor_names.size();
-  _hardware[sensor_name] = std::make_shared<SensorTofSensorRingAdapter>(_measurement_manager, total_sensors);
+  _hardware[sensor_name] = std::make_shared<SensorTofSensorRingAdapter>(_measurement_manager);
 
   // Virtual range sensors — check per-board ROS parameter flag.
   const std::vector<std::string> all_sensor_names = [&] {
