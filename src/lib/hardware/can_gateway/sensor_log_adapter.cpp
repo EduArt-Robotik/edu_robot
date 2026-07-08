@@ -22,7 +22,7 @@ SensorLogAdapter *SensorLogAdapter::getInstance() noexcept {
 
 void SensorLogAdapter::initialize(rclcpp::Node &ros_node) {
   std::call_once(_init_once, [this, &ros_node]() {
-    constexpr const char *kParamName = "sensorring.logging.enabled";
+    constexpr const char *kParamName = "tof_sensor_ring.logging.enabled";
 
     ros_node.declare_parameter<bool>(kParamName, false);
     _enabled.store(ros_node.get_parameter(kParamName).as_bool(),
