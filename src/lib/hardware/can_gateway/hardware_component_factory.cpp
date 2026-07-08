@@ -1,5 +1,4 @@
 #include "edu_robot/hardware/can_gateway/hardware_component_factory.hpp"
-#include "edu_robot/hardware/can_gateway/sensor_tof_hardware.hpp"
 #include "edu_robot/hardware/can_gateway/motor_controller_hardware.hpp"
 #include "edu_robot/hardware/can_gateway/imu_sensor_hardware.hpp"
 #include "edu_robot/hardware/can_gateway/lighting_hardware.hpp"
@@ -93,16 +92,6 @@ HardwareComponentFactory& HardwareComponentFactory::addMotorController(
   );
   _motor_controller_hardware.push_back(compound_motor);
   _shield->registerMotorControllerHardware(compound_motor);
-
-  return *this;
-}
-
-HardwareComponentFactory& HardwareComponentFactory::addTofSensor(
-  const std::string& sensor_name, const SensorTofHardware::Parameter& parameter, rclcpp::Node& ros_node)
-{
-  _hardware[sensor_name] = std::make_shared<SensorTofHardware>(
-    sensor_name, parameter, ros_node, _shield->getExecuter(), _shield->getCommunicator(1)
-  );
 
   return *this;
 }

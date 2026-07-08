@@ -7,7 +7,6 @@
 
 #include <edu_robot/hardware_component_factory.hpp>
 
-#include "edu_robot/hardware/can_gateway/sensor_tof_hardware.hpp"
 #include "edu_robot/hardware/can_gateway/motor_controller_hardware.hpp"
 
 #include <cstdint>
@@ -41,8 +40,6 @@ public:
   //  const std::string& sensor_name, const std::uint8_t id);
   HardwareComponentFactory& addImuSensor(
     const std::string& sensor_name, const std::uint32_t can_id);
-  HardwareComponentFactory& addTofSensor(
-    const std::string& sensor_name, const SensorTofHardware::Parameter& parameter, rclcpp::Node& ros_node);
 
   /**
    * \brief Add a sensor ring (left + right) backed by edu_lib_sensorring.

@@ -12,7 +12,6 @@ add_library(eduart-hardware-can
   sensor_point_cloud_fusion.cpp
   sensor_tof_point_cloud_utils.cpp
   sensor_tof_sensor_ring_adapter.cpp
-  sensor_tof_hardware_adapter.cpp
   sensor_virtual_range_adapter.cpp
   sensor_log_adapter.cpp
 )
