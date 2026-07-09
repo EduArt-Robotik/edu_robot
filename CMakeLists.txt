@@ -48,7 +48,7 @@ endif()
 
 # Sensor ring library
 set(SENSORRING_USE_USBTINGO OFF CACHE BOOL "" FORCE)
-set(LOCAL_SENSORRING_DIR "${PROJECT_SOURCE_DIR}/edu_lib_sensorring")
+set(LOCAL_SENSORRING_DIR "${PROJECT_SOURCE_DIR}/external/edu_lib_sensorring")
 if(EXISTS "${LOCAL_SENSORRING_DIR}/CMakeLists.txt")
   # Prefer the local submodule — avoids stale find_package hits from install dir.
   message(STATUS "edu_lib_sensorring: Using local copy at ${LOCAL_SENSORRING_DIR}")
