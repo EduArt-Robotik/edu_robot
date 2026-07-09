@@ -7,6 +7,8 @@ endif()
 
 set(CMAKE_BUILD_TYPE Debug)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 ## Dependencies
 # find dependencies
 find_package(ament_cmake REQUIRED)
@@ -26,6 +28,7 @@ find_package(nav_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(diagnostic_updater REQUIRED)
 find_package(Eigen3 REQUIRED NO_MODULE)
+find_package(sensorring)
 
 # MRAA library
 if(EXISTS "/usr/local/include/mraa/common.hpp")
@@ -44,36 +47,6 @@ if (EXISTS "/usr/include/gpiod.hpp")
 else()
   message(STATUS "Couldn't find libgpiod. Disable hardware support for raspberry.")
   set(HAVE_GPIOD "FALSE")  
-endif()
-
-# Sensor ring library
-set(SENSORRING_USE_USBTINGO OFF CACHE BOOL "" FORCE)
-set(LOCAL_SENSORRING_DIR "${PROJECT_SOURCE_DIR}/external/edu_lib_sensorring")
-if(EXISTS "${LOCAL_SENSORRING_DIR}/CMakeLists.txt")
-  # Prefer the local submodule — avoids stale find_package hits from install dir.
-  message(STATUS "edu_lib_sensorring: Using local copy at ${LOCAL_SENSORRING_DIR}")
-  add_subdirectory("${LOCAL_SENSORRING_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/sensorring_build" EXCLUDE_FROM_ALL)
-  set(sensorring_FOUND TRUE)
-else()
-  find_package(sensorring QUIET)
-  if(NOT sensorring_FOUND)
-    if(EXISTS "/usr/include/gpiod.hpp")
-      message(STATUS "edu_lib_sensorring: Raspberry Pi detected — fetching from GitHub...")
-      cmake_policy(SET CMP0135 NEW)
-      include(FetchContent)
-      FetchContent_Declare(
-        sensorring
-        URL https://github.com/EduArt-Robotik/edu_lib_sensorring/archive/refs/tags/v4.0.0-alpha.5.zip
-      )
-      FetchContent_MakeAvailable(sensorring)
-      set(sensorring_FOUND TRUE)
-    else()
-      message(STATUS "edu_lib_sensorring: Not found. Sensor ring hardware support disabled.")
-    endif()
-  endif()
-endif()
-if(sensorring_FOUND)
-  message(STATUS "edu_lib_sensorring: Sensor ring hardware support enabled.")
 endif()
 
 ## Build Defined ROS Messages
