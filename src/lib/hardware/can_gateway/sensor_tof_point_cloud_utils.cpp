@@ -47,7 +47,7 @@ std::shared_ptr<sensor_msgs::msg::PointCloud2> make_point_cloud() {
   return point_cloud;
 }
 
-void append_point_to_cloud(sensor_msgs::msg::PointCloud2 &point_cloud, float x, float y, float z, float sigma, float raw_distance, uint8_t sensor_idx) {
+void append_point_to_cloud(sensor_msgs::msg::PointCloud2 &point_cloud, float x, float y, float z, float sigma, float raw_distance, std::uint8_t sensor_idx) {
   const std::array<float, 5> values = {x, y, z, sigma, raw_distance};
   const auto *bytes = reinterpret_cast<const uint8_t *>(values.data());
   point_cloud.data.insert(point_cloud.data.end(), bytes, bytes + 5 * sizeof(float));

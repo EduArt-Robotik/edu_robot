@@ -10,7 +10,6 @@
 #include <sensor_msgs/msg/point_cloud2.hpp>
 
 #include <memory>
-#include <mutex>
 #include <vector>
 
 // Forward declarations for sensorring types
@@ -28,14 +27,13 @@ namespace hardware {
 namespace can_gateway {
 
 /**
- * \brief Adapter that subscribes to all depth sensors of a MeasurementManager,
- *        accumulates one measurement cycle across all sensors, and publishes a merged PointCloud2.
+ * \brief Adapter that subscribes to all depth sensors of a MeasurementManager and publishes a merged PointCloud2.
  */
 class SensorTofSensorRingAdapter : public SensorPointCloud::SensorInterface
 {
 public:
   SensorTofSensorRingAdapter(std::shared_ptr<sensorring::manager::MeasurementManager> manager);
-  ~SensorTofSensorRingAdapter() override = default;
+  ~SensorTofSensorRingAdapter() override;
 
   void initialize(const SensorPointCloud::Parameter& parameter) override;
 
@@ -43,13 +41,8 @@ private:
   void onDepthMeasurement(const std::vector<sensorring::measurement::DepthMeasurement>& m);
 
   std::shared_ptr<sensorring::manager::MeasurementManager> _manager;
-
-  // Stored as unique_ptr to avoid including sensorring/subscription/Subscription.hpp here
   std::unique_ptr<sensorring::subscription::Subscription> _depth_sub;
-
-  // Fusion state (protected by _data_mutex, accessed from the manager worker thread)
   std::shared_ptr<sensor_msgs::msg::PointCloud2> _point_cloud;
-  std::mutex _data_mutex;
 };
 
 } // end namespace can_gateway
