@@ -49,7 +49,7 @@ if(NOT TARGET sensorring::sensorring)
     FetchContent_Declare(
       sensorring_source
       URL
-      https://github.com/EduArt-Robotik/edu_lib_sensorring/archive/refs/tags/v4.0.0-alpha.5.zip
+      https://github.com/EduArt-Robotik/edu_lib_sensorring/archive/refs/tags/v4.0.0-alpha.6.zip
     )
     FetchContent_MakeAvailable(sensorring_source)
     cmake_policy(POP)
