@@ -9,6 +9,7 @@
 #include "edu_robot/hardware/rx_data_endpoint.hpp"
 #include "edu_robot/hardware/communicator.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <chrono>
 #include <memory>

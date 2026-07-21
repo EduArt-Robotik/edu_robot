@@ -18,25 +18,22 @@ target_link_libraries(eduart-robot
   eduart-action
   eduart-diagnostic
   "${cpp_typesupport_target}"
+  rclcpp::rclcpp
+  tf2::tf2
+  tf2_ros::tf2_ros
+  tf2_geometry_msgs::tf2_geometry_msgs
+  "${nav_msgs_TARGETS}"
+  "${std_msgs_TARGETS}"
+  "${geometry_msgs_TARGETS}"
+  "${sensor_msgs_TARGETS}"
+  diagnostic_updater::diagnostic_updater
+  "${diagnostic_msgs_TARGETS}"
+  "${std_srvs_TARGETS}"
 )
 target_compile_features(eduart-robot PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 target_include_directories(eduart-robot PUBLIC
   $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
-)
-ament_target_dependencies(
-  eduart-robot
-  "rclcpp"
-  "tf2"
-  "tf2_ros"
-  "tf2_geometry_msgs"
-  "nav_msgs"
-  "std_msgs"
-  "geometry_msgs"
-  "sensor_msgs"
-  "diagnostic_updater"
-  "diagnostic_msgs"
-  "std_srvs"
 )
 list(APPEND BUILT_LIBRARIES eduart-robot)
 

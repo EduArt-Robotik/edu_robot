@@ -4,18 +4,15 @@ add_library(eduart-action
 )
 target_link_libraries(eduart-action
   "${cpp_typesupport_target}"
+  rclcpp::rclcpp
+  "${sensor_msgs_TARGETS}"
+  "${diagnostic_msgs_TARGETS}"
+  diagnostic_updater::diagnostic_updater
 )
 target_compile_features(eduart-action PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 target_include_directories(eduart-action PUBLIC
   $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
-)
-ament_target_dependencies(
-  eduart-action
-  "rclcpp"
-  "sensor_msgs"
-  "diagnostic_msgs"
-  "diagnostic_updater"  
 )
 list(APPEND BUILT_LIBRARIES eduart-action)
 
