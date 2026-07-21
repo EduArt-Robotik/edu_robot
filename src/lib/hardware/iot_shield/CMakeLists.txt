@@ -44,10 +44,8 @@ if (HAVE_MRAA)
   )
   target_link_libraries(ros2-control-eduard-iot
     mraa
-  )
-  ament_target_dependencies(ros2-control-eduard-iot
-    "pluginlib"
-    "hardware_interface"
+    pluginlib::pluginlib
+    hardware_interface::hardware_interface
   )
   list(APPEND BUILT_LIBRARIES ros2-control-eduard-iot)
 endif()

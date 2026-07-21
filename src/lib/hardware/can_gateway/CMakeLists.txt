@@ -15,16 +15,14 @@ target_link_libraries(eduart-hardware-can
   eduart-algorithm
   eduart-robot
   eduart-hardware
+  tf2::tf2
+  tf2_ros::tf2_ros
+  tf2_sensor_msgs::tf2_sensor_msgs
 )
 target_compile_features(eduart-hardware-can PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 target_include_directories(eduart-hardware-can PUBLIC
   $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
-)
-ament_target_dependencies(eduart-hardware-can
-  "tf2"
-  "tf2_ros"
-  "tf2_sensor_msgs"
 )
 list(APPEND BUILT_LIBRARIES eduart-hardware-can)
 
@@ -39,10 +37,8 @@ if (HAVE_GPIOD)
   )
   target_link_libraries(ros2-control-eduard-raspberry
     lgpio
-  )
-  ament_target_dependencies(ros2-control-eduard-raspberry
-    "pluginlib"
-    "hardware_interface"
+    pluginlib::pluginlib
+    hardware_interface::hardware_interface
   )
   list(APPEND BUILT_LIBRARIES ros2-control-eduard-raspberry)
 endif()

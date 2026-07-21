@@ -7,12 +7,8 @@ target_include_directories(eduart-diagnostic PUBLIC
   $<INSTALL_INTERFACE:include>
 )
 target_link_libraries(eduart-diagnostic
-
-)
-ament_target_dependencies(
-  eduart-diagnostic
-  "diagnostic_updater"
-  "diagnostic_msgs"
+  diagnostic_updater::diagnostic_updater
+  "${diagnostic_msgs_TARGETS}"
 )
 list(APPEND BUILT_LIBRARIES eduart-diagnostic)
 

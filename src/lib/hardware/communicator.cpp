@@ -272,7 +272,8 @@ void Communicator::processReceiving()
         std::unique_lock lock(_mutex_receiving_data);
 
         if (_rx_buffer_queue.size() >= _max_rx_buffer_queue_size) {
-          while (_rx_buffer_queue.empty() == false) {
+          // error: max rx buffer queue size is reached. Remove all object except the last one to avoid race conditions.
+          while (_rx_buffer_queue.size() > 1) {
             std::stringstream debug_out;
             debug_out << "rx_buffer: " << std::hex;
 
