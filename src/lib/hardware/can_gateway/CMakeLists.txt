@@ -36,8 +36,7 @@ if (HAVE_GPIOD)
     $<INSTALL_INTERFACE:include>
   )
   target_link_libraries(ros2-control-eduard-raspberry
-    gpiodcxx
-    gpiod
+    lgpio
     pluginlib::pluginlib
     hardware_interface::hardware_interface
   )

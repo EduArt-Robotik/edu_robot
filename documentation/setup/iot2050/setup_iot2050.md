@@ -59,6 +59,8 @@ And as last step configure the UART according following image ![](../../image/io
 
 ### GPIO
 
+
+
 ## Install Required Software
 
 > **Note**: All commands below are executed on the Robot. Either connect a monitor and keyboard to the IoT2050 or connect via SSH.

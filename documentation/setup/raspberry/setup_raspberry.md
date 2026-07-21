@@ -161,6 +161,7 @@ Please follow these steps to prepare the installation of the ROS2 control softwa
 
 1. [Install Docker Engine](../iot2050/setup_iot2050.md#docker-engine)
 2. [Prepare Environment](../iot2050/setup_iot2050.md#prepare-environment)
+3. [GPIO](#gpio)
 
 ### Get Control Software and Launch it
 
@@ -245,7 +246,6 @@ sudo apt install -y \
   libcycloneddsidl0
 ```
 
->>>>>>> Stashed changes
 * Install Development Tools
 
 ```bash
@@ -281,4 +281,17 @@ rosdep install --from-paths src --ignore-src --rosdistro jazzy -y --skip-keys "f
 
 ```bash
 colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --event-handlers console_direct+
+```
+
+## GPIO
+
+GPIO is enabled and available with a default pin configuration defined in the [URDF](../../../docker/raspberry/launch_content/eduard.urdf)-file. Only required dependency is the lgpio daemon needs to be installed and launched:
+
+```bash
+# install needed including daemon
+sudo apt update
+sudo apt install lgpio
+# launch daemon
+sudo systemctl enable rgpiod
+sudo systemctl start rgpiod
 ```
