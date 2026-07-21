@@ -10,6 +10,10 @@ add_library(eduart-hardware-can
   lighting_hardware.cpp
   sensor_virtual_range.cpp
   sensor_point_cloud_fusion.cpp
+  sensor_tof_point_cloud_utils.cpp
+  sensor_tof_sensor_ring_adapter.cpp
+  sensor_virtual_range_adapter.cpp
+  sensor_log_adapter.cpp
 )
 target_link_libraries(eduart-hardware-can
   eduart-algorithm
@@ -19,6 +23,9 @@ target_link_libraries(eduart-hardware-can
   tf2_ros::tf2_ros
   tf2_sensor_msgs::tf2_sensor_msgs
 )
+if(TARGET sensorring::sensorring)
+  target_link_libraries(eduart-hardware-can sensorring::sensorring)
+endif()
 target_compile_features(eduart-hardware-can PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 target_include_directories(eduart-hardware-can PUBLIC
   $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>

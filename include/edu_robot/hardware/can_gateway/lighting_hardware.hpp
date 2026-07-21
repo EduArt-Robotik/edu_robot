@@ -5,13 +5,19 @@
  */
 #pragma once
 
-#include <cstdint>
 #include <edu_robot/lighting.hpp>
 
-#include <edu_robot/hardware/communicator_node.hpp>
-
 #include <memory>
-#include <map>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+// Forward declaration for sensorring type
+namespace eduart {
+namespace sensorring {
+namespace manager { class MeasurementManager; }
+} // end namespace sensorring
+} // end namespace eduart
 
 namespace eduart {
 namespace robot {
@@ -21,12 +27,15 @@ namespace can_gateway {
 class LightingHardwareManager;
 
 /**
- * \brief These classes here provide a functionality to address specific lightings like front, rear, left and right.
+ * \brief Lighting zone backed by the sensorring library.
+ *
+ * Each instance represents one logical zone (e.g. "head", "left_side") and
+ * delegates light commands to the shared LightingHardwareManager.
  */
 class LightingGroup : public Lighting::ComponentInterface
 {
 public:
-  LightingGroup(const std::string& name) : _name(name) { }
+  LightingGroup(const std::string& name, std::shared_ptr<LightingHardwareManager> manager);
   ~LightingGroup() override = default;
 
   void processSetValue(const Color& color, const robot::Lighting::Mode& mode) override;
@@ -36,55 +45,34 @@ public:
 
 private:
   std::string _name;
+  std::shared_ptr<LightingHardwareManager> _manager;
 };
 
-class LightingHardwareManager
+/**
+ * \brief Manages sensorring light devices and maps logical lighting zones to physical light indices.
+ *
+ * Created by HardwareComponentFactory::addLighting() after the sensor ring is set up.
+ */
+class LightingHardwareManager : public std::enable_shared_from_this<LightingHardwareManager>
 {
-private:
-  friend std::unique_ptr<LightingHardwareManager> std::make_unique<LightingHardwareManager>();
-
-  LightingHardwareManager();
-
 public:
-  friend LightingGroup;
-
-  struct Parameter {
-    std::uint32_t can_address = 0x200;
-  };
-
+  /**
+   * \brief Construct a fully-initialized lighting manager.
+   *
+   * \param manager                The MeasurementManager that owns the light devices.
+   * \param zone_to_light_indices  Maps zone names ("all", "head", …) to light indices in manager->lights().
+   */
+  LightingHardwareManager(
+    std::shared_ptr<sensorring::manager::MeasurementManager> manager,
+    std::unordered_map<std::string, std::vector<std::size_t>> zone_to_light_indices);
   ~LightingHardwareManager() = default;
 
-  static LightingHardwareManager& instance() {
-    if (_instance == nullptr) {
-      _instance = std::make_unique<LightingHardwareManager>();
-    }
-
-    return *_instance;
-
-    // alternative implementation
-    // static LightingHardwareManager manager;
-    // return manager;
-  }
-
-  void initialize(
-    std::shared_ptr<Executer> executer, std::shared_ptr<Communicator> communicator_left, std::shared_ptr<Communicator> communicator_right);
-  inline std::shared_ptr<Lighting::ComponentInterface> lighting(const std::string& name) {
-    return _lighting_group.at(name);
-  }
+  void processSetValue(const std::string& zone_name, const Color& color, const robot::Lighting::Mode& mode);
 
 private:
-  void processSetValue(const std::string& name, const Color& color, const robot::Lighting::Mode& mode);
-  void syncLighting();
-
-  inline static std::unique_ptr<LightingHardwareManager> _instance{nullptr};
-
-  const Parameter _parameter;
-  std::shared_ptr<CommunicatorNode> _communication_node_left;
-  std::shared_ptr<CommunicatorNode> _communication_node_right;
-  std::map<std::string, std::shared_ptr<LightingGroup>> _lighting_group;
+  std::shared_ptr<sensorring::manager::MeasurementManager> _manager;
+  std::unordered_map<std::string, std::vector<std::size_t>> _zone_to_light_indices;
 };
-
-
 
 } // end namespace can_gateway
 } // end namespace hardware

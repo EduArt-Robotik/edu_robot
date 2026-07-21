@@ -9,6 +9,9 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic -std=c++1z)# -O2)
 endif()
 
+# Add additional cmake modules
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 ## Dependencies
 # find dependencies
 find_package(ament_cmake REQUIRED)
@@ -28,6 +31,7 @@ find_package(nav_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(diagnostic_updater REQUIRED)
 find_package(Eigen3 REQUIRED NO_MODULE)
+find_package(sensorring)
 
 # MRAA library
 if(EXISTS "/usr/local/include/mraa/common.hpp")

@@ -69,6 +69,7 @@ public:
   inline const std::string& name() const { return _name; }
 
 private:
+  Mode _mode;
   Color _color;
   float _brightness;
   std::string _name;

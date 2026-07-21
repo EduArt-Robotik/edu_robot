@@ -64,12 +64,12 @@ CanGatewayShield::CanGatewayShield(char const* const can_device_0, char const* c
   : CanGatewayShield(can_device_0)
 {
   // These two communicators are not part of this rx node!
-  _communicator[1] = std::make_shared<Communicator>(
-    std::make_shared<CanCommunicationDevice>(can_device_1, CanCommunicationDevice::CanType::CAN_FD), 1ms
-  );
-  _communicator[2] = std::make_shared<Communicator>(
-    std::make_shared<CanCommunicationDevice>(can_device_2, CanCommunicationDevice::CanType::CAN_FD), 1ms
-  );
+  //_communicator[1] = std::make_shared<Communicator>(
+  //  std::make_shared<CanCommunicationDevice>(can_device_1, CanCommunicationDevice::CanType::CAN_FD), 1ms
+  //);
+  //_communicator[2] = std::make_shared<Communicator>(
+  //  std::make_shared<CanCommunicationDevice>(can_device_2, CanCommunicationDevice::CanType::CAN_FD), 1ms
+  //);
 
   // Creating Data Endpoints for Measurements
   _communication_node->createRxDataEndPoint<CanRxDataEndPoint, can::message::power_management::Response>(
