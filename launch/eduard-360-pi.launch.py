@@ -48,7 +48,7 @@ def generate_launch_description():
         motor_parameter_file_path
       ],
       namespace=edu_robot_namespace,      
-      prefix=['gdbserver localhost:3210'],
+      # prefix=['gdbserver localhost:3000'],
       output='screen'
     )
 
