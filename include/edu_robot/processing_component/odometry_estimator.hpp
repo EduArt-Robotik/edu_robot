@@ -27,6 +27,7 @@ public:
   OdometryEstimator(const Parameter parameter, rclcpp::Node& ros_node);
   ~OdometryEstimator() override = default;
 
+  void process() override { }
   void process(const Eigen::Vector3f& measured_velocity);
   nav_msgs::msg::Odometry getOdometryMessage(const std::string& robot_base_frame, const std::string& odom_frame) const;
   geometry_msgs::msg::TransformStamped getTfMessage(const std::string& robot_base_frame, const std::string& odom_frame) const;

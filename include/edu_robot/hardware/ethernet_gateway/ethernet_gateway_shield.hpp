@@ -27,7 +27,7 @@ class Communicator;
 namespace ethernet {
 
 class EthernetGatewayShield : public HardwareRobotInterface
-                            , public processing::ProcessingComponentOutput<float>
+                            , public processing::DataSourceComponent
 {
 public:
   EthernetGatewayShield(char const* const ip_address, const std::uint16_t port);

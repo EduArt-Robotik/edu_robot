@@ -2,6 +2,7 @@
 add_library(eduart-hardware
   communicator.cpp
   rx_data_endpoint.cpp
+  network_communication_device.cpp
 )
 target_link_libraries(eduart-hardware
   eduart-robot

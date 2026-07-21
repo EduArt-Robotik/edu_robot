@@ -33,7 +33,7 @@ class FutureAction : public Action
 public:
   FutureAction(std::shared_ptr<rclcpp::Clock> clock, rclcpp::Duration process_in)
     : _clock(clock)
-    , _process_at(clock->now() + process_in)  
+    , _process_at(clock->now() + process_in)
   { }
 
   bool isReady() const override {

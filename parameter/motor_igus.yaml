@@ -1,0 +1,30 @@
+/**:
+  ros__parameters:
+    # Motor
+    motor_a:
+      index: 0
+      max_rpm: 100.0
+      gear_ratio: 2.127659574
+      inverted: false
+      closed_loop: false
+
+    motor_b:
+      index: 0
+      max_rpm: 100.0
+      gear_ratio: 2.127659574
+      inverted: false
+      closed_loop: false
+
+    motor_c:
+      index: 0
+      max_rpm: 100.0
+      gear_ratio: 2.127659574
+      inverted: false
+      closed_loop: false
+
+    motor_d:
+      index: 0
+      max_rpm: 100.0
+      gear_ratio: 2.127659574
+      inverted: false
+      closed_loop: false

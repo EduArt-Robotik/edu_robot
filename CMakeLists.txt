@@ -83,6 +83,9 @@ endif()
 # Building Nodes
 add_subdirectory(src/node)
 
+# Building Tools
+add_subdirectory(src/tools)
+
 ## Installing of Content
 install(
   DIRECTORY include/
@@ -107,6 +110,12 @@ install(
   RUNTIME DESTINATION lib/${PROJECT_NAME}
   INCLUDES DESTINATION include
 )
+message(STATUS "Tools: ${BUILT_TOOLS}")
+install(
+  TARGETS
+    ${BUILT_TOOLS}
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
+)
 message(STATUS "Libraries: ${BUILT_LIBRARIES}")
 install(
   TARGETS
@@ -120,6 +129,8 @@ install(
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
+  find_package(ament_cmake_gtest REQUIRED)
+  find_package(Catch2 REQUIRED) 
   # the following line skips the linter which checks for copyrights
   # comment the line when a copyright and license is added to all source files
   set(ament_cmake_copyright_FOUND TRUE)
@@ -128,6 +139,17 @@ if(BUILD_TESTING)
   # a copyright and license is added to all source files
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
+
+  # todo: move add subdirectory down to a CMakeLists in test or something
+  add_subdirectory(src/test/sub_system)
+  add_subdirectory(src/test/unit_test)
+
+  install(
+    TARGETS
+      sub_system_test_can_motor_controller
+      test_angle
+    RUNTIME DESTINATION bin    
+  )
 endif()
 
 ament_export_include_directories(

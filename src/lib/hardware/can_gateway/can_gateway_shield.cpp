@@ -1,10 +1,12 @@
 #include "edu_robot/hardware/can_gateway/can_gateway_shield.hpp"
-#include "edu_robot/executer.hpp"
 #include "edu_robot/hardware/can_gateway/can_communication_device.hpp"
 #include "edu_robot/hardware/can_gateway/motor_controller_hardware.hpp"
 #include "edu_robot/hardware/can_gateway/can/message_definition.hpp"
 #include "edu_robot/hardware/can_gateway/can/can_rx_data_endpoint.hpp"
 #include "edu_robot/hardware/communicator_node.hpp"
+
+#include <edu_robot/executer.hpp>
+#include <edu_robot/event.hpp>
 
 #include <memory>
 #include <mutex>
@@ -21,14 +23,19 @@ using hardware::can_gateway::CanCommunicationDevice;
 using hardware::can_gateway::can::CanRxDataEndPoint;
 
 CanGatewayShield::CanGatewayShield(char const* const can_device)
-  : processing::ProcessingComponentOutput<float>("can_gateway_shield")
-  , _communicator{
+  : _communicator{
       std::make_shared<Communicator>(
         std::make_shared<CanCommunicationDevice>(can_device, CanCommunicationDevice::CanType::CAN), 1ms),
       nullptr,
       nullptr
     }
 {
+  // Output for Measurements
+  createOutput<float>("system.voltage");
+  createOutput<float>("system.current");
+  createOutput<float>("system.temperature");
+  createOutput<Event>("event");
+
   // Configuring Diagnostic
   _clock = std::make_shared<rclcpp::Clock>();
   _diagnostic.voltage = std::make_shared<diagnostic::MeanDiagnostic<float, std::less<float>>>(
@@ -68,6 +75,12 @@ CanGatewayShield::CanGatewayShield(char const* const can_device_0, char const* c
   _communication_node->createRxDataEndPoint<CanRxDataEndPoint, can::message::power_management::Response>(
     0x580,
     std::bind(&CanGatewayShield::processPowerManagementBoardResponse, this, std::placeholders::_1)
+  );
+  _communication_node->createRxDataEndPoint<CanRxDataEndPoint, can::message::power_management::ShutdownCommand>(
+    0x580,
+    [this](const message::RxMessageDataBuffer &){ 
+      output("event")->setValue(Event::SHUTDOWN);
+    }
   );
   _communication_node->createRxDataEndPoint<CanRxDataEndPoint, can::message::can_gateway_shield::Response>(
     0x381,
@@ -112,10 +125,11 @@ void CanGatewayShield::processPowerManagementBoardResponse(const message::RxMess
   }
   if (Response::isCurrent(data)) {
     _status_report.current.mcu = Response::value(data);
+    output("system.current")->setValue(_status_report.current.mcu);
   }
   else if (Response::isVoltage(data)) {
     _status_report.voltage.mcu = Response::value(data);
-    sendInputValue(_status_report.voltage.mcu);
+    output("system.voltage")->setValue(_status_report.voltage.mcu);
   }
   else {
     throw HardwareError(State::CAN_SOCKET_ERROR, "wrong message received");
@@ -144,6 +158,7 @@ void CanGatewayShield::processCanGatewayShieldResponse(const message::RxMessageD
 
   std::scoped_lock lock(_mutex);
   _status_report.temperature = Response::temperature(data);
+  output("system.temperature")->setValue(_status_report.temperature);
 
   // Do Diagnostics
   const auto now = _clock->now();

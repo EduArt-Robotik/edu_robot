@@ -2,8 +2,8 @@ version: "3.0"
 
 services:
     eduard-raspberry-pi:
-        image: eduartrobotik/eduart-robot:1.0.2
-        container_name: eduard-raspberry-1.0.2
+        image: eduartrobotik/eduart-robot:1.1.0
+        container_name: eduard-raspberry-1.1.0
         user: user
         restart: always
         privileged: true
@@ -14,6 +14,7 @@ services:
             - EDU_ROBOT_NAMESPACE=${EDU_ROBOT_NAMESPACE}
             - RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION} 
             - CYCLONEDDS_URI=/home/user/ros/launch_content/cyclone_profile.xml  
+            - EDU_MOTOR_MODEL=${EDU_MOTOR_MODEL:-faulhaber}
         network_mode: "host"
         command: bash -c 'cd /home/user/ros/launch_content; ros2 launch eduard-360-pi.launch.py'
         volumes:

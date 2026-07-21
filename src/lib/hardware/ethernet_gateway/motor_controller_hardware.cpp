@@ -34,12 +34,18 @@ using udp::message::AcknowledgedMotorRpm;
 
 template <std::size_t NUM_CHANNELS>
 void initialize_controller(
-  const Motor::Parameter& parameter, const typename MotorControllerHardware<NUM_CHANNELS>::Parameter& hardware_parameter,
+  const std::vector<Motor::Parameter>& parameter, const typename MotorControllerHardware<NUM_CHANNELS>::Parameter& hardware_parameter,
   std::shared_ptr<CommunicatorNode> communicator_node)
 {
   // Initial Motor Controller Hardware
-  if (false == parameter.isValid()) {
+  if (parameter.size() < 1) {
+    throw std::runtime_error("can motor controller hardware layer expect exactly 2 motors.");
+  }
+  if (false == parameter[0].isValid()) {
     throw std::invalid_argument("Given parameter are not valid. Cancel initialization of motor controller.");
+  }
+  if (false == hardware_parameter.isValid()) {
+    throw std::invalid_argument("Given hardware parameter are not valid. Cancel initialization of motor controller.");
   }
 
   // Motor Controller Parameter
@@ -47,10 +53,10 @@ void initialize_controller(
     auto request = EthernetRequest::make_request<SetMotorControllerParameter>(
       0,
       hardware_parameter.can_id,
-      hardware_parameter.gear_ratio,
-      parameter.max_rpm,
+      parameter[0].gear_ratio,
+      parameter[0].max_rpm,
       hardware_parameter.threshold_stall_check,
-      hardware_parameter.weight_low_pass_set_point,
+      hardware_parameter.input_filter_weight,
       hardware_parameter.control_frequency,
       hardware_parameter.timeout.count()
     );
@@ -65,9 +71,9 @@ void initialize_controller(
     auto request = EthernetRequest::make_request<SetEncoderParameter>(
       0,
       hardware_parameter.can_id,
-      hardware_parameter.encoder_ratio,
-      hardware_parameter.weight_low_pass_encoder,
-      hardware_parameter.encoder_inverted
+      parameter[0].encoder.ratio,
+      hardware_parameter.input_filter_weight,
+      parameter[0].encoder.inverted
     );
     const auto got = communicator_node->sendRequest(std::move(request), 200ms);
 
@@ -80,12 +86,12 @@ void initialize_controller(
     auto request = EthernetRequest::make_request<SetPidControllerParameter>(
       0,
       hardware_parameter.can_id,
-      parameter.kp,
-      parameter.ki,
-      parameter.kd,
-     -parameter.max_rpm,
-      parameter.max_rpm,
-      hardware_parameter.weight_low_pass_set_point,
+      parameter[0].pid.kp,
+      parameter[0].pid.ki,
+      parameter[0].pid.kd,
+     -parameter[0].max_rpm,
+      parameter[0].max_rpm,
+      hardware_parameter.input_filter_weight,
       true
     );
     const auto got = communicator_node->sendRequest(std::move(request), 200ms);
@@ -166,11 +172,6 @@ void MotorControllerHardware<1>::processSending()
     return;
   }
 
-  // if motor rotates inverted, change direction
-  if (_parameter.inverted) {
-    invertRotation(_data.measured_rpm);
-  }
-
   _callback_process_measurement(_data.measured_rpm, AcknowledgedMotorRpm::enabled(got.response()));
 }
 
@@ -205,16 +206,11 @@ void MotorControllerHardware<2>::processSending()
     return;
   }
 
-  // if motor rotates inverted, change direction
-  if (_parameter.inverted) {
-    invertRotation(_data.measured_rpm);
-  }
-
   _callback_process_measurement(_data.measured_rpm, AcknowledgedMotorRpm::enabled(got.response()));  
 }
 
 template <>
-void MotorControllerHardware<1>::initialize(const Motor::Parameter& parameter)
+void MotorControllerHardware<1>::initialize(const std::vector<Motor::Parameter>& parameter)
 {
   initialize_controller<1>(parameter, _parameter, _communication_node);
   _communication_node->addSendingJob(
@@ -223,7 +219,7 @@ void MotorControllerHardware<1>::initialize(const Motor::Parameter& parameter)
 }
 
 template <>
-void MotorControllerHardware<2>::initialize(const Motor::Parameter& parameter)
+void MotorControllerHardware<2>::initialize(const std::vector<Motor::Parameter>& parameter)
 {
   initialize_controller<2>(parameter, _parameter, _communication_node);
   _communication_node->addSendingJob(

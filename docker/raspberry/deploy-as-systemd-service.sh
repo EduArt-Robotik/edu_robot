@@ -6,13 +6,18 @@ fi
 
 docker_compose_file_path=$(pwd)
 systemd_service_file="raspberry-edu-robot.service"
+systemd_service_heartbeat_file="raspberry-can-heartbeat.service"
+heartbeat_file="raspberry-can-heartbeat.sh"
 tag="<docker_compose_file_path>"
 
 echo "Deploying Docker Compose Services for Controlling Raspberry Eduard"
 
-# First installing systemd service on system.
+# First installing systemd services on system. In addition, copying heartbeat files, too.
 echo "Installing systemd service on system"
 cp $systemd_service_file /etc/systemd/system/
+cp $systemd_service_heartbeat_file /etc/systemd/system/
+cp $heartbeat_file /usr/local/bin/
+chmod +x /usr/local/bin/$heartbeat_file
 
 # Modify systemd service so it runs the correct docker compose file.
 echo "Add current file path \"$docker_compose_file_path\" to systemd service."

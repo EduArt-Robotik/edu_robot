@@ -6,6 +6,7 @@
 #pragma once
 
 #include <edu_robot/diagnostic/diagnostic_component.hpp>
+#include <edu_robot/processing_component/processing_component.hpp>
 
 #include <rclcpp/time.hpp>
 #include <tf2/LinearMath/Transform.h>
@@ -20,6 +21,7 @@ namespace robot {
  * \brief Base class of each sensor. Provides general sensor configuration for example used for tf publishing.
  */
 class Sensor : public diagnostic::DiagnosticComponent
+             , public processing::DataSourceComponent
 {
 protected:
   Sensor(const std::string& name, const std::string& frame_id, const std::string& reference_frame_id,
@@ -27,7 +29,7 @@ protected:
 
 public:
   Sensor(const Sensor&) = delete;
-  virtual ~Sensor() = default;
+  ~Sensor() override = default;
 
   inline const std::string& name() const { return _name; }
   inline const std::string& frameId() const { return _frame_id; }

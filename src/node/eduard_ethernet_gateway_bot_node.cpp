@@ -54,7 +54,7 @@ public:
     factory.addImuSensor("imu");
 
     initialize(factory);
-    shield->registerComponentInput(_detect_charging_component);
+    shield->output("system.voltage")->connect(_detect_charging_component->input("voltage"));
     _mode_state_machine.switchToMode(eduart::robot::RobotMode::INACTIVE);
   }
 };

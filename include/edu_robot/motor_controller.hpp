@@ -35,7 +35,7 @@ public:
    * \brief Hardware interface used for communication with actual hardware.
    */
   class HardwareInterface : public eduart::robot::HardwareInterface
-                          , public HardwareComponent<Motor::Parameter>
+                          , public HardwareComponent<std::vector<Motor::Parameter>>
                           , public HardwareActuator<std::vector<Rpm>>
                           , public HardwareSensor<const std::vector<Rpm>, const bool>
   {
@@ -92,7 +92,13 @@ public:
       throw std::runtime_error("No motor is present --> can't initialize motors.");
     }
 
-    _hardware_interface->initialize(_motor[0].parameter());
+    std::vector<Motor::Parameter> motor_parameter;
+
+    for (const auto& motor : _motor) {
+      motor_parameter.push_back(motor.parameter());
+    }
+
+    _hardware_interface->initialize(motor_parameter);
   }
 
 private:
@@ -104,6 +110,7 @@ private:
   std::string _name;
   std::size_t _id;
   std::vector<Motor> _motor;
+  std::vector<Rpm> _set_rpm;
   std::vector<Rpm> _measured_rpm;
   std::shared_ptr<HardwareInterface> _hardware_interface;
 

@@ -22,40 +22,7 @@
         y: 0.4399999976158142
       wheel_diameter: 0.1
 
-# Motors and Controller
-    motor_a:
-      closed_loop: true
-      index: 0
-      max_rpm: 100.0
-      pid:
-        kd: 0.0
-        ki: 5.0
-        kp: 0.5
-    motor_b:
-      closed_loop: true
-      index: 0
-      max_rpm: 100.0
-      pid:
-        kd: 0.0
-        ki: 5.0
-        kp: 0.5
-    motor_c:
-      closed_loop: true
-      index: 0
-      max_rpm: 100.0
-      pid:
-        kd: 0.0
-        ki: 5.0
-        kp: 0.5
-    motor_d:
-      closed_loop: true
-      index: 0
-      max_rpm: 100.0
-      pid:
-        kd: 0.0
-        ki: 5.0
-        kp: 0.5
-      
+# Motor Controller
     motor_controller_a:
       set_parameter: false
       can_id: 0x38

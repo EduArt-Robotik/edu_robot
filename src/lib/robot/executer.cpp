@@ -32,7 +32,10 @@ void Executer::start()
 void Executer::stop()
 {
   _is_running = false;
-  _executer.join();
+
+  if (_executer.joinable()) {
+    _executer.join();
+  }
 }
 
 void Executer::addJob(std::function<void()> do_job_function, const std::chrono::microseconds time_interval)
@@ -55,7 +58,7 @@ void Executer::addJob(std::function<void()> do_job_function, const std::chrono::
 
 void Executer::run()
 {
-  while (_is_running && rclcpp::ok()) {
+  while (_is_running) {
     // process all jobs if nothing to do sleep
     bool did_something = false;
     const auto stamp_now = std::chrono::system_clock::now();

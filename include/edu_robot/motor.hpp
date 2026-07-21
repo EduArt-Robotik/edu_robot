@@ -28,16 +28,28 @@ public:
    */
   struct Parameter
   {
-    bool closed_loop = true;
-    std::size_t index = 0;
-    float max_rpm = 100.0f;
+    bool closed_loop = true; // closed loop control --> pid is active
+    bool inverted = false;   // motor direction inverted
+    std::size_t index = 0;   // motor index, 0 == ignored, (> 0) == motor index
+    float max_rpm = 100.0f;  // maximum allowed rpm
+    float gear_ratio = 1.0f; // gear ratio
   
-    float kp = 0.5f;
-    float ki = 5.0f;
-    float kd = 0.0f;
+    struct Pid {
+      float kp = 0.5f;
+      float ki = 5.0f;
+      float kd = 0.0f;
+      bool isValid() const {
+        return kp >= 0.0f && ki >= 0.0f && kd >= 0.0f;
+      }
+    } pid;
+
+    struct Encoder {
+      bool inverted = false;      // encoder direction inverted
+      std::uint32_t ratio = 4096; // encoder ticks per revolution, four times encoder CPR
+    } encoder;
 
     bool isValid() const {
-      return kp >= 0.0f && ki >= 0.0f && kd >= 0.0f;
+      return pid.isValid() && max_rpm >= 0.0f && gear_ratio > 0;
     }
   };
 

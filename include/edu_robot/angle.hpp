@@ -89,24 +89,46 @@ template<>
 inline constexpr void NormalizedAngle<AngleRange::PI_2_TO_PI_2>::normalize()
 {
   // add or sub pi/2 from angle until it is in range of [-pi/2, pi/2]
-  while (_value >   M_PI_2) _value -= M_PI;
-  while (_value <= -M_PI_2) _value += M_PI;
+  if (std::abs(_value) <= 4.0 * M_PI) {
+    while (_value >   M_PI_2) _value -= M_PI;
+    while (_value <= -M_PI_2) _value += M_PI;
+  }
+  // for extreme values use remainder
+  else {
+    _value = std::remainder(_value, M_PI);
+    if (_value > M_PI_2) _value -= M_PI;
+    else if (_value <= -M_PI_2) _value += M_PI;
+  }
 }
 
 template<>
 inline constexpr void NormalizedAngle<AngleRange::PI_TO_PI>::normalize()
 {
   // add or sub 2pi from angle until it is in range of ]-pi, pi]
-  while (_value >   M_PI) _value -= 2.0 * M_PI;
-  while (_value <= -M_PI) _value += 2.0 * M_PI;
+  if (std::abs(_value) <= 4.0 * M_PI) {
+    while (_value >   M_PI) _value -= 2.0 * M_PI;
+    while (_value <= -M_PI) _value += 2.0 * M_PI;
+  }
+  // for extreme values use remainder
+  else {
+    _value = std::remainder(_value, 2.0 * M_PI);
+    if (_value > M_PI) _value -= 2.0 * M_PI;
+  }
 }
 
 template<>
 inline constexpr void NormalizedAngle<AngleRange::NULL_TO_2PI>::normalize()
 {
-  // add or sub 2pi from angle until it is in range of [0, pi[
-  while (_value >= 2.0 * M_PI) _value -= 2.0 * M_PI;
-  while (_value  <        0.0) _value += 2.0 * M_PI;
+  // add or sub 2pi from angle until it is in range of [0, 2pi[
+  if (std::abs(_value) <= 4.0 * M_PI) {
+    while (_value >= 2.0 * M_PI) _value -= 2.0 * M_PI;
+    while (_value  <        0.0) _value += 2.0 * M_PI;
+  }
+  // for extreme values use fmod
+  else {
+    _value = std::fmod(_value, 2.0 * M_PI);
+    if (_value < 0.0) _value += 2.0 * M_PI;
+  }
 }
 
 } // end namespace impl

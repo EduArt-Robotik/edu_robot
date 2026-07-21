@@ -19,6 +19,8 @@ namespace algorithm {
 AnglePiToPi quaternion_to_yaw(const geometry_msgs::msg::Quaternion& q);
 AnglePiToPi quaternion_to_yaw(const Eigen::Quaterniond& q);
 
+geometry_msgs::msg::Quaternion yaw_to_quaternion(const Angle& yaw);
+
 void eliminate_yaw(geometry_msgs::msg::Quaternion& q);
 void eliminate_yaw(Eigen::Quaterniond& q);
 

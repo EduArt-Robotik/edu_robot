@@ -14,7 +14,6 @@ namespace robot {
 namespace processing {
 
 class DetectCharging : public ProcessingComponent
-                     , public ProcessingComponentInput<float>
 {
 public:
   struct Parameter {
@@ -24,12 +23,16 @@ public:
   DetectCharging(const Parameter parameter, rclcpp::Node& ros_node)
     : ProcessingComponent("detect_charging", ros_node)
     , _parameter(parameter)
-  { }
+  {
+    createInput<float>("voltage", 10);
+  }
   ~DetectCharging() override = default;
 
-  void processInput(const float& value, const ProcessingComponentOutput<float>*) override
+  void process() override
   {
-    _is_charging = value >= _parameter.voltage_threshold;
+    for (auto port = input("voltage"); port->hasValue();) {
+      _is_charging = port->getValue().get<float>() >= _parameter.voltage_threshold;
+    }
   }
 
   inline bool isCharging() const { return _is_charging; }

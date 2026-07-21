@@ -147,9 +147,10 @@ protected:
   Eigen::MatrixXf _inverse_kinematic_matrix;
 
   // Processing Components
+  std::vector<std::shared_ptr<processing::ProcessingComponent>> _processing_components;
+  std::shared_ptr<processing::OdometryEstimator> _odometry_component;
   std::shared_ptr<processing::CollisionAvoidance> _collision_avoidance_component;
   std::shared_ptr<processing::DetectCharging> _detect_charging_component;
-  std::shared_ptr<processing::OdometryEstimator> _odometry_component;
 
   // Event
   std::shared_ptr<action::ActionManager> _action_manager;
@@ -165,7 +166,7 @@ protected:
 private:
   void processStatusReport();
   void processTfPublishing();
-  void processWatchDogBarking();
+  void process();
   void setLightingForMode(const RobotMode mode);
   void remapTwistSubscription(const std::string& new_topic_name);
   void configureStateMachine();
@@ -189,7 +190,7 @@ private:
   // Timer used for synchronous processing
   std::shared_ptr<rclcpp::TimerBase> _timer_status_report; 
   std::shared_ptr<rclcpp::TimerBase> _timer_tf_publishing;
-  std::shared_ptr<rclcpp::TimerBase> _timer_watch_dog;
+  std::shared_ptr<rclcpp::TimerBase> _timer_process;
   std::shared_ptr<rclcpp::TimerBase> _timer_odometry;
 };
 
