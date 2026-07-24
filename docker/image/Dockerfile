@@ -1,4 +1,4 @@
-FROM eduartrobotik/eduart-ros-base:jazzy-1.2.2
+FROM eduartrobotik/eduart-ros-base:jazzy-1.2.3
 
 ENV USER=user
 ENV DEBIAN_FRONTEND=noninteractive
@@ -17,6 +17,7 @@ RUN apt-get update \
       cmake \
       libjson-c-dev \
       libgpiod-dev \
+      libusb-1.0-0-dev \
     && apt-get install -y \
       ros-$ROS_DISTRO-hardware-interface \
     # todo master brauch is not good, but the only one how compiles.
@@ -30,6 +31,22 @@ RUN apt-get update \
     # hack: was the fastest and most fluffy way
     && cp /usr/local/lib/libmraa.so* /usr/lib
 
+# libsensoring for the distance sensor and lighting for raspberry pi
+RUN cd /tmp \
+    && git clone --branch develop https://github.com/EduArt-Robotik/edu_lib_sensorring.git \
+    && cd edu_lib_sensorring \
+    && git submodule sync --recursive \
+    && git -c url."https://github.com/".insteadOf="git@github.com:" \
+       -c url."https://github.com/".insteadOf="ssh://git@github.com/" \
+       submodule update --init --recursive \
+    && mkdir build \
+    && cd build \
+    && cmake .. \
+    && make -j$(nproc) \
+    && make install \
+    && rm -rf /tmp/edu_lib_sensorring
+
+# set up user space
 USER $USER
 
 # set up ros workspace
