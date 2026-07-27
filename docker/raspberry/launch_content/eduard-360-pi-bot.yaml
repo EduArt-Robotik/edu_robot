@@ -3,6 +3,11 @@
     # General Parameters
     use_sim_time: false
 
+    # Logging
+    tof_sensor_ring:
+      logging:
+        enabled: false
+
     # Collision Avoidance
     collision_avoidance:
       distance_reduce_velocity: 0.4
@@ -71,19 +76,8 @@
 
     # TOF Sensors
     tof_sensor_ring_left:
-      can_id:
-        measurement_complete: 776
-        trigger: 904
       front:
         virtual_range_sensor: true
-        fov:
-          horizontal: 0.7853981852531433
-          vertical: 0.7853981852531433
-        measurement_interval_ms: 100
-        number_of_zones:
-          horizontal: 8
-          vertical: 8
-        sensor_id: 2
         transform:
           orientation:
             roll: 1.570796327
@@ -93,17 +87,8 @@
             x: 0.17
             y: 0.063
             z: 0.045
-      measurement_interval: 100
       rear:
         virtual_range_sensor: true
-        fov:
-          horizontal: 0.7853981852531433
-          vertical: 0.7853981852531433
-        measurement_interval_ms: 100
-        number_of_zones:
-          horizontal: 8
-          vertical: 8
-        sensor_id: 1
         transform:
           orientation:
             roll: 0.0
@@ -114,19 +99,8 @@
             y: 0.063
             z: 0.05
     tof_sensor_ring_right:
-      can_id:
-        measurement_complete: 776
-        trigger: 904
       front:
         virtual_range_sensor: true
-        fov:
-          horizontal: 0.7853981852531433
-          vertical: 0.7853981852531433
-        measurement_interval_ms: 100
-        number_of_zones:
-          horizontal: 8
-          vertical: 8
-        sensor_id: 2
         transform:
           orientation:
             roll: -1.570796327
@@ -136,17 +110,8 @@
             x: 0.17
             y: -0.063
             z: 0.045
-      measurement_interval: 100
       rear:
         virtual_range_sensor: true
-        fov:
-          horizontal: 0.7853981852531433
-          vertical: 0.7853981852531433
-        measurement_interval_ms: 100
-        number_of_zones:
-          horizontal: 8
-          vertical: 8
-        sensor_id: 1
         transform:
           orientation:
             roll: 0.0
