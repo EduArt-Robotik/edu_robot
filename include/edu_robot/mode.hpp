@@ -14,6 +14,7 @@ enum class RobotMode {
   AUTONOMOUS                = edu_robot::msg::Mode::AUTONOMOUS,
   CHARGING                  = edu_robot::msg::Mode::CHARGING,
   SHUTTING_DOWN             = edu_robot::msg::Mode::SHUTTING_DOWN,
+  BATTERY_EMPTY             = edu_robot::msg::Mode::BATTERY_EMPTY,
   // MASK_UNSET_DRIVING_MODE   = edu_robot::msg::Mode::MASK_UNSET_DRIVING_MODE,
 };
 

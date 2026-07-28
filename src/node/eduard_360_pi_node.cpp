@@ -71,6 +71,8 @@ public:
     shield->output("event")->connect(shutting_downer->input("event"));
     _processing_components.push_back(shutting_downer);
 
+    shield->output("event")->connect(input("event"));
+
     // Switch to inactive mode (default)
     _mode_state_machine.switchToMode(eduart::robot::RobotMode::INACTIVE);
   }

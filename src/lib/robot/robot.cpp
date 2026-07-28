@@ -3,10 +3,12 @@
 #include "edu_robot/hardware_error.hpp"
 #include "edu_robot/lighting.hpp"
 #include "edu_robot/mode.hpp"
+#include "edu_robot/event.hpp"
 
 #include "edu_robot/msg_conversion.hpp"
 
 #include "edu_robot/action/motor_action.hpp"
+#include "edu_robot/action/indicate_rejected_action.hpp"
 
 #include "edu_robot/processing_component/collison_avoidance.hpp"
 #include "edu_robot/processing_component/odometry_estimator.hpp"
@@ -70,11 +72,15 @@ static Robot::Parameter get_robot_ros_parameter(rclcpp::Node& ros_node)
 
 Robot::Robot(const std::string& robot_name, std::unique_ptr<HardwareRobotInterface> hardware_interface, const std::string& ns)
   : rclcpp::Node(robot_name, ns)
+  , processing::ProcessingComponent("robot", *this)
   , _hardware_interface(std::move(hardware_interface))
   , _last_twist_received(get_clock()->now())
   , _tf_broadcaster(std::make_unique<tf2_ros::TransformBroadcaster>(*this))
 {
   _parameter = get_robot_ros_parameter(*this);
+
+  // Inputs
+  createInput<Event>("event");
 
   // Diagnostic
   _diagnostic_updater = std::make_shared<diagnostic_updater::Updater>(
@@ -354,6 +360,10 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
   try {
     // Robot Mode Request Handling
     if (request->mode.mode != edu_robot::msg::Mode::UNKNOWN) {
+      if (_emergency_stop_pressed) {
+        throw std::runtime_error("Emergency stop is pressed.");
+      }
+
       _mode_state_machine.switchToMode(static_cast<RobotMode>(request->mode.mode));
     }
     // Drive Kinematic Request Handling
@@ -376,12 +386,15 @@ void Robot::callbackServiceSetMode(const std::shared_ptr<edu_robot::srv::SetMode
   catch (HardwareError& ex) {
     RCLCPP_ERROR_STREAM(get_logger(), "Hardware error occurred while trying to set new mode. what() = " << ex.what());
     response->state.info_message = "REJECTED";
-    response->state.state.value = response->state.state.OK;        
+    response->state.state.value = response->state.state.OK;
   }
   catch (std::exception& ex) {
     RCLCPP_ERROR_STREAM(get_logger(), "Error occurred while trying to set new mode. what() = " << ex.what());
     response->state.info_message = "REJECTED";
     response->state.state.value = response->state.state.OK;
+    _action_manager->addAction(std::make_shared<action::IndicateRejected>(
+      get_clock(), 2000ms, std::bind(&Robot::setLightingForMode, this, std::placeholders::_1), _mode_state_machine)
+    );
   }
 
   response->state.mode = to_ros(_mode_state_machine.mode());
@@ -491,24 +504,36 @@ void Robot::process()
       component->process();
     }
 
-    // Charging Detection
-    static bool last_state = false;
+    // Processing Events
+    for (auto port = input("event"); port->hasValue();) {
+      const auto value = port->getValue();
 
+      if (value.get<Event>() == Event::EMERGENCY_STOP_PRESSED) {
+        _emergency_stop_pressed = true;
+      }
+      else if (value.get<Event>() == Event::EMERGENCY_STOP_RELEASED) {
+        _emergency_stop_pressed = false;
+      }
+      else if (value.get<Event>() == Event::BATTERY_EMPTY) {
+        _mode_state_machine.switchToMode(RobotMode::BATTERY_EMPTY);
+      }
+    }
+
+    // Charging Detection
     // The order of the if else statements reflect the priority of these modes!
-    if (last_state == false && _detect_charging_component->isCharging() == true) {
+    if (_mode_state_machine.mode().robot_mode != RobotMode::CHARGING && _detect_charging_component->isCharging() == true) {
       _mode_state_machine.switchToMode(RobotMode::CHARGING);
     }
-    else if (last_state == true && _detect_charging_component->isCharging() == false) {
+    else if (_mode_state_machine.mode().robot_mode == RobotMode::CHARGING && _detect_charging_component->isCharging() == false) {
       _mode_state_machine.switchToMode(RobotMode::INACTIVE);
     }
     // Check if timeout occurred.
     else if ((_mode_state_machine.mode().robot_mode != RobotMode::CHARGING) &&
              (_mode_state_machine.mode().robot_mode != RobotMode::INACTIVE) &&
+             (_mode_state_machine.mode().robot_mode != RobotMode::BATTERY_EMPTY) &&
              (get_clock()->now() - _last_twist_received).seconds() > 1.0) {
       _mode_state_machine.switchToMode(RobotMode::INACTIVE);
     }
-
-    last_state = _detect_charging_component->isCharging();
   }
   catch (HardwareError& ex) {
     RCLCPP_ERROR_STREAM(get_logger(), "Hardware error occurred while trying to process timercallback. what() = " << ex.what());                                      
@@ -550,6 +575,10 @@ void Robot::setLightingForMode(const RobotMode mode)
 
       case RobotMode::SHUTTING_DOWN:
         search->second->setColor(Color{0, 0, 25}, Lighting::Mode::FLASH);
+        break;
+
+      case RobotMode::BATTERY_EMPTY:
+        search->second->setColor(Color{25, 0, 0}, Lighting::Mode::FLASH);
         break;
 
       default:

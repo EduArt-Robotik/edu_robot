@@ -275,7 +275,7 @@ struct GetterCommandFrame : public MessageFrame<element::Command<CommandByte>, E
 
   inline static constexpr auto makeSearchPattern(const std::uint32_t can_address) {
     using MessageType = typename MessageFrame<
-      element::Command<PROTOCOL::MOTOR::COMMAND::RESPONSE_MOTOR_PARAMETER>,
+      element::Command<PROTOCOL::MOTOR::COMMAND::RESPONSE_MOTOR_PARAMETER>, // \todo remove motor controller dependency!
       element::Command<CommandByte>,
       Elements...
     >::MessageType;
@@ -288,7 +288,7 @@ struct GetterCommandFrame : public MessageFrame<element::Command<CommandByte>, E
     return MessageFrame<element::Command<CommandByte>, Elements...>::serialize(
       can_address, 0, element_value...
     );
-  }  
+  }
 };
 
 template <class... Elements>

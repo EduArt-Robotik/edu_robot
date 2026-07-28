@@ -67,7 +67,11 @@ struct PROTOCOL {
       static constexpr Byte VOLTAGE = 0x02;
     };
     struct COMMAND {
-      static constexpr Byte SHUTDOWN = 0xFC; // Command to initiate shutdown sequence
+      static constexpr Byte SHUTDOWN     = 0xFC; // Command to initiate shutdown sequence
+      static constexpr Byte GET_FIRMWARE = 0x03; // Request firmware version
+      static constexpr Byte GET_HARDWARE = 0x04; // Request hardware version
+
+      static constexpr Byte RESPONSE_POWER_MANAGEMENT = 0xa2;
     };
   };
   struct LIGHTING {

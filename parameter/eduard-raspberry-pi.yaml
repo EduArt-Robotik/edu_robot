@@ -3,6 +3,11 @@
     # General Parameters
     use_sim_time: false
 
+    # Logging
+    tof_sensor_ring:
+      logging:
+        enabled: false
+
     # Collision Avoidance
     collision_avoidance:
       distance_reduce_velocity: 0.4

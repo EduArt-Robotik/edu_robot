@@ -1,6 +1,7 @@
 add_library(eduart-action
   action_manager.cpp
   motor_action.cpp
+  indicate_rejected_action.cpp
 )
 target_link_libraries(eduart-action
   "${cpp_typesupport_target}"

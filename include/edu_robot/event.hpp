@@ -10,6 +10,9 @@ namespace robot {
 
 enum class Event {
   SHUTDOWN,
+  EMERGENCY_STOP_PRESSED,
+  EMERGENCY_STOP_RELEASED,
+  BATTERY_EMPTY
 };
 
 } // end namespace robot

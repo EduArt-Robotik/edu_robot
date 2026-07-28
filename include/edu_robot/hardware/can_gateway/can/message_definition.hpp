@@ -505,6 +505,9 @@ struct Response : public message::MessageFrame<element::Uint8, // command
 
 namespace power_management {
 
+using GetFirmware = GetterCommandFrame<PROTOCOL::POWER_MANAGEMENT::COMMAND::GET_FIRMWARE>;
+using GetHardware = GetterCommandFrame<PROTOCOL::POWER_MANAGEMENT::COMMAND::GET_HARDWARE>;
+
 struct Response : public message::MessageFrame<element::Uint8, // measurement type indicator
                                                element::Float, // measurement value
                                                element::Uint8> // enable state
@@ -518,8 +521,11 @@ struct Response : public message::MessageFrame<element::Uint8, // measurement ty
   inline static constexpr float value(const RxMessageDataBuffer& rx_buffer) {
     return deserialize<2>(rx_buffer);
   }
-  inline static constexpr bool isEnabled(const RxMessageDataBuffer& rx_buffer) {
-    return deserialize<3>(rx_buffer);
+  inline static constexpr bool isEmergencyStop(const RxMessageDataBuffer& rx_buffer) {
+    return (deserialize<3>(rx_buffer) >> 0) & 0x01;
+  }
+  inline static constexpr bool isBatteryEmpty(const RxMessageDataBuffer& rx_buffer) {
+    return (deserialize<3>(rx_buffer) >> 1) & 0x01;
   }
 };
 
@@ -533,6 +539,40 @@ struct ShutdownCommand : public message::MessageFrame<element::Command<PROTOCOL:
 
     return element::impl::make_message_search_pattern<0, 1>(can_address, MessageType{});
   }  
+};
+
+struct Firmware : public message::MessageFrame<element::Command<PROTOCOL::POWER_MANAGEMENT::COMMAND::RESPONSE_POWER_MANAGEMENT>,
+                                               element::Command<PROTOCOL::POWER_MANAGEMENT::COMMAND::GET_FIRMWARE>,
+                                               element::Uint16,
+                                               element::Uint16,
+                                               element::Uint16>
+{
+  inline static constexpr std::uint16_t major(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<3>(rx_buffer);
+  }
+  inline static constexpr std::uint16_t minor(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<4>(rx_buffer);
+  }
+  inline static constexpr std::uint16_t patch(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<5>(rx_buffer);
+  }
+};
+
+struct Hardware : public message::MessageFrame<element::Command<PROTOCOL::POWER_MANAGEMENT::COMMAND::RESPONSE_POWER_MANAGEMENT>,
+                                               element::Command<PROTOCOL::POWER_MANAGEMENT::COMMAND::GET_HARDWARE>,
+                                               element::Uint16,
+                                               element::Uint16,
+                                               element::Uint16>
+{
+  inline static constexpr std::uint16_t major(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<3>(rx_buffer);
+  }
+  inline static constexpr std::uint16_t minor(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<4>(rx_buffer);
+  }
+  inline static constexpr std::uint16_t patch(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<5>(rx_buffer);
+  }
 };
 
 } // end namespace_power_management

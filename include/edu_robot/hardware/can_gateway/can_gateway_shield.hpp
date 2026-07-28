@@ -50,6 +50,7 @@ public:
   void registerMotorControllerHardware(std::shared_ptr<MotorControllerHardware> motor_controller_hardware);
 
 private:
+  void initialize();
   diagnostic::Diagnostic processDiagnosticsImpl() override;
   void processPowerManagementBoardResponse(const message::RxMessageDataBuffer &data);
   void processCanGatewayShieldResponse(const message::RxMessageDataBuffer &data);
@@ -60,6 +61,9 @@ private:
   std::mutex _mutex;
   std::shared_ptr<rclcpp::Clock> _clock;
   std::vector<std::shared_ptr<MotorControllerHardware>> _motor_controller_hardware;
+  std::array<std::uint16_t, 3> _hardware_version = {0, 0, 0};
+  bool _emergency_stop_active = false;
+  bool _battery_empty = false;
 
   RobotStatusReport _status_report;
 

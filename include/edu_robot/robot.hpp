@@ -54,6 +54,7 @@ class Lighting;
  *        class has to implement a hardware driver that is used for hardware abstraction.
  */
 class Robot : public rclcpp::Node
+            , public processing::ProcessingComponent
 {
 protected:
   Robot(const std::string& robot_name, std::unique_ptr<HardwareRobotInterface> hardware_interface, const std::string& ns = "");
@@ -157,6 +158,7 @@ protected:
 
   // Mode  
   StateMachine _mode_state_machine;
+  bool _emergency_stop_pressed = false;
 
   // Mounted components that are controlled by the hardware interface.
   std::map<std::string, std::shared_ptr<Lighting>> _lightings;

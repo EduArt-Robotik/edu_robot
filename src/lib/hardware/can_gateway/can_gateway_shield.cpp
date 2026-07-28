@@ -3,10 +3,13 @@
 #include "edu_robot/hardware/can_gateway/motor_controller_hardware.hpp"
 #include "edu_robot/hardware/can_gateway/can/message_definition.hpp"
 #include "edu_robot/hardware/can_gateway/can/can_rx_data_endpoint.hpp"
+#include "edu_robot/hardware/can_gateway/can/can_request.hpp"
 #include "edu_robot/hardware/communicator_node.hpp"
 
 #include <edu_robot/executer.hpp>
 #include <edu_robot/event.hpp>
+
+#include <rclcpp/logging.hpp>
 
 #include <memory>
 #include <mutex>
@@ -21,6 +24,7 @@ using namespace std::chrono_literals;
 
 using hardware::can_gateway::CanCommunicationDevice;
 using hardware::can_gateway::can::CanRxDataEndPoint;
+using hardware::can_gateway::can::Request;
 
 CanGatewayShield::CanGatewayShield(char const* const can_device)
   : _communicator{
@@ -63,6 +67,8 @@ CanGatewayShield::CanGatewayShield(char const* const can_device)
 CanGatewayShield::CanGatewayShield(char const* const can_device_0, char const* const can_device_1, char const* const can_device_2)
   : CanGatewayShield(can_device_0)
 {
+  (void)can_device_1;
+  (void)can_device_2;
   // These two communicators are not part of this rx node!
   //_communicator[1] = std::make_shared<Communicator>(
   //  std::make_shared<CanCommunicationDevice>(can_device_1, CanCommunicationDevice::CanType::CAN_FD), 1ms
@@ -86,6 +92,8 @@ CanGatewayShield::CanGatewayShield(char const* const can_device_0, char const* c
     0x381,
     std::bind(&CanGatewayShield::processCanGatewayShieldResponse, this, std::placeholders::_1)
   );
+
+  initialize();
 }
 
 CanGatewayShield::~CanGatewayShield()
@@ -93,6 +101,26 @@ CanGatewayShield::~CanGatewayShield()
   disable();
   for (auto& executer : _executer) {
     executer->stop();
+  }
+}
+
+void CanGatewayShield::initialize()
+{
+  try {
+    auto request = Request::make_request_with_response<can::message::power_management::GetHardware>(
+      0x500, 0x580);
+    const auto got = _communication_node->sendRequest(std::move(request), 200ms);
+
+    const auto major = can::message::power_management::Hardware::major(got.response());
+    const auto minor = can::message::power_management::Hardware::minor(got.response());
+    const auto patch = can::message::power_management::Hardware::patch(got.response());
+
+    _hardware_version = {major, minor, patch};
+    RCLCPP_INFO(rclcpp::get_logger("CanGatewayShield"), "Hardware version: %d.%d.%d", major, minor, patch);
+  }
+  catch (...) {
+    // hardware version request failed --> fall back to 0.x.x hardware version
+    _hardware_version = {0, 0, 0};
   }
 }
 
@@ -124,15 +152,37 @@ void CanGatewayShield::processPowerManagementBoardResponse(const message::RxMess
     return;
   }
   if (Response::isCurrent(data)) {
+    // process system current measurement
     _status_report.current.mcu = Response::value(data);
     output("system.current")->setValue(_status_report.current.mcu);
   }
   else if (Response::isVoltage(data)) {
+    // process system voltage
     _status_report.voltage.mcu = Response::value(data);
     output("system.voltage")->setValue(_status_report.voltage.mcu);
   }
   else {
     throw HardwareError(State::CAN_SOCKET_ERROR, "wrong message received");
+  }
+
+  // process status byte
+  if (_hardware_version[0] >= 1) {
+    // only read emergency stop state at hardware version 1.x.x
+    if (_emergency_stop_active == false && Response::isEmergencyStop(data)) {
+      output("event")->setValue(Event::EMERGENCY_STOP_PRESSED);
+      _emergency_stop_active = true;
+    }
+    else if (_emergency_stop_active && Response::isEmergencyStop(data) == false) {
+      output("event")->setValue(Event::EMERGENCY_STOP_RELEASED);
+      _emergency_stop_active = false;
+    }
+  }
+  if (_battery_empty == false && Response::isBatteryEmpty(data)) {
+    output("event")->setValue(Event::BATTERY_EMPTY);
+    _battery_empty = true;
+  }
+  else if (_battery_empty && Response::isBatteryEmpty(data) == false) {
+    _battery_empty = false;
   }
 
   // Do Diagnostics
