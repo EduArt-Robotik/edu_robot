@@ -1,6 +1,8 @@
 #include "edu_robot/bot/eduard_v3.hpp"
+#include "edu_robot/hardware_error.hpp"
 
 #include <edu_robot/sensor_point_cloud.hpp>
+
 #include <algorithm>
 
 namespace eduart {
@@ -82,6 +84,39 @@ void EduardV3::initialize(eduart::robot::HardwareComponentFactory& factory)
     registerSensor(point_cloud_sensor);
     hardware_interface->initialize(parameter);
   }  
+}
+
+void EduardV3::setLightingForMode(const RobotMode mode)
+{
+  try {
+    auto search_head = _lightings.find("head");
+    auto search_back = _lightings.find("back");
+
+    if (search_head == _lightings.end() || search_back == _lightings.end()) {
+      RCLCPP_WARN(get_logger(), "Can't set lighting to indicate inactive mode. Lighting \"head\" or \"back\" was not found.");
+      return;
+    }
+
+    switch (mode) {
+      case RobotMode::REMOTE_CONTROLLED:
+        search_head->second->setColor(Color{34, 34, 34}, Lighting::Mode::DIM);
+        search_back->second->setColor(Color{34, 0, 0}, Lighting::Mode::DIM);
+        break;
+
+      default:
+        // For all other modes use the default implementation of the base class.
+        Robot::setLightingForMode(mode);
+        break;
+    }
+  }
+  catch (HardwareError& ex) {
+    RCLCPP_ERROR_STREAM(get_logger(), "Hardware error occurred while trying to set new values for lighting \"all\"."
+                                      << " what() = " << ex.what());                                      
+  }
+  catch (std::exception& ex) {
+    RCLCPP_ERROR_STREAM(get_logger(), "Error occurred while trying to set new values for lighting \"all\"."
+                                      << " what() = " << ex.what());     
+  }
 }
 
 } // end namespace bot

@@ -20,6 +20,7 @@ public:
 
 protected:
   void initialize(eduart::robot::HardwareComponentFactory& factory) override;
+  void setLightingForMode(const RobotMode mode) override;
 };
 
 } // end namespace bot

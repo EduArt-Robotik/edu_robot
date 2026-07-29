@@ -86,6 +86,12 @@ protected:
    */
   virtual void initialize(eduart::robot::HardwareComponentFactory& factory) = 0;
   /**
+   * \brief Set the lighting for the given robot mode.
+   *
+   * \param mode The robot mode.
+   */
+  virtual void setLightingForMode(const RobotMode mode);  
+  /**
    * \brief Callback used to process received twist messages by passing it to the hardware abstraction layer.
    *
    * \param twist_msg Received twist message.
@@ -169,7 +175,6 @@ private:
   void processStatusReport();
   void processTfPublishing();
   void process();
-  void setLightingForMode(const RobotMode mode);
   void remapTwistSubscription(const std::string& new_topic_name);
   void configureStateMachine();
 
