@@ -2,7 +2,6 @@
   ros__parameters:
     # Motor
     motor_a:
-      index: 2
       max_rpm: 80.0
       gear_ratio: 100.0
       inverted: true
@@ -19,7 +18,6 @@
         ratio: 2048.0 # 512 ticks per revolution
 
     motor_b:
-      index: 1
       max_rpm: 80.0
       gear_ratio: 100.0
       inverted: true
@@ -36,7 +34,6 @@
         ratio: 2048.0 # 512 ticks per revolution
 
     motor_c:
-      index: 4
       max_rpm: 80.0
       gear_ratio: 100.0
       inverted: true
@@ -53,7 +50,6 @@
         ratio: 2048.0 # 512 ticks per revolution
 
     motor_d:
-      index: 3
       max_rpm: 80.0
       gear_ratio: 100.0
       inverted: true
