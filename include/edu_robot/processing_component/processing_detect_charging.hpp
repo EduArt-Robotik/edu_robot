@@ -17,7 +17,7 @@ class DetectCharging : public ProcessingComponent
 {
 public:
   struct Parameter {
-    float voltage_threshold = 28.5f;
+    float voltage_threshold = 28.0f;
   };
 
   DetectCharging(const Parameter parameter, rclcpp::Node& ros_node)

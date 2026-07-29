@@ -167,7 +167,7 @@ void CanGatewayShield::processPowerManagementBoardResponse(const message::RxMess
 
   // process status byte
   if (_hardware_version[0] >= 1) {
-    // only read emergency stop state at hardware version 1.x.x
+    // only read emergency stop state with hardware version 1.x.x and above
     if (_emergency_stop_active == false && Response::isEmergencyStop(data)) {
       output("event")->setValue(Event::EMERGENCY_STOP_PRESSED);
       _emergency_stop_active = true;
@@ -251,6 +251,7 @@ diagnostic::Diagnostic CanGatewayShield::processDiagnosticsImpl()
   diagnostic.add(*_diagnostic.current);
   diagnostic.add(*_diagnostic.temperature);
   diagnostic.add(*_diagnostic.processing_dt);
+  diagnostic.add("emergency_stop", _emergency_stop_active, _emergency_stop_active ? diagnostic::Level::WARN : diagnostic::Level::OK);
 
   return diagnostic;
 }

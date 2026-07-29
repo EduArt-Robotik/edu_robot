@@ -645,6 +645,12 @@ void Robot::configureStateMachine()
     _hardware_interface->disable();
     setLightingForMode(RobotMode::SHUTTING_DOWN);
   });
+
+  // Battery Empty Mode
+  _mode_state_machine.setModeActivationOperation(RobotMode::BATTERY_EMPTY, [this](){
+    _hardware_interface->disable();
+    setLightingForMode(RobotMode::BATTERY_EMPTY);
+  });
 }
 
 std::string Robot::getFrameIdPrefix() const
