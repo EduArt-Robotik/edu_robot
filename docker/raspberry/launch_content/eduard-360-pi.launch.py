@@ -24,6 +24,12 @@ def generate_launch_description():
       motor_parameter_file = PathJoinSubstitution([
         './',
         'motor_leison.yaml'
+      ])
+    elif motor_model == 'custom':
+      # Custom motor
+      motor_parameter_file = PathJoinSubstitution([
+        './',
+        'motor_custom.yaml'
       ])      
     else:
       # Faulhaber motor
