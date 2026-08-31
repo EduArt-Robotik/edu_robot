@@ -89,6 +89,15 @@ struct PROTOCOL {
       static constexpr Byte DISTANCE    = 11;// Indicate distance by color
     };
   };
+  struct CAN_GATEWAY_SHIELD {
+    struct COMMAND {
+      static constexpr Byte SET_IMU_FUSION      = 0x01; // Command to enable/disable IMU fusion
+      static constexpr Byte SET_IMU_ORIENTATION = 0x02; // Command to set IMU orientation
+
+      static constexpr Byte GET_FIRMWARE   = 0xFB; // Request firmware version
+      static constexpr Byte GET_PRODUCT_ID = 0xFE; // Request product id
+    };
+  };
 };
 
 } // end namespace message

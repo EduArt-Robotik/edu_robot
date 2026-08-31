@@ -94,6 +94,38 @@ private:
 
 namespace imu {
 
+struct SetImuFusion : public message::NoResponseMessageFrame<element::Command<PROTOCOL::CAN_GATEWAY_SHIELD::COMMAND::SET_IMU_FUSION>,
+                                                element::Uint8> // flag imu fusion
+{
+  inline static TxMessageDataBuffer serialize(
+    const std::uint32_t can_address, const bool imu_fusion_enabled)
+  {
+    return message::MessageFrame<element::Command<PROTOCOL::CAN_GATEWAY_SHIELD::COMMAND::SET_IMU_FUSION>, element::Uint8>::serialize(
+      can_address, 0, imu_fusion_enabled ? 1 : 0
+    );
+  }
+};
+
+struct SetImuOrientation : public message::NoResponseMessageFrame<element::Command<PROTOCOL::CAN_GATEWAY_SHIELD::COMMAND::SET_IMU_ORIENTATION>,
+                                                element::Int16, // orientation x
+                                                element::Int16, // orientation y
+                                                element::Int16> // orientation z
+{
+  inline static TxMessageDataBuffer serialize(
+    const std::uint32_t can_address, const float roll, const float pitch, const float yaw)
+  {
+    return message::MessageFrame<element::Command<PROTOCOL::CAN_GATEWAY_SHIELD::COMMAND::SET_IMU_ORIENTATION>, 
+                                 element::Int16, 
+                                 element::Int16, 
+                                 element::Int16>::serialize(
+      can_address, 0,
+      static_cast<std::int16_t>(roll  * 10000.0),
+      static_cast<std::int16_t>(pitch * 10000.0),
+      static_cast<std::int16_t>(yaw   * 10000.0)
+    );
+  }
+};
+
 struct MeasurementOrientation : public message::MessageFrame<element::Int16, // orientation w
                                                              element::Int16, // orientation x
                                                              element::Int16, // orientation y
@@ -578,6 +610,31 @@ struct Hardware : public message::MessageFrame<element::Command<PROTOCOL::POWER_
 } // end namespace_power_management
 
 namespace can_gateway_shield {
+
+struct GetFirmware : public message::GetterCommandFrame<PROTOCOL::CAN_GATEWAY_SHIELD::COMMAND::GET_FIRMWARE>{ };
+
+// Response Message Definitions
+template <Byte CommandByte, class... Elements>
+struct ParameterResponse : public message::MessageFrame<element::Command<PROTOCOL::MOTOR::COMMAND::RESPONSE_MOTOR_PARAMETER>,
+                                                        element::Command<CommandByte>,
+                                                        Elements...>
+{ };
+
+struct Firmware : public ParameterResponse<PROTOCOL::CAN_GATEWAY_SHIELD::COMMAND::GET_FIRMWARE,
+                                            element::Uint16, // major
+                                            element::Uint16, // minor
+                                            element::Uint16> // patch
+{
+  inline static constexpr std::uint16_t major(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<3>(rx_buffer);
+  }
+  inline static constexpr std::uint16_t minor(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<4>(rx_buffer);
+  }
+  inline static constexpr std::uint16_t patch(const RxMessageDataBuffer& rx_buffer) {
+    return deserialize<5>(rx_buffer);
+  }
+};                                       
 
 struct Response : public message::MessageFrame<element::Int16, // temperature measurement
                                                element::Int16> // voltage measurement
