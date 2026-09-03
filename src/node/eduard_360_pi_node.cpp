@@ -56,7 +56,7 @@ public:
     factory.addLighting();
 
     // IMU Sensor
-    factory.addImuSensor("imu", 0x381);
+    factory.addImuSensor("imu", 0x381, 0x301);
 
     // Initialize using created factory
     initialize(factory);

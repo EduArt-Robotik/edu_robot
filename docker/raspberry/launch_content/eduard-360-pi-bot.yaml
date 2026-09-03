@@ -23,9 +23,9 @@
     imu:
       fusion_weight: 0.029999999329447746
       mounting_orientation:
-        roll: -1.5707963705062866
-        pitch: -1.5707963705062866
-        yaw: -1.5707963705062866
+        roll: 1.5707963705062866
+        pitch: 0.0
+        yaw: 1.5707963705062866
       publish_orientation_without_yaw_tf: true
       publish_tf: true
     

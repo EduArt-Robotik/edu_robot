@@ -62,7 +62,7 @@ public:
     factory.addTofRingSensor("tof_sensor_ring", tof_sensor_ring_a_names, tof_sensor_ring_b_names, *this);
     
     // IMU Sensor
-    factory.addImuSensor("imu", 0x381);           
+    factory.addImuSensor("imu", 0x381, 0x301);           
 
     initialize(factory);
     _mode_state_machine.switchToMode(eduart::robot::RobotMode::INACTIVE);

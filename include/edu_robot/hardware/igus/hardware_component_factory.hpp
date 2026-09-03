@@ -36,7 +36,7 @@ public:
   HardwareComponentFactory& addRangeSensor(
     const std::string& sensor_name, const std::uint8_t id, rclcpp::Node& ros_node);
   HardwareComponentFactory& addImuSensor(
-    const std::string& sensor_name, const std::uint32_t can_id);
+    const std::string& sensor_name, const std::uint32_t can_id_host, const std::uint32_t can_id_board);
   HardwareComponentFactory& addTofSensor(
     const std::string& sensor_name, const hardware::can_gateway::SensorTofHardware::Parameter& parameter,
     rclcpp::Node& ros_node);

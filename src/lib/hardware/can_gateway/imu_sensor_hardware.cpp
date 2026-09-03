@@ -22,14 +22,15 @@ using can::message::sensor::imu::SetImuFusion;
 using can::message::sensor::imu::SetImuOrientation;
 
 ImuSensorHardware::ImuSensorHardware(
-  const std::uint32_t can_id, std::shared_ptr<Executer> executer, std::shared_ptr<Communicator> communicator)
-  : _can_id(can_id)
+  const std::uint32_t can_id_host, const std::uint32_t can_id_board, std::shared_ptr<Executer> executer, std::shared_ptr<Communicator> communicator)
+  : _can_id_host(can_id_host)
+  , _can_id_board(can_id_board)
   , _communication_node(std::make_shared<CommunicatorNode>(executer, communicator))
 {
   _processing_data.clear();
 
   _communication_node->createRxDataEndPoint<CanRxDataEndPoint, MeasurementOrientation>(
-    can_id,
+    can_id_host,
     std::bind(&ImuSensorHardware::processRxData, this, std::placeholders::_1)
   );
 }
@@ -74,16 +75,16 @@ void ImuSensorHardware::initialize(const SensorImu::Parameter& parameter)
 {
   // setting imu fusion
   {
-    auto request = Request::make_request<SetImuFusion>(_can_id, parameter.raw_data_mode);
+    auto request = Request::make_request<SetImuFusion>(_can_id_board, parameter.raw_data_mode);
     _communication_node->sendRequest(std::move(request), 100ms);
   }
   // setting imu orientation
   {
     auto request = Request::make_request<SetImuOrientation>(
-      _can_id,
-      static_cast<std::int16_t>(parameter.mount_orientation.roll * 10000.0),
-      static_cast<std::int16_t>(parameter.mount_orientation.pitch * 10000.0),
-      static_cast<std::int16_t>(parameter.mount_orientation.yaw * 10000.0)
+      _can_id_board,
+      parameter.mount_orientation.roll,
+      parameter.mount_orientation.pitch,
+      parameter.mount_orientation.yaw
     );
     _communication_node->sendRequest(std::move(request), 100ms);
   }

@@ -20,7 +20,7 @@ class ImuSensorHardware : public SensorImu::SensorInterface
 {
 public:
   ImuSensorHardware(
-    const std::uint32_t can_id, std::shared_ptr<Executer> executer, std::shared_ptr<Communicator> communicator);
+    const std::uint32_t can_id_host, const std::uint32_t can_id_board, std::shared_ptr<Executer> executer, std::shared_ptr<Communicator> communicator);
   ~ImuSensorHardware() override = default;
 
   void initialize(const SensorImu::Parameter& parameter) override;
@@ -28,7 +28,8 @@ public:
 private:
   void processRxData(const message::RxMessageDataBuffer& data);
 
-  std::uint32_t _can_id;
+  std::uint32_t _can_id_host;
+  std::uint32_t _can_id_board;
   std::shared_ptr<CommunicatorNode> _communication_node;
   
   struct {

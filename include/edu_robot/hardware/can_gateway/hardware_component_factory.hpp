@@ -39,7 +39,7 @@ public:
   //HardwareComponentFactory& addRangeSensor(
   //  const std::string& sensor_name, const std::uint8_t id);
   HardwareComponentFactory& addImuSensor(
-    const std::string& sensor_name, const std::uint32_t can_id);
+    const std::string& sensor_name, const std::uint32_t can_id_host, const std::uint32_t can_id_board);
 
   /**
    * \brief Add a sensor ring (left + right) backed by edu_lib_sensorring.

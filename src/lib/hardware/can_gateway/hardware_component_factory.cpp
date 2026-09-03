@@ -204,10 +204,10 @@ HardwareComponentFactory& HardwareComponentFactory::addSensorRing(
 // }
 
 HardwareComponentFactory& HardwareComponentFactory::addImuSensor(
-  const std::string& sensor_name, const std::uint32_t can_id)
+  const std::string& sensor_name, const std::uint32_t can_id_host, const std::uint32_t can_id_board)
 {
   _hardware[sensor_name] = std::make_shared<ImuSensorHardware>(
-    can_id, _shield->getExecuter(), _shield->getCommunicator(0)
+    can_id_host, can_id_board, _shield->getExecuter(), _shield->getCommunicator(0)
   );
 
   return *this;
