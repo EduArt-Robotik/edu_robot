@@ -182,6 +182,11 @@ ament_export_dependencies(
   hardware_interface
   pluginlib
 )
+if(TARGET sensorring::sensorring)
+  ament_export_dependencies(
+    sensorring
+  )
+endif()
 ament_export_targets(
   export_${PROJECT_NAME}
 )
