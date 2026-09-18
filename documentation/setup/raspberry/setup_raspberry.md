@@ -12,7 +12,7 @@ Please use the [Raspberry Pi Imager](https://www.raspberrypi.com/software/) to i
 
 We also recommend to enable SSH via the tool and create following user:
 * username : user
-* password : eduart
+* password : user
 
 But please feel free to configure it like you want.
 
