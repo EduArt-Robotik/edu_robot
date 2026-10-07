@@ -24,7 +24,6 @@ if(EXISTS "${_SENSORRING_LOCAL_DIR}/CMakeLists.txt")
   add_subdirectory(
     "${_SENSORRING_LOCAL_DIR}"
     "${CMAKE_CURRENT_BINARY_DIR}/sensorring"
-    EXCLUDE_FROM_ALL
   )
 
 endif()
