@@ -1,0 +1,20 @@
+[Unit]
+Description=ROS2 Environment Setup
+
+# This service generates the ROS2 environment file (/etc/ros2.env)
+# that other services can use via EnvironmentFile=
+
+Before=ros2.online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/lib/eduart/ros2_setup_environment.sh
+RemainAfterExit=yes
+User=root
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

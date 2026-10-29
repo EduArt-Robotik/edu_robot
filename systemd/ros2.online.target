@@ -1,0 +1,14 @@
+[Unit]
+Description=ROS2 Online Target that could be used to start ROS2 nodes as SystemD services.
+
+# This target is reached when ROS2 is ready to use
+# Other services can specify "Requires=ros2.online.target" to ensure startup.
+
+# Target guaranteed ROS2 is ready to launch some nodes. 
+After=ros2.online.wait.service
+After=ros2.setup.environment.service
+Requires=ros2.online.wait.service
+Requires=ros2.setup.environment.service
+
+[Install]
+WantedBy=default.target

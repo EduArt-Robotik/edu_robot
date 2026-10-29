@@ -1,0 +1,18 @@
+[Unit]
+Description=ROS2 Online Wait Service
+
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/lib/eduart/ros2_online_wait.sh
+RemainAfterExit=yes
+User=root
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target
