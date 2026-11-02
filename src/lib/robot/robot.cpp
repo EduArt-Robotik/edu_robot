@@ -517,6 +517,9 @@ void Robot::process()
       else if (value.get<Event>() == Event::BATTERY_EMPTY) {
         _mode_state_machine.switchToMode(RobotMode::BATTERY_EMPTY);
       }
+      else if (value.get<Event>() == Event::BATTERY_NORMAL) {
+        _mode_state_machine.switchToMode(RobotMode::INACTIVE);
+      }
     }
 
     // Charging Detection

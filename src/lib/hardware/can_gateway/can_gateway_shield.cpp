@@ -182,6 +182,7 @@ void CanGatewayShield::processPowerManagementBoardResponse(const message::RxMess
     _battery_empty = true;
   }
   else if (_battery_empty && Response::isBatteryEmpty(data) == false) {
+    output("event")->setValue(Event::BATTERY_NORMAL);
     _battery_empty = false;
   }
 
