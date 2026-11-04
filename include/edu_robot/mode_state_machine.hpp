@@ -39,6 +39,7 @@ template <> struct can_switch_to_mode<RobotMode::AUTONOMOUS, RobotMode::CHARGING
 template <> struct can_switch_to_mode<RobotMode::CHARGING, RobotMode::INACTIVE>      { static constexpr bool value = true; };
 
 template <> struct can_switch_to_mode<RobotMode::BATTERY_EMPTY, RobotMode::CHARGING> { static constexpr bool value = true; };
+template <> struct can_switch_to_mode<RobotMode::BATTERY_EMPTY, RobotMode::INACTIVE> { static constexpr bool value = true; };
 
 // Defines which feature is needed for robot mode.
 template <RobotMode Mode, FeatureMode Feature> struct does_need_feature { static constexpr bool value = false; };
